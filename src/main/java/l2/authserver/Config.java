@@ -182,8 +182,8 @@ public class Config {
     DEFAULT_PASSWORD_HASH = serverSettings.getProperty("PasswordHash", "sha1");
     LEGACY_PASSWORD_HASH = serverSettings.getProperty("LegacyPasswordHash", "whirlpool2");
     AUTO_CREATE_ACCOUNTS = serverSettings.getProperty("AutoCreateAccounts", true);
-    ANAME_TEMPLATE = serverSettings.getProperty("AccountTemplate", "[A-Za-z0-9]{4,14}");
-    APASSWD_TEMPLATE = serverSettings.getProperty("PasswordTemplate", "[A-Za-z0-9]{4,16}");
+    ANAME_TEMPLATE = serverSettings.getProperty("AccountTemplate.regexp", "[A-Za-z0-9]{4,14}");
+    APASSWD_TEMPLATE = serverSettings.getProperty("PasswordTemplate.regexp", "[A-Za-z0-9]{4,16}");
     LOGIN_TRY_BEFORE_BAN = serverSettings.getProperty("LoginTryBeforeBan", 10);
     LOGIN_TRY_TIMEOUT = (long) serverSettings.getProperty("LoginTryTimeout", 5) * 1000L;
     IP_BAN_TIME = (long) serverSettings.getProperty("IpBanTime", 300) * 1000L;
