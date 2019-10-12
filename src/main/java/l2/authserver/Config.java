@@ -12,15 +12,16 @@ import org.dom4j.io.SAXReader;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.security.KeyPairGenerator;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.*;
 
 @Slf4j
 public class Config {
-  public static final String LOGIN_CONFIGURATION_FILE = "config/authserver.properties";
-  public static final String SERVER_NAMES_FILE = "config/servername.xml";
-  public static final String PROXY_SERVERS_FILE = "config/proxyservers.xml";
+  public static final String LOGIN_CONFIGURATION_FILE = "/config/authserver.properties";
+  public static final String SERVER_NAMES_FILE = "/config/servername.xml";
+  public static final String PROXY_SERVERS_FILE = "/config/proxyservers.xml";
   public static String LOGIN_HOST;
   public static int PORT_LOGIN;
   public static String GAME_SERVER_LOGIN_HOST;
@@ -112,7 +113,8 @@ public class Config {
 
     try {
       SAXReader reader = new SAXReader(true);
-      Document document = reader.read(new File("config/servername.xml"));
+      URL resource = Config.class.getResource(SERVER_NAMES_FILE);
+      Document document = reader.read(resource);
       Element root = document.getRootElement();
       Iterator itr = root.elementIterator();
 
@@ -137,7 +139,8 @@ public class Config {
 
     try {
       SAXReader reader = new SAXReader(true);
-      Document document = reader.read(new File("config/proxyservers.xml"));
+      URL resource = Config.class.getResource(PROXY_SERVERS_FILE);
+      Document document = reader.read(resource);
       Element root = document.getRootElement();
       Iterator itr = root.elementIterator();
 
@@ -160,7 +163,8 @@ public class Config {
   }
 
   private static void loadConfiguration() {
-    ExProperties serverSettings = load("config/authserver.properties");
+    ExProperties serverSettings = loadClassPath();
+
     LOGIN_HOST = serverSettings.getProperty("LoginserverHostname", "127.0.0.1");
     PORT_LOGIN = serverSettings.getProperty("LoginserverPort", 2106);
     GAME_SERVER_LOGIN_HOST = serverSettings.getProperty("LoginHost", "127.0.0.1");
@@ -190,8 +194,10 @@ public class Config {
     RESTART_AT_TIME = serverSettings.getProperty("AutoRestartAt", "");
   }
 
-  private static ExProperties load(String filename) {
-    return load(new File(filename));
+  private static ExProperties loadClassPath() {
+    String resource = Config.class.getResource(Config.LOGIN_CONFIGURATION_FILE).getFile();
+    File file = new File(resource);
+    return load(file);
   }
 
   private static ExProperties load(File file) {

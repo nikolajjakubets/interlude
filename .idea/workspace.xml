@@ -1,29 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1aeeaf08-8e60-4d7e-a35b-0eada0df16ed" name="Default Changelist" comment="">
+    <list default="true" id="1aeeaf08-8e60-4d7e-a35b-0eada0df16ed" name="Default Changelist" comment="configure logback">
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/l2/authserver/Config.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/authserver/Config.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/authserver/GameServerManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/authserver/GameServerManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/authserver/crypt/PasswordHash.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/authserver/crypt/PasswordHash.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/authserver/network/gamecomm/GameServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/authserver/network/gamecomm/GameServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/authserver/network/gamecomm/gs2as/OnlineStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/authserver/network/gamecomm/gs2as/OnlineStatus.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/s2c/LoginOk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/s2c/LoginOk.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/commons/collections/CollectionUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/commons/collections/CollectionUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/commons/collections/LazyArrayList.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/commons/collections/LazyArrayList.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/commons/collections/MultiValueSet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/commons/collections/MultiValueSet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/commons/lang/ArrayUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/commons/lang/ArrayUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/commons/lang/reference/HardReferences.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/commons/lang/reference/HardReferences.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/commons/math/random/RndSelector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/commons/math/random/RndSelector.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/commons/net/nio/impl/SelectorThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/commons/net/nio/impl/SelectorThread.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/commons/net/nio/impl/SendablePacket.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/commons/net/nio/impl/SendablePacket.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/commons/text/PrintfFormat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/commons/text/PrintfFormat.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/commons/text/StrTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/commons/text/StrTable.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/commons/time/cron/SchedulingPattern.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/commons/time/cron/SchedulingPattern.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/commons/util/NaturalOrderComparator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/commons/util/NaturalOrderComparator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/commons/util/RandomUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/commons/util/RandomUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/commons/util/TroveUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/commons/util/TroveUtils.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -96,17 +79,18 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/java/com/lineage2/interlude" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../demo" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="project.structure.last.edited" value="Modules" />
-    <property name="project.structure.proportion" value="0.0" />
-    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="project.structure.last.edited" value="Project" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2954023" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\User\IdeaProjects\interlude\src\main\resources\config" />
       <recent name="C:\Users\User\IdeaProjects\interlude\src\main\java\com\lineage2\interlude" />
     </key>
   </component>
@@ -122,7 +106,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.AuthServer">
     <configuration name="AccountManager" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="l2.authserver.AccountManager" />
       <module name="interlude" />
@@ -136,8 +120,36 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="AuthServer" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="l2.authserver.AuthServer" />
+      <module name="interlude" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="l2.authserver.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PasswordHash" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="l2.authserver.crypt.PasswordHash" />
+      <module name="interlude" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="l2.authserver.crypt.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.AuthServer" />
+        <item itemvalue="Application.PasswordHash" />
         <item itemvalue="Application.AccountManager" />
       </list>
     </recent_temporary>
@@ -152,7 +164,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1570839229617</updated>
-      <workItem from="1570839231306" duration="9851000" />
+      <workItem from="1570839231306" duration="10767000" />
+      <workItem from="1570851077260" duration="23653000" />
     </task>
     <task id="LOCAL-00001" summary="add 2 libs">
       <created>1570847277013</created>
@@ -161,7 +174,42 @@
       <option name="project" value="LOCAL" />
       <updated>1570847277013</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="add client">
+      <created>1570849200998</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1570849200998</updated>
+    </task>
+    <task id="LOCAL-00003" summary="configure logback">
+      <created>1570900799876</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1570900799876</updated>
+    </task>
+    <task id="LOCAL-00004" summary="add editorconfig">
+      <created>1570900882557</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1570900882557</updated>
+    </task>
+    <task id="LOCAL-00005" summary="refactoring dependency">
+      <created>1570902283736</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1570902283736</updated>
+    </task>
+    <task id="LOCAL-00006" summary="add hash">
+      <created>1570907192849</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1570907192849</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -172,7 +220,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
@@ -180,20 +230,87 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="add 2 libs" />
-    <option name="LAST_COMMIT_MESSAGE" value="add 2 libs" />
+    <MESSAGE value="add client" />
+    <MESSAGE value="configure logback" />
+    <MESSAGE value="add editorconfig" />
+    <MESSAGE value="refactoring dependency" />
+    <MESSAGE value="add hash" />
+    <option name="LAST_COMMIT_MESSAGE" value="add hash" />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/l2/commons/db/BaseDataConnectionFactory.java</url>
-          <line>41</line>
-          <option name="timeStamp" value="1" />
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/AccountManager.java</url>
+          <line>22</line>
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/l2/commons/db/BaseDataConnectionFactory.java</url>
-          <line>40</line>
-          <option name="timeStamp" value="2" />
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/crypt/PasswordHash.java</url>
+          <line>21</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/c2s/RequestAuthLogin.java</url>
+          <line>59</line>
+          <option name="timeStamp" value="20" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/c2s/RequestAuthLogin.java</url>
+          <line>60</line>
+          <option name="timeStamp" value="31" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/c2s/RequestAuthLogin.java</url>
+          <line>68</line>
+          <option name="timeStamp" value="32" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/c2s/RequestAuthLogin.java</url>
+          <line>61</line>
+          <option name="timeStamp" value="33" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/c2s/RequestAuthLogin.java</url>
+          <line>64</line>
+          <option name="timeStamp" value="34" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/c2s/RequestAuthLogin.java</url>
+          <line>69</line>
+          <option name="timeStamp" value="35" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/c2s/RequestAuthLogin.java</url>
+          <line>81</line>
+          <option name="timeStamp" value="36" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/Config.java</url>
+          <line>116</line>
+          <option name="timeStamp" value="42" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/Config.java</url>
+          <line>117</line>
+          <option name="timeStamp" value="43" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/Config.java</url>
+          <line>120</line>
+          <option name="timeStamp" value="44" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/Config.java</url>
+          <line>121</line>
+          <option name="timeStamp" value="45" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/Config.java</url>
+          <line>122</line>
+          <option name="timeStamp" value="46" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
