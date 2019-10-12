@@ -5,26 +5,17 @@
 
 package l2.commons.net.nio.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.CancelledKeyException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-//import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
+import java.nio.channels.*;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SelectorThread<T extends MMOClient> extends Thread {
     private static final Logger _log = LoggerFactory.getLogger(SelectorThread.class);
@@ -42,7 +33,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
     private T WRITE_CLIENT;
     private final Queue<ByteBuffer> _bufferPool;
     private final List<MMOConnection<T>> _connections;
-    private static final List<SelectorThread> ALL_SELECTORS = new ArrayList();
+  private static final List<SelectorThread> ALL_SELECTORS = new ArrayList<SelectorThread>();
     private static SelectorStats stats = new SelectorStats();
     public static long MAX_CONNECTIONS = 9223372036854775807L;
 
@@ -100,80 +91,79 @@ public class SelectorThread<T extends MMOClient> extends Thread {
     }
 
     public void run() {
-        boolean totalKeys = false;
-        Set<SelectionKey> keys = null;
-        Iterator<SelectionKey> itr = null;
-        Iterator<MMOConnection<T>> conItr = null;
-        SelectionKey key = null;
-        MMOConnection con = null;
-        long currentMillis = 0L;
+      Set<SelectionKey> keys;
+      Iterator<SelectionKey> itr;
+      Iterator<MMOConnection<T>> conItr;
+      SelectionKey key;
+      MMOConnection con;
+      long currentMillis;
 
-        while(true) {
-            while(true) {
-                try {
-                    if (this.isShuttingDown()) {
-                        this.closeSelectorThread();
-                        return;
-                    }
-
-                    currentMillis = System.currentTimeMillis();
-                    conItr = this._connections.iterator();
-
-                    while(true) {
-                        while(conItr.hasNext()) {
-                            con = conItr.next();
-                            if (con.isPengingClose() && (!con.isPendingWrite() || currentMillis - con.getPendingCloseTime() >= 10000L)) {
-                                this.closeConnectionImpl(con);
-                            } else if (con.isPendingWrite() && currentMillis - con.getPendingWriteTime() >= this._sc.INTEREST_DELAY) {
-                                con.enableWriteInterest();
-                            }
-                        }
-
-                        int totalKeyss = this.getSelector().selectNow();
-                        if (totalKeyss > 0) {
-                            keys = this.getSelector().selectedKeys();
-                            itr = keys.iterator();
-
-                            while(itr.hasNext()) {
-                                key = itr.next();
-                                itr.remove();
-                                if (key.isValid()) {
-                                    try {
-                                        if (key.isAcceptable()) {
-                                            this.acceptConnection(key);
-                                        } else if (key.isConnectable()) {
-                                            this.finishConnection(key);
-                                        } else {
-                                            if (key.isReadable()) {
-                                                this.readPacket(key);
-                                            }
-
-                                            if (key.isValid() && key.isWritable()) {
-                                                this.writePacket(key);
-                                            }
-                                        }
-                                    } catch (CancelledKeyException var13) {
-                                    }
-                                }
-                            }
-                        }
-
-                        try {
-                            Thread.sleep(this._sc.SLEEP_TIME);
-                        } catch (InterruptedException var12) {
-                        }
-                        break;
-                    }
-                } catch (IOException var14) {
-                    _log.error("Error in " + this.getName(), var14);
-
-                    try {
-                        Thread.sleep(1000L);
-                    } catch (InterruptedException var11) {
-                    }
-                }
+      while (true) {
+        while (true) {
+          try {
+            if (this.isShuttingDown()) {
+              this.closeSelectorThread();
+              return;
             }
+
+            currentMillis = System.currentTimeMillis();
+            conItr = this._connections.iterator();
+
+            while (true) {
+              while (conItr.hasNext()) {
+                con = conItr.next();
+                if (con.isPengingClose() && (!con.isPendingWrite() || currentMillis - con.getPendingCloseTime() >= 10000L)) {
+                  this.closeConnectionImpl(con);
+                } else if (con.isPendingWrite() && currentMillis - con.getPendingWriteTime() >= this._sc.INTEREST_DELAY) {
+                  con.enableWriteInterest();
+                }
+              }
+
+              int totalKeyss = this.getSelector().selectNow();
+              if (totalKeyss > 0) {
+                keys = this.getSelector().selectedKeys();
+                itr = keys.iterator();
+
+                while (itr.hasNext()) {
+                  key = itr.next();
+                  itr.remove();
+                  if (key.isValid()) {
+                    try {
+                      if (key.isAcceptable()) {
+                        this.acceptConnection(key);
+                      } else if (key.isConnectable()) {
+                        this.finishConnection(key);
+                      } else {
+                        if (key.isReadable()) {
+                          this.readPacket(key);
+                        }
+
+                        if (key.isValid() && key.isWritable()) {
+                          this.writePacket(key);
+                        }
+                      }
+                    } catch (CancelledKeyException var13) {
+                    }
+                  }
+                }
+              }
+
+              try {
+                Thread.sleep(this._sc.SLEEP_TIME);
+              } catch (InterruptedException var12) {
+              }
+              break;
+            }
+          } catch (IOException var14) {
+            _log.error("Error in " + this.getName(), var14);
+
+            try {
+              Thread.sleep(1000L);
+            } catch (InterruptedException var11) {
+            }
+          }
         }
+      }
     }
 
     protected void finishConnection(SelectionKey key) {

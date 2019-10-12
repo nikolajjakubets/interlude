@@ -62,7 +62,6 @@ public class RequestAuthLogin extends L2LoginClientPacket {
                 client.close(LoginFailReason.REASON_USER_OR_PASS_WRONG);
                 return;
             }
-
             account.setPasswordHash(passwordHash);
             account.save();
         }
