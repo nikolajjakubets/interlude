@@ -28,7 +28,7 @@ public class SessionKey {
         return this.loginOkID1 == loginOk1 && this.loginOkID2 == loginOk2;
     }
 
-    public static final SessionKey create() {
+    public static SessionKey create() {
         return new SessionKey(Rnd.nextInt(), Rnd.nextInt(), Rnd.nextInt(), Rnd.nextInt());
     }
 

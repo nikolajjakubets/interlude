@@ -1,25 +1,26 @@
 package l2.authserver.network.l2.s2c;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
 import l2.authserver.GameServerManager;
 import l2.authserver.accounts.Account;
 import l2.authserver.network.gamecomm.GameServer;
 import l2.authserver.network.gamecomm.ProxyServer;
 import l2.commons.net.utils.NetUtils;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 public final class ServerList extends L2LoginServerPacket {
-    private static final Comparator<ServerList.ServerData> SERVER_DATA_COMPARATOR = new Comparator<ServerList.ServerData>() {
-        public int compare(ServerList.ServerData o1, ServerList.ServerData o2) {
+    private static final Comparator<ServerData> SERVER_DATA_COMPARATOR = new Comparator<ServerData>() {
+        public int compare(ServerData o1, ServerData o2) {
             return o1.serverId - o2.serverId;
         }
     };
-    private List<ServerList.ServerData> _servers = new ArrayList();
+
+    private List<ServerData> _servers = new ArrayList<ServerData>();
     private int _lastServer;
 
     public ServerList(Account account) {
@@ -27,9 +28,7 @@ public final class ServerList extends L2LoginServerPacket {
         GameServer[] var2 = GameServerManager.getInstance().getGameServers();
         int var3 = var2.length;
 
-        for(int var4 = 0; var4 < var3; ++var4) {
-            GameServer gs = var2[var4];
-
+        for (GameServer gs : var2) {
             InetAddress ip;
             try {
                 ip = NetUtils.isInternalIP(account.getLastIP()) ? gs.getInternalHost() : gs.getExternalHost();
@@ -37,13 +36,11 @@ public final class ServerList extends L2LoginServerPacket {
                 continue;
             }
 
-            this._servers.add(new ServerList.ServerData(gs.getId(), ip, gs.getPort(), gs.isPvp(), gs.isShowingBrackets(), gs.getServerType(), gs.getOnline(), gs.getMaxPlayers(), gs.isOnline(), gs.getAgeLimit()));
+            this._servers.add(new ServerData(gs.getId(), ip, gs.getPort(), gs.isPvp(), gs.isShowingBrackets(), gs.getServerType(), gs.getOnline(), gs.getMaxPlayers(), gs.isOnline(), gs.getAgeLimit()));
             List<ProxyServer> proxyServers = GameServerManager.getInstance().getProxyServersList(gs.getId());
-            Iterator var8 = proxyServers.iterator();
 
-            while(var8.hasNext()) {
-                ProxyServer ps = (ProxyServer)var8.next();
-                this._servers.add(new ServerList.ServerData(ps.getProxyServerId(), ps.getProxyAddr(), ps.getProxyPort(), gs.isPvp(), gs.isShowingBrackets(), gs.getServerType(), gs.getOnline(), gs.getMaxPlayers(), gs.isOnline(), gs.getAgeLimit()));
+            for (ProxyServer ps : proxyServers) {
+                this._servers.add(new ServerData(ps.getProxyServerId(), ps.getProxyAddr(), ps.getProxyPort(), gs.isPvp(), gs.isShowingBrackets(), gs.getServerType(), gs.getOnline(), gs.getMaxPlayers(), gs.isOnline(), gs.getAgeLimit()));
             }
         }
 
@@ -54,10 +51,8 @@ public final class ServerList extends L2LoginServerPacket {
         this.writeC(4);
         this.writeC(this._servers.size());
         this.writeC(this._lastServer);
-        Iterator var1 = this._servers.iterator();
 
-        while(var1.hasNext()) {
-            ServerList.ServerData server = (ServerList.ServerData)var1.next();
+        for (ServerData server : this._servers) {
             this.writeC(server.serverId);
             InetAddress i4 = server.ip;
             byte[] raw = i4.getAddress();

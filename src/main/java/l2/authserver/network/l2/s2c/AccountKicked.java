@@ -12,7 +12,7 @@ public final class AccountKicked extends L2LoginServerPacket {
         this.writeD(this.reason);
     }
 
-    public static enum AccountKickedReason {
+    public enum AccountKickedReason {
         REASON_FALSE_DATA_STEALER_REPORT(0),
         REASON_DATA_STEALER(1),
         REASON_SOUSPICION_DATA_STEALER(3),

@@ -12,7 +12,7 @@ public final class LoginFail extends L2LoginServerPacket {
         this.writeD(this.reason_code);
     }
 
-    public static enum LoginFailReason {
+    public enum LoginFailReason {
         REASON_NO_MESSAGE(0),
         REASON_SYSTEM_ERROR(1),
         REASON_PASS_WRONG(2),
@@ -44,7 +44,7 @@ public final class LoginFail extends L2LoginServerPacket {
 
         private final int _code;
 
-        private LoginFailReason(int code) {
+        LoginFailReason(int code) {
             this._code = code;
         }
 

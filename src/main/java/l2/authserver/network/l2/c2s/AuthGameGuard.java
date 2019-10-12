@@ -6,18 +6,18 @@ import l2.authserver.network.l2.s2c.GGAuth;
 import l2.authserver.network.l2.s2c.LoginFail.LoginFailReason;
 
 public class AuthGameGuard extends L2LoginClientPacket {
-    private int _sessionId;
+    private int sessionId;
 
     public AuthGameGuard() {
     }
 
     protected void readImpl() {
-        this._sessionId = this.readD();
+        this.sessionId = this.readD();
     }
 
     protected void runImpl() {
-        L2LoginClient client = (L2LoginClient)this.getClient();
-        if (this._sessionId != 0 && this._sessionId != client.getSessionId()) {
+        L2LoginClient client = this.getClient();
+        if (this.sessionId != 0 && this.sessionId != client.getSessionId()) {
             client.close(LoginFailReason.REASON_ACCESS_FAILED);
         } else {
             client.setState(LoginClientState.AUTHED_GG);

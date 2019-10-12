@@ -1,30 +1,30 @@
 package l2.authserver.network.gamecomm;
 
+import l2.authserver.Config;
+import l2.authserver.ThreadPoolManager;
+import l2.authserver.network.gamecomm.as2gs.PingRequest;
+import l2.commons.threading.RunnableImpl;
+import lombok.extern.slf4j.Slf4j;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import l2.authserver.Config;
-import l2.authserver.ThreadPoolManager;
-import l2.authserver.network.gamecomm.as2gs.PingRequest;
-import l2.commons.threading.RunnableImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class GameServerConnection {
-    private static final Logger _log = LoggerFactory.getLogger(GameServerConnection.class);
-    final ByteBuffer readBuffer;
+    private final ByteBuffer readBuffer;
     final Queue<SendablePacket> sendQueue;
     final Lock sendLock;
-    final AtomicBoolean isPengingWrite;
+    private final AtomicBoolean isPengingWrite;
     private final Selector selector;
     private final SelectionKey key;
     private GameServer gameServer;
@@ -33,7 +33,7 @@ public class GameServerConnection {
 
     public GameServerConnection(SelectionKey key) {
         this.readBuffer = ByteBuffer.allocate(65536).order(ByteOrder.LITTLE_ENDIAN);
-        this.sendQueue = new ArrayDeque();
+        this.sendQueue = new LinkedBlockingQueue<SendablePacket>();
         this.sendLock = new ReentrantLock();
         this.isPengingWrite = new AtomicBoolean();
         this.key = key;
@@ -44,12 +44,14 @@ public class GameServerConnection {
         this.sendLock.lock();
 
         boolean wakeUp;
-        label44: {
+        label44:
+        {
             try {
                 this.sendQueue.add(packet);
                 wakeUp = this.enableWriteInterest();
                 break label44;
-            } catch (CancelledKeyException var7) {
+            } catch (CancelledKeyException e) {
+                log.error("sendPacket: eMessage={}, eClass={}", e.getMessage(), e.getClass());
             } finally {
                 this.sendLock.unlock();
             }
@@ -100,14 +102,14 @@ public class GameServerConnection {
 
             this.isPengingWrite.set(false);
             if (this.gameServer != null && this.gameServer.isAuthed()) {
-                _log.info("Connection with gameserver " + this.gameServer.getId() + " [" + this.gameServer.getName() + "] lost.");
-                _log.info("Setting gameserver down. All proxies will be down as well.");
+                log.info("Connection with gameserver " + this.gameServer.getId() + " [" + this.gameServer.getName() + "] lost.");
+                log.info("Setting gameserver down. All proxies will be down as well.");
                 this.gameServer.setDown();
             }
 
             this.gameServer = null;
-        } catch (Exception var5) {
-            _log.error("", var5);
+        } catch (Exception e) {
+            log.error("restore: eMessage={}, eClass={}", e.getMessage(), e.getClass());
         }
 
     }
@@ -125,7 +127,7 @@ public class GameServerConnection {
     }
 
     public String getIpAddress() {
-        return ((SocketChannel)this.key.channel()).socket().getInetAddress().getHostAddress();
+        return ((SocketChannel) this.key.channel()).socket().getInetAddress().getHostAddress();
     }
 
     public void onPingResponse() {

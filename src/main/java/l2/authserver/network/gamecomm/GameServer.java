@@ -1,71 +1,67 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package l2.authserver.network.gamecomm;
+
+import l2.authserver.Config;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
-import l2.authserver.Config;
-import org.apache.log4j.Logger;
 
+@Slf4j
 public class GameServer {
-    private static final Logger _log = Logger.getLogger(GameServer.class);
-    private int _id;
-    private String _internalHost;
-    private String _externalHost;
-    private InetAddress _internalAddr;
-    private InetAddress _externalAddr;
-    private volatile int[] _ports = new int[]{7777};
-    private int _serverType;
-    private int _ageLimit;
-    private int _protocol;
-    private boolean _isOnline;
-    private boolean _isPvp;
-    private boolean _isShowingBrackets;
-    private boolean _isGmOnly;
-    private int _maxPlayers;
-    private GameServerConnection _conn;
-    private boolean _isAuthed;
-    private AtomicInteger _port = new AtomicInteger(0);
-    private volatile int _playersIngame;
+    private int id;
+    private String internalHost;
+    private String externalHost;
+    private InetAddress internalAddr;
+    private InetAddress externalAddr;
+    private volatile int[] ports = new int[]{7777};
+    private int serverType;
+    private int ageLimit;
+    private int protocol;
+    private boolean isOnline;
+    private boolean isPvp;
+    private boolean isShowingBrackets;
+    private boolean isGmOnly;
+    private int maxPlayers;
+    private GameServerConnection conn;
+    private boolean isAuthed;
+    private AtomicInteger port = new AtomicInteger(0);
+    private volatile int playersIngame;
 
     public GameServer(GameServerConnection conn) {
-        this._conn = conn;
+        this.conn = conn;
     }
 
     public GameServer(int id) {
-        this._id = id;
+        this.id = id;
     }
 
     public void setId(int id) {
-        this._id = id;
+        this.id = id;
     }
 
     public int getId() {
-        return this._id;
+        return this.id;
     }
 
     public void setAuthed(boolean isAuthed) {
-        this._isAuthed = isAuthed;
+        this.isAuthed = isAuthed;
     }
 
     public boolean isAuthed() {
-        return this._isAuthed;
+        return this.isAuthed;
     }
 
     public void setConnection(GameServerConnection conn) {
-        this._conn = conn;
+        this.conn = conn;
     }
 
     public GameServerConnection getConnection() {
-        return this._conn;
+        return this.conn;
     }
 
     public InetAddress getInternalHost() throws UnknownHostException {
-        return this._internalAddr != null ? this._internalAddr : (this._internalAddr = InetAddress.getByName(this._internalHost));
+        return this.internalAddr != null ? this.internalAddr : (this.internalAddr = InetAddress.getByName(this.internalHost));
     }
 
     public void setInternalHost(String internalHost) {
@@ -73,8 +69,8 @@ public class GameServer {
             internalHost = this.getConnection().getIpAddress();
         }
 
-        this._internalHost = internalHost;
-        this._internalAddr = null;
+        this.internalHost = internalHost;
+        this.internalAddr = null;
     }
 
     public void setExternalHost(String externalHost) {
@@ -82,41 +78,41 @@ public class GameServer {
             externalHost = this.getConnection().getIpAddress();
         }
 
-        this._externalHost = externalHost;
-        this._externalAddr = null;
+        this.externalHost = externalHost;
+        this.externalAddr = null;
     }
 
     public InetAddress getExternalHost() throws UnknownHostException {
-        return this._externalAddr != null ? this._externalAddr : (this._externalAddr = InetAddress.getByName(this._externalHost));
+        return this.externalAddr != null ? this.externalAddr : (this.externalAddr = InetAddress.getByName(this.externalHost));
     }
 
     public int getPort() {
-        int[] ports = this._ports;
-        return ports[(this._port.incrementAndGet() & 2147483647) % ports.length];
+        int[] ports = this.ports;
+        return ports[(this.port.incrementAndGet() & 2147483647) % ports.length];
     }
 
     public void setPorts(int[] ports) {
-        this._ports = ports;
+        this.ports = ports;
     }
 
     public void setMaxPlayers(int maxPlayers) {
-        this._maxPlayers = maxPlayers;
+        this.maxPlayers = maxPlayers;
     }
 
     public int getMaxPlayers() {
-        return this._maxPlayers;
+        return this.maxPlayers;
     }
 
     public int getOnline() {
-        return this._playersIngame;
+        return this.playersIngame;
     }
 
     public void addAccount(String account) {
-        ++this._playersIngame;
+        ++this.playersIngame;
     }
 
     public void removeAccount(String account) {
-        --this._playersIngame;
+        --this.playersIngame;
     }
 
     public void setDown() {
@@ -138,54 +134,54 @@ public class GameServer {
     }
 
     public int getServerType() {
-        return this._serverType;
+        return this.serverType;
     }
 
     public boolean isOnline() {
-        return this._isOnline;
+        return this.isOnline;
     }
 
     public void setOnline(boolean online) {
-        this._isOnline = online;
+        this.isOnline = online;
     }
 
     public void setServerType(int serverType) {
-        this._serverType = serverType;
+        this.serverType = serverType;
     }
 
     public boolean isPvp() {
-        return this._isPvp;
+        return this.isPvp;
     }
 
     public void setPvp(boolean pvp) {
-        this._isPvp = pvp;
+        this.isPvp = pvp;
     }
 
     public boolean isShowingBrackets() {
-        return this._isShowingBrackets;
+        return this.isShowingBrackets;
     }
 
     public void setShowingBrackets(boolean showingBrackets) {
-        this._isShowingBrackets = showingBrackets;
+        this.isShowingBrackets = showingBrackets;
     }
 
     public boolean isGmOnly() {
-        return this._isGmOnly;
+        return this.isGmOnly;
     }
 
     public void setGmOnly(boolean gmOnly) {
-        this._isGmOnly = gmOnly;
+        this.isGmOnly = gmOnly;
     }
 
     public int getAgeLimit() {
-        return this._ageLimit;
+        return this.ageLimit;
     }
 
     public void setAgeLimit(int ageLimit) {
-        this._ageLimit = ageLimit;
+        this.ageLimit = ageLimit;
     }
 
     public void setProtocol(int protocol) {
-        this._protocol = protocol;
+        this.protocol = protocol;
     }
 }

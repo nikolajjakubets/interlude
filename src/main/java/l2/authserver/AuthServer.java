@@ -1,8 +1,5 @@
 package l2.authserver;
 
-import java.io.File;
-import java.net.InetAddress;
-import java.net.ServerSocket;
 import l2.authserver.database.L2DatabaseFactory;
 import l2.authserver.network.gamecomm.GameServerCommunication;
 import l2.authserver.network.l2.L2LoginClient;
@@ -13,43 +10,51 @@ import l2.commons.net.nio.impl.SelectorThread;
 import l2.commons.threading.RunnableImpl;
 import l2.commons.time.cron.SchedulingPattern;
 import l2.commons.time.cron.SchedulingPattern.InvalidPatternException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+
+import static l2.authserver.Config.RESTART_AT_TIME;
+
+@Slf4j
 public class AuthServer {
-    private static final Logger _log = LoggerFactory.getLogger(AuthServer.class);
     public static final int SHUTDOWN = 0;
     public static final int RESTART = 2;
     public static final int NONE = -1;
     private static AuthServer authServer;
-    private GameServerCommunication _gameServerListener;
-    private SelectorThread<L2LoginClient> _selectorThread;
+    private GameServerCommunication gameServerListener;
+    private SelectorThread<L2LoginClient> selectorThread;
 
     public static AuthServer getInstance() {
         return authServer;
     }
 
-    public AuthServer() throws Throwable {
+    private AuthServer() throws Throwable {
         Config.initCrypt();
         GameServerManager.getInstance();
         L2LoginPacketHandler loginPacketHandler = new L2LoginPacketHandler();
         SelectorHelper sh = new SelectorHelper();
         SelectorConfig sc = new SelectorConfig();
-        this._selectorThread = new SelectorThread(sc, loginPacketHandler, sh, sh, sh);
-        this._gameServerListener = GameServerCommunication.getInstance();
-        this._gameServerListener.openServerSocket(Config.GAME_SERVER_LOGIN_HOST.equals("*") ? null : InetAddress.getByName(Config.GAME_SERVER_LOGIN_HOST), Config.GAME_SERVER_LOGIN_PORT);
-        this._gameServerListener.start();
-        _log.info("Listening for gameservers on " + Config.GAME_SERVER_LOGIN_HOST + ":" + Config.GAME_SERVER_LOGIN_PORT);
-        this._selectorThread.openServerSocket(Config.LOGIN_HOST.equals("*") ? null : InetAddress.getByName(Config.LOGIN_HOST), Config.PORT_LOGIN);
-        this._selectorThread.start();
-        _log.info("Listening for clients on " + Config.LOGIN_HOST + ":" + Config.PORT_LOGIN);
+        this.selectorThread = new SelectorThread<L2LoginClient>(sc, loginPacketHandler, sh, sh, sh);
+        this.gameServerListener = GameServerCommunication.getInstance();
+        this.gameServerListener.openServerSocket(Config.GAME_SERVER_LOGIN_HOST.equals("*") ? null : InetAddress.getByName(Config.GAME_SERVER_LOGIN_HOST), Config.GAME_SERVER_LOGIN_PORT);
+        this.gameServerListener.start();
+
+        log.info("Listening for gameservers on " + Config.GAME_SERVER_LOGIN_HOST + ":" + Config.GAME_SERVER_LOGIN_PORT);
+
+        this.selectorThread.openServerSocket(Config.LOGIN_HOST.equals("*") ? null : InetAddress.getByName(Config.LOGIN_HOST), Config.PORT_LOGIN);
+        this.selectorThread.start();
+
+        log.info("Listening for clients on " + Config.LOGIN_HOST + ":" + Config.PORT_LOGIN);
     }
 
     public GameServerCommunication getGameServerListener() {
-        return this._gameServerListener;
+        return this.gameServerListener;
     }
 
-    public static void checkFreePorts() throws Throwable {
+    private static void checkFreePorts() throws Throwable {
         ServerSocket ss = null;
 
         try {
@@ -62,7 +67,8 @@ public class AuthServer {
             if (ss != null) {
                 try {
                     ss.close();
-                } catch (Exception var7) {
+                } catch (Exception e) {
+                    log.error("checkFreePorts: eMessage={}, eClass={}", e.getMessage(), e.getClass());
                 }
             }
 
@@ -70,11 +76,12 @@ public class AuthServer {
 
     }
 
-    protected void scheduleRestartByCron(String cronPattern) {
+    private void scheduleRestartByCron(String cronPattern) {
         SchedulingPattern cronTime;
         try {
             cronTime = new SchedulingPattern(cronPattern);
-        } catch (InvalidPatternException var7) {
+        } catch (InvalidPatternException e) {
+            log.error("scheduleRestartByCron: eMessage={}, eClass={}", e.getMessage(), e.getClass());
             return;
         }
 
@@ -93,8 +100,8 @@ public class AuthServer {
         checkFreePorts();
         L2DatabaseFactory.getInstance().getConnection().close();
         authServer = new AuthServer();
-        if (!Config.RESTART_AT_TIME.isEmpty()) {
-            authServer.scheduleRestartByCron(Config.RESTART_AT_TIME);
+        if (RESTART_AT_TIME != null && !RESTART_AT_TIME.equals("")) {
+            authServer.scheduleRestartByCron(RESTART_AT_TIME);
         }
 
     }

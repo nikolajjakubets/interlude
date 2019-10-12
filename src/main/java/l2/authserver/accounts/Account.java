@@ -1,16 +1,17 @@
 package l2.authserver.accounts;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import l2.authserver.database.L2DatabaseFactory;
 import l2.commons.dbutils.DbUtils;
 import l2.commons.net.utils.NetList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+
+@Slf4j
 public class Account {
-    private static final Logger _log = LoggerFactory.getLogger(Account.class);
+    //    private static final Logger _log = LoggerFactory.getLogger(Account.class);
     private static final String SQLP_ACCOUNT_LOAD = "{CALL `lip_AccountLoad`(?)}";
     private static final String SQLP_ACCOUNT_CREATE = "{CALL `lip_AccountCreate`(?, ?)}";
     private static final String SQLP_ACCOUNT_UPDATE = "{CALL `lip_AccountUpdate`(?, ?, ?, ?, ?, ?, ?)}";
@@ -114,8 +115,8 @@ public class Account {
                 this.setLastAccess(rset.getInt("lastactive"));
                 this.setEmail(rset.getString("email"));
             }
-        } catch (Exception var8) {
-            _log.error("", var8);
+        } catch (Exception e) {
+            log.error("restore: eMessage={}, eClass={}", e.getMessage(), e.getClass());
         } finally {
             DbUtils.closeQuietly(con, cstmt, rset);
         }
@@ -132,8 +133,8 @@ public class Account {
             cstmt.setString(1, this.getLogin());
             cstmt.setString(2, this.getPasswordHash());
             cstmt.execute();
-        } catch (Exception var7) {
-            _log.error("", var7);
+        } catch (Exception e) {
+            log.error("restore: eMessage={}, eClass={}", e.getMessage(), e.getClass());
         } finally {
             DbUtils.closeQuietly(con, cstmt);
         }
@@ -155,8 +156,8 @@ public class Account {
             cstmt.setInt(6, this.getLastAccess());
             cstmt.setString(7, this.getEmail());
             cstmt.execute();
-        } catch (Exception var7) {
-            _log.error("", var7);
+        } catch (Exception e) {
+            log.error("restore: eMessage={}, eClass={}", e.getMessage(), e.getClass());
         } finally {
             DbUtils.closeQuietly(con, cstmt);
         }

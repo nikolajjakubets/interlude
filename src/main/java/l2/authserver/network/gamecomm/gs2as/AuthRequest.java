@@ -5,36 +5,35 @@ import l2.authserver.network.gamecomm.GameServer;
 import l2.authserver.network.gamecomm.ReceivablePacket;
 import l2.authserver.network.gamecomm.as2gs.AuthResponse;
 import l2.authserver.network.gamecomm.as2gs.LoginServerFail;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AuthRequest extends ReceivablePacket {
-    private static final Logger _log = LoggerFactory.getLogger(AuthRequest.class);
-    private int _protocolVersion;
+    private int protocolVersion;
     private int requestId;
     private boolean acceptAlternateID;
     private String externalIp;
     private String internalIp;
     private int maxOnline;
-    private int _serverType;
-    private int _ageLimit;
-    private boolean _gmOnly;
-    private boolean _brackets;
-    private boolean _pvp;
+    private int serverType;
+    private int ageLimit;
+    private boolean gmOnly;
+    private boolean brackets;
+    private boolean pvp;
     private int[] ports;
 
     public AuthRequest() {
     }
 
     protected void readImpl() {
-        this._protocolVersion = this.readD();
+        this.protocolVersion = this.readD();
         this.requestId = this.readC();
         this.acceptAlternateID = this.readC() == 1;
-        this._serverType = this.readD();
-        this._ageLimit = this.readD();
-        this._gmOnly = this.readC() == 1;
-        this._brackets = this.readC() == 1;
-        this._pvp = this.readC() == 1;
+        this.serverType = this.readD();
+        this.ageLimit = this.readD();
+        this.gmOnly = this.readC() == 1;
+        this.brackets = this.readC() == 1;
+        this.pvp = this.readC() == 1;
         this.externalIp = this.readS();
         this.internalIp = this.readS();
         this.ports = new int[this.readH()];
@@ -47,7 +46,7 @@ public class AuthRequest extends ReceivablePacket {
     }
 
     protected void runImpl() {
-        _log.info("Trying to register gameserver: " + this.requestId + " [" + this.getGameServer().getConnection().getIpAddress() + "]");
+        log.info("Trying to register gameserver: " + this.requestId + " [" + this.getGameServer().getConnection().getIpAddress() + "]");
         int failReason = 0;
         GameServer gs = this.getGameServer();
         if (GameServerManager.getInstance().registerGameServer(this.requestId, gs)) {
@@ -55,12 +54,12 @@ public class AuthRequest extends ReceivablePacket {
             gs.setExternalHost(this.externalIp);
             gs.setInternalHost(this.internalIp);
             gs.setMaxPlayers(this.maxOnline);
-            gs.setPvp(this._pvp);
-            gs.setServerType(this._serverType);
-            gs.setShowingBrackets(this._brackets);
-            gs.setGmOnly(this._gmOnly);
-            gs.setAgeLimit(this._ageLimit);
-            gs.setProtocol(this._protocolVersion);
+            gs.setPvp(this.pvp);
+            gs.setServerType(this.serverType);
+            gs.setShowingBrackets(this.brackets);
+            gs.setGmOnly(this.gmOnly);
+            gs.setAgeLimit(this.ageLimit);
+            gs.setProtocol(this.protocolVersion);
             gs.setAuthed(true);
             gs.getConnection().startPingTask();
         } else if (this.acceptAlternateID) {
@@ -69,12 +68,12 @@ public class AuthRequest extends ReceivablePacket {
                 gs.setExternalHost(this.externalIp);
                 gs.setInternalHost(this.internalIp);
                 gs.setMaxPlayers(this.maxOnline);
-                gs.setPvp(this._pvp);
-                gs.setServerType(this._serverType);
-                gs.setShowingBrackets(this._brackets);
-                gs.setGmOnly(this._gmOnly);
-                gs.setAgeLimit(this._ageLimit);
-                gs.setProtocol(this._protocolVersion);
+                gs.setPvp(this.pvp);
+                gs.setServerType(this.serverType);
+                gs.setShowingBrackets(this.brackets);
+                gs.setGmOnly(this.gmOnly);
+                gs.setAgeLimit(this.ageLimit);
+                gs.setProtocol(this.protocolVersion);
                 gs.setAuthed(true);
                 gs.getConnection().startPingTask();
             } else {
@@ -85,10 +84,10 @@ public class AuthRequest extends ReceivablePacket {
         }
 
         if (failReason != 0) {
-            _log.info("Gameserver registration failed.");
+            log.info("Gameserver registration failed.");
             this.sendPacket(new LoginServerFail(failReason));
         } else {
-            _log.info("Gameserver registration successful.");
+            log.info("Gameserver registration successful.");
             this.sendPacket(new AuthResponse(gs));
         }
     }

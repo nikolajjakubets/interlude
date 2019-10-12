@@ -3,11 +3,11 @@ package l2.authserver.crypt;
 
 //import jonelo.jacksum.JacksumAPI;
 //import jonelo.jacksum.algorithm.AbstractChecksum;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class PasswordHash {
-    private static final Logger _log = LoggerFactory.getLogger(PasswordHash.class);
     private final String name;
 
     public PasswordHash(String name) {
@@ -17,8 +17,8 @@ public class PasswordHash {
     public boolean compare(String password, String expected) {
         try {
             return this.encrypt(password).equalsIgnoreCase(expected);
-        } catch (Exception var4) {
-            _log.error(this.name + ": encryption error!", var4);
+        } catch (Exception e) {
+            log.error("restore: eMessage={}, eClass={}", e.getMessage(), e.getClass());
             return false;
         }
     }
@@ -28,7 +28,7 @@ public class PasswordHash {
 //        checksum.setEncoding("BASE64");
 //        checksum.update(password.getBytes());
 //        return checksum.format("#CHECKSUM");
-        _log.error("PASSWORD ENCODE HARDOCRE!!!!!!!!!!!!!");
+        log.error("PASSWORD ENCODE HARDOCRE!!!!!!!!!!!!!");
         return "";
     }
 }

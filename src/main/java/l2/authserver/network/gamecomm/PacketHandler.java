@@ -1,20 +1,13 @@
 package l2.authserver.network.gamecomm;
 
 
-import java.nio.ByteBuffer;
-import l2.authserver.network.gamecomm.gs2as.AuthRequest;
-import l2.authserver.network.gamecomm.gs2as.ChangeAccessLevel;
-import l2.authserver.network.gamecomm.gs2as.IGPwdCng;
-import l2.authserver.network.gamecomm.gs2as.OnlineStatus;
-import l2.authserver.network.gamecomm.gs2as.PingResponse;
-import l2.authserver.network.gamecomm.gs2as.PlayerAuthRequest;
-import l2.authserver.network.gamecomm.gs2as.PlayerInGame;
-import l2.authserver.network.gamecomm.gs2as.PlayerLogout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import l2.authserver.network.gamecomm.gs2as.*;
+import lombok.extern.slf4j.Slf4j;
 
+import java.nio.ByteBuffer;
+
+@Slf4j
 public class PacketHandler {
-    private static Logger _log = LoggerFactory.getLogger(PacketHandler.class);
 
     public PacketHandler() {
     }
@@ -23,12 +16,10 @@ public class PacketHandler {
         ReceivablePacket packet = null;
         int id = buf.get() & 255;
         if (!gs.isAuthed()) {
-            switch(id) {
-                case 0:
-                    packet = new AuthRequest();
-                    break;
-                default:
-                    _log.error("Received unknown packet: " + Integer.toHexString(id));
+            if (id == 0) {
+                packet = new AuthRequest();
+            } else {
+                log.error("handlePacket: Received unknown packet={}", Integer.toHexString(id));
             }
         } else {
             switch(id) {
@@ -54,10 +45,10 @@ public class PacketHandler {
                     packet = new PingResponse();
                     break;
                 default:
-                    _log.error("Received unknown packet: " + Integer.toHexString(id));
+                    log.error("handlePacket: Received unknown packet={} ", Integer.toHexString(id));
             }
         }
 
-        return (ReceivablePacket)packet;
+        return packet;
     }
 }

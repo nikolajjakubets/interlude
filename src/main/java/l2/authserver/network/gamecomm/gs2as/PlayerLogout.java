@@ -18,6 +18,5 @@ public class PlayerLogout extends ReceivablePacket {
         if (gs.isAuthed()) {
             gs.removeAccount(this.account);
         }
-
     }
 }

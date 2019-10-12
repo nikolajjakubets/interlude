@@ -1,24 +1,24 @@
 package l2.authserver.accounts;
 
+import l2.authserver.ThreadPoolManager;
+import l2.authserver.network.l2.SessionKey;
+import l2.commons.threading.RunnableImpl;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import l2.authserver.ThreadPoolManager;
-import l2.authserver.network.l2.SessionKey;
-import l2.commons.threading.RunnableImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class SessionManager {
-    private static final Logger _log = LoggerFactory.getLogger(SessionManager.class);
-    private static final SessionManager _instance = new SessionManager();
-    private final Map<SessionKey, SessionManager.Session> sessions = new HashMap();
+    private static final SessionManager instance = new SessionManager();
+    private final Map<SessionKey, Session> sessions = new HashMap<SessionKey, Session>();
     private final Lock lock = new ReentrantLock();
 
-    public static final SessionManager getInstance() {
-        return _instance;
+    public static SessionManager getInstance() {
+        return instance;
     }
 
     private SessionManager() {
@@ -28,10 +28,10 @@ public class SessionManager {
 
                 try {
                     long currentMillis = System.currentTimeMillis();
-                    Iterator itr = SessionManager.this.sessions.values().iterator();
+                    Iterator<Session> itr = SessionManager.this.sessions.values().iterator();
 
                     while(itr.hasNext()) {
-                        SessionManager.Session session = (SessionManager.Session)itr.next();
+                        SessionManager.Session session = itr.next();
                         if (session.getExpireTime() < currentMillis) {
                             itr.remove();
                         }
@@ -49,7 +49,7 @@ public class SessionManager {
 
         SessionManager.Session var3;
         try {
-            SessionManager.Session session = new SessionManager.Session(account);
+            SessionManager.Session session = new Session(account);
             this.sessions.put(session.getSessionKey(), session);
             var3 = session;
         } finally {
@@ -64,7 +64,7 @@ public class SessionManager {
 
         SessionManager.Session var2;
         try {
-            var2 = (SessionManager.Session)this.sessions.remove(skey);
+            var2 = this.sessions.remove(skey);
         } finally {
             this.lock.unlock();
         }
@@ -73,7 +73,7 @@ public class SessionManager {
     }
 
     public SessionManager.Session getSessionByName(String name) {
-        Iterator var2 = this.sessions.values().iterator();
+        Iterator<Session> var2 = this.sessions.values().iterator();
 
         SessionManager.Session session;
         do {
@@ -81,13 +81,14 @@ public class SessionManager {
                 return null;
             }
 
-            session = (SessionManager.Session)var2.next();
+            session = var2.next();
         } while(!session.account.getLogin().equalsIgnoreCase(name));
 
         return session;
     }
 
-    public final class Session {
+
+    public static final class Session {
         private final Account account;
         private final SessionKey skey;
         private final long expireTime;

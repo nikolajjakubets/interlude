@@ -2,11 +2,8 @@ package l2.authserver.network.gamecomm.gs2as;
 
 import l2.authserver.accounts.Account;
 import l2.authserver.network.gamecomm.ReceivablePacket;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ChangeAccessLevel extends ReceivablePacket {
-    public static final Logger _log = LoggerFactory.getLogger(ChangeAccessLevel.class);
     private String account;
     private int level;
     private int banExpire;

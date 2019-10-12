@@ -2,11 +2,10 @@ package l2.authserver.network.l2.s2c;
 
 import l2.authserver.network.l2.L2LoginClient;
 import l2.commons.net.nio.impl.SendablePacket;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class L2LoginServerPacket extends SendablePacket<L2LoginClient> {
-    private static final Logger _log = LoggerFactory.getLogger(L2LoginServerPacket.class);
 
     public L2LoginServerPacket() {
     }
@@ -15,8 +14,9 @@ public abstract class L2LoginServerPacket extends SendablePacket<L2LoginClient> 
         try {
             this.writeImpl();
             return true;
-        } catch (Exception var2) {
-            _log.error("Client: " + this.getClient() + " - Failed writing: " + this.getClass().getSimpleName() + "!", var2);
+        } catch (Exception e) {
+            log.error("read: eMessage={}, eClass={}", e.getMessage(), e.getClass());
+            log.error("read: Client: " + this.getClient() + " - Failed writing: " + this.getClass().getSimpleName() + "!", e);
             return false;
         }
     }

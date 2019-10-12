@@ -7,7 +7,7 @@ public class AccountManager {
     public AccountManager() {
     }
 
-    private static final void printUsage() {
+    private static void printUsage() {
         System.out.println("Usage: ");
         System.out.println(" -c <name> <password>\t Creates account <name> with password <password>");
         System.out.println(" -p <name> <password>\t Update <name>'s password to <password>");

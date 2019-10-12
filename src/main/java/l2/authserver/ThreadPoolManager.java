@@ -1,20 +1,17 @@
 package l2.authserver;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import l2.commons.threading.RunnableImpl;
+
+import java.util.concurrent.*;
 
 public class ThreadPoolManager {
     private static final long MAX_DELAY;
-    private static final ThreadPoolManager _instance;
+    private static final ThreadPoolManager instance;
     private final ScheduledThreadPoolExecutor scheduledExecutor = new ScheduledThreadPoolExecutor(1);
     private final ThreadPoolExecutor executor;
 
-    public static final ThreadPoolManager getInstance() {
-        return _instance;
+    public static ThreadPoolManager getInstance() {
+        return instance;
     }
 
     private ThreadPoolManager() {
@@ -27,7 +24,7 @@ public class ThreadPoolManager {
         }, 600000L, 600000L);
     }
 
-    private final long validate(long delay) {
+    private long validate(long delay) {
         return Math.max(0L, Math.min(MAX_DELAY, delay));
     }
 
@@ -35,8 +32,8 @@ public class ThreadPoolManager {
         this.executor.execute(r);
     }
 
-    public ScheduledFuture<?> schedule(Runnable r, long delay) {
-        return this.scheduledExecutor.schedule(r, this.validate(delay), TimeUnit.MILLISECONDS);
+    public void schedule(Runnable r, long delay) {
+        this.scheduledExecutor.schedule(r, this.validate(delay), TimeUnit.MILLISECONDS);
     }
 
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable r, long initial, long delay) {
@@ -45,6 +42,6 @@ public class ThreadPoolManager {
 
     static {
         MAX_DELAY = TimeUnit.NANOSECONDS.toMillis(9223372036854775807L - System.nanoTime()) / 2L;
-        _instance = new ThreadPoolManager();
+        instance = new ThreadPoolManager();
     }
 }

@@ -1,6 +1,5 @@
 package l2.authserver.network.l2.c2s;
 
-import javax.crypto.Cipher;
 import l2.authserver.Config;
 import l2.authserver.IpBanManager;
 import l2.authserver.accounts.Account;
@@ -9,15 +8,18 @@ import l2.authserver.accounts.SessionManager.Session;
 import l2.authserver.crypt.PasswordHash;
 import l2.authserver.network.l2.L2LoginClient;
 import l2.authserver.network.l2.L2LoginClient.LoginClientState;
-import l2.authserver.network.l2.s2c.LoginOk;
 import l2.authserver.network.l2.s2c.LoginFail.LoginFailReason;
+import l2.authserver.network.l2.s2c.LoginOk;
 import l2.authserver.utils.Log;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+import javax.crypto.Cipher;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class RequestAuthLogin extends L2LoginClientPacket {
     private byte[] _raw = new byte[128];
-
-    public RequestAuthLogin() {
-    }
 
     protected void readImpl() {
         this.readB(this._raw);
@@ -32,7 +34,7 @@ public class RequestAuthLogin extends L2LoginClientPacket {
     }
 
     protected void runImpl() throws Exception {
-        L2LoginClient client = (L2LoginClient)this.getClient();
+        L2LoginClient client = this.getClient();
 
         byte[] decrypted;
         try {
@@ -68,10 +70,8 @@ public class RequestAuthLogin extends L2LoginClientPacket {
         boolean passwordCorrect = account.getPasswordHash().equalsIgnoreCase(passwordHash);
         if (!passwordCorrect) {
             PasswordHash[] var10 = Config.LEGACY_CRYPT;
-            int var11 = var10.length;
 
-            for(int var12 = 0; var12 < var11; ++var12) {
-                PasswordHash c = var10[var12];
+            for (PasswordHash c : var10) {
                 if (c.compare(password, account.getPasswordHash())) {
                     passwordCorrect = true;
                     account.setPasswordHash(passwordHash);

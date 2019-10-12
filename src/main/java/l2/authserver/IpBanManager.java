@@ -1,5 +1,7 @@
 package l2.authserver;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -7,18 +9,15 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+@Slf4j
 public class IpBanManager {
-    private static final Logger _log = LoggerFactory.getLogger(IpBanManager.class);
     private static final IpBanManager _instance = new IpBanManager();
-    private final Map<String, IpBanManager.IpSession> ips = new HashMap();
+    private final Map<String, IpSession> ips = new HashMap<String, IpSession>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private final Lock readLock;
     private final Lock writeLock;
 
-    public static final IpBanManager getInstance() {
+    public static IpBanManager getInstance() {
         return _instance;
     }
 
@@ -33,8 +32,8 @@ public class IpBanManager {
                 try {
                     Iterator itr = IpBanManager.this.ips.values().iterator();
 
-                    while(itr.hasNext()) {
-                        IpBanManager.IpSession session = (IpBanManager.IpSession)itr.next();
+                    while (itr.hasNext()) {
+                        IpBanManager.IpSession session = (IpBanManager.IpSession) itr.next();
                         if (session.banExpire < currentMillis && session.lastTry < currentMillis - Config.LOGIN_TRY_TIMEOUT) {
                             itr.remove();
                         }
@@ -56,9 +55,8 @@ public class IpBanManager {
             boolean var3;
             try {
                 IpBanManager.IpSession ipsession;
-                if ((ipsession = (IpBanManager.IpSession)this.ips.get(ip)) == null) {
-                    var3 = false;
-                    return var3;
+                if ((ipsession = this.ips.get(ip)) == null) {
+                    return false;
                 }
 
                 var3 = ipsession.banExpire > System.currentTimeMillis();
@@ -76,11 +74,10 @@ public class IpBanManager {
         } else {
             this.writeLock.lock();
 
-            boolean var6;
             try {
-                IpBanManager.IpSession ipsession = (IpBanManager.IpSession)this.ips.get(ip);
+                IpBanManager.IpSession ipsession = this.ips.get(ip);
                 if (ipsession == null) {
-                    this.ips.put(ip, ipsession = new IpBanManager.IpSession());
+                    this.ips.put(ip, ipsession = new IpSession());
                 }
 
                 long currentMillis = System.currentTimeMillis();
@@ -98,25 +95,23 @@ public class IpBanManager {
 
                 ipsession.lastTry = currentMillis;
                 if (ipsession.tryCount != Config.LOGIN_TRY_BEFORE_BAN) {
-                    var6 = true;
-                    return var6;
+                    return true;
                 }
 
-                _log.warn("IpBanManager: " + ip + " banned for " + Config.IP_BAN_TIME / 1000L + " seconds.");
+                log.warn("tryLogin: IpBanManager: " + ip + " banned for " + Config.IP_BAN_TIME / 1000L + " seconds.");
                 ipsession.banExpire = currentMillis + Config.IP_BAN_TIME;
-                var6 = false;
             } finally {
                 this.writeLock.unlock();
             }
 
-            return var6;
+            return false;
         }
     }
 
-    private class IpSession {
-        public int tryCount;
-        public long lastTry;
-        public long banExpire;
+    private static class IpSession {
+        int tryCount;
+        long lastTry;
+        long banExpire;
 
         private IpSession() {
         }

@@ -1,41 +1,42 @@
 package l2.authserver.network.gamecomm;
 
-import java.net.InetAddress;
 import l2.authserver.GameServerManager;
 
+import java.net.InetAddress;
+
 public class ProxyServer {
-    private final int _origServerId;
-    private final int _proxyServerId;
-    private InetAddress _proxyAddr;
-    private int _proxyPort;
+    private final int origServerId;
+    private final int proxyServerId;
+    private InetAddress proxyAddr;
+    private int proxyport;
 
     public ProxyServer(int origServerId, int proxyServerId) {
-        this._origServerId = origServerId;
-        this._proxyServerId = proxyServerId;
+        this.origServerId = origServerId;
+        this.proxyServerId = proxyServerId;
     }
 
     public int getOrigServerId() {
-        return this._origServerId;
+        return this.origServerId;
     }
 
     public int getProxyServerId() {
-        return this._proxyServerId;
+        return this.proxyServerId;
     }
 
     public InetAddress getProxyAddr() {
-        return this._proxyAddr;
+        return this.proxyAddr;
     }
 
     public void setProxyAddr(InetAddress proxyAddr) {
-        this._proxyAddr = proxyAddr;
+        this.proxyAddr = proxyAddr;
     }
 
     public int getProxyPort() {
-        return this._proxyPort;
+        return this.proxyport;
     }
 
     public void setProxyPort(int proxyPort) {
-        this._proxyPort = proxyPort;
+        this.proxyport = proxyPort;
     }
 
     public GameServer getGameServer() {

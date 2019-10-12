@@ -8,18 +8,18 @@ package l2.authserver.network.l2.s2c;
 import l2.authserver.network.l2.SessionKey;
 
 public final class LoginOk extends L2LoginServerPacket {
-    private int _loginOk1;
-    private int _loginOk2;
+    private int loginOk1;
+    private int loginOk2;
 
     public LoginOk(SessionKey sessionKey) {
-        this._loginOk1 = sessionKey.loginOkID1;
-        this._loginOk2 = sessionKey.loginOkID2;
+        this.loginOk1 = sessionKey.loginOkID1;
+        this.loginOk2 = sessionKey.loginOkID2;
     }
 
     protected void writeImpl() {
         this.writeC(3);
-        this.writeD(this._loginOk1);
-        this.writeD(this._loginOk2);
+        this.writeD(this.loginOk1);
+        this.writeD(this.loginOk2);
         this.writeD(0);
         this.writeD(0);
         this.writeD(1002);

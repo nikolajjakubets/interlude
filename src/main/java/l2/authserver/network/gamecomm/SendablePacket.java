@@ -1,11 +1,11 @@
 package l2.authserver.network.gamecomm;
 
-import java.nio.ByteBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.nio.ByteBuffer;
+
+@Slf4j
 public abstract class SendablePacket extends l2.commons.net.nio.SendablePacket<GameServer> {
-    private static final Logger _log = LoggerFactory.getLogger(SendablePacket.class);
     protected GameServer _gs;
     protected ByteBuffer _buf;
 
@@ -35,8 +35,8 @@ public abstract class SendablePacket extends l2.commons.net.nio.SendablePacket<G
     public boolean write() {
         try {
             this.writeImpl();
-        } catch (Exception var2) {
-            _log.error("", var2);
+        } catch (Exception e) {
+            log.error("restore: eMessage={}, eClass={}", e.getMessage(), e.getClass());
         }
 
         return true;

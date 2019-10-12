@@ -1,25 +1,21 @@
 package l2.authserver.network.gamecomm;
 
+import l2.authserver.ThreadPoolManager;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.ClosedSelectorException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.*;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
-import l2.authserver.ThreadPoolManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class GameServerCommunication extends Thread {
-    private static final Logger _log = LoggerFactory.getLogger(GameServerCommunication.class);
     private static final GameServerCommunication instance = new GameServerCommunication();
     private final ByteBuffer writeBuffer;
     private Selector selector;
@@ -76,14 +72,14 @@ public class GameServerCommunication extends Thread {
                         }
                     }
                 }
-            } catch (ClosedSelectorException var6) {
-                _log.error("Selector " + this.selector + " closed!");
+            } catch (ClosedSelectorException e) {
+                log.error("run: Selector={} closed!", this.selector);
                 return;
-            } catch (IOException var7) {
-                _log.error("Gameserver I/O error: " + var7.getMessage());
+            } catch (IOException e) {
+                log.error("run: Gameserver I/O error={} " + e.getMessage());
                 this.close(key);
             } catch (Exception var8) {
-                _log.error("", var8);
+                log.error("", var8);
             }
         }
 
@@ -136,7 +132,7 @@ public class GameServerCommunication extends Thread {
                         ThreadPoolManager.getInstance().execute(rp);
                     }
 
-                    rp.setByteBuffer((ByteBuffer)null);
+                    rp.setByteBuffer(null);
                 }
 
                 buf.limit(limit);
@@ -171,7 +167,7 @@ public class GameServerCommunication extends Thread {
             int var9 = 0;
 
             SendablePacket sp;
-            while(var9++ < 64 && (sp = (SendablePacket)sendQueue.poll()) != null) {
+            while (var9++ < 64 && (sp = sendQueue.poll()) != null) {
                 int headerPos = buf.position();
                 buf.position(headerPos + 2);
                 sp.setByteBuffer(buf);
@@ -226,8 +222,8 @@ public class GameServerCommunication extends Thread {
                     key.channel().close();
                     key.cancel();
                 }
-            } catch (IOException var7) {
-                _log.error("", var7);
+            } catch (IOException e) {
+                log.error("restore: eMessage={}, eClass={}", e.getMessage(), e.getClass());
             }
 
         }

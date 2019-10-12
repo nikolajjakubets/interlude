@@ -1,10 +1,6 @@
 package l2.authserver.network.l2.s2c;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public final class GGAuth extends L2LoginServerPacket {
-    static Logger _log = LoggerFactory.getLogger(GGAuth.class);
     public static int SKIP_GG_AUTH_REQUEST = 11;
     private int _response;
 

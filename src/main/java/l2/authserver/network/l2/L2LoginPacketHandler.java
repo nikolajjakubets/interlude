@@ -1,6 +1,5 @@
 package l2.authserver.network.l2;
 
-import java.nio.ByteBuffer;
 import l2.authserver.network.l2.L2LoginClient.LoginClientState;
 import l2.authserver.network.l2.c2s.AuthGameGuard;
 import l2.authserver.network.l2.c2s.RequestAuthLogin;
@@ -8,6 +7,8 @@ import l2.authserver.network.l2.c2s.RequestServerList;
 import l2.authserver.network.l2.c2s.RequestServerLogin;
 import l2.commons.net.nio.impl.IPacketHandler;
 import l2.commons.net.nio.impl.ReceivablePacket;
+
+import java.nio.ByteBuffer;
 
 public final class L2LoginPacketHandler implements IPacketHandler<L2LoginClient> {
     public L2LoginPacketHandler() {
@@ -36,6 +37,6 @@ public final class L2LoginPacketHandler implements IPacketHandler<L2LoginClient>
                 }
         }
 
-        return (ReceivablePacket)packet;
+        return packet;
     }
 }
