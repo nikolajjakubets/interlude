@@ -236,7 +236,7 @@ public class SchedulingPattern implements NextTime {
                     List<Integer> values2 = new ArrayList();
 
                     for(int i = 0; i < values.size(); i += div) {
-                        values2.add(values.get(i));
+                        values2.add((Integer) values.get(i));
                     }
 
                     return values2;

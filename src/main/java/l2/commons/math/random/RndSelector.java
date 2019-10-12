@@ -37,9 +37,9 @@ public class RndSelector<E> {
             int r = Rnd.get(maxWeight);
             int weight = 0;
 
-            for(int i = 0; i < this.nodes.size(); ++i) {
-                if ((weight += ((RndSelector.RndNode)this.nodes.get(i)).weight) > r) {
-                    return ((RndSelector.RndNode)this.nodes.get(i)).value;
+            for (RndNode<E> node : this.nodes) {
+                if ((weight += node.weight) > r) {
+                    return node.value;
                 }
             }
 
@@ -70,7 +70,7 @@ public class RndSelector<E> {
         }
 
         public int compareTo(RndSelector<E>.RndNode<T> o) {
-            return this.weight - this.weight;
+            return 0;
         }
     }
 }

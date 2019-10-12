@@ -73,7 +73,8 @@ public class StrTable {
             row = (Map)this.rows.get(rowIndex);
         } else {
             row = new HashMap();
-            this.rows.put(rowIndex, row);
+            //TODO: i add cast
+            this.rows.put(rowIndex, (Map<String, String>) row);
         }
 
         ((Map)row).put(colName, val);

@@ -21,7 +21,8 @@ public final class ArrayUtils {
 
     public static <T> T[] add(T[] array, T element) {
         Class type = array != null ? array.getClass().getComponentType() : (element != null ? element.getClass() : Object.class);
-        T[] newArray = (Object[])copyArrayGrow(array, type);
+        //TODO: i add cast
+        T[] newArray = (T[]) copyArrayGrow(array, type);
         newArray[newArray.length - 1] = element;
         return newArray;
     }
@@ -29,11 +30,13 @@ public final class ArrayUtils {
     private static <T> T[] copyArrayGrow(T[] array, Class<? extends T> type) {
         if (array != null) {
             int arrayLength = Array.getLength(array);
-            T[] newArray = (Object[])((Object[])Array.newInstance(array.getClass().getComponentType(), arrayLength + 1));
+            //TODO: i add cast
+            T[] newArray = (T[]) Array.newInstance(array.getClass().getComponentType(), arrayLength + 1);
             System.arraycopy(array, 0, newArray, 0, arrayLength);
             return newArray;
         } else {
-            return (Object[])((Object[])Array.newInstance(type, 1));
+            //TODO: i add cast
+            return (T[]) Array.newInstance(type, 1);
         }
     }
 
@@ -74,7 +77,8 @@ public final class ArrayUtils {
                 return array;
             } else {
                 int length = array.length;
-                T[] newArray = (Object[])((Object[])Array.newInstance(array.getClass().getComponentType(), length - 1));
+                //TODO: i add cast
+                T[] newArray = (T[]) Array.newInstance(array.getClass().getComponentType(), length - 1);
                 System.arraycopy(array, 0, newArray, 0, index);
                 if (index < length - 1) {
                     System.arraycopy(array, index + 1, newArray, index, length - index - 1);
@@ -101,7 +105,8 @@ public final class ArrayUtils {
                 if (pmin != lo) {
                     e = a[lo];
                     a[lo] = a[pmin];
-                    a[pmin] = e;
+                    //TODO: i add cast
+                    a[pmin] = (T) e;
                 }
 
                 eqBrute(a, lo + 1, hi);
@@ -112,15 +117,17 @@ public final class ArrayUtils {
                 if (pmin != lo) {
                     e = a[lo];
                     a[lo] = a[pmin];
-                    a[pmin] = e;
+                    //TODO: i add cast
+                    a[pmin] = (T) e;
                 }
 
                 int pmax = a[hi].compareTo(a[hi - 1]) > 0 ? hi : hi - 1;
                 pmax = a[pmax].compareTo(a[hi - 2]) > 0 ? pmax : hi - 2;
                 if (pmax != hi) {
-                    T e = a[hi];
+                    e = a[hi];
                     a[hi] = a[pmax];
-                    a[pmax] = e;
+                    //TODO: i add cast
+                    a[pmax] = (T) e;
                 }
 
                 eqBrute(a, lo + 1, hi - 1);
@@ -182,7 +189,8 @@ public final class ArrayUtils {
                 if (pmin != lo) {
                     e = a[lo];
                     a[lo] = a[pmin];
-                    a[pmin] = e;
+                    //TODO: i add cast
+                    a[pmin] = (T) e;
                 }
 
                 eqBrute(a, lo + 1, hi, c);
@@ -193,15 +201,17 @@ public final class ArrayUtils {
                 if (pmin != lo) {
                     e = a[lo];
                     a[lo] = a[pmin];
-                    a[pmin] = e;
+                    //TODO: i add cast
+                    a[pmin] = (T) e;
                 }
 
                 int pmax = c.compare(a[hi], a[hi - 1]) > 0 ? hi : hi - 1;
                 pmax = c.compare(a[pmax], a[hi - 2]) > 0 ? pmax : hi - 2;
                 if (pmax != hi) {
-                    T e = a[hi];
+                    e = a[hi];
                     a[hi] = a[pmax];
-                    a[pmax] = e;
+                    //TODO: i add cast
+                    a[pmax] = (T) e;
                 }
 
                 eqBrute(a, lo + 1, hi - 1, c);

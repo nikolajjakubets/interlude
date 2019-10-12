@@ -74,12 +74,11 @@ public class NaturalOrderComparator implements Comparator {
     private static int compare0(String a, String b) {
         int ia = 0;
         int ib = 0;
-        int nza = false;
-        boolean var5 = false;
+        int nza;
 
         while(true) {
             int nzb = 0;
-            int nza = 0;
+            nza = 0;
             char ca = charAt(a, ia);
 
             char cb;

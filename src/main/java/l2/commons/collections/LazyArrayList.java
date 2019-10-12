@@ -133,7 +133,8 @@ public class LazyArrayList<E> implements List<E>, RandomAccess, Cloneable, Seria
         E e = null;
         if (index >= 0 && index < this.size) {
             --this.size;
-            e = this.elementData[index];
+            //TODO: i add cast
+            e = (E) this.elementData[index];
             this.elementData[index] = this.elementData[this.size];
             this.elementData[this.size] = null;
             this.trim();
@@ -218,7 +219,9 @@ public class LazyArrayList<E> implements List<E>, RandomAccess, Cloneable, Seria
     }
 
     public E get(int index) {
-        return this.size > 0 && index >= 0 && index < this.size ? this.elementData[index] : null;
+        //TODO: i add cast
+
+        return this.size > 0 && index >= 0 && index < this.size ? (E) this.elementData[index] : null;
     }
 
     public Object clone() {
@@ -332,7 +335,8 @@ public class LazyArrayList<E> implements List<E>, RandomAccess, Cloneable, Seria
     }
 
     public <T> T[] toArray(T[] a) {
-        T[] r = a.length >= this.size ? a : (Object[])((Object[])Array.newInstance(a.getClass().getComponentType(), this.size));
+        //TODO: i add cast
+        T[] r = a.length >= this.size ? a : (T[]) Array.newInstance(a.getClass().getComponentType(), this.size);
         if (this.size > 0) {
             System.arraycopy(this.elementData, 0, r, 0, this.size);
         }
@@ -387,7 +391,7 @@ public class LazyArrayList<E> implements List<E>, RandomAccess, Cloneable, Seria
 
     private class LazyListItr extends LazyArrayList<E>.LazyItr implements ListIterator<E> {
         LazyListItr(int index) {
-            super(null);
+            super();
             this.cursor = index;
         }
 

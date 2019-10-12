@@ -12,7 +12,7 @@ public class HardReferences {
     }
 
     public static <T> HardReference<T> emptyRef() {
-        return EMPTY_REF;
+        return (HardReference<T>) EMPTY_REF;
     }
 
     public static <T> Collection<T> unwrap(Collection<HardReference<T>> refs) {
@@ -30,18 +30,18 @@ public class HardReferences {
         return result;
     }
 
-    public static <T> Iterable<T> iterate(Iterable<HardReference<T>> refs) {
+    public static <T> WrappedIterable iterate(Iterable<HardReference<T>> refs) {
         return new HardReferences.WrappedIterable(refs);
     }
 
-    private static class WrappedIterable<T> implements Iterable<T> {
+    private static class WrappedIterable<T> implements Iterable<Object> {
         final Iterable<HardReference<T>> refs;
 
         WrappedIterable(Iterable<HardReference<T>> refs) {
             this.refs = refs;
         }
 
-        public Iterator<T> iterator() {
+        public Iterator<Object> iterator() {
             return new HardReferences.WrappedIterable.WrappedIterator(this.refs.iterator());
         }
 
@@ -57,7 +57,7 @@ public class HardReferences {
             }
 
             public T next() {
-                return ((HardReference)this.iterator.next()).get();
+                return this.iterator.next().get();
             }
 
             public void remove() {

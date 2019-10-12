@@ -220,7 +220,8 @@ public class MultiValueSet<T> extends HashMap<T, Object> {
     public <E extends Enum<E>> E getEnum(T name, Class<E> enumClass) {
         Object val = this.get(name);
         if (val != null && enumClass.isInstance(val)) {
-            return (Enum)val;
+            //TODO: add cast
+            return (E) val;
         } else if (val instanceof String) {
             return Enum.valueOf(enumClass, (String)val);
         } else {
@@ -231,7 +232,8 @@ public class MultiValueSet<T> extends HashMap<T, Object> {
     public <E extends Enum<E>> E getEnum(T name, Class<E> enumClass, E defaultValue) {
         Object val = this.get(name);
         if (val != null && enumClass.isInstance(val)) {
-            return (Enum)val;
+            //TODO: add cast
+            return (E) val;
         } else {
             return val instanceof String ? Enum.valueOf(enumClass, (String)val) : defaultValue;
         }

@@ -13,8 +13,8 @@ import org.apache.commons.lang3.tuple.Pair;
 public class RandomUtils {
     public static final Comparator<Pair<?, Double>> DOUBLE_GROUP_COMPARATOR = new Comparator<Pair<?, Double>>() {
         public int compare(Pair<?, Double> o1, Pair<?, Double> o2) {
-            double v = (Double)o1.getRight() - (Double)o2.getRight();
-            return v > 0.0D ? 1 : (v < 0.0D ? -1 : 0);
+            double v = o1.getRight() - o2.getRight();
+            return Double.compare(v, 0.0D);
         }
     };
 
@@ -36,6 +36,7 @@ public class RandomUtils {
             share += (Double)group.getRight();
         } while(r > share);
 
-        return group.getLeft();
+        //TODO: i add cast
+        return (G) group.getLeft();
     }
 }

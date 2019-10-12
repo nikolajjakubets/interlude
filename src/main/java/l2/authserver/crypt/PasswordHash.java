@@ -1,8 +1,8 @@
 package l2.authserver.crypt;
 
 
-import jonelo.jacksum.JacksumAPI;
-import jonelo.jacksum.algorithm.AbstractChecksum;
+//import jonelo.jacksum.JacksumAPI;
+//import jonelo.jacksum.algorithm.AbstractChecksum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +24,11 @@ public class PasswordHash {
     }
 
     public String encrypt(String password) throws Exception {
-        AbstractChecksum checksum = JacksumAPI.getChecksumInstance(this.name);
-        checksum.setEncoding("BASE64");
-        checksum.update(password.getBytes());
-        return checksum.format("#CHECKSUM");
+//        AbstractChecksum checksum = JacksumAPI.getChecksumInstance(this.name);
+//        checksum.setEncoding("BASE64");
+//        checksum.update(password.getBytes());
+//        return checksum.format("#CHECKSUM");
+        _log.error("PASSWORD ENCODE HARDOCRE!!!!!!!!!!!!!");
+        return "";
     }
 }

@@ -1,4 +1,11 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package l2.authserver.network.l2.s2c;
+
+import l2.authserver.network.l2.SessionKey;
 
 public final class LoginOk extends L2LoginServerPacket {
     private int _loginOk1;

@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package l2.authserver;
 
 import java.net.InetAddress;
@@ -97,12 +102,12 @@ public class GameServerManager {
                 }
 
                 ps.setProxyPort(psc.getProxyPort());
-                List<ProxyServer> proxyList = (List)this._gameServerProxys.get(ps.getOrigServerId());
+                List<ProxyServer> proxyList = this._gameServerProxys.get(ps.getOrigServerId());
                 if (proxyList == null) {
                     this._gameServerProxys.put(ps.getOrigServerId(), proxyList = new LinkedList());
                 }
 
-                ((List)proxyList).add(ps);
+                proxyList.add(ps);
                 this._proxyServers.put(ps.getProxyServerId(), ps);
             }
         }
@@ -110,12 +115,13 @@ public class GameServerManager {
     }
 
     public List<ProxyServer> getProxyServersList(int gameServerId) {
-        List<ProxyServer> result = (List)this._gameServerProxys.get(gameServerId);
-        return result != null ? result : Collections.emptyList();
+        List result = this._gameServerProxys.get(gameServerId);
+        //TODO: i add cast
+        return result != null ? result :  Collections.emptyList();
     }
 
     public ProxyServer getProxyServerById(int proxyServerId) {
-        return (ProxyServer)this._proxyServers.get(proxyServerId);
+        return this._proxyServers.get(proxyServerId);
     }
 
     public GameServer[] getGameServers() {
@@ -123,7 +129,7 @@ public class GameServerManager {
 
         GameServer[] var1;
         try {
-            var1 = (GameServer[])this._gameServers.values().toArray(new GameServer[this._gameServers.size()]);
+            var1 = this._gameServers.values().toArray(new GameServer[this._gameServers.size()]);
         } finally {
             this._readLock.unlock();
         }
@@ -136,7 +142,7 @@ public class GameServerManager {
 
         GameServer var2;
         try {
-            var2 = (GameServer)this._gameServers.get(id);
+            var2 = this._gameServers.get(id);
         } finally {
             this._readLock.unlock();
         }
@@ -159,7 +165,7 @@ public class GameServerManager {
                         return false;
                     }
 
-                    pgs = (GameServer)this._gameServers.get(id);
+                    pgs = this._gameServers.get(id);
                 } while(!this._proxyServers.containsKey(id) && pgs != null);
 
                 this._gameServers.put(id, gs);
@@ -177,7 +183,7 @@ public class GameServerManager {
 
         boolean var4;
         try {
-            GameServer pgs = (GameServer)this._gameServers.get(id);
+            GameServer pgs = this._gameServers.get(id);
             if (!Config.ACCEPT_NEW_GAMESERVER && pgs == null) {
                 var4 = false;
                 return var4;
@@ -196,3 +202,4 @@ public class GameServerManager {
 
         return var4;
     }
+}

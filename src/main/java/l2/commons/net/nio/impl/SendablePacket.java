@@ -15,8 +15,9 @@ public abstract class SendablePacket<T extends MMOClient> extends l2.commons.net
         return ((SelectorThread)Thread.currentThread()).getWriteBuffer();
     }
 
+    //TODO: i add cast
     public T getClient() {
-        return ((SelectorThread)Thread.currentThread()).getWriteClient();
+        return (T) ((SelectorThread)Thread.currentThread()).getWriteClient();
     }
 
     protected abstract boolean write();

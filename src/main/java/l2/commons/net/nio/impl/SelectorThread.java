@@ -14,13 +14,15 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayDeque;
+//import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +56,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
         this._packetHandler = packetHandler;
         this._clientFactory = clientFactory;
         this._executor = executor;
-        this._bufferPool = new ArrayDeque(this._sc.HELPER_BUFFER_COUNT);
+        this._bufferPool = new LinkedBlockingQueue<ByteBuffer>(this._sc.HELPER_BUFFER_COUNT);
         this._connections = new CopyOnWriteArrayList();
         this.DIRECT_WRITE_BUFFER = ByteBuffer.wrap(new byte[this._sc.WRITE_BUFFER_SIZE]).order(this._sc.BYTE_ORDER);
         this.WRITE_BUFFER = ByteBuffer.wrap(new byte[this._sc.WRITE_BUFFER_SIZE]).order(this._sc.BYTE_ORDER);
@@ -76,7 +78,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
     }
 
     protected ByteBuffer getPooledBuffer() {
-        return this._bufferPool.isEmpty() ? ByteBuffer.wrap(new byte[this.HELPER_BUFFER_SIZE]).order(this._sc.BYTE_ORDER) : (ByteBuffer)this._bufferPool.poll();
+        return this._bufferPool.isEmpty() ? ByteBuffer.wrap(new byte[this.HELPER_BUFFER_SIZE]).order(this._sc.BYTE_ORDER) : this._bufferPool.poll();
     }
 
     protected void recycleBuffer(ByteBuffer buf) {
@@ -91,19 +93,19 @@ public class SelectorThread<T extends MMOClient> extends Thread {
         if (buf == this.READ_BUFFER) {
             this.READ_BUFFER.clear();
         } else {
-            con.setReadBuffer((ByteBuffer)null);
+            con.setReadBuffer(null);
             this.recycleBuffer(buf);
         }
 
     }
 
     public void run() {
-        int totalKeys = false;
+        boolean totalKeys = false;
         Set<SelectionKey> keys = null;
         Iterator<SelectionKey> itr = null;
         Iterator<MMOConnection<T>> conItr = null;
         SelectionKey key = null;
-        MMOConnection<T> con = null;
+        MMOConnection con = null;
         long currentMillis = 0L;
 
         while(true) {
@@ -119,7 +121,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
 
                     while(true) {
                         while(conItr.hasNext()) {
-                            con = (MMOConnection)conItr.next();
+                            con = conItr.next();
                             if (con.isPengingClose() && (!con.isPendingWrite() || currentMillis - con.getPendingCloseTime() >= 10000L)) {
                                 this.closeConnectionImpl(con);
                             } else if (con.isPendingWrite() && currentMillis - con.getPendingWriteTime() >= this._sc.INTEREST_DELAY) {
@@ -127,13 +129,13 @@ public class SelectorThread<T extends MMOClient> extends Thread {
                             }
                         }
 
-                        int totalKeys = this.getSelector().selectNow();
-                        if (totalKeys > 0) {
+                        int totalKeyss = this.getSelector().selectNow();
+                        if (totalKeyss > 0) {
                             keys = this.getSelector().selectedKeys();
                             itr = keys.iterator();
 
                             while(itr.hasNext()) {
-                                key = (SelectionKey)itr.next();
+                                key = itr.next();
                                 itr.remove();
                                 if (key.isValid()) {
                                     try {
@@ -317,7 +319,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
                     con.recvPacket(rp);
                 }
 
-                rp.setByteBuffer((ByteBuffer)null);
+                rp.setByteBuffer(null);
             }
 
             buf.limit(limit);
@@ -375,7 +377,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
             for(int i = 0; i < this._sc.MAX_SEND_PER_PASS; ++i) {
                 SendablePacket sp;
                 synchronized(con) {
-                    if ((sp = (SendablePacket)sendQueue.poll()) == null) {
+                    if ((sp = sendQueue.poll()) == null) {
                         break;
                     }
                 }
@@ -460,8 +462,8 @@ public class SelectorThread<T extends MMOClient> extends Thread {
             } finally {
                 con.releaseBuffers();
                 con.clearQueues();
-                con.getClient().setConnection((MMOConnection)null);
-                con.getSelectionKey().attach((Object)null);
+                con.getClient().setConnection(null);
+                con.getSelectionKey().attach(null);
                 con.getSelectionKey().cancel();
                 this._connections.remove(con);
                 stats.decreseOpenedConnections();
