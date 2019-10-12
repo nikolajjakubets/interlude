@@ -50,10 +50,6 @@ public class AuthServer {
         log.info("Listening for clients on " + Config.LOGIN_HOST + ":" + Config.PORT_LOGIN);
     }
 
-    public GameServerCommunication getGameServerListener() {
-        return this.gameServerListener;
-    }
-
     private static void checkFreePorts() throws Throwable {
         ServerSocket ss = null;
 

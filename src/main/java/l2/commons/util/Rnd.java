@@ -5,10 +5,11 @@
 
 package l2.commons.util;
 
+import org.apache.commons.math3.random.MersenneTwister;
+import org.apache.commons.math3.random.RandomGenerator;
+
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import org.apache.commons.math.random.MersenneTwister;
-import org.apache.commons.math.random.RandomGenerator;
 
 public class Rnd {
     private static final ThreadLocal<RandomGenerator> rnd = new Rnd.ThreadLocalGeneratorHolder();
@@ -18,7 +19,7 @@ public class Rnd {
     }
 
     private static RandomGenerator rnd() {
-        return (RandomGenerator)rnd.get();
+      return rnd.get();
     }
 
     public static double get() {

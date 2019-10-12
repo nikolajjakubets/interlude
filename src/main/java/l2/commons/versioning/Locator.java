@@ -17,12 +17,12 @@ public final class Locator {
     private Locator() {
     }
 
-    public static File getClassSource(Class<?> c) {
+  static File getClassSource(Class<?> c) {
         String classResource = c.getName().replace('.', '/') + ".class";
         return getResourceSource(c.getClassLoader(), classResource);
     }
 
-    public static File getResourceSource(ClassLoader c, String resource) {
+  private static File getResourceSource(ClassLoader c, String resource) {
         if (c == null) {
             c = Locator.class.getClassLoader();
         }
