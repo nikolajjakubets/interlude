@@ -19,9 +19,9 @@ import java.util.*;
 
 @Slf4j
 public class Config {
-  public static final String LOGIN_CONFIGURATION_FILE = "/config/authserver.properties";
-  public static final String SERVER_NAMES_FILE = "/config/servername.xml";
-  public static final String PROXY_SERVERS_FILE = "/config/proxyservers.xml";
+  public static final String LOGIN_CONFIGURATION_FILE = "/auth/authserver.properties";
+  public static final String SERVER_NAMES_FILE = "/auth/servername.xml";
+  public static final String PROXY_SERVERS_FILE = "/auth/proxyservers.xml";
   public static String LOGIN_HOST;
   public static int PORT_LOGIN;
   public static String GAME_SERVER_LOGIN_HOST;
