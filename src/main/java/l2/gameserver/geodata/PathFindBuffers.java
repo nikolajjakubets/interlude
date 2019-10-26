@@ -71,8 +71,8 @@ public class PathFindBuffers {
         }
       }
 
-      var2 = null;
-      return var2;
+//      var2 = null;
+      return null;
     } finally {
       lock.unlock();
     }

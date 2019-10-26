@@ -67,8 +67,8 @@ public class FishTable {
         int combat_time = resultSet.getInt("combat_time");
         FishTemplate fish = new FishTemplate(id, lvl, name, rewardid, mindrop, maxdrop, chance, fish_guts, guts_check_time, wait_time, combat_time);
         Object fishes;
-        if ((fishes = (List)this._fishes.get(chance)) == null) {
-          this._fishes.put(chance, fishes = new ArrayList());
+        if ((fishes = this._fishes.get(chance)) == null) {
+          this._fishes.put(chance, new ArrayList<>());
         }
 
         ((List)fishes).add(fish);
@@ -85,9 +85,9 @@ public class FishTable {
         mindrop = resultSet.getInt("min");
         maxdrop = resultSet.getInt("max");
         chance = resultSet.getInt("chance");
-        RewardData reward = new RewardData(rewardid, (long)mindrop, (long)maxdrop, (double)chance * 10000.0D);
+        RewardData reward = new RewardData(rewardid, mindrop, maxdrop, (double)chance * 10000.0D);
         Object rewards;
-        if ((rewards = (List)this._fishRewards.get(fishid)) == null) {
+        if ((rewards = this._fishRewards.get(fishid)) == null) {
           this._fishRewards.put(fishid, rewards = new ArrayList());
         }
 
@@ -109,7 +109,7 @@ public class FishTable {
 
   public List<FishTemplate> getFish(int group, int type, int lvl) {
     List<FishTemplate> result = new ArrayList();
-    List<FishTemplate> fishs = (List)this._fishes.get(group);
+    List<FishTemplate> fishs = this._fishes.get(group);
     if (fishs == null) {
       _log.warn("No fishes defined for group : " + group + "!");
       return null;
@@ -132,7 +132,7 @@ public class FishTable {
   }
 
   public List<RewardData> getFishReward(int fishid) {
-    List<RewardData> result = (List)this._fishRewards.get(fishid);
+    List<RewardData> result = this._fishRewards.get(fishid);
     if (this._fishRewards == null) {
       _log.warn("No fish rewards defined for fish id: " + fishid + "!");
       return null;

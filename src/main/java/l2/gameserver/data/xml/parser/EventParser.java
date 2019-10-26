@@ -241,23 +241,23 @@ public final class EventParser extends AbstractDirParser<EventHolder> {
                 a = new OpenCloseAction(false, name);
                 actions.add(a);
               } else {
-                ActiveDeactiveAction a;
+                ActiveDeactiveAction activeDeactiveAction;
                 if (actionElement.getName().equalsIgnoreCase("active")) {
                   name = actionElement.attributeValue("name");
-                  a = new ActiveDeactiveAction(true, name);
-                  actions.add(a);
+                  activeDeactiveAction = new ActiveDeactiveAction(true, name);
+                  actions.add(activeDeactiveAction);
                 } else if (actionElement.getName().equalsIgnoreCase("deactive")) {
                   name = actionElement.attributeValue("name");
-                  a = new ActiveDeactiveAction(false, name);
-                  actions.add(a);
+                  activeDeactiveAction = new ActiveDeactiveAction(false, name);
+                  actions.add(activeDeactiveAction);
                 } else if (actionElement.getName().equalsIgnoreCase("refresh")) {
                   name = actionElement.attributeValue("name");
-                  RefreshAction a = new RefreshAction(name);
-                  actions.add(a);
+                  RefreshAction refreshAction = new RefreshAction(name);
+                  actions.add(refreshAction);
                 } else if (actionElement.getName().equalsIgnoreCase("init")) {
                   name = actionElement.attributeValue("name");
-                  InitAction a = new InitAction(name);
-                  actions.add(a);
+                  InitAction initAction = new InitAction(name);
+                  actions.add(initAction);
                 } else {
                   int itemId;
                   if (actionElement.getName().equalsIgnoreCase("npc_say")) {
@@ -325,8 +325,8 @@ public final class EventParser extends AbstractDirParser<EventHolder> {
                         actions.add(sayAction);
                       } else if (actionElement.getName().equalsIgnoreCase("teleport_players")) {
                         name = actionElement.attributeValue("id");
-                        TeleportPlayersAction a = new TeleportPlayersAction(name);
-                        actions.add(a);
+                        TeleportPlayersAction teleportPlayersAction = new TeleportPlayersAction(name);
+                        actions.add(teleportPlayersAction);
                       }
                     }
                   }

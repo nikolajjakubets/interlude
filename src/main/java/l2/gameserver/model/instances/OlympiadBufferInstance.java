@@ -64,8 +64,8 @@ public class OlympiadBufferInstance extends NpcInstance {
       }
 
       if (command.startsWith("Buff")) {
-        int id = false;
-        int lvl = false;
+//        int id = false;
+//        int lvl = false;
         StringTokenizer st = new StringTokenizer(command, " ");
         st.nextToken();
         int id = Integer.parseInt(st.nextToken());

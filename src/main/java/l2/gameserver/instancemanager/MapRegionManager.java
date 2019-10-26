@@ -51,12 +51,10 @@ public class MapRegionManager extends AbstractHolder {
 
   public <T extends RegionData> T getRegionData(Class<T> clazz, int x, int y, int z) {
     RegionData[] var5 = this.map[this.regionX(x)][this.regionY(y)];
-    int var6 = var5.length;
 
-    for(int var7 = 0; var7 < var6; ++var7) {
-      RegionData rd = var5[var7];
-      if (rd.getClass() == clazz && rd.getTerritory().isInside(x, y, z)) {
-        return rd;
+    for (RegionData regionDatas : var5) {
+      if (regionDatas.getClass() == clazz && regionDatas.getTerritory().isInside(x, y, z)) {
+        return regionDatas;
       }
     }
 

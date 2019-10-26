@@ -40,8 +40,8 @@ public final class ResidenceHolder extends AbstractHolder {
   }
 
   public <R extends Residence> R getResidence(Class<R> type, int id) {
-    Residence r = this.getResidence(id);
-    return r != null && r.getClass() == type ? r : null;
+    Residence residence = this.getResidence(id);
+    return residence != null && residence.getClass() == type ? residence : null;
   }
 
   public <R extends Residence> List<R> getResidenceList(Class<R> t) {
@@ -75,11 +75,10 @@ public final class ResidenceHolder extends AbstractHolder {
   public <R extends Residence> R findNearestResidence(Class<R> clazz, int x, int y, int z, Reflection ref, int offset) {
     Residence residence = this.getResidenceByCoord(clazz, x, y, z, ref);
     if (residence == null) {
-      double closestDistance = (double)offset;
-      Iterator var12 = this.getResidenceList(clazz).iterator();
+      double closestDistance = offset;
 
-      while(var12.hasNext()) {
-        Residence r = (Residence)var12.next();
+      for (R value : this.getResidenceList(clazz)) {
+        Residence r = (Residence) value;
         double distance = r.getZone().findDistanceToZone(x, y, z, false);
         if (closestDistance > distance) {
           closestDistance = distance;
@@ -92,10 +91,8 @@ public final class ResidenceHolder extends AbstractHolder {
   }
 
   public void callInit() {
-    Iterator var1 = this.getResidences().iterator();
 
-    while(var1.hasNext()) {
-      Residence r = (Residence)var1.next();
+    for (Residence r : this.getResidences()) {
       r.init();
     }
 
@@ -104,12 +101,10 @@ public final class ResidenceHolder extends AbstractHolder {
   private void buildFastLook() {
     Residence residence;
     Object list;
+    _log.error("buildFastLook: i put NULL in list");
     for(Iterator var1 = this._residences.values().iterator(); var1.hasNext(); ((List)list).add(residence)) {
       residence = (Residence)var1.next();
-      list = (List)this._fastResidencesByType.get(residence.getClass());
-      if (list == null) {
-        this._fastResidencesByType.put(residence.getClass(), list = new ArrayList());
-      }
+      list = this._fastResidencesByType.computeIfAbsent(residence.getClass(), k ->null);
     }
 
   }
@@ -121,7 +116,7 @@ public final class ResidenceHolder extends AbstractHolder {
 
     while(var1.hasNext()) {
       Entry<Class, List<Residence>> entry = (Entry)var1.next();
-      this.info(" - load " + ((List)entry.getValue()).size() + " " + ((Class)entry.getKey()).getSimpleName().toLowerCase() + "(s).");
+      this.info(" - load " + entry.getValue().size() + " " + entry.getKey().getSimpleName().toLowerCase() + "(s).");
     }
 
   }

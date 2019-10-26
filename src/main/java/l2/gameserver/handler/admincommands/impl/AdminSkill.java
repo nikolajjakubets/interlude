@@ -200,7 +200,7 @@ public class AdminSkill implements IAdminCommandHandler {
       Player player = (Player)target;
       ArrayList skills = new ArrayList();
       skills.addAll(player.getAllSkills());
-      List<Skill> skills = skills.subList(0, Math.min(skills.size(), 50));
+      List<Skill> skillList = skillList.subList(0, Math.min(skillList.size(), 50));
       NpcHtmlMessage adminReply = new NpcHtmlMessage(5);
       StringBuilder replyMSG = new StringBuilder("<html><body>");
       replyMSG.append("<table width=260><tr>");
@@ -214,7 +214,7 @@ public class AdminSkill implements IAdminCommandHandler {
       replyMSG.append("<br><center>Click on the skill you wish to remove:</center>");
       replyMSG.append("<br><table width=270>");
       replyMSG.append("<tr><td width=80>Name:</td><td width=60>Level:</td><td width=40>Id:</td></tr>");
-      Iterator var7 = skills.iterator();
+      Iterator var7 = skillList.iterator();
 
       while(var7.hasNext()) {
         Skill element = (Skill)var7.next();

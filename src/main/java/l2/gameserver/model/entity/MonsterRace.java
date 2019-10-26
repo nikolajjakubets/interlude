@@ -35,7 +35,7 @@ public class MonsterRace {
   }
 
   public void newRace() {
-    int random = false;
+//    int random = false;
 
     for(int i = 0; i < 8; ++i) {
       int id = 31003;
@@ -62,7 +62,7 @@ public class MonsterRace {
 
   public void newSpeeds() {
     this.speeds = new int[8][20];
-    int total = false;
+//    int total = false;
     this.first[1] = 0;
     this.second[1] = 0;
 

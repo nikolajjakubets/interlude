@@ -39,9 +39,9 @@ public class PetSkillsTable {
   private void load() {
     int npcId = 0;
     int count = 0;
-    int id = false;
-    int lvl = false;
-    int minLvl = false;
+//    int id = false;
+//    int lvl = false;
+//    int minLvl = false;
     Connection con = null;
     PreparedStatement statement = null;
     ResultSet rset = null;
@@ -51,17 +51,17 @@ public class PetSkillsTable {
       statement = con.prepareStatement("SELECT * FROM pets_skills ORDER BY templateId");
 
       for(rset = statement.executeQuery(); rset.next(); ++count) {
-        int npcId = rset.getInt("templateId");
+        npcId = rset.getInt("templateId");
         int id = rset.getInt("skillId");
         int lvl = rset.getInt("skillLvl");
         int minLvl = rset.getInt("minLvl");
-        List<SkillLearn> list = (List)this._skillTrees.get(npcId);
+        List<SkillLearn> list = this._skillTrees.get(npcId);
         if (list == null) {
-          this._skillTrees.put(npcId, list = new ArrayList());
+          this._skillTrees.put(npcId, list = new ArrayList<>());
         }
 
         SkillLearn skillLearn = new SkillLearn(id, lvl, minLvl, 0, 0, 0L, false, false);
-        ((List)list).add(skillLearn);
+        list.add(skillLearn);
       }
     } catch (Exception var14) {
       _log.error("Error while creating pet skill tree (Pet ID " + npcId + ")", var14);
@@ -73,7 +73,7 @@ public class PetSkillsTable {
   }
 
   public int getAvailableLevel(Summon cha, int skillId) {
-    List<SkillLearn> skills = (List)this._skillTrees.get(cha.getNpcId());
+    List<SkillLearn> skills = this._skillTrees.get(cha.getNpcId());
     if (skills == null) {
       return 0;
     } else {

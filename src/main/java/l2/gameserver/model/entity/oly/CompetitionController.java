@@ -5,14 +5,6 @@
 
 package l2.gameserver.model.entity.oly;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ScheduledFuture;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.Config;
 import l2.gameserver.ThreadPoolManager;
@@ -24,7 +16,6 @@ import l2.gameserver.model.base.ClassId;
 import l2.gameserver.model.entity.oly.NoblesController.NobleRecord;
 import l2.gameserver.model.entity.oly.participants.SinglePlayerParticipant;
 import l2.gameserver.model.entity.oly.participants.TeamParticipant;
-import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.network.l2.components.CustomMessage;
 import l2.gameserver.network.l2.components.SystemMsg;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
@@ -36,6 +27,15 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ScheduledFuture;
 
 public class CompetitionController {
   private static final Logger _log = LoggerFactory.getLogger(CompetitionController.class);
@@ -76,7 +76,7 @@ public class CompetitionController {
       ParticipantPool.getInstance().broadcastToEntrys(type, Msg.THE_MATCH_MAY_BE_DELAYED_DUE_TO_NOT_ENOUGH_COMBATANTS, cls_id);
       return false;
     } else {
-      for(Player[][] participants = ParticipantPool.getInstance().retrieveEntrys(type, cls_id); OlyController.getInstance().isRegAllowed() && StadiumPool.getInstance().isStadiumAvailable() && participants != null && participants[0] != null && participants[1] != null; participants = ParticipantPool.getInstance().retrieveEntrys(type, cls_id)) {
+      for (Player[][] participants = ParticipantPool.getInstance().retrieveEntrys(type, cls_id); OlyController.getInstance().isRegAllowed() && StadiumPool.getInstance().isStadiumAvailable() && participants != null && participants[0] != null && participants[1] != null; participants = ParticipantPool.getInstance().retrieveEntrys(type, cls_id)) {
         Stadium stadium = StadiumPool.getInstance().pollStadium();
         if (stadium == null) {
           _log.error("OlyCompetitionController: stadium == null wtf?");
@@ -126,7 +126,7 @@ public class CompetitionController {
       ClassId[] var3 = ClassId.values();
       int var4 = var3.length;
 
-      for(int var5 = 0; var5 < var4; ++var5) {
+      for (int var5 = 0; var5 < var4; ++var5) {
         ClassId cid = var3[var5];
         if (cid.level() == 3) {
           this.TryCreateCompetitions(type, cid.getId());
@@ -141,7 +141,10 @@ public class CompetitionController {
 
   public void scheduleStartTask() {
     if (OlyController.getInstance().isRegAllowed()) {
-      this._start_task = ThreadPoolManager.getInstance().schedule(new CompetitionController.CompetitionStarterTask((SyntheticClass_1)null), (long)Math.min(30000 * (this._start_fail_trys + 1), 60000));
+      this._start_task = ThreadPoolManager.getInstance().schedule(
+        new CompetitionController.CompetitionStarterTask(),
+        Math.min(30000 * (this._start_fail_trys + 1), 60000)
+      );
     }
 
   }
@@ -161,7 +164,7 @@ public class CompetitionController {
       Player[] var3 = players;
       int var4 = players.length;
 
-      for(int var5 = 0; var5 < var4; ++var5) {
+      for (int var5 = 0; var5 < var4; ++var5) {
         Player noble = var3[var5];
         if (!noble.isNoble()) {
           return (new SystemMessage(1501)).addName(noble);
@@ -179,7 +182,7 @@ public class CompetitionController {
           return (new SystemMessage(1502)).addName(noble);
         }
 
-        if ((double)noble.getInventoryLimit() * 0.8D <= (double)noble.getInventory().getSize()) {
+        if ((double) noble.getInventoryLimit() * 0.8D <= (double) noble.getInventory().getSize()) {
           return (new SystemMessage(1691)).addName(noble);
         }
 
@@ -188,24 +191,24 @@ public class CompetitionController {
         }
 
         if (NoblesController.getInstance().getPointsOf(noble.getObjectId()) < 1) {
-          return (new SystemMessage(SystemMsg.S1)).addString((new CustomMessage("THE_REQUEST_CANNOT_BE_COMPLETED_BECAUSE_THE_REQUIREMENTS_ARE_NOT_MET_IN_ORDER_TO_PARTICIPATE_IN", noble, new Object[0])).toString());
+          return (new SystemMessage(SystemMsg.S1)).addString((new CustomMessage("THE_REQUEST_CANNOT_BE_COMPLETED_BECAUSE_THE_REQUIREMENTS_ARE_NOT_MET_IN_ORDER_TO_PARTICIPATE_IN", noble)).toString());
         }
 
         if (Config.OLY_RESTRICT_CLASS_IDS.length > 0 && ArrayUtils.contains(Config.OLY_RESTRICT_CLASS_IDS, noble.getActiveClassId())) {
-          return (new SystemMessage(SystemMsg.S1)).addString((new CustomMessage("olympiad.restrictedclasses", noble, new Object[0])).toString());
+          return (new SystemMessage(SystemMsg.S1)).addString((new CustomMessage("olympiad.restrictedclasses", noble)).toString());
         }
 
         if (Config.OLY_RESTRICT_HWID && noble.getNetConnection().getHwid() != null && ParticipantPool.getInstance().isHWIDRegistred(noble.getNetConnection().getHwid())) {
-          return (new SystemMessage(SystemMsg.S1)).addString((new CustomMessage("olympiad.iphwid.check", noble, new Object[0])).toString());
+          return (new SystemMessage(SystemMsg.S1)).addString((new CustomMessage("olympiad.iphwid.check", noble)).toString());
         }
 
         if (Config.OLY_RESTRICT_IP && noble.getNetConnection().getIpAddr() != null && ParticipantPool.getInstance().isIPRegistred(noble.getNetConnection().getIpAddr())) {
-          return (new SystemMessage(SystemMsg.S1)).addString((new CustomMessage("olympiad.iphwid.check", noble, new Object[0])).toString());
+          return (new SystemMessage(SystemMsg.S1)).addString((new CustomMessage("olympiad.iphwid.check", noble)).toString());
         }
       }
 
       ParticipantPool.getInstance().createEntry(type, players);
-      switch(type) {
+      switch (type) {
         case CLASS_INDIVIDUAL:
           return Msg.YOU_HAVE_BEEN_REGISTERED_IN_A_WAITING_LIST_OF_CLASSIFIED_GAMES;
         case CLASS_FREE:
@@ -247,9 +250,9 @@ public class CompetitionController {
           pstmt.setInt(2, winner.char_id);
           pstmt.setInt(3, looser.char_id);
           pstmt.setInt(4, type.getTypeIdx());
-          pstmt.setByte(5, (byte)(tie ? 0 : 1));
-          pstmt.setInt(6, (int)elapsed_time);
-          pstmt.setInt(7, (int)(System.currentTimeMillis() / 1000L));
+          pstmt.setByte(5, (byte) (tie ? 0 : 1));
+          pstmt.setInt(6, (int) elapsed_time);
+          pstmt.setInt(7, (int) (System.currentTimeMillis() / 1000L));
           pstmt.executeUpdate();
         }
 
@@ -257,9 +260,9 @@ public class CompetitionController {
         pstmt.setInt(2, looser.char_id);
         pstmt.setInt(3, winner.char_id);
         pstmt.setInt(4, type.getTypeIdx());
-        pstmt.setByte(5, (byte)(tie ? 0 : -1));
-        pstmt.setInt(6, (int)elapsed_time);
-        pstmt.setInt(7, (int)(System.currentTimeMillis() / 1000L));
+        pstmt.setByte(5, (byte) (tie ? 0 : -1));
+        pstmt.setInt(6, (int) elapsed_time);
+        pstmt.setInt(7, (int) (System.currentTimeMillis() / 1000L));
         pstmt.executeUpdate();
       } catch (Exception var17) {
         _log.warn("Can't save competition result", var17);
@@ -283,8 +286,19 @@ public class CompetitionController {
       pstmt.setInt(2, season);
       rset = pstmt.executeQuery();
 
-      while(rset.next()) {
-        result.add(new CompetitionController.CompetitionResults(rset.getInt("char_obj_id"), rset.getInt("char_class_id"), rset.getString("char_name"), rset.getInt("rival_obj_id"), rset.getInt("rival_class_id"), rset.getString("rival_name"), CompetitionType.getTypeOf(rset.getByte("rules")), rset.getByte("result"), rset.getInt("elapsed_time"), rset.getLong("mtime"), (SyntheticClass_1)null));
+      while (rset.next()) {
+        result.add(new CompetitionController
+          .CompetitionResults(rset.getInt("char_obj_id"),
+          rset.getInt("char_class_id"),
+          rset.getString("char_name"),
+          rset.getInt("rival_obj_id"),
+          rset.getInt("rival_class_id"),
+          rset.getString("rival_name"),
+          CompetitionType.getTypeOf(rset.getByte("rules")),
+          rset.getByte("result"),
+          rset.getInt("elapsed_time"),
+          rset.getLong("mtime")
+        ));
       }
     } catch (Exception var11) {
       _log.warn("Can't load competitions records", var11);
@@ -303,28 +317,28 @@ public class CompetitionController {
       Stadium[] var3 = StadiumPool.getInstance().getAllStadiums();
       int var4 = var3.length;
 
-      for(int var5 = 0; var5 < var4; ++var5) {
+      for (int var5 = 0; var5 < var4; ++var5) {
         Stadium stadium = var3[var5];
         sb.append("<a action=\"bypass -h _olympiad?command=move_op_field&field=").append(stadium.getStadiumId() + 1).append("\">");
-        sb.append((new CustomMessage("Olympiad.CompetitionState.ARENA", player, new Object[0])).toString()).append(stadium.getStadiumId() + 1);
+        sb.append((new CustomMessage("Olympiad.CompetitionState.ARENA", player)).toString()).append(stadium.getStadiumId() + 1);
         sb.append("&nbsp;&nbsp;&nbsp;");
         boolean isEmpty = true;
         Iterator var8 = this._activeCompetitions.iterator();
 
-        while(var8.hasNext()) {
-          Competition comp = (Competition)var8.next();
+        while (var8.hasNext()) {
+          Competition comp = (Competition) var8.next();
           if (comp.getStadium() == stadium && comp.getState() != CompetitionState.INIT) {
             sb.append(comp._participants[0].getName()).append(" : ").append(comp._participants[1].getName());
             sb.append("&nbsp;");
-            switch(comp.getState()) {
+            switch (comp.getState()) {
               case STAND_BY:
-                sb.append((new CustomMessage("Olympiad.CompetitionState.STAND_BY", player, new Object[0])).toString());
+                sb.append((new CustomMessage("Olympiad.CompetitionState.STAND_BY", player)).toString());
                 break;
               case PLAYING:
-                sb.append((new CustomMessage("Olympiad.CompetitionState.PLAYING", player, new Object[0])).toString());
+                sb.append((new CustomMessage("Olympiad.CompetitionState.PLAYING", player)).toString());
                 break;
               case FINISH:
-                sb.append((new CustomMessage("Olympiad.CompetitionState.FINISH", player, new Object[0])).toString());
+                sb.append((new CustomMessage("Olympiad.CompetitionState.FINISH", player)).toString());
             }
 
             isEmpty = false;
@@ -332,13 +346,13 @@ public class CompetitionController {
         }
 
         if (isEmpty) {
-          sb.append((new CustomMessage("Olympiad.CompetitionState.EMPTY", player, new Object[0])).toString());
+          sb.append((new CustomMessage("Olympiad.CompetitionState.EMPTY", player)).toString());
         }
 
         sb.append("</a><br>");
       }
 
-      NpcHtmlMessage html = new NpcHtmlMessage(player, (NpcInstance)null);
+      NpcHtmlMessage html = new NpcHtmlMessage(player, null);
       html.setFile("oly/arenas.htm");
       html.replace("%arenas%", sb.toString());
       player.sendPacket(html);
@@ -356,7 +370,7 @@ public class CompetitionController {
           if (!player.isOlyParticipant() && !ParticipantPool.getInstance().isRegistred(player)) {
             Stadium stadium = StadiumPool.getInstance().getStadium(stadium_id - 1);
             if (stadium.getObserverCount() > Config.OLY_MAX_SPECTATORS_PER_STADIUM) {
-              player.sendMessage(new CustomMessage("CompetitionController.oly.ToManyObservers", player, new Object[0]));
+              player.sendMessage(new CustomMessage("CompetitionController.oly.ToManyObservers", player));
             } else {
               if (player.isOlyObserver()) {
                 player.switchOlympiadObserverArena(stadium);
@@ -446,7 +460,7 @@ public class CompetitionController {
           this._game.broadcastPacket((new SystemMessage(1499)).addNumber(this._countdown), true, false);
           int dur = this._countdown > 5 ? this._countdown / 2 : 1;
           this._countdown -= dur;
-          this._game.scheduleTask(CompetitionController.this.new FinishCompetitionTask(this._game, this._countdown), (long)(dur * 1000));
+          this._game.scheduleTask(CompetitionController.this.new FinishCompetitionTask(this._game, this._countdown), dur * 1000);
         } else {
           CompetitionController.getInstance().FinishCompetition(this._game);
         }
@@ -475,7 +489,7 @@ public class CompetitionController {
         }
 
         long delay = 1000L;
-        switch(this._countdown) {
+        switch (this._countdown) {
           case 5:
             this._game.applyBuffs();
           case 1:
@@ -538,7 +552,7 @@ public class CompetitionController {
       if (this._countdown > 0) {
         this._game.broadcastPacket((new SystemMessage(1492)).addNumber(this._countdown), true, false);
         long delay = 1000L;
-        switch(this._countdown) {
+        switch (this._countdown) {
           case 1:
           case 2:
           case 3:
@@ -590,7 +604,7 @@ public class CompetitionController {
         CompetitionType[] var1 = CompetitionType.values();
         int var2 = var1.length;
 
-        for(int var3 = 0; var3 < var2; ++var3) {
+        for (int var3 = 0; var3 < var2; ++var3) {
           CompetitionType type = var1[var3];
           if (CompetitionController.this.RunComps(type)) {
             CompetitionController.getInstance()._start_fail_trys = 0;

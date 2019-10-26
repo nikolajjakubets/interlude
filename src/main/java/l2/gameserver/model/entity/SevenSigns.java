@@ -121,9 +121,9 @@ public class SevenSigns {
       _log.info("SevenSigns: The " + getCabalName(this.getCabalHighestScore()) + " are in the lead this week.");
     }
 
-    int numMins = false;
-    int numHours = false;
-    int numDays = false;
+//    int numMins = false;
+//    int numHours = false;
+//    int numDays = false;
     this.setCalendarForNextPeriodChange();
     long milliToChange = this.getMilliToPeriodChange();
     if (milliToChange < 10L) {
@@ -673,7 +673,7 @@ public class SevenSigns {
   public int getAncientAdenaReward(Player player, boolean removeReward) {
     int charObjId = player.getObjectId();
     StatsSet currPlayer = (StatsSet)this._signsPlayerData.get(charObjId);
-    int rewardAmount = false;
+//    int rewardAmount = false;
     int rewardAmount;
     if (currPlayer.getInteger("cabal") == 2) {
       rewardAmount = currPlayer.getInteger("dawn_ancient_adena_amount");

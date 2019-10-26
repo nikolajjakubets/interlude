@@ -296,26 +296,26 @@ public class GeoMove {
 
           int dz = worldToIndented.getZ() - lastWorldLocInWater.getZ();
           if (!lastWorldLocInWater.clone().world2geo().equals(worldToIndented.clone().world2geo())) {
-            List geoFoundPathLines;
+            List list;
             if (pathfind) {
-              geoFoundPathLines = findMovePath(lastWorldLocInWater.getX(), lastWorldLocInWater.getY(), lastWorldLocInWater.getZ(), worldTo.getX(), worldTo.getY(), worldTo.getZ(), isPlayable, geoIndex);
-              if (!geoFoundPathLines.isEmpty()) {
+              list = findMovePath(lastWorldLocInWater.getX(), lastWorldLocInWater.getY(), lastWorldLocInWater.getZ(), worldTo.getX(), worldTo.getY(), worldTo.getZ(), isPlayable, geoIndex);
+              if (!list.isEmpty()) {
                 if (indent > 0) {
-                  List<Location> lastGeoFoundPathLine = (List)geoFoundPathLines.remove(geoFoundPathLines.size() - 1);
+                  List<Location> lastGeoFoundPathLine = (List)list.remove(list.size() - 1);
                   lastGeoFoundPathLine = applyGeoIndent(lastGeoFoundPathLine, indent >> 4);
                   if (!lastGeoFoundPathLine.isEmpty()) {
-                    geoFoundPathLines.add(lastGeoFoundPathLine);
+                    list.add(lastGeoFoundPathLine);
                   }
                 }
 
-                if (!geoFoundPathLines.isEmpty()) {
-                  geoPathLines.addAll(geoFoundPathLines);
+                if (!list.isEmpty()) {
+                  geoPathLines.addAll(list);
                 }
               }
             } else {
-              geoFoundPathLines = GeoEngine.MoveList(lastWorldLocInWater.getX(), lastWorldLocInWater.getY(), lastWorldLocInWater.getZ(), worldTo.getX(), worldTo.getY(), geoIndex, false);
-              if (geoFoundPathLines != null && !geoFoundPathLines.isEmpty()) {
-                geoPathLines.add(geoFoundPathLines);
+              list = GeoEngine.MoveList(lastWorldLocInWater.getX(), lastWorldLocInWater.getY(), lastWorldLocInWater.getZ(), worldTo.getX(), worldTo.getY(), geoIndex, false);
+              if (list != null && !list.isEmpty()) {
+                geoPathLines.add(list);
               }
             }
           }

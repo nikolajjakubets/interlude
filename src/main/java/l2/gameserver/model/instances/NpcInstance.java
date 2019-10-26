@@ -895,8 +895,8 @@ public class NpcInstance extends Creature {
                   player.teleToLocation(r.getReturnLoc(), 0);
                   if (command.length() > 22) {
                     try {
-                      int val = Integer.parseInt(command.substring(22));
-                      this.showChatWindow(player, val);
+                      int anInt = Integer.parseInt(command.substring(22));
+                      this.showChatWindow(player, anInt);
                     } catch (NumberFormatException var6) {
                       String filename = command.substring(22).trim();
                       if (filename.length() > 0) {

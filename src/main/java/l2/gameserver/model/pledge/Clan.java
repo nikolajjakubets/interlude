@@ -108,7 +108,7 @@ public class Clan implements Iterable<UnitMember> {
   public static final int SUBUNIT_KNIGHT2 = 1002;
   public static final int SUBUNIT_KNIGHT3 = 2001;
   public static final int SUBUNIT_KNIGHT4 = 2002;
-  private static final Clan.ClanReputationComparator REPUTATION_COMPARATOR = new Clan.ClanReputationComparator(();
+  private static final Clan.ClanReputationComparator REPUTATION_COMPARATOR = new Clan.ClanReputationComparator();
   private static final int REPUTATION_PLACES = 100;
 
   public Clan(int clanId) {

@@ -42,7 +42,7 @@ public final class SkillAcquireHolder extends AbstractHolder {
   public int getMinLevelForNewSkill(ClassId classId, int currLevel, AcquireType type) {
     switch(type) {
       case NORMAL:
-        List<SkillLearn> skills = (List)this._normalSkillTree.get(classId.getId());
+        List<SkillLearn> skills = this._normalSkillTree.get(classId.getId());
         if (skills == null) {
           this.info("skill tree for class " + classId.getId() + " is not defined !");
           return 0;
@@ -71,14 +71,14 @@ public final class SkillAcquireHolder extends AbstractHolder {
   }
 
   public Collection<SkillLearn> getAvailableSkills(Player player, AcquireType type) {
-    return this.getAvailableSkills(player, player.getClassId(), type, (SubUnit)null);
+    return this.getAvailableSkills(player, player.getClassId(), type, null);
   }
 
   public Collection<SkillLearn> getAvailableSkills(Player player, ClassId classId, AcquireType type, SubUnit subUnit) {
     Collection skills;
     switch(type) {
       case NORMAL:
-        skills = (Collection)this._normalSkillTree.get(classId.getId());
+        skills = this._normalSkillTree.get(classId.getId());
         if (skills == null) {
           this.info("skill tree for class " + classId + " is not defined !");
           return Collections.emptyList();
@@ -86,7 +86,7 @@ public final class SkillAcquireHolder extends AbstractHolder {
 
         return this.getAvaliableList(skills, player.getAllSkillsArray(), player.getLevel());
       case FISHING:
-        skills = (Collection)this._fishingSkillTree.get(player.getRace().ordinal());
+        skills = this._fishingSkillTree.get(player.getRace().ordinal());
         if (skills == null) {
           this.info("skill tree for race " + player.getRace().ordinal() + " is not defined !");
           return Collections.emptyList();
@@ -94,16 +94,16 @@ public final class SkillAcquireHolder extends AbstractHolder {
 
         return this.getAvaliableList(skills, player.getAllSkillsArray(), player.getLevel());
       case CLAN:
-        Collection<SkillLearn> skills = this._pledgeSkillTree;
+        Collection<SkillLearn> pledgeSkillTree = this._pledgeSkillTree;
         Collection<Skill> skls = player.getClan().getSkills();
-        return this.getAvaliableList(skills, (Skill[])skls.toArray(new Skill[skls.size()]), player.getClan().getLevel());
+        return this.getAvaliableList(pledgeSkillTree, skls.toArray(new Skill[skls.size()]), player.getClan().getLevel());
       default:
         return Collections.emptyList();
     }
   }
 
   private Collection<SkillLearn> getAvaliableList(Collection<SkillLearn> skillLearns, Skill[] skills, int level) {
-    return this.getAvaliableList(skillLearns, skills, level, (Player)null);
+    return this.getAvaliableList(skillLearns, skills, level, null);
   }
 
   private Collection<SkillLearn> getAvaliableList(Collection<SkillLearn> skillLearns, Skill[] skills, int level, Player target) {
@@ -176,10 +176,10 @@ public final class SkillAcquireHolder extends AbstractHolder {
     List skills;
     switch(type) {
       case NORMAL:
-        skills = (List)this._normalSkillTree.get(classId.getId());
+        skills = this._normalSkillTree.get(classId.getId());
         break;
       case FISHING:
-        skills = (List)this._fishingSkillTree.get(player.getRace().ordinal());
+        skills = this._fishingSkillTree.get(player.getRace().ordinal());
         break;
       case CLAN:
         skills = this._pledgeSkillTree;
@@ -211,10 +211,10 @@ public final class SkillAcquireHolder extends AbstractHolder {
     List skills;
     switch(type) {
       case NORMAL:
-        skills = (List)this._normalSkillTree.get(player.getActiveClassId());
+        skills = this._normalSkillTree.get(player.getActiveClassId());
         break;
       case FISHING:
-        skills = (List)this._fishingSkillTree.get(player.getRace().ordinal());
+        skills = this._fishingSkillTree.get(player.getRace().ordinal());
         break;
       case CLAN:
         clan = player.getClan();
@@ -228,7 +228,7 @@ public final class SkillAcquireHolder extends AbstractHolder {
         return false;
     }
 
-    return this.isSkillPossible((Collection)skills, skill);
+    return this.isSkillPossible(skills, skill);
   }
 
   public boolean isSkillPossible(Player player, ClassId classId, Skill skill, AcquireType type) {
@@ -236,10 +236,10 @@ public final class SkillAcquireHolder extends AbstractHolder {
     List skills;
     switch(type) {
       case NORMAL:
-        skills = (List)this._normalSkillTree.get(classId.getId());
+        skills = this._normalSkillTree.get(classId.getId());
         break;
       case FISHING:
-        skills = (List)this._fishingSkillTree.get(player.getRace().ordinal());
+        skills = this._fishingSkillTree.get(player.getRace().ordinal());
         break;
       case CLAN:
         clan = player.getClan();
@@ -253,7 +253,7 @@ public final class SkillAcquireHolder extends AbstractHolder {
         return false;
     }
 
-    return this.isSkillPossible((Collection)skills, skill);
+    return this.isSkillPossible(skills, skill);
   }
 
   private boolean isSkillPossible(Collection<SkillLearn> skills, Skill skill) {
@@ -300,7 +300,7 @@ public final class SkillAcquireHolder extends AbstractHolder {
   }
 
   public List<SkillLearn> getSkillLearnListByItemId(Player player, int itemId) {
-    List<SkillLearn> learns = (List)this._normalSkillTree.get(player.getActiveClassId());
+    List<SkillLearn> learns = this._normalSkillTree.get(player.getActiveClassId());
     if (learns == null) {
       return Collections.emptyList();
     } else {
@@ -345,7 +345,7 @@ public final class SkillAcquireHolder extends AbstractHolder {
       ClassId classId = var3[var5];
       if (classId.getRace() != null) {
         int classID = classId.getId();
-        List<SkillLearn> temp = (List)map.get(classID);
+        List<SkillLearn> temp = map.get(classID);
         if (temp == null) {
           this.info("Not found NORMAL skill learn for class " + classID);
         } else {
@@ -358,7 +358,7 @@ public final class SkillAcquireHolder extends AbstractHolder {
           classId = classId.getParent(0);
 
           while(classId != null) {
-            List<SkillLearn> parentList = (List)this._normalSkillTree.get(classId.getId());
+            List<SkillLearn> parentList = this._normalSkillTree.get(classId.getId());
             temp.addAll(parentList);
             classId = classId.getParent(0);
             if (classId == null && secondparent != null) {

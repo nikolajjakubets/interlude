@@ -148,12 +148,11 @@ public class MultiValueIntegerMap {
   public boolean putAll(Integer key, Collection<? extends Integer> values) {
     if (values != null && values.size() != 0) {
       boolean result = false;
-      List<Integer> coll = (List)this.map.get(key);
+      List<Integer> coll = this.map.get(key);
       if (coll == null) {
-        List<Integer> coll = new CopyOnWriteArrayList();
-        coll.addAll(values);
-        if (coll.size() > 0) {
-          this.map.put(key, coll);
+        List<Integer> copyOnWriteArrayList = new CopyOnWriteArrayList<>(values);
+        if (copyOnWriteArrayList.size() > 0) {
+          this.map.put(key, copyOnWriteArrayList);
           result = true;
         }
       } else {

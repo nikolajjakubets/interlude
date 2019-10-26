@@ -5,24 +5,25 @@
 
 package l2.gameserver.handler.admincommands.impl;
 
-import java.util.StringTokenizer;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.handler.admincommands.IAdminCommandHandler;
 import l2.gameserver.model.Creature;
 import l2.gameserver.model.GameObject;
 import l2.gameserver.model.Player;
-import l2.gameserver.model.Skill;
 import l2.gameserver.model.World;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
 import l2.gameserver.utils.AdminFunctions;
 import l2.gameserver.utils.Location;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.StringTokenizer;
+
+@Slf4j
 public class AdminMenu implements IAdminCommandHandler {
   public AdminMenu() {
   }
 
   public boolean useAdminCommand(Enum comm, String[] wordList, String fullString, Player activeChar) {
-    AdminMenu.Commands command = (AdminMenu.Commands)comm;
     if (!activeChar.getPlayerAccess().Menu) {
       return false;
     } else {
@@ -31,45 +32,46 @@ public class AdminMenu implements IAdminCommandHandler {
         String[] data = fullString.split(" ");
         if (data.length == 5) {
           player = data[1];
-          Player player = World.getPlayer(player);
-          if (player != null) {
-            this.teleportCharacter(player, new Location(Integer.parseInt(data[2]), Integer.parseInt(data[3]), Integer.parseInt(data[4])), activeChar);
+          Player nextPlayer = World.getPlayer(player);
+          if (nextPlayer != null) {
+            this.teleportCharacter(nextPlayer, new Location(Integer.parseInt(data[2]), Integer.parseInt(data[3]), Integer.parseInt(data[4])), activeChar);
           }
         }
       } else {
         String targetName;
-        Player player;
+        Player elsPlayer;
         if (fullString.startsWith("admin_recall_char_menu")) {
           try {
             targetName = fullString.substring(23);
-            player = World.getPlayer(targetName);
-            this.teleportCharacter(player, activeChar.getLoc(), activeChar);
-          } catch (StringIndexOutOfBoundsException var11) {
+            elsPlayer = World.getPlayer(targetName);
+            this.teleportCharacter(elsPlayer, activeChar.getLoc(), activeChar);
+          } catch (StringIndexOutOfBoundsException e) {
+            log.error("useAdminCommand: eClause = {}, eMessage={}", e.getCause(), e.getMessage());
           }
         } else if (fullString.startsWith("admin_goto_char_menu")) {
           try {
             targetName = fullString.substring(21);
-            player = World.getPlayer(targetName);
-            this.teleportToCharacter(activeChar, player);
-          } catch (StringIndexOutOfBoundsException var10) {
+            elsPlayer = World.getPlayer(targetName);
+            this.teleportToCharacter(activeChar, elsPlayer);
+          } catch (StringIndexOutOfBoundsException e) {
+            log.error("useAdminCommand: eClause = {}, eMessage={}", e.getCause(), e.getMessage());
           }
         } else if (fullString.equals("admin_kill_menu")) {
           GameObject obj = activeChar.getTarget();
           StringTokenizer st = new StringTokenizer(fullString);
           if (st.countTokens() > 1) {
             st.nextToken();
-            String player = st.nextToken();
-            Player plyr = World.getPlayer(player);
+            String nextToken = st.nextToken();
+            Player plyr = World.getPlayer(nextToken);
             if (plyr == null) {
-              activeChar.sendMessage("Player " + player + " not found in game.");
+              activeChar.sendMessage("Player " + nextToken + " not found in game.");
             }
-
             obj = plyr;
           }
 
-          if (obj != null && ((GameObject)obj).isCreature()) {
-            Creature target = (Creature)obj;
-            target.reduceCurrentHp((double)(target.getMaxHp() + 1), activeChar, (Skill)null, true, true, true, false, false, false, true);
+          if (obj != null && obj.isCreature()) {
+            Creature target = (Creature) obj;
+            target.reduceCurrentHp(target.getMaxHp() + 1, activeChar, null, true, true, true, false, false, false, true);
           } else {
             activeChar.sendPacket(Msg.INVALID_TARGET);
           }
@@ -104,7 +106,7 @@ public class AdminMenu implements IAdminCommandHandler {
 
   private void teleportToCharacter(Player activeChar, GameObject target) {
     if (target != null && target.isPlayer()) {
-      Player player = (Player)target;
+      Player player = (Player) target;
       if (player.getObjectId() == activeChar.getObjectId()) {
         activeChar.sendMessage("You cannot self teleport.");
       } else {
@@ -117,7 +119,7 @@ public class AdminMenu implements IAdminCommandHandler {
     }
   }
 
-  private static enum Commands {
+  private enum Commands {
     admin_char_manage,
     admin_teleport_character_to_menu,
     admin_recall_char_menu,
@@ -127,7 +129,7 @@ public class AdminMenu implements IAdminCommandHandler {
     admin_ban_menu,
     admin_unban_menu;
 
-    private Commands() {
+    Commands() {
     }
   }
 }

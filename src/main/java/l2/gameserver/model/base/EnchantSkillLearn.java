@@ -7,7 +7,9 @@ package l2.gameserver.model.base;
 
 import l2.gameserver.model.Player;
 import l2.gameserver.tables.SkillTable;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode
 public final class EnchantSkillLearn {
   private final int _id;
   private final int _level;
@@ -75,26 +77,5 @@ public final class EnchantSkillLearn {
     return this._type;
   }
 
-  public int hashCode() {
-    int PRIME = true;
-    int result = 1;
-    int result = 31 * result + this._id;
-    result = 31 * result + this._level;
-    return result;
-  }
 
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    } else if (obj == null) {
-      return false;
-    } else if (this.getClass() != obj.getClass()) {
-      return false;
-    } else if (!(obj instanceof EnchantSkillLearn)) {
-      return false;
-    } else {
-      EnchantSkillLearn other = (EnchantSkillLearn)obj;
-      return this.getId() == other.getId() && this.getLevel() == other.getLevel();
-    }
-  }
 }

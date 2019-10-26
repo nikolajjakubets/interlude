@@ -5,6 +5,7 @@
 
 package l2.gameserver.network.l2.s2c;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import l2.commons.collections.CollectionUtils;
@@ -18,7 +19,7 @@ public class ExShowReceivedPostList extends L2GameServerPacket {
 
   public ExShowReceivedPostList(Player cha) {
     this.mails = MailDAO.getInstance().getReceivedMailByOwnerId(cha.getObjectId());
-    CollectionUtils.eqSort(this.mails);
+    Collections.sort(this.mails);
   }
 
   protected void writeImpl() {

@@ -70,7 +70,6 @@ public class RequestPreviewItem extends L2GameClientPacket {
           if (list == null) {
             activeChar.sendActionFailed();
           } else {
-            int slots = false;
             long totalPrice = 0L;
             HashMap itemList = new HashMap();
 

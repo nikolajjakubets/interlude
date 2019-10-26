@@ -37,7 +37,7 @@ public class RequestRecipeItemMakeSelf extends L2GameClientPacket {
   }
 
   protected void runImpl() {
-    Player activeChar = ((GameClient)this.getClient()).getActiveChar();
+    Player activeChar = this.getClient().getActiveChar();
     if (activeChar != null) {
       if (activeChar.isActionsDisabled()) {
         activeChar.sendActionFailed();
@@ -51,9 +51,9 @@ public class RequestRecipeItemMakeSelf extends L2GameClientPacket {
         Recipe recipe = RecipeHolder.getInstance().getRecipeById(this._recipeId);
         if (recipe != null && !recipe.getMaterials().isEmpty() && !recipe.getProducts().isEmpty()) {
           if (activeChar.getCurrentMp() < (double)recipe.getMpConsume()) {
-            activeChar.sendPacket(new IStaticPacket[]{Msg.NOT_ENOUGH_MP, new RecipeItemMakeInfo(activeChar, recipe, 0)});
+            activeChar.sendPacket(Msg.NOT_ENOUGH_MP, new RecipeItemMakeInfo(activeChar, recipe, 0));
           } else if (!activeChar.findRecipe(this._recipeId)) {
-            activeChar.sendPacket(new IStaticPacket[]{Msg.PLEASE_REGISTER_A_RECIPE, ActionFail.STATIC});
+            activeChar.sendPacket(Msg.PLEASE_REGISTER_A_RECIPE, ActionFail.STATIC);
           } else {
             boolean succeed = false;
             List<Pair<ItemTemplate, Long>> materials = recipe.getMaterials();
@@ -79,12 +79,12 @@ public class RequestRecipeItemMakeSelf extends L2GameClientPacket {
                     totalWeight = (int)((long)totalWeight + (long)((ItemTemplate)material.getKey()).getWeight() * (Long)material.getValue());
                   }
 
-                  if (activeChar.getInventory().validateWeight((long)totalWeight) && activeChar.getInventory().validateCapacity(totalSlotCount)) {
+                  if (activeChar.getInventory().validateWeight(totalWeight) && activeChar.getInventory().validateCapacity(totalSlotCount)) {
                     var20 = materials.iterator();
 
                     while(true) {
                       while(true) {
-                        long materialAmount;
+                        long materialAmountCounter;
                         ItemTemplate materialItem;
                         do {
                           if (!var20.hasNext()) {
@@ -93,19 +93,19 @@ public class RequestRecipeItemMakeSelf extends L2GameClientPacket {
 
                           material = (Pair)var20.next();
                           materialItem = (ItemTemplate)material.getKey();
-                          materialAmount = (Long)material.getValue();
-                        } while(materialAmount <= 0L);
+                          materialAmountCounter = (Long)material.getValue();
+                        } while(materialAmountCounter <= 0L);
 
                         if (Config.ALT_GAME_UNREGISTER_RECIPE && materialItem.getItemType() == EtcItemType.RECIPE) {
                           activeChar.unregisterRecipe(RecipeHolder.getInstance().getRecipeByItem(materialItem).getId());
-                        } else if (activeChar.getInventory().destroyItemByItemId(materialItem.getItemId(), materialAmount)) {
-                          activeChar.sendPacket(SystemMessage2.removeItems(materialItem.getItemId(), materialAmount));
+                        } else if (activeChar.getInventory().destroyItemByItemId(materialItem.getItemId(), materialAmountCounter)) {
+                          activeChar.sendPacket(SystemMessage2.removeItems(materialItem.getItemId(), materialAmountCounter));
                         }
                       }
                     }
                   }
 
-                  activeChar.sendPacket(new IStaticPacket[]{Msg.WEIGHT_AND_VOLUME_LIMIT_HAS_BEEN_EXCEEDED_THAT_SKILL_IS_CURRENTLY_UNAVAILABLE, new RecipeItemMakeInfo(activeChar, recipe, 0)});
+                  activeChar.sendPacket(Msg.WEIGHT_AND_VOLUME_LIMIT_HAS_BEEN_EXCEEDED_THAT_SKILL_IS_CURRENTLY_UNAVAILABLE, new RecipeItemMakeInfo(activeChar, recipe, 0));
                   return;
                 }
 
@@ -116,13 +116,13 @@ public class RequestRecipeItemMakeSelf extends L2GameClientPacket {
                   if (Config.ALT_GAME_UNREGISTER_RECIPE && materialItem.getItemType() == EtcItemType.RECIPE) {
                     Recipe recipe1 = RecipeHolder.getInstance().getRecipeByItem(materialItem);
                     if (!activeChar.hasRecipe(recipe1)) {
-                      activeChar.sendPacket(new IStaticPacket[]{Msg.NOT_ENOUGH_MATERIALS, new RecipeItemMakeInfo(activeChar, recipe, 0)});
+                      activeChar.sendPacket(Msg.NOT_ENOUGH_MATERIALS, new RecipeItemMakeInfo(activeChar, recipe, 0));
                       return;
                     }
                   } else {
                     ItemInstance item = activeChar.getInventory().getItemByItemId(materialItem.getItemId());
                     if (item == null || item.getCount() < materialAmount) {
-                      activeChar.sendPacket(new IStaticPacket[]{Msg.NOT_ENOUGH_MATERIALS, new RecipeItemMakeInfo(activeChar, recipe, 0)});
+                      activeChar.sendPacket(Msg.NOT_ENOUGH_MATERIALS, new RecipeItemMakeInfo(activeChar, recipe, 0));
                       return;
                     }
                   }
@@ -133,7 +133,7 @@ public class RequestRecipeItemMakeSelf extends L2GameClientPacket {
             }
 
             activeChar.resetWaitSitTime();
-            activeChar.reduceCurrentMp((double)recipe.getMpConsume(), (Creature)null);
+            activeChar.reduceCurrentMp(recipe.getMpConsume(), null);
             if (Rnd.chance(recipe.getSuccessRate())) {
               var6 = products.iterator();
 

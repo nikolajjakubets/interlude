@@ -348,7 +348,7 @@ public class DefaultAI extends CharacterAI {
         boolean aggressive = Rnd.chance(actor.getParameter("SelfAggressive", actor.isAggressive() ? 100 : 0));
         if (!actor.getAggroList().isEmpty() || aggressive) {
           List<Creature> chars = World.getAroundCharacters(actor);
-          CollectionUtils.eqSort(chars, this._nearestTargetComparator);
+          chars.sort(this._nearestTargetComparator);
           Iterator var6 = chars.iterator();
 
           label66:
@@ -596,9 +596,9 @@ public class DefaultAI extends CharacterAI {
               } else {
                 int pAtkRng = actor.getPhysicalAttackRange();
                 castRange = (int)(actor.getCollisionRadius() + target.getColRadius());
-                boolean incZ = actor.isFlying() || actor.isInWater() || target.isFlying() || target.isInWater();
-                int dist = (int)(!incZ ? actor.getDistance(target) : actor.getDistance3D(target)) - castRange;
-                if (dist <= pAtkRng + 16 && GeoEngine.canSeeTarget(actor, target, incZ)) {
+                boolean incZEls = actor.isFlying() || actor.isInWater() || target.isFlying() || target.isInWater();
+                int distEls = (int)(!incZEls ? actor.getDistance(target) : actor.getDistance3D(target)) - castRange;
+                if (distEls <= pAtkRng + 16 && GeoEngine.canSeeTarget(actor, target, incZEls)) {
                   this.clientStopMoving();
                   this._pathfindFails = 0;
                   this.setAttackTimeout((long)this.getMaxAttackTimeout() + System.currentTimeMillis());
