@@ -108,7 +108,7 @@ public class Clan implements Iterable<UnitMember> {
   public static final int SUBUNIT_KNIGHT2 = 1002;
   public static final int SUBUNIT_KNIGHT3 = 2001;
   public static final int SUBUNIT_KNIGHT4 = 2002;
-  private static final Clan.ClanReputationComparator REPUTATION_COMPARATOR = new Clan.ClanReputationComparator((SyntheticClass_1)null);
+  private static final Clan.ClanReputationComparator REPUTATION_COMPARATOR = new Clan.ClanReputationComparator(();
   private static final int REPUTATION_PLACES = 100;
 
   public Clan(int clanId) {
@@ -256,12 +256,10 @@ public class Clan implements Iterable<UnitMember> {
       unit = (SubUnit)var3.next();
     }
 
-    List<UnitMember> members = new ArrayList(size);
-    Iterator var7 = units.iterator();
+    List<UnitMember> members = new ArrayList<>(size);
 
-    while(var7.hasNext()) {
-      SubUnit unit = (SubUnit)var7.next();
-      members.addAll(unit.getUnitMembers());
+    for (SubUnit next : units) {
+      members.addAll(next.getUnitMembers());
     }
 
     return members;
@@ -269,10 +267,8 @@ public class Clan implements Iterable<UnitMember> {
 
   public List<Player> getOnlineMembers(int exclude) {
     List<Player> result = new ArrayList(this.getAllSize() - 1);
-    Iterator var3 = this.iterator();
 
-    while(var3.hasNext()) {
-      UnitMember temp = (UnitMember)var3.next();
+    for (UnitMember temp : this) {
       if (temp != null && temp.isOnline() && temp.getObjectId() != exclude) {
         result.add(temp.getPlayer());
       }
@@ -429,8 +425,8 @@ public class Clan implements Iterable<UnitMember> {
         clanData = statement1.executeQuery();
         if (!clanData.next()) {
           _log.warn("Clan " + clanId + " doesnt exists!");
-          var5 = null;
-          return var5;
+//          var5 = null;
+          return null;
         }
 
         clan = new Clan(clanId);

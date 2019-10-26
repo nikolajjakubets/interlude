@@ -197,8 +197,8 @@ public final class VillageMasterInstance extends NpcInstance {
                       break label321;
                     }
 
-                    PlayerClass subClass = (PlayerClass)var18.next();
-                    content.append("<a action=\"bypass -h npc_").append(this.getObjectId()).append("_Subclass 4 ").append(subClass.ordinal()).append("\">").append(HtmlUtils.htmlClassName(subClass.ordinal(), player)).append("</a><br>");
+                    PlayerClass playerClass = (PlayerClass)var18.next();
+                    content.append("<a action=\"bypass -h npc_").append(this.getObjectId()).append("_Subclass 4 ").append(playerClass.ordinal()).append("\">").append(HtmlUtils.htmlClassName(playerClass.ordinal(), player)).append("</a><br>");
                   }
                 }
 
@@ -261,8 +261,8 @@ public final class VillageMasterInstance extends NpcInstance {
                   var20 = playerClassList.values().iterator();
 
                   while(var20.hasNext()) {
-                    SubClass subClass = (SubClass)var20.next();
-                    if (subClass.getLevel() < Config.ALT_GAME_LEVEL_TO_GET_SUBCLASS) {
+                    SubClass next = (SubClass)var20.next();
+                    if (next.getLevel() < Config.ALT_GAME_LEVEL_TO_GET_SUBCLASS) {
                       player.sendMessage((new CustomMessage("l2p.gameserver.model.instances.L2VillageMasterInstance.NoSubBeforeLevel", player, new Object[0])).addNumber((long)Config.ALT_GAME_LEVEL_TO_GET_SUBCLASS));
                       allowAddition = false;
                       break;
@@ -347,8 +347,8 @@ public final class VillageMasterInstance extends NpcInstance {
                     break label321;
                   }
 
-                  PlayerClass subClass = (PlayerClass)var20.next();
-                  content.append("<a action=\"bypass -h npc_").append(this.getObjectId()).append("_Subclass 7 ").append(classId).append(" ").append(subClass.ordinal()).append("\">").append(HtmlUtils.htmlClassName(subClass.ordinal(), player)).append("</a><br>");
+                  PlayerClass playerClass = (PlayerClass)var20.next();
+                  content.append("<a action=\"bypass -h npc_").append(this.getObjectId()).append("_Subclass 7 ").append(classId).append(" ").append(playerClass.ordinal()).append("\">").append(HtmlUtils.htmlClassName(playerClass.ordinal(), player)).append("</a><br>");
                 }
               case 7:
                 if (Config.OLY_ENABLED && (ParticipantPool.getInstance().isRegistred(player) || player.isOlyParticipant())) {

@@ -448,7 +448,6 @@ public class Fishing {
   }
 
   public static int getRandomFishLvl(Player player) {
-    int skilllvl = false;
     Effect effect = player.getEffectList().getEffectByStackType("fishPot");
     int skilllvl;
     if (effect != null) {

@@ -477,37 +477,37 @@ public class Party implements PlayerGroup {
         break;
       case 1:
       case 2:
-        List<Player> ret = new ArrayList(this._members.size());
+        List<Player> playerList = new ArrayList<>(this._members.size());
 
         for (Player member : this._members) {
           if (member.isInRangeZ(player, (long) Config.ALT_PARTY_DISTRIBUTION_RANGE) && !member.isDead() && member.getInventory().validateCapacity(item) && member.getInventory().validateWeight(item)) {
-            ret.add(member);
+            playerList.add(member);
           }
         }
 
-        target = ret.isEmpty() ? null : (Player)ret.get(Rnd.get(ret.size()));
+        target = playerList.isEmpty() ? null : (Player)playerList.get(Rnd.get(playerList.size()));
         break;
       case 3:
       case 4:
         synchronized(this._members) {
-          ret = new CopyOnWriteArrayList(this._members);
+          playerList = new CopyOnWriteArrayList(this._members);
 
           while(true) {
-            if (target != null || ret.isEmpty()) {
+            if (target != null || playerList.isEmpty()) {
               break;
             }
 
             int looter = this._itemOrder++;
-            if (this._itemOrder > ret.size() - 1) {
+            if (this._itemOrder > playerList.size() - 1) {
               this._itemOrder = 0;
             }
 
-            Player looterPlayer = looter < ret.size() ? (Player)ret.get(looter) : null;
+            Player looterPlayer = looter < playerList.size() ? (Player)playerList.get(looter) : null;
             if (looterPlayer != null) {
               if (!looterPlayer.isDead() && looterPlayer.isInRangeZ(player, (long)Config.ALT_PARTY_DISTRIBUTION_RANGE) && ItemFunctions.canAddItem(looterPlayer, item)) {
                 target = looterPlayer;
               } else {
-                ret.remove(looterPlayer);
+                playerList.remove(looterPlayer);
               }
             }
           }
@@ -616,21 +616,19 @@ public class Party implements PlayerGroup {
       double bonus = Config.ALT_PARTY_BONUS[mtr.size() - 1];
       double XP = xpReward * bonus;
       double SP = spReward * bonus;
-      Iterator var17 = mtr.iterator();
 
-      while(var17.hasNext()) {
-        Player member = (Player)var17.next();
-        double lvlPenalty = Experience.penaltyModifier((long)monster.calculateLevelDiffForDrop(member.getLevel()), 9.0D);
-        int lvlDiff = partyLevel - member.getLevel();
+      for (Player next : mtr) {
+        double lvlPenalty = Experience.penaltyModifier((long) monster.calculateLevelDiffForDrop(next.getLevel()), 9.0D);
+        int lvlDiff = partyLevel - next.getLevel();
         if (lvlDiff >= Config.PARTY_PENALTY_EXP_SP_MAX_LEVEL && lvlDiff <= Config.PARTY_PENALTY_EXP_SP_MIN_LEVEL) {
           lvlPenalty *= 0.3D;
         }
 
-        double memberXp = XP * lvlPenalty * (double)member.getLevel() / (double)partyLvlSum;
-        double memberSp = SP * lvlPenalty * (double)member.getLevel() / (double)partyLvlSum;
+        double memberXp = XP * lvlPenalty * (double) next.getLevel() / (double) partyLvlSum;
+        double memberSp = SP * lvlPenalty * (double) next.getLevel() / (double) partyLvlSum;
         memberXp = Math.min(memberXp, xpReward);
         memberSp = Math.min(memberSp, spReward);
-        member.addExpAndCheckBonus(monster, (double)((long)memberXp), (double)((long)memberSp));
+        next.addExpAndCheckBonus(monster, (double) ((long) memberXp), (double) ((long) memberSp));
       }
 
       this.recalculatePartyData();

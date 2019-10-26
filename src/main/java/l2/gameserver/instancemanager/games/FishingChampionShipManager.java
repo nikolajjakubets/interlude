@@ -150,13 +150,11 @@ public class FishingChampionShipManager {
 
         FishingChampionShipManager.Fisher minFisher = null;
         double minLen = 99999.0D;
-        Iterator var10 = this._tmpPlayers.iterator();
 
-        while(var10.hasNext()) {
-          FishingChampionShipManager.Fisher fisher = (FishingChampionShipManager.Fisher)var10.next();
-          if (fisher.getLength() < minLen) {
-            minFisher = fisher;
-            minLen = fisher.getLength();
+        for (Fisher next : this._tmpPlayers) {
+          if (next.getLength() < minLen) {
+            minFisher = next;
+            minLen = next.getLength();
           }
         }
 

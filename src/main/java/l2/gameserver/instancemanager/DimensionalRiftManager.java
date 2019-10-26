@@ -77,12 +77,12 @@ public class DimensionalRiftManager {
 
       Document doc = factory.newDocumentBuilder().parse(file);
       Location tele = new Location();
-      int xMin = false;
-      int xMax = false;
-      int yMin = false;
-      int yMax = false;
-      int zMin = false;
-      int zMax = false;
+//      int xMin = false;
+//      int xMax = false;
+//      int yMin = false;
+//      int yMax = false;
+//      int zMin = false;
+//      int zMax = false;
 
       for(Node rift = doc.getFirstChild(); rift != null; rift = rift.getNextSibling()) {
         if ("rift".equalsIgnoreCase(rift.getNodeName())) {

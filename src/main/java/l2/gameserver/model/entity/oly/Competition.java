@@ -564,10 +564,10 @@ public class Competition {
 
       for(int i = 0; i < winn_arr.length; ++i) {
         try {
-          Player wp = winn_arr[i];
-          loose_points = Math.max(0, NoblesController.getInstance().getPointsOf(wp.getObjectId()) + points);
-          NoblesController.getInstance().setPointsOf(wp.getObjectId(), loose_points);
-          NobleRecord wnr = NoblesController.getInstance().getNobleRecord(wp.getObjectId());
+          Player player = winn_arr[i];
+          loose_points = Math.max(0, NoblesController.getInstance().getPointsOf(player.getObjectId()) + points);
+          NoblesController.getInstance().setPointsOf(player.getObjectId(), loose_points);
+          NobleRecord wnr = NoblesController.getInstance().getNobleRecord(player.getObjectId());
           wnr.points_current = loose_points;
           ++wnr.comp_win;
           ++wnr.comp_done;
@@ -583,8 +583,8 @@ public class Competition {
           }
 
           NoblesController.getInstance().SaveNobleRecord(wnr);
-          wp.sendPacket((new SystemMessage(1657)).addName(wp).addNumber(points));
-          QuestState[] var31 = wp.getAllQuestsStates();
+          player.sendPacket((new SystemMessage(1657)).addName(player).addNumber(points));
+          QuestState[] var31 = player.getAllQuestsStates();
           int var35 = var31.length;
 
           for(var20 = 0; var20 < var35; ++var20) {
@@ -594,7 +594,7 @@ public class Competition {
             }
           }
 
-          Iterator var32 = wp.getEffectList().getAllEffects().iterator();
+          Iterator var32 = player.getEffectList().getAllEffects().iterator();
 
           while(var32.hasNext()) {
             Effect e = (Effect)var32.next();
@@ -603,8 +603,8 @@ public class Competition {
             }
           }
 
-          wp.sendChanges();
-          wp.updateEffectIcons();
+          player.sendChanges();
+          player.updateEffectIcons();
           int rvicnt = 0;
           switch(this.getType()) {
             case CLASS_FREE:
@@ -618,12 +618,12 @@ public class Competition {
           }
 
           if (rvicnt > 0) {
-            wp.getInventory().addItem(Config.OLY_VICTORY_RITEMID, (long)rvicnt);
-            wp.sendPacket(SystemMessage2.obtainItems(Config.OLY_VICTORY_RITEMID, (long)rvicnt, 0));
+            player.getInventory().addItem(Config.OLY_VICTORY_RITEMID, (long)rvicnt);
+            player.sendPacket(SystemMessage2.obtainItems(Config.OLY_VICTORY_RITEMID, (long)rvicnt, 0));
           }
 
-          CompetitionController.getInstance().addCompetitionResult(OlyController.getInstance().getCurrentSeason(), NoblesController.getInstance().getNobleRecord(wp.getObjectId()), points, NoblesController.getInstance().getNobleRecord(loose_arr[i].getObjectId()), points, this.getType(), tie, looserDisconnected, comp_spend_time);
-          wp.getListeners().onOlyCompetitionCompleted(this, !tie);
+          CompetitionController.getInstance().addCompetitionResult(OlyController.getInstance().getCurrentSeason(), NoblesController.getInstance().getNobleRecord(player.getObjectId()), points, NoblesController.getInstance().getNobleRecord(loose_arr[i].getObjectId()), points, this.getType(), tie, looserDisconnected, comp_spend_time);
+          player.getListeners().onOlyCompetitionCompleted(this, !tie);
         } catch (Exception var25) {
           var25.printStackTrace();
         }
