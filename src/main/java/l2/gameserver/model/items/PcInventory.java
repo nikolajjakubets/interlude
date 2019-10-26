@@ -6,6 +6,7 @@
 package l2.gameserver.model.items;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import l2.commons.collections.CollectionUtils;
 import l2.commons.threading.RunnableImpl;
@@ -166,7 +167,7 @@ public class PcInventory extends Inventory {
     }
 
     if (needSort) {
-      CollectionUtils.eqSort(this._items, ItemOrderComparator.getInstance());
+      this._items.sort(ItemOrderComparator.getInstance());
     }
 
   }
@@ -174,11 +175,9 @@ public class PcInventory extends Inventory {
   public ItemInstance findArrowForBow(ItemTemplate bow) {
     int[] arrowsId = arrows[bow.getCrystalType().gradeOrd()];
     ItemInstance ret = null;
-    int[] var4 = arrowsId;
     int var5 = arrowsId.length;
 
-    for(int var6 = 0; var6 < var5; ++var6) {
-      int id = var4[var6];
+    for (int id : arrowsId) {
       if ((ret = this.getItemByItemId(id)) != null) {
         return ret;
       }
@@ -326,7 +325,7 @@ public class PcInventory extends Inventory {
         this.onRestoreItem(item);
       }
 
-      CollectionUtils.eqSort(this._items, ItemOrderComparator.getInstance());
+      this._items.sort(ItemOrderComparator.getInstance());
       items = _itemsDAO.loadItemsByOwnerIdAndLoc(ownerId, this.getEquipLocation());
       var3 = items.iterator();
 

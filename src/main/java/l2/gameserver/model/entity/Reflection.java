@@ -826,7 +826,6 @@ public class Reflection {
   }
 
   public void setReenterTime(long time) {
-    int[] players = null;
     this.lock.lock();
 
     int[] players;
@@ -837,18 +836,15 @@ public class Reflection {
     }
 
     if (players != null) {
-      int[] var5 = players;
       int var6 = players.length;
 
-      for(int var7 = 0; var7 < var6; ++var7) {
-        int objectId = var5[var7];
-
+      for (int objectId : players) {
         try {
           Player player = World.getPlayer(objectId);
           if (player != null) {
             player.setInstanceReuse(this.getInstancedZoneId(), time);
           } else {
-            mysql.set("REPLACE INTO character_instances (obj_id, id, reuse) VALUES (?,?,?)", new Object[]{objectId, this.getInstancedZoneId(), time});
+            mysql.set("REPLACE INTO character_instances (obj_id, id, reuse) VALUES (?,?,?)", objectId, this.getInstancedZoneId(), time);
           }
         } catch (Exception var12) {
           var12.printStackTrace();

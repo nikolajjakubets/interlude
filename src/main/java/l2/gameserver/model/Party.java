@@ -478,11 +478,9 @@ public class Party implements PlayerGroup {
       case 1:
       case 2:
         List<Player> ret = new ArrayList(this._members.size());
-        Iterator var6 = this._members.iterator();
 
-        while(var6.hasNext()) {
-          Player member = (Player)var6.next();
-          if (member.isInRangeZ(player, (long)Config.ALT_PARTY_DISTRIBUTION_RANGE) && !member.isDead() && member.getInventory().validateCapacity(item) && member.getInventory().validateWeight(item)) {
+        for (Player member : this._members) {
+          if (member.isInRangeZ(player, (long) Config.ALT_PARTY_DISTRIBUTION_RANGE) && !member.isDead() && member.getInventory().validateCapacity(item) && member.getInventory().validateWeight(item)) {
             ret.add(member);
           }
         }

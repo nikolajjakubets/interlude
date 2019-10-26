@@ -1,9 +1,4 @@
-v//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
-  package l2.gameserver.handler.usercommands.impl;
+package l2.gameserver.handler.usercommands.impl;
 
 import java.text.SimpleDateFormat;
 import l2.gameserver.data.htm.HtmCache;

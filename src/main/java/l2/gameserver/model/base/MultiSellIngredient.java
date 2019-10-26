@@ -7,7 +7,9 @@ package l2.gameserver.model.base;
 
 import l2.gameserver.data.xml.holder.ItemHolder;
 import l2.gameserver.model.items.ItemAttributes;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode
 public class MultiSellIngredient implements Cloneable {
   private int _itemId;
   private long _itemCount;
@@ -69,54 +71,51 @@ public class MultiSellIngredient implements Cloneable {
   public void setItemAttributes(ItemAttributes attr) {
     this._itemAttributes = attr;
   }
-
-  public int hashCode() {
-    int prime = true;
-    int result = 1;
-    int result = 31 * result + (int)(this._itemCount ^ this._itemCount >>> 32);
-    Element[] var3 = Element.VALUES;
-    int var4 = var3.length;
-
-    for(int var5 = 0; var5 < var4; ++var5) {
-      Element e = var3[var5];
-      result = 31 * result + this._itemAttributes.getValue(e);
-    }
-
-    result = 31 * result + this._itemEnchant;
-    result = 31 * result + this._itemId;
-    return result;
-  }
-
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    } else if (obj == null) {
-      return false;
-    } else if (this.getClass() != obj.getClass()) {
-      return false;
-    } else {
-      MultiSellIngredient other = (MultiSellIngredient)obj;
-      if (this._itemId != other._itemId) {
-        return false;
-      } else if (this._itemCount != other._itemCount) {
-        return false;
-      } else if (this._itemEnchant != other._itemEnchant) {
-        return false;
-      } else {
-        Element[] var3 = Element.VALUES;
-        int var4 = var3.length;
-
-        for(int var5 = 0; var5 < var4; ++var5) {
-          Element e = var3[var5];
-          if (this._itemAttributes.getValue(e) != other._itemAttributes.getValue(e)) {
-            return false;
-          }
-        }
-
-        return true;
-      }
-    }
-  }
+//
+//  public int hashCode() {
+//    int result = 31 + (int)(this._itemCount ^ this._itemCount >>> 32);
+//    Element[] var3 = Element.VALUES;
+//    int var4 = var3.length;
+//
+//    for (Element e : var3) {
+//      result = 31 * result + this._itemAttributes.getValue(e);
+//    }
+//
+//    result = 31 * result + this._itemEnchant;
+//    result = 31 * result + this._itemId;
+//    return result;
+//  }
+//
+//  public boolean equals(Object obj) {
+//    if (this == obj) {
+//      return true;
+//    } else if (obj == null) {
+//      return false;
+//    } else if (this.getClass() != obj.getClass()) {
+//      return false;
+//    } else {
+//      MultiSellIngredient other = (MultiSellIngredient)obj;
+//      if (this._itemId != other._itemId) {
+//        return false;
+//      } else if (this._itemCount != other._itemCount) {
+//        return false;
+//      } else if (this._itemEnchant != other._itemEnchant) {
+//        return false;
+//      } else {
+//        Element[] var3 = Element.VALUES;
+//        int var4 = var3.length;
+//
+//        for(int var5 = 0; var5 < var4; ++var5) {
+//          Element e = var3[var5];
+//          if (this._itemAttributes.getValue(e) != other._itemAttributes.getValue(e)) {
+//            return false;
+//          }
+//        }
+//
+//        return true;
+//      }
+//    }
+//  }
 
   public boolean getMantainIngredient() {
     return this._mantainIngredient;

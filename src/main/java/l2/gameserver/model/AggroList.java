@@ -182,8 +182,8 @@ public class AggroList {
     List chars;
     try {
       if (this.hateList.isEmpty()) {
-        chars = null;
-        return chars;
+//        chars = null;
+        return null;
       }
 
       hated = (AggroList.AggroInfo[])this.hateList.getValues(new AggroList.AggroInfo[this.hateList.size()]);
@@ -197,13 +197,11 @@ public class AggroList {
     } else {
       chars = World.getAroundCharacters(this.npc);
 
-      for(int i = 0; i < hated.length; ++i) {
-        AggroList.AggroInfo ai = hated[i];
+      for (AggroInfo ai : hated) {
         if (ai.hate != 0) {
-          Iterator var5 = chars.iterator();
 
-          while(var5.hasNext()) {
-            Creature cha = (Creature)var5.next();
+          for (Object aChar : chars) {
+            Creature cha = (Creature) aChar;
             if (cha.getObjectId() == ai.attackerId) {
               if (!cha.isDead()) {
                 return cha;
@@ -226,16 +224,16 @@ public class AggroList {
     label112: {
       try {
         if (!this.hateList.isEmpty()) {
-          hated = (AggroList.AggroInfo[])this.hateList.getValues(new AggroList.AggroInfo[this.hateList.size()]);
+          hated = this.hateList.getValues(new AggroList.AggroInfo[this.hateList.size()]);
           break label112;
         }
 
-        chars = null;
+//        chars = null;
       } finally {
         this.readLock.unlock();
       }
 
-      return chars;
+      return null;
     }
 
     Arrays.sort(hated, AggroList.HateComparator.getInstance());
@@ -430,7 +428,7 @@ public class AggroList {
     public final int attackerId;
 
     AggroInfo(Creature attacker) {
-      super(null);
+      super();
       this.attackerId = attacker.getObjectId();
     }
   }
@@ -439,7 +437,7 @@ public class AggroList {
     public final Creature attacker;
 
     HateInfo(Creature attacker, AggroList.AggroInfo ai) {
-      super(null);
+      super();
       this.attacker = attacker;
       this.hate = ai.hate;
       this.damage = ai.damage;

@@ -124,7 +124,7 @@ public abstract class GlobalEvent extends LoggerObject {
   }
 
   public void addOnTimeAction(int time, EventAction action) {
-    List<EventAction> list = (List)this._onTimeActions.get(time);
+    List<EventAction> list = this._onTimeActions.get(time);
     if (list != null) {
       list.add(action);
     } else {
@@ -137,7 +137,7 @@ public abstract class GlobalEvent extends LoggerObject {
 
   public void addOnTimeActions(int time, List<EventAction> actions) {
     if (!actions.isEmpty()) {
-      List<EventAction> list = (List)this._onTimeActions.get(time);
+      List<EventAction> list = this._onTimeActions.get(time);
       if (list != null) {
         list.addAll(actions);
       } else {
@@ -148,7 +148,7 @@ public abstract class GlobalEvent extends LoggerObject {
   }
 
   public void timeActions(int time) {
-    List<EventAction> actions = (List)this._onTimeActions.get(time);
+    List<EventAction> actions = this._onTimeActions.get(time);
     if (actions == null) {
       this.info("Undefined time : " + time + " for " + this.toString());
     } else {
@@ -179,22 +179,23 @@ public abstract class GlobalEvent extends LoggerObject {
   }
 
   public <O extends Serializable> List<O> getObjects(String name) {
-    List<Serializable> objects = (List)this._objects.get(name);
+    List<Serializable> objects = this._objects.get(name);
     return objects == null ? Collections.emptyList() : objects;
   }
 
   public <O extends Serializable> O getFirstObject(String name) {
     List<O> objects = this.getObjects(name);
-    return objects.size() > 0 ? (Serializable)objects.get(0) : null;
+    return objects.size() > 0 ? objects.get(0) : null;
   }
 
   public void addObject(String name, Serializable object) {
+
     if (object != null) {
-      List<Serializable> list = (List)this._objects.get(name);
+      List<Serializable> list = this._objects.get(name);
       if (list != null) {
         list.add(object);
       } else {
-        List<Serializable> list = new CopyOnWriteArrayList();
+        List<Serializable> list = new CopyOnWriteArrayList<>();
         list.add(object);
         this._objects.put(name, list);
       }
@@ -204,7 +205,7 @@ public abstract class GlobalEvent extends LoggerObject {
 
   public void removeObject(String name, Serializable o) {
     if (o != null) {
-      List<Serializable> list = (List)this._objects.get(name);
+      List<Serializable> list = this._objects.get(name);
       if (list != null) {
         list.remove(o);
       }
@@ -213,13 +214,13 @@ public abstract class GlobalEvent extends LoggerObject {
   }
 
   public <O extends Serializable> List<O> removeObjects(String name) {
-    List<Serializable> objects = (List)this._objects.remove(name);
+    List<Serializable> objects = this._objects.remove(name);
     return objects == null ? Collections.emptyList() : objects;
   }
 
   public void addObjects(String name, List<? extends Serializable> objects) {
     if (!objects.isEmpty()) {
-      List<Serializable> list = (List)this._objects.get(name);
+      List<Serializable> list = this._objects.get(name);
       if (list != null) {
         list.addAll(objects);
       } else {
@@ -475,7 +476,7 @@ public abstract class GlobalEvent extends LoggerObject {
 
         item.delete();
       } else {
-        item = (ItemInstance)entry.getValue();
+        item = entry.getValue();
       }
     }
 
@@ -516,7 +517,7 @@ public abstract class GlobalEvent extends LoggerObject {
 
     while(var2.hasNext()) {
       Entry<List<EventAction>> entry = (Entry)var2.next();
-      e.addOnTimeActions(entry.getKey(), (List)entry.getValue());
+      e.addOnTimeActions(entry.getKey(), entry.getValue());
     }
 
   }
@@ -530,7 +531,7 @@ public abstract class GlobalEvent extends LoggerObject {
 
       while(var1.hasNext()) {
         Listener<GlobalEvent> listener = (Listener)var1.next();
-        if (OnStartStopListener.class.isInstance(listener)) {
+        if (listener instanceof OnStartStopListener) {
           ((OnStartStopListener)listener).onStart(GlobalEvent.this);
         }
       }
@@ -542,7 +543,7 @@ public abstract class GlobalEvent extends LoggerObject {
 
       while(var1.hasNext()) {
         Listener<GlobalEvent> listener = (Listener)var1.next();
-        if (OnStartStopListener.class.isInstance(listener)) {
+        if (listener instanceof OnStartStopListener) {
           ((OnStartStopListener)listener).onStop(GlobalEvent.this);
         }
       }

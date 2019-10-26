@@ -495,7 +495,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
       this._ping = this._pingTimestamp > 0 ? (int)(nowMs - serverStartTimeMs - (long)timestamp) : 0;
       this._fps = fps;
       this._pawnClippingRange = pawnClipRange;
-      this._pingTaskFuture = ThreadPoolManager.getInstance().schedule(new GameClient.PingTask(this, (SyntheticClass_1)null), 30000L);
+      this._pingTaskFuture = ThreadPoolManager.getInstance().schedule(new GameClient.PingTask(this), 30000L);
     }
 
   }

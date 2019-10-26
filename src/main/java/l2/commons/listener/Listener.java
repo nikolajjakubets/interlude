@@ -3,8 +3,7 @@
 // (powered by Fernflower decompiler)
 //
 
-package l2.gameserver.model.entity.events;
+package l2.commons.listener;
 
-public interface EventAction {
-  void call(GlobalEvent var1);
+public interface Listener<T> {
 }

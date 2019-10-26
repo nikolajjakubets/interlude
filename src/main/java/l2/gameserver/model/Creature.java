@@ -2838,7 +2838,7 @@ public abstract class Creature extends GameObject {
         task.cancel(false);
       }
 
-      this._stanceTask = LazyPrecisionTaskManager.getInstance().scheduleAtFixedRate(this._stanceTaskRunnable == null ? (this._stanceTaskRunnable = new Creature.AttackStanceTask((SyntheticClass_1)null)) : this._stanceTaskRunnable, 1000L, 1000L);
+      this._stanceTask = LazyPrecisionTaskManager.getInstance().scheduleAtFixedRate(this._stanceTaskRunnable == null ? (this._stanceTaskRunnable = new Creature.AttackStanceTask()) : this._stanceTaskRunnable, 1000L, 1000L);
     }
   }
 
@@ -2878,7 +2878,7 @@ public abstract class Creature extends GameObject {
         try {
           if (!this._isRegenerating) {
             this._isRegenerating = true;
-            this._regenTask = RegenTaskManager.getInstance().scheduleAtFixedRate(this._regenTaskRunnable == null ? (this._regenTaskRunnable = new Creature.RegenTask((SyntheticClass_1)null)) : this._regenTaskRunnable, 0L, this.getRegenTick());
+            this._regenTask = RegenTaskManager.getInstance().scheduleAtFixedRate(this._regenTaskRunnable == null ? (this._regenTaskRunnable = new Creature.RegenTask()) : this._regenTaskRunnable, 0L, this.getRegenTick());
           }
         } finally {
           this.regenLock.unlock();
@@ -4251,9 +4251,9 @@ public abstract class Creature extends GameObject {
         return false;
       } else {
         Runnable r = actor._moveTaskRunnable;
-        Creature.CreatureMoveActionTask r;
-        actor._moveTaskRunnable = r = new Creature.CreatureMoveActionTask(actor);
-        actor._moveTask = ThreadPoolManager.getInstance().schedule(r, (long)this.getNextTickInterval());
+        Creature.CreatureMoveActionTask creatureMoveActionTask;
+        actor._moveTaskRunnable = creatureMoveActionTask = new Creature.CreatureMoveActionTask(actor);
+        actor._moveTask = ThreadPoolManager.getInstance().schedule(creatureMoveActionTask, (long)this.getNextTickInterval());
         return true;
       }
     }

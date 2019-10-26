@@ -79,7 +79,24 @@
       <artifactId>mysql-connector-java</artifactId>
       <version>5.1.48</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-pool2 -->
+    <!-- https://mvnrepository.com/artifact/log4j/log4j -->
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/net.sf.ehcache/ehcache-core -->
+    <dependency>
+      <groupId>net.sf.ehcache</groupId>
+      <artifactId>ehcache-core</artifactId>
+      <version>2.4.3</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.jboss.netty/netty -->
+    <dependency>
+      <groupId>org.jboss.netty</groupId>
+      <artifactId>netty</artifactId>
+      <version>3.2.3.Final</version>
+    </dependency>
     <!-- https://mvnrepository.com/artifact/commons-pool/commons-pool -->
     <dependency>
       <groupId>commons-pool</groupId>
@@ -91,6 +108,12 @@
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
       <version>1.13</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/net.sf.trove/trove -->
+    <dependency>
+      <groupId>net.sf.trove</groupId>
+      <artifactId>trove</artifactId>
+      <version>2.1.0</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
@@ -113,5 +136,10 @@
     </dependency>
 
   </dependencies>
-
+  <repositories>
+    <repository>
+      <id>ukp-oss-releases</id>
+      <url>http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-releases</url>
+    </repository>
+  </repositories>
 </project>

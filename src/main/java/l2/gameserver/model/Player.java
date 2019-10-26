@@ -1462,7 +1462,7 @@ public class Player extends Playable implements PlayerGroup {
     if (!this.isLogoutStarted() && this.getMaxLoad() > 0) {
       this.setOverloaded(this.getCurrentLoad() > this.getMaxLoad());
       double weightproc = 100.0D * ((double)this.getCurrentLoad() - this.calcStat(Stats.MAX_NO_PENALTY_LOAD, 0.0D, this, (Skill)null)) / (double)this.getMaxLoad();
-      int newWeightPenalty = false;
+//      int newWeightPenalty = false;
       byte newWeightPenalty;
       if (weightproc < 50.0D) {
         newWeightPenalty = 0;
@@ -1502,7 +1502,7 @@ public class Player extends Playable implements PlayerGroup {
   public void refreshExpertisePenalty() {
     if (!this.isLogoutStarted()) {
       int level = (int)this.calcStat(Stats.GRADE_EXPERTISE_LEVEL, (double)this.getLevel(), (Creature)null, (Skill)null);
-      int i = false;
+//      int i = false;
 
       int i;
       for(i = 0; i < EXPERTISE_LEVELS.length && level >= EXPERTISE_LEVELS[i + 1]; ++i) {
@@ -1519,11 +1519,10 @@ public class Player extends Playable implements PlayerGroup {
 
       int newGradePenalty = 0;
       ItemInstance[] items = this.getInventory().getPaperdollItems();
-      ItemInstance[] var6 = items;
       int var7 = items.length;
 
       for(int var8 = 0; var8 < var7; ++var8) {
-        ItemInstance item = var6[var8];
+        ItemInstance item = items[var8];
         if (item != null) {
           int crystaltype = item.getTemplate().getCrystalType().ordinal();
           if ((item.getTemplate().getType2() == 0 || item.getTemplate().getType2() == 1 || item.getTemplate().getType2() == 2) && crystaltype > newGradePenalty) {
@@ -1576,7 +1575,7 @@ public class Player extends Playable implements PlayerGroup {
     if (this.getLvlJoinedAcademy() != 0 && this._clan != null && this._clan.getLevel() >= 5 && ClassId.VALUES[id].getLevel() == 2) {
       this._clan.incReputation(100, true, "Academy");
     } else if (this.getLvlJoinedAcademy() != 0 && this._clan != null && this._clan.getLevel() >= 5 && ClassId.VALUES[id].getLevel() == 3) {
-      int earnedPoints = false;
+//      int earnedPoints = false;
       int earnedPoints;
       if (this.getLvlJoinedAcademy() > 39) {
         earnedPoints = 160;
@@ -6180,9 +6179,9 @@ public class Player extends Playable implements PlayerGroup {
       }
 
       if (player.getActiveClass() == null) {
-        SubClass subClass = (SubClass)player.getSubClasses().get(BaseClassId);
-        subClass.setActive(true);
-        player.setActiveSubClass(subClass.getClassId(), false);
+        SubClass pBaseClassId = (SubClass)player.getSubClasses().get(BaseClassId);
+        pBaseClassId.setActive(true);
+        player.setActiveSubClass(pBaseClassId.getClassId(), false);
       }
     } catch (Exception var10) {
       _log.warn("Could not restore char sub-classes: " + var10);
@@ -7249,36 +7248,34 @@ public class Player extends Playable implements PlayerGroup {
 
                 label117:
                 while(true) {
-                  Skill s;
+                  Skill nextSkill;
                   do {
                     do {
                       if (!var13.hasNext()) {
                         break label117;
                       }
 
-                      s = (Skill)var13.next();
-                    } while(s == null);
-                  } while(!s.isActive() && !s.isToggle());
+                      nextSkill = (Skill)var13.next();
+                    } while(nextSkill == null);
+                  } while(!nextSkill.isActive() && !nextSkill.isToggle());
 
-                  this._transformationSkills.put(s.getId(), s);
+                  this._transformationSkills.put(nextSkill.getId(), nextSkill);
                 }
               } else {
                 AddedSkill[] var4 = effect.getSkill().getAddedSkills();
                 int var5 = var4.length;
 
-                for(int var6 = 0; var6 < var5; ++var6) {
-                  AddedSkill s = var4[var6];
+                for (AddedSkill addedSkill : var4) {
                   int learnLevel;
-                  if (s.level == 0) {
-                    learnLevel = this.getSkillLevel(s.id);
+                  if (addedSkill.level == 0) {
+                    learnLevel = this.getSkillLevel(addedSkill.id);
                     if (learnLevel > 0) {
-                      this._transformationSkills.put(s.id, SkillTable.getInstance().getInfo(s.id, learnLevel));
+                      this._transformationSkills.put(addedSkill.id, SkillTable.getInstance().getInfo(addedSkill.id, learnLevel));
                     }
-                  } else if (s.level == -2) {
+                  } else if (addedSkill.level == -2) {
                     learnLevel = Math.max(effect.getSkill().getMagicLevel(), 40);
-                    int maxLevel = SkillTable.getInstance().getBaseLevel(s.id);
+                    int maxLevel = SkillTable.getInstance().getBaseLevel(addedSkill.id);
                     int curSkillLevel = 1;
-                    int curSkillLevel;
                     if (maxLevel > 3) {
                       curSkillLevel = curSkillLevel + (this.getLevel() - learnLevel);
                     } else {
@@ -7286,9 +7283,9 @@ public class Player extends Playable implements PlayerGroup {
                     }
 
                     curSkillLevel = Math.min(Math.max(curSkillLevel, 1), maxLevel);
-                    this._transformationSkills.put(s.id, SkillTable.getInstance().getInfo(s.id, curSkillLevel));
+                    this._transformationSkills.put(addedSkill.id, SkillTable.getInstance().getInfo(addedSkill.id, curSkillLevel));
                   } else {
-                    this._transformationSkills.put(s.id, s.getSkill());
+                    this._transformationSkills.put(addedSkill.id, addedSkill.getSkill());
                   }
                 }
               }
@@ -7510,9 +7507,9 @@ public class Player extends Playable implements PlayerGroup {
     }
 
     if (this._createList != null && !this._createList.isEmpty()) {
-      ManufactureItem i;
-      for(var2 = this._createList.iterator(); var2.hasNext(); val = val + i.getRecipeId() + ";" + i.getCost() + ":") {
-        i = (ManufactureItem)var2.next();
+      ManufactureItem manufactureItem;
+      for(var2 = this._createList.iterator(); var2.hasNext(); val = val + manufactureItem.getRecipeId() + ";" + manufactureItem.getCost() + ":") {
+        manufactureItem = (ManufactureItem)var2.next();
       }
 
       this.setVar("createlist", val, -1L);
@@ -7534,7 +7531,6 @@ public class Player extends Playable implements PlayerGroup {
     String item;
     String[] values;
     int recId;
-    long price;
     long price;
     ItemInstance itemToSell;
     TradeItem i;
@@ -7621,15 +7617,15 @@ public class Player extends Playable implements PlayerGroup {
         if (!item.equals("")) {
           values = item.split(";");
           if (values.length >= 3) {
-            TradeItem i = new TradeItem();
-            i.setItemId(Integer.parseInt(values[0]));
-            i.setCount(Long.parseLong(values[1]));
-            i.setOwnersPrice(Long.parseLong(values[2]));
+            TradeItem tradeItem = new TradeItem();
+            tradeItem.setItemId(Integer.parseInt(values[0]));
+            tradeItem.setCount(Long.parseLong(values[1]));
+            tradeItem.setOwnersPrice(Long.parseLong(values[2]));
             if (values.length >= 4) {
-              i.setEnchantLevel(Integer.parseInt(values[3]));
+              tradeItem.setEnchantLevel(Integer.parseInt(values[3]));
             }
 
-            this._buyList.add(i);
+            this._buyList.add(tradeItem);
           }
         }
       }

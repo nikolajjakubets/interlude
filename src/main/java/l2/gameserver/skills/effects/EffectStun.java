@@ -5,17 +5,22 @@
 
 package l2.gameserver.skills.effects;
 
+import l2.commons.util.Rnd;
 import l2.gameserver.model.Effect;
 import l2.gameserver.stats.Env;
 
-public final class EffectSleep extends Effect {
-  public EffectSleep(Env env, EffectTemplate template) {
+public final class EffectStun extends Effect {
+  public EffectStun(Env env, EffectTemplate template) {
     super(env, template);
+  }
+
+  public boolean checkCondition() {
+    return Rnd.chance(this._template.chance(100));
   }
 
   public void onStart() {
     super.onStart();
-    this._effected.startSleeping();
+    this._effected.startStunning();
     this._effected.abortAttack(true, true);
     this._effected.abortCast(true, true);
     this._effected.stopMove();
@@ -23,7 +28,7 @@ public final class EffectSleep extends Effect {
 
   public void onExit() {
     super.onExit();
-    this._effected.stopSleeping();
+    this._effected.stopStunning();
   }
 
   public boolean onActionTime() {
