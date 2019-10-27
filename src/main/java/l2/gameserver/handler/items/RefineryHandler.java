@@ -49,7 +49,7 @@ public class RefineryHandler implements IRefineryHandler {
     if (!Functions.CheckPlayerConditions(player)) {
       player.sendActionFailed();
     } else {
-      player.sendPacket(new IStaticPacket[]{Msg.SELECT_THE_ITEM_TO_BE_AUGMENTED, ExShowRefineryInterface.STATIC});
+      player.sendPacket(Msg.SELECT_THE_ITEM_TO_BE_AUGMENTED, ExShowRefineryInterface.STATIC);
     }
   }
 
@@ -57,13 +57,13 @@ public class RefineryHandler implements IRefineryHandler {
     if (!Functions.CheckPlayerConditions(player)) {
       player.sendActionFailed();
     } else if (targetItem.isAugmented()) {
-      player.sendPacket(new IStaticPacket[]{Msg.ONCE_AN_ITEM_IS_AUGMENTED_IT_CANNOT_BE_AUGMENTED_AGAIN, ActionFail.STATIC});
+      player.sendPacket(Msg.ONCE_AN_ITEM_IS_AUGMENTED_IT_CANNOT_BE_AUGMENTED_AGAIN, ActionFail.STATIC);
     } else {
       List<VariationGroupData> variationGroupDataList = VariationGroupHolder.getInstance().getDataForItemId(targetItem.getItemId());
       if (variationGroupDataList != null && !variationGroupDataList.isEmpty()) {
-        player.sendPacket(new IStaticPacket[]{Msg.SELECT_THE_CATALYST_FOR_AUGMENTATION, new ExPutItemResultForVariationMake(targetItem.getObjectId(), true)});
+        player.sendPacket(Msg.SELECT_THE_CATALYST_FOR_AUGMENTATION, new ExPutItemResultForVariationMake(targetItem.getObjectId(), true));
       } else {
-        player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+        player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
       }
     }
   }
@@ -72,17 +72,15 @@ public class RefineryHandler implements IRefineryHandler {
     if (!Functions.CheckPlayerConditions(player)) {
       player.sendPacket(ActionFail.STATIC);
     } else if (targetItem.isAugmented()) {
-      player.sendPacket(new IStaticPacket[]{Msg.ONCE_AN_ITEM_IS_AUGMENTED_IT_CANNOT_BE_AUGMENTED_AGAIN, ActionFail.STATIC});
+      player.sendPacket(Msg.ONCE_AN_ITEM_IS_AUGMENTED_IT_CANNOT_BE_AUGMENTED_AGAIN, ActionFail.STATIC);
     } else {
       List<VariationGroupData> variationGroupDataList = VariationGroupHolder.getInstance().getDataForItemId(targetItem.getItemId());
       if (variationGroupDataList != null && !variationGroupDataList.isEmpty()) {
         int mineralItemId = mineralItem.getItemId();
         VariationGroupData variationGroupDataOfMineral = null;
         Pair<VariationChanceData, VariationChanceData> variationChanceData = VariationChanceHolder.getInstance().getVariationChanceDataForMineral(mineralItemId);
-        Iterator var8 = variationGroupDataList.iterator();
 
-        while(var8.hasNext()) {
-          VariationGroupData variationGroupData = (VariationGroupData)var8.next();
+        for (VariationGroupData variationGroupData : variationGroupDataList) {
           if (variationGroupData.getMineralItemId() == mineralItemId) {
             variationGroupDataOfMineral = variationGroupData;
             break;
@@ -92,20 +90,20 @@ public class RefineryHandler implements IRefineryHandler {
         if (null != variationGroupDataOfMineral && null != variationChanceData) {
           if (targetItem.getTemplate().isMageItem() && variationChanceData.getRight() == null) {
             LOG.warn("No mage variation for item " + targetItem.getItemId() + " and mineral " + mineralItem.getItemId());
-            player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+            player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
           } else if (!targetItem.getTemplate().isMageItem() && variationChanceData.getLeft() == null) {
             LOG.warn("No warrior variation for item " + targetItem.getItemId() + " and mineral " + mineralItem.getItemId());
-            player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+            player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
           } else if (!mineralItem.getTemplate().testCondition(player, mineralItem, true)) {
             player.sendPacket(ActionFail.STATIC);
           } else {
-            player.sendPacket(new IStaticPacket[]{new ExPutIntensiveResultForVariationMake(mineralItem.getObjectId(), mineralItemId, variationGroupDataOfMineral.getGemstoneItemId(), variationGroupDataOfMineral.getGemstoneItemCnt(), true), (new SystemMessage(1959)).addNumber(variationGroupDataOfMineral.getGemstoneItemCnt()).addItemName(variationGroupDataOfMineral.getGemstoneItemId())});
+            player.sendPacket(new ExPutIntensiveResultForVariationMake(mineralItem.getObjectId(), mineralItemId, variationGroupDataOfMineral.getGemstoneItemId(), variationGroupDataOfMineral.getGemstoneItemCnt(), true), (new SystemMessage(1959)).addNumber(variationGroupDataOfMineral.getGemstoneItemCnt()).addItemName(variationGroupDataOfMineral.getGemstoneItemId()));
           }
         } else {
-          player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+          player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
         }
       } else {
-        player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+        player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
       }
     }
   }
@@ -114,7 +112,7 @@ public class RefineryHandler implements IRefineryHandler {
     if (!Functions.CheckPlayerConditions(player)) {
       player.sendPacket(ActionFail.STATIC);
     } else if (targetItem.isAugmented()) {
-      player.sendPacket(new IStaticPacket[]{Msg.ONCE_AN_ITEM_IS_AUGMENTED_IT_CANNOT_BE_AUGMENTED_AGAIN, ActionFail.STATIC});
+      player.sendPacket(Msg.ONCE_AN_ITEM_IS_AUGMENTED_IT_CANNOT_BE_AUGMENTED_AGAIN, ActionFail.STATIC);
     } else {
       List<VariationGroupData> variationGroupDataList = VariationGroupHolder.getInstance().getDataForItemId(targetItem.getItemId());
       if (variationGroupDataList != null && !variationGroupDataList.isEmpty()) {
@@ -122,10 +120,8 @@ public class RefineryHandler implements IRefineryHandler {
         int gemstoneItemId = gemstoneItem.getItemId();
         VariationGroupData variationGroupDataOfMineral = null;
         Pair<VariationChanceData, VariationChanceData> variationChanceData = VariationChanceHolder.getInstance().getVariationChanceDataForMineral(mineralItemId);
-        Iterator var12 = variationGroupDataList.iterator();
 
-        while(var12.hasNext()) {
-          VariationGroupData variationGroupData = (VariationGroupData)var12.next();
+        for (VariationGroupData variationGroupData : variationGroupDataList) {
           if (variationGroupData.getMineralItemId() == mineralItemId && variationGroupData.getGemstoneItemId() == gemstoneItemId) {
             variationGroupDataOfMineral = variationGroupData;
             break;
@@ -133,28 +129,28 @@ public class RefineryHandler implements IRefineryHandler {
         }
 
         if (null != variationGroupDataOfMineral && variationChanceData != null) {
-          if ((variationChanceData.getLeft() == null || ((VariationChanceData)variationChanceData.getLeft()).getMineralItemId() == variationGroupDataOfMineral.getMineralItemId()) && (variationChanceData.getRight() == null || ((VariationChanceData)variationChanceData.getRight()).getMineralItemId() == variationGroupDataOfMineral.getMineralItemId())) {
+          if ((variationChanceData.getLeft() == null || variationChanceData.getLeft().getMineralItemId() == variationGroupDataOfMineral.getMineralItemId()) && (variationChanceData.getRight() == null || variationChanceData.getRight().getMineralItemId() == variationGroupDataOfMineral.getMineralItemId())) {
             if (targetItem.getTemplate().isMageItem() && variationChanceData.getRight() == null) {
               LOG.warn("No mage variation for item " + targetItem.getItemId() + " and mineral " + mineralItem.getItemId());
-              player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+              player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
             } else if (!targetItem.getTemplate().isMageItem() && variationChanceData.getLeft() == null) {
               LOG.warn("No warrior variation for item " + targetItem.getItemId() + " and mineral " + mineralItem.getItemId());
-              player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+              player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
             } else if (!mineralItem.getTemplate().testCondition(player, mineralItem, true)) {
               player.sendPacket(ActionFail.STATIC);
             } else if (variationGroupDataOfMineral.getGemstoneItemCnt() <= gemstoneItemCnt && player.getInventory().getCountOf(gemstoneItemId) >= variationGroupDataOfMineral.getGemstoneItemCnt()) {
-              player.sendPacket(new IStaticPacket[]{new ExPutCommissionResultForVariationMake(gemstoneItem.getObjectId(), variationGroupDataOfMineral.getGemstoneItemCnt()), Msg.PRESS_THE_AUGMENT_BUTTON_TO_BEGIN});
+              player.sendPacket(new ExPutCommissionResultForVariationMake(gemstoneItem.getObjectId(), variationGroupDataOfMineral.getGemstoneItemCnt()), Msg.PRESS_THE_AUGMENT_BUTTON_TO_BEGIN);
             } else {
-              player.sendPacket(new IStaticPacket[]{Msg.GEMSTONE_QUANTITY_IS_INCORRECT, ActionFail.STATIC});
+              player.sendPacket(Msg.GEMSTONE_QUANTITY_IS_INCORRECT, ActionFail.STATIC);
             }
           } else {
-            player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+            player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
           }
         } else {
-          player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+          player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
         }
       } else {
-        player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+        player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
       }
     }
   }
@@ -163,7 +159,7 @@ public class RefineryHandler implements IRefineryHandler {
     if (!Functions.CheckPlayerConditions(player)) {
       player.sendPacket(ActionFail.STATIC);
     } else if (targetItem.isAugmented()) {
-      player.sendPacket(new IStaticPacket[]{Msg.ONCE_AN_ITEM_IS_AUGMENTED_IT_CANNOT_BE_AUGMENTED_AGAIN, ActionFail.STATIC});
+      player.sendPacket(Msg.ONCE_AN_ITEM_IS_AUGMENTED_IT_CANNOT_BE_AUGMENTED_AGAIN, ActionFail.STATIC);
     } else {
       List<VariationGroupData> variationGroupDataList = VariationGroupHolder.getInstance().getDataForItemId(targetItem.getItemId());
       if (variationGroupDataList != null && !variationGroupDataList.isEmpty()) {
@@ -172,6 +168,9 @@ public class RefineryHandler implements IRefineryHandler {
         VariationGroupData variationGroupDataOfMineral = null;
         Pair<VariationChanceData, VariationChanceData> variationChanceData = VariationChanceHolder.getInstance().getVariationChanceDataForMineral(mineralItemId);
         Iterator variation1Groups = variationGroupDataList.iterator();
+
+        List<Pair<List<Pair<Integer, Double>>, Double>> variation1;
+        List<Pair<List<Pair<Integer, Double>>, Double>> variation2;
 
         VariationGroupData variation2Groups;
         while(variation1Groups.hasNext()) {
@@ -183,32 +182,30 @@ public class RefineryHandler implements IRefineryHandler {
         }
 
         if (null != variationGroupDataOfMineral && variationChanceData != null) {
-          if ((variationChanceData.getLeft() == null || ((VariationChanceData)variationChanceData.getLeft()).getMineralItemId() == variationGroupDataOfMineral.getMineralItemId()) && (variationChanceData.getRight() == null || ((VariationChanceData)variationChanceData.getRight()).getMineralItemId() == variationGroupDataOfMineral.getMineralItemId())) {
+          if ((variationChanceData.getLeft() == null || variationChanceData.getLeft().getMineralItemId() == variationGroupDataOfMineral.getMineralItemId()) && (variationChanceData.getRight() == null || variationChanceData.getRight().getMineralItemId() == variationGroupDataOfMineral.getMineralItemId())) {
             if (targetItem.getTemplate().isMageItem() && variationChanceData.getRight() == null) {
               LOG.warn("No mage variation for item " + targetItem.getItemId() + " and mineral " + mineralItem.getItemId());
-              player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+              player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
             } else if (!targetItem.getTemplate().isMageItem() && variationChanceData.getLeft() == null) {
               LOG.warn("No warrior variation for item " + targetItem.getItemId() + " and mineral " + mineralItem.getItemId());
-              player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+              player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
             } else if (!mineralItem.getTemplate().testCondition(player, mineralItem, true)) {
               player.sendPacket(ActionFail.STATIC);
             } else if (variationGroupDataOfMineral.getGemstoneItemCnt() <= gemstoneItemCnt && player.getInventory().getCountOf(gemstoneItemId) >= variationGroupDataOfMineral.getGemstoneItemCnt()) {
-              variation1Groups = null;
-              variation2Groups = null;
-              List variation1Groups;
-              List variation2Groups;
+//              List variation1Groups;
+//              List variation2Groups;
               if (targetItem.getTemplate().isMageItem()) {
-                variation1Groups = ((VariationChanceData)variationChanceData.getRight()).getVariation1();
-                variation2Groups = ((VariationChanceData)variationChanceData.getRight()).getVariation2();
+                variation1 = variationChanceData.getRight().getVariation1();
+                 variation2 = variationChanceData.getRight().getVariation2();
               } else {
-                variation1Groups = ((VariationChanceData)variationChanceData.getLeft()).getVariation1();
-                variation2Groups = ((VariationChanceData)variationChanceData.getLeft()).getVariation2();
+                variation1 = variationChanceData.getLeft().getVariation1();
+                variation2 = variationChanceData.getLeft().getVariation2();
               }
 
-              List<Pair<Integer, Double>> variation1 = (List)RandomUtils.pickRandomSortedGroup(variation1Groups, 100.0D);
-              List<Pair<Integer, Double>> variation2 = (List)RandomUtils.pickRandomSortedGroup(variation2Groups, 100.0D);
-              Integer option1 = variation1 != null ? (Integer)RandomUtils.pickRandomSortedGroup(variation1, 100.0D) : 0;
-              Integer option2 = variation2 != null ? (Integer)RandomUtils.pickRandomSortedGroup(variation2, 100.0D) : 0;
+              List<Pair<Integer, Double>> pickRandomSortedGroup = RandomUtils.pickRandomSortedGroup(variation1, 100.0D);
+              List<Pair<Integer, Double>> pickRandomSortedGroup1 = RandomUtils.pickRandomSortedGroup(variation2, 100.0D);
+              Integer option1 = pickRandomSortedGroup != null ? RandomUtils.pickRandomSortedGroup(pickRandomSortedGroup, 100.0D) : 0;
+              Integer option2 = pickRandomSortedGroup1 != null ? RandomUtils.pickRandomSortedGroup(pickRandomSortedGroup1, 100.0D) : 0;
               if (player.getInventory().destroyItem(gemstoneItem, variationGroupDataOfMineral.getGemstoneItemCnt())) {
                 if (player.getInventory().destroyItem(mineralItem, 1L)) {
                   boolean equipped;
@@ -223,10 +220,8 @@ public class RefineryHandler implements IRefineryHandler {
                   }
 
                   player.sendPacket((new InventoryUpdate()).addModifiedItem(targetItem));
-                  Iterator var19 = player.getAllShortCuts().iterator();
 
-                  while(var19.hasNext()) {
-                    ShortCut sc = (ShortCut)var19.next();
+                  for (ShortCut sc : player.getAllShortCuts()) {
                     if (sc.getId() == targetItem.getObjectId() && sc.getType() == 1) {
                       player.sendPacket(new ShortCutRegister(player, sc));
                     }
@@ -237,23 +232,23 @@ public class RefineryHandler implements IRefineryHandler {
                 }
               }
             } else {
-              player.sendPacket(new IStaticPacket[]{Msg.GEMSTONE_QUANTITY_IS_INCORRECT, ActionFail.STATIC});
+              player.sendPacket(Msg.GEMSTONE_QUANTITY_IS_INCORRECT, ActionFail.STATIC);
             }
           } else {
-            player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+            player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
           }
         } else {
-          player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+          player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
         }
       } else {
-        player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+        player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
       }
     }
   }
 
   public void onInitRefineryCancel(Player player) {
     if (Functions.CheckPlayerConditions(player)) {
-      player.sendPacket(new IStaticPacket[]{Msg.SELECT_THE_ITEM_FROM_WHICH_YOU_WISH_TO_REMOVE_AUGMENTATION, ExShowVariationCancelWindow.STATIC});
+      player.sendPacket(Msg.SELECT_THE_ITEM_FROM_WHICH_YOU_WISH_TO_REMOVE_AUGMENTATION, ExShowVariationCancelWindow.STATIC);
     }
   }
 
@@ -264,9 +259,9 @@ public class RefineryHandler implements IRefineryHandler {
       List<VariationGroupData> variationGroupDataList = VariationGroupHolder.getInstance().getDataForItemId(targetCancelItem.getItemId());
       if (variationGroupDataList != null && !variationGroupDataList.isEmpty()) {
         if (!targetCancelItem.isAugmented()) {
-          player.sendPacket(new IStaticPacket[]{Msg.AUGMENTATION_REMOVAL_CAN_ONLY_BE_DONE_ON_AN_AUGMENTED_ITEM, ActionFail.STATIC});
+          player.sendPacket(Msg.AUGMENTATION_REMOVAL_CAN_ONLY_BE_DONE_ON_AN_AUGMENTED_ITEM, ActionFail.STATIC);
         } else {
-          VariationGroupData variationGroupData = (VariationGroupData)variationGroupDataList.get(0);
+          VariationGroupData variationGroupData = variationGroupDataList.get(0);
           if (variationGroupData == null) {
             player.sendPacket(ActionFail.STATIC);
           } else {
@@ -274,7 +269,7 @@ public class RefineryHandler implements IRefineryHandler {
           }
         }
       } else {
-        player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+        player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
       }
     }
   }
@@ -286,9 +281,9 @@ public class RefineryHandler implements IRefineryHandler {
       List<VariationGroupData> variationGroupDataList = VariationGroupHolder.getInstance().getDataForItemId(targetCancelItem.getItemId());
       if (variationGroupDataList != null && !variationGroupDataList.isEmpty()) {
         if (!targetCancelItem.isAugmented()) {
-          player.sendPacket(new IStaticPacket[]{Msg.AUGMENTATION_REMOVAL_CAN_ONLY_BE_DONE_ON_AN_AUGMENTED_ITEM, ActionFail.STATIC});
+          player.sendPacket(Msg.AUGMENTATION_REMOVAL_CAN_ONLY_BE_DONE_ON_AN_AUGMENTED_ITEM, ActionFail.STATIC);
         } else {
-          VariationGroupData variationGroupData = (VariationGroupData)variationGroupDataList.get(0);
+          VariationGroupData variationGroupData = variationGroupDataList.get(0);
           if (variationGroupData == null) {
             player.sendPacket(ActionFail.STATIC);
           } else {
@@ -298,7 +293,7 @@ public class RefineryHandler implements IRefineryHandler {
             }
 
             if (!player.reduceAdena(price, true)) {
-              player.sendPacket(new IStaticPacket[]{ActionFail.STATIC, Msg.YOU_DO_NOT_HAVE_ENOUGH_ADENA});
+              player.sendPacket(ActionFail.STATIC, Msg.YOU_DO_NOT_HAVE_ENOUGH_ADENA);
             } else {
               boolean equipped;
               if (equipped = targetCancelItem.isEquipped()) {
@@ -314,11 +309,9 @@ public class RefineryHandler implements IRefineryHandler {
               InventoryUpdate iu = (new InventoryUpdate()).addModifiedItem(targetCancelItem);
               SystemMessage sm = new SystemMessage(1965);
               sm.addItemName(targetCancelItem.getItemId());
-              player.sendPacket(new IStaticPacket[]{new ExVariationCancelResult(1), iu, sm});
-              Iterator var10 = player.getAllShortCuts().iterator();
+              player.sendPacket(new ExVariationCancelResult(1), iu, sm);
 
-              while(var10.hasNext()) {
-                ShortCut sc = (ShortCut)var10.next();
+              for (ShortCut sc : player.getAllShortCuts()) {
                 if (sc.getId() == targetCancelItem.getObjectId() && sc.getType() == 1) {
                   player.sendPacket(new ShortCutRegister(player, sc));
                 }
@@ -329,7 +322,7 @@ public class RefineryHandler implements IRefineryHandler {
           }
         }
       } else {
-        player.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC});
+        player.sendPacket(Msg.THIS_IS_NOT_A_SUITABLE_ITEM, ActionFail.STATIC);
       }
     }
   }

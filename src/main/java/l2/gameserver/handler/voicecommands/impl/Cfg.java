@@ -20,8 +20,9 @@ import l2.gameserver.network.authcomm.AuthServerCommunication;
 import l2.gameserver.network.authcomm.gs2as.IGPwdCng;
 import l2.gameserver.network.l2.components.CustomMessage;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
-
+@Slf4j
 public class Cfg implements IVoicedCommandHandler {
   private static final Pattern PASSWORD_BYPASS_PATTERN = Pattern.compile("^([\\w\\d_-]{4,18})\\s+([\\w\\d_-]{4,16})$");
   private static final long PASSWORD_CHANGE_INTERVAL = 3600000L;
@@ -39,7 +40,7 @@ public class Cfg implements IVoicedCommandHandler {
         if (lastChanged != null && !lastChanged.isEmpty()) {
           long lastChange = Long.parseLong(lastChanged) * 1000L;
           if (lastChange + 3600000L > System.currentTimeMillis()) {
-            activeChar.sendMessage(new CustomMessage("usercommandhandlers.CantChangePasswordSoFast", activeChar, new Object[0]));
+            activeChar.sendMessage(new CustomMessage("usercommandhandlers.CantChangePasswordSoFast", activeChar));
             canChange = false;
           }
         }
@@ -53,12 +54,12 @@ public class Cfg implements IVoicedCommandHandler {
             return true;
           }
 
-          activeChar.sendMessage(new CustomMessage("usercommandhandlers.PasswordNotMet", activeChar, new Object[0]));
+          activeChar.sendMessage(new CustomMessage("usercommandhandlers.PasswordNotMet", activeChar));
         }
 
-        NpcHtmlMessage dialog = new NpcHtmlMessage(5);
-        dialog.setFile("command/passchg.htm");
-        activeChar.sendPacket(dialog);
+        NpcHtmlMessage dialogNpcHtmlMessage = new NpcHtmlMessage(5);
+        dialogNpcHtmlMessage.setFile("command/passchg.htm");
+        activeChar.sendPacket(dialogNpcHtmlMessage);
       } else if (command.equalsIgnoreCase(this._commandList[3])) {
         dialog = new NpcHtmlMessage(5);
         dialog.setFile("command/repair.htm");
@@ -78,9 +79,10 @@ public class Cfg implements IVoicedCommandHandler {
             while(rset.next()) {
               charName = rset.getString("char_name");
               int charId = rset.getInt("obj_Id");
-              cl.append("<a action=\"bypass -h user_repair " + charId + "\">" + charName + "</a><br1>");
+              cl.append("<a action=\"bypass -h user_repair ").append(charId).append("\">").append(charName).append("</a><br1>");
             }
-          } catch (Exception var23) {
+          } catch (Exception e) {
+            log.error("useVoicedCommand: eMessage={}, eClause={}", e.getMessage(), e.getClass());
           } finally {
             DbUtils.closeQuietly(con, fpstmt, rset);
           }
@@ -99,16 +101,14 @@ public class Cfg implements IVoicedCommandHandler {
             fpstmt.setInt(2, charId);
             rset = fpstmt.executeQuery();
             if (!rset.next()) {
-              activeChar.sendMessage(new CustomMessage("usercommandhandlers.CharNotFound", activeChar, new Object[0]));
-              boolean var39 = true;
-              return var39;
+              activeChar.sendMessage(new CustomMessage("usercommandhandlers.CharNotFound", activeChar));
+              return true;
             }
 
             charName = rset.getString("char_name");
             if (World.getPlayer(charId) != null) {
-              activeChar.sendMessage(new CustomMessage("usercommandhandlers.CharacterOnline", activeChar, new Object[0]));
-              boolean var40 = true;
-              return var40;
+              activeChar.sendMessage(new CustomMessage("usercommandhandlers.CharacterOnline", activeChar));
+              return true;
             }
 
             DbUtils.close(fpstmt, rset);
@@ -125,7 +125,7 @@ public class Cfg implements IVoicedCommandHandler {
             fpstmt.executeUpdate();
             DbUtils.close(fpstmt);
             dialog.replace("%repair%", "Character successfully repaired.");
-            activeChar.sendMessage(new CustomMessage("usercommandhandlers.CharacterRepaired", activeChar, new Object[0]));
+            activeChar.sendMessage(new CustomMessage("usercommandhandlers.CharacterRepaired", activeChar));
           } catch (Exception var21) {
             dialog.replace("%repair%", "Character reparation failed.");
             var21.printStackTrace();
@@ -191,7 +191,7 @@ public class Cfg implements IVoicedCommandHandler {
             if (param[1].equalsIgnoreCase("on")) {
               activeChar.setHWIDLock(activeChar.getNetConnection().getHwid());
             } else if (param[1].startsWith("of")) {
-              activeChar.setHWIDLock((String)null);
+              activeChar.setHWIDLock(null);
             }
           }
 
@@ -199,7 +199,7 @@ public class Cfg implements IVoicedCommandHandler {
             if (param[1].equalsIgnoreCase("on")) {
               activeChar.setIPLock(activeChar.getNetConnection().getIpAddr());
             } else if (param[1].startsWith("of")) {
-              activeChar.setIPLock((String)null);
+              activeChar.setIPLock(null);
             }
           }
 
@@ -242,17 +242,17 @@ public class Cfg implements IVoicedCommandHandler {
               }
 
               activeChar.setAutoLootAdena(true);
-              activeChar.sendMessage(new CustomMessage("usercommandhandlers.AutoLootAll", activeChar, new Object[0]));
+              activeChar.sendMessage(new CustomMessage("usercommandhandlers.AutoLootAll", activeChar));
             } else if (param[1].equalsIgnoreCase("ad")) {
               activeChar.setAutoLoot(false);
               activeChar.setAutoLootHerbs(false);
               activeChar.setAutoLootAdena(true);
-              activeChar.sendMessage(new CustomMessage("usercommandhandlers.AutoLootAdena", activeChar, new Object[0]));
+              activeChar.sendMessage(new CustomMessage("usercommandhandlers.AutoLootAdena", activeChar));
             } else if (param[1].equalsIgnoreCase("of")) {
               activeChar.setAutoLoot(false);
               activeChar.setAutoLootHerbs(false);
               activeChar.setAutoLootAdena(false);
-              activeChar.sendMessage(new CustomMessage("usercommandhandlers.AutoLootOff", activeChar, new Object[0]));
+              activeChar.sendMessage(new CustomMessage("usercommandhandlers.AutoLootOff", activeChar));
             }
           }
         }

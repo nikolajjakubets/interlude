@@ -35,34 +35,32 @@ public class PlayerMessageStack {
       cha.sendPacket(message);
     } else {
       synchronized(this._stack) {
-        Object messages;
+        List<L2GameServerPacket> messages;
         if (this._stack.containsKey(char_obj_id)) {
-          messages = (List)this._stack.remove(char_obj_id);
+          messages = this._stack.remove(char_obj_id);
         } else {
           messages = new ArrayList<>();
         }
 
-        ((List)messages).add(message);
+        messages.add(message);
         this._stack.put(char_obj_id, messages);
       }
     }
   }
 
   public void CheckMessages(Player cha) {
-    List<L2GameServerPacket> messages = null;
+    List<L2GameServerPacket> messages;
     synchronized(this._stack) {
       if (!this._stack.containsKey(cha.getObjectId())) {
         return;
       }
 
-      messages = (List)this._stack.remove(cha.getObjectId());
+      messages = this._stack.remove(cha.getObjectId());
     }
 
     if (messages != null && messages.size() != 0) {
-      Iterator var3 = messages.iterator();
 
-      while(var3.hasNext()) {
-        L2GameServerPacket message = (L2GameServerPacket)var3.next();
+      for (L2GameServerPacket message : messages) {
         cha.sendPacket(message);
       }
 

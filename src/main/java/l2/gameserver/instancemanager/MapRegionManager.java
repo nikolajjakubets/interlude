@@ -35,7 +35,7 @@ public class MapRegionManager extends AbstractHolder {
   public void addRegionData(RegionData rd) {
     for(int x = this.regionX(rd.getTerritory().getXmin()); x <= this.regionX(rd.getTerritory().getXmax()); ++x) {
       for(int y = this.regionY(rd.getTerritory().getYmin()); y <= this.regionY(rd.getTerritory().getYmax()); ++y) {
-        this.map[x][y] = (RegionData[])ArrayUtils.add(this.map[x][y], rd);
+        this.map[x][y] = ArrayUtils.add(this.map[x][y], rd);
       }
     }
 
@@ -54,7 +54,7 @@ public class MapRegionManager extends AbstractHolder {
 
     for (RegionData regionDatas : var5) {
       if (regionDatas.getClass() == clazz && regionDatas.getTerritory().isInside(x, y, z)) {
-        return regionDatas;
+        return (T) regionDatas;
       }
     }
 
