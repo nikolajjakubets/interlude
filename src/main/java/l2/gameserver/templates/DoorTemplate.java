@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class DoorTemplate extends CharTemplate {
   private static final Logger _log = LoggerFactory.getLogger(DoorTemplate.class);
-  public static final Constructor<DoorAI> DEFAULT_AI_CONSTRUCTOR = CharacterAI.class.getConstructors()[0];
+  public static final Constructor<?> DEFAULT_AI_CONSTRUCTOR = CharacterAI.class.getConstructors()[0];
   private final int _id;
   private final String _name;
   private final DoorTemplate.DoorType _doorType;
@@ -34,14 +34,14 @@ public class DoorTemplate extends CharTemplate {
   private final int _masterDoor;
   private StatsSet _aiParams;
   private Class<DoorAI> _classAI = DoorAI.class;
-  private Constructor<DoorAI> _constructorAI;
+  private Constructor<?> _constructorAI;
 
   public DoorTemplate(StatsSet set) {
     super(set);
     this._constructorAI = DEFAULT_AI_CONSTRUCTOR;
     this._id = set.getInteger("uid");
     this._name = set.getString("name");
-    this._doorType = (DoorTemplate.DoorType)set.getEnum("door_type", DoorTemplate.DoorType.class, DoorTemplate.DoorType.DOOR);
+    this._doorType = set.getEnum("door_type", DoorType.class, DoorType.DOOR);
     this._unlockable = set.getBool("unlockable", false);
     this._isHPVisible = set.getBool("show_hp", false);
     this._opened = set.getBool("opened", false);
@@ -58,12 +58,12 @@ public class DoorTemplate extends CharTemplate {
   }
 
   private void setAI(String ai) {
-    Class classAI = null;
+    Class classAI;
 
     try {
       classAI = Class.forName("l2.gameserver.ai." + ai);
     } catch (ClassNotFoundException var4) {
-      classAI = (Class)Scripts.getInstance().getClasses().get("ai.door." + ai);
+      classAI = Scripts.getInstance().getClasses().get("ai.door." + ai);
     }
 
     if (classAI == null) {
@@ -81,7 +81,7 @@ public class DoorTemplate extends CharTemplate {
 
   public CharacterAI getNewAI(DoorInstance door) {
     try {
-      return (CharacterAI)this._constructorAI.newInstance(door);
+      return (CharacterAI) this._constructorAI.newInstance(door);
     } catch (Exception var3) {
       _log.error("Unable to create ai of doorId " + this._id, var3);
       return new DoorAI(door);
@@ -148,11 +148,11 @@ public class DoorTemplate extends CharTemplate {
     return this._aiParams;
   }
 
-  public static enum DoorType {
+  public enum DoorType {
     DOOR,
     WALL;
 
-    private DoorType() {
+    DoorType() {
     }
   }
 }

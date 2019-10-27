@@ -99,7 +99,7 @@ public class Functions {
   }
 
   public static List<Pair<ItemTemplate, Long>> parseItemIdAmountList(String itemIdAmountListText) {
-    List<Pair<ItemTemplate, Long>> result = new ArrayList();
+    List<Pair<ItemTemplate, Long>> result = new ArrayList<>();
     StringTokenizer itemsListTokenizer = new StringTokenizer(itemIdAmountListText, ",;/");
 
     while(itemsListTokenizer.hasMoreTokens()) {
@@ -570,7 +570,7 @@ public class Functions {
   }
 
   public static Map<String, ScheduledFuture<?>> ScheduleTimeStarts(Runnable r, String[] times) {
-    Map<String, ScheduledFuture<?>> result = new HashMap();
+    Map<String, ScheduledFuture<?>> result = new HashMap<>();
     if (r != null && times != null && times.length != 0) {
       Calendar currentTime = Calendar.getInstance();
       SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");

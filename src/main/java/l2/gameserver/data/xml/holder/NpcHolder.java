@@ -57,7 +57,7 @@ public final class NpcHolder extends AbstractHolder {
 
   private void buildFastLookupTable() {
     this._npcsByLevel = new TIntObjectHashMap();
-    this._npcsNames = new HashMap();
+    this._npcsNames = new HashMap<>();
     int highestId = 0;
     int[] var2 = this._npcs.keys();
     int npcId = var2.length;
@@ -79,7 +79,7 @@ public final class NpcHolder extends AbstractHolder {
       this._allTemplates[npcId] = npc;
       Object byLevel;
       if ((byLevel = (List)this._npcsByLevel.get(npc.level)) == null) {
-        this._npcsByLevel.put(npcId, byLevel = new ArrayList());
+        this._npcsByLevel.put(npcId, byLevel = new ArrayList<>());
       }
 
       ((List)byLevel).add(npc);

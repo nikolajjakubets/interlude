@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 public class MacroList {
   private static final Logger _log = LoggerFactory.getLogger(MacroList.class);
   private final Player player;
-  private final Map<Integer, Macro> _macroses = new HashMap();
+  private final Map<Integer, Macro> _macroses = new HashMap<>();
   private int _revision;
   private int _macroId;
 
@@ -168,7 +168,7 @@ public class MacroList {
         String name = Strings.stripSlashes(rset.getString("name"));
         String descr = Strings.stripSlashes(rset.getString("descr"));
         String acronym = Strings.stripSlashes(rset.getString("acronym"));
-        List<L2MacroCmd> commands = new ArrayList();
+        List<L2MacroCmd> commands = new ArrayList<>();
         StringTokenizer st1 = new StringTokenizer(rset.getString("commands"), ";");
 
         while(st1.hasMoreTokens()) {

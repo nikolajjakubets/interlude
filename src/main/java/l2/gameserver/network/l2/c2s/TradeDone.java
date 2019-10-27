@@ -33,7 +33,7 @@ public class TradeDone extends L2GameClientPacket {
   }
 
   protected void runImpl() {
-    Player parthner1 = ((GameClient)this.getClient()).getActiveChar();
+    Player parthner1 = this.getClient().getActiveChar();
     if (parthner1 != null) {
       Request request = parthner1.getRequest();
       if (request != null && request.isTypeOf(L2RequestType.TRADE)) {
@@ -59,18 +59,18 @@ public class TradeDone extends L2GameClientPacket {
           } else if (this._response == 0) {
             request.cancel();
             parthner1.sendPacket(SendTradeDone.FAIL);
-            parthner2.sendPacket(new IStaticPacket[]{SendTradeDone.FAIL, (new SystemMessage(124)).addString(parthner1.getName())});
+            parthner2.sendPacket(SendTradeDone.FAIL, (new SystemMessage(124)).addString(parthner1.getName()));
           } else if (!parthner2.isInActingRange(parthner1)) {
             parthner1.sendPacket(Msg.YOUR_TARGET_IS_OUT_OF_RANGE);
           } else {
             request.confirm(parthner1);
-            parthner2.sendPacket(new IStaticPacket[]{(new SystemMessage(121)).addString(parthner1.getName()), TradePressOtherOk.STATIC});
+            parthner2.sendPacket((new SystemMessage(121)).addString(parthner1.getName()), TradePressOtherOk.STATIC);
             if (!request.isConfirmed(parthner2)) {
               parthner1.sendActionFailed();
             } else {
               List<TradeItem> tradeList1 = parthner1.getTradeList();
               List<TradeItem> tradeList2 = parthner2.getTradeList();
-              int slots = false;
+//              int slots = false;
               long weight = 0L;
               boolean success = false;
               parthner1.getInventory().writeLock();
@@ -78,7 +78,6 @@ public class TradeDone extends L2GameClientPacket {
 
               try {
                 int slots = 0;
-                weight = 0L;
                 Iterator var10 = tradeList1.iterator();
 
                 TradeItem ti;
@@ -90,7 +89,7 @@ public class TradeDone extends L2GameClientPacket {
                     return;
                   }
 
-                  weight = SafeMath.addAndCheck(weight, SafeMath.mulAndCheck(ti.getCount(), (long)ti.getItem().getWeight()));
+                  weight = SafeMath.addAndCheck(weight, SafeMath.mulAndCheck(ti.getCount(), ti.getItem().getWeight()));
                   if (!ti.getItem().isStackable() || parthner2.getInventory().getItemByItemId(ti.getItemId()) == null) {
                     ++slots;
                   }
@@ -98,7 +97,7 @@ public class TradeDone extends L2GameClientPacket {
 
                 if (!parthner2.getInventory().validateWeight(weight)) {
                   parthner2.sendPacket(Msg.YOU_HAVE_EXCEEDED_THE_WEIGHT_LIMIT);
-                } else if (!parthner2.getInventory().validateCapacity((long)slots)) {
+                } else if (!parthner2.getInventory().validateCapacity(slots)) {
                   parthner2.sendPacket(Msg.YOUR_INVENTORY_IS_FULL);
                 } else {
                   slots = 0;
@@ -112,7 +111,7 @@ public class TradeDone extends L2GameClientPacket {
                       return;
                     }
 
-                    weight = SafeMath.addAndCheck(weight, SafeMath.mulAndCheck(ti.getCount(), (long)ti.getItem().getWeight()));
+                    weight = SafeMath.addAndCheck(weight, SafeMath.mulAndCheck(ti.getCount(), ti.getItem().getWeight()));
                     if (!ti.getItem().isStackable() || parthner1.getInventory().getItemByItemId(ti.getItemId()) == null) {
                       ++slots;
                     }
@@ -120,7 +119,7 @@ public class TradeDone extends L2GameClientPacket {
 
                   if (!parthner1.getInventory().validateWeight(weight)) {
                     parthner1.sendPacket(Msg.YOU_HAVE_EXCEEDED_THE_WEIGHT_LIMIT);
-                  } else if (!parthner1.getInventory().validateCapacity((long)slots)) {
+                  } else if (!parthner1.getInventory().validateCapacity(slots)) {
                     parthner1.sendPacket(Msg.YOUR_INVENTORY_IS_FULL);
                   } else {
                     var10 = tradeList1.iterator();

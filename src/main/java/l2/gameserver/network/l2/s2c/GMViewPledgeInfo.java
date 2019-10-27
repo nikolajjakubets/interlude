@@ -27,7 +27,7 @@ public class GMViewPledgeInfo extends L2GameServerPacket {
   private int hasCastle;
   private int hasHideout;
   private int atWar;
-  private List<GMViewPledgeInfo.PledgeMemberInfo> infos = new ArrayList();
+  private List<GMViewPledgeInfo.PledgeMemberInfo> infos = new ArrayList<>();
 
   public GMViewPledgeInfo(Player activeChar) {
     Clan clan = activeChar.getClan();

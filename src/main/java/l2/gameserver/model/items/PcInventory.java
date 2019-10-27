@@ -192,7 +192,7 @@ public class PcInventory extends Inventory {
     Player owner = this.getActor();
     String LastLure = owner.getVar("LastLure");
     if (LastLure != null && !LastLure.isEmpty()) {
-      last_lure = Integer.valueOf(LastLure);
+      last_lure = Integer.parseInt(LastLure);
     }
 
     ItemInstance[] var5 = this.getItems();

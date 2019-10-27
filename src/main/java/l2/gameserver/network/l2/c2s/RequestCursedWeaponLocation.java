@@ -25,7 +25,7 @@ public class RequestCursedWeaponLocation extends L2GameClientPacket {
   protected void runImpl() {
     Creature activeChar = ((GameClient)this.getClient()).getActiveChar();
     if (activeChar != null) {
-      List<CursedWeaponInfo> list = new ArrayList();
+      List<CursedWeaponInfo> list = new ArrayList<>();
       CursedWeapon[] var3 = CursedWeaponsManager.getInstance().getCursedWeapons();
       int var4 = var3.length;
 

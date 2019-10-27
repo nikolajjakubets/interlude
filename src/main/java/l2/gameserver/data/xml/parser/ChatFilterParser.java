@@ -46,7 +46,7 @@ public class ChatFilterParser extends AbstractFileParser<ChatFilters> {
   }
 
   protected List<ChatFilterMatcher> parseMatchers(Element n) throws Exception {
-    List<ChatFilterMatcher> matchers = new ArrayList();
+    List<ChatFilterMatcher> matchers = new ArrayList<>();
     Iterator nItr = n.elementIterator();
 
     while(true) {
@@ -55,7 +55,7 @@ public class ChatFilterParser extends AbstractFileParser<ChatFilters> {
         StringTokenizer st;
         ArrayList words;
         if (e.getName().equals("Channels")) {
-          words = new ArrayList();
+          words = new ArrayList<>();
           st = new StringTokenizer(e.getText(), ",");
 
           while(st.hasMoreTokens()) {
@@ -75,7 +75,7 @@ public class ChatFilterParser extends AbstractFileParser<ChatFilters> {
 
           matchers.add(new MatchMaps(maps.toNativeArray()));
         } else if (e.getName().equals("Words")) {
-          words = new ArrayList();
+          words = new ArrayList<>();
           st = new StringTokenizer(e.getText());
 
           while(st.hasMoreTokens()) {

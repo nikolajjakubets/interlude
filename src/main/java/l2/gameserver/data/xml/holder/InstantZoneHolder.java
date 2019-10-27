@@ -47,7 +47,7 @@ public class InstantZoneHolder extends AbstractHolder {
     } else {
       Long time = null;
       if (this.getSharedReuseInstanceIds(id) != null && !this.getSharedReuseInstanceIds(id).isEmpty()) {
-        List<Long> reuses = new ArrayList();
+        List<Long> reuses = new ArrayList<>();
         Iterator var6 = this.getSharedReuseInstanceIds(id).iterator();
 
         while(var6.hasNext()) {
@@ -73,7 +73,7 @@ public class InstantZoneHolder extends AbstractHolder {
     if (this.getInstantZone(id).getSharedReuseGroup() < 1) {
       return null;
     } else {
-      List<Integer> sharedInstanceIds = new ArrayList();
+      List<Integer> sharedInstanceIds = new ArrayList<>();
       Iterator var3 = this._zones.values().iterator();
 
       while(var3.hasNext()) {
@@ -91,7 +91,7 @@ public class InstantZoneHolder extends AbstractHolder {
     if (groupId < 1) {
       return null;
     } else {
-      List<Integer> sharedInstanceIds = new ArrayList();
+      List<Integer> sharedInstanceIds = new ArrayList<>();
       Iterator var3 = this._zones.values().iterator();
 
       while(var3.hasNext()) {

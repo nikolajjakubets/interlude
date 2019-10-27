@@ -16,7 +16,7 @@ import l2.gameserver.model.Skill;
 import l2.gameserver.templates.SkillEnchant;
 
 public class ExEnchantSkillList extends L2GameServerPacket {
-  private final List<ExEnchantSkillList.SkillEnchantEntry> _skills = new ArrayList();
+  private final List<ExEnchantSkillList.SkillEnchantEntry> _skills = new ArrayList<>();
 
   public static ExEnchantSkillList packetFor(Player player) {
     Collection<Skill> playerSkills = player.getAllSkills();

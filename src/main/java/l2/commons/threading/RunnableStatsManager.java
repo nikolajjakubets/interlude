@@ -17,7 +17,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public final class RunnableStatsManager {
     private static final RunnableStatsManager _instance = new RunnableStatsManager();
-    private final Map<Class<?>, RunnableStatsManager.ClassStat> classStats = new HashMap();
+    private final Map<Class<?>, RunnableStatsManager.ClassStat> classStats = new HashMap<>();
     private final Lock lock = new ReentrantLock();
 
     public RunnableStatsManager() {

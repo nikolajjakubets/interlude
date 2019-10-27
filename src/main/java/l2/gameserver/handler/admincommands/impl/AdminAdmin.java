@@ -226,7 +226,7 @@ public class AdminAdmin implements IAdminCommandHandler {
           }
 
           Player pl = ob.getPlayer();
-          List<String> _s = new ArrayList();
+          List<String> _s = new ArrayList<>();
           _s.add("==========TARGET STATS:");
           _s.add("==Magic Resist: " + pl.calcStat(Stats.MAGIC_RESIST, (Creature)null, (Skill)null));
           _s.add("==Magic Power: " + pl.calcStat(Stats.MAGIC_POWER, 1.0D, (Creature)null, (Skill)null));

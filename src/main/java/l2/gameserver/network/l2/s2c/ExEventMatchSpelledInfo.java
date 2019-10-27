@@ -12,7 +12,7 @@ import l2.gameserver.model.Player;
 
 public class ExEventMatchSpelledInfo extends L2GameServerPacket {
   private int char_obj_id = 0;
-  private List<ExEventMatchSpelledInfo.Effect> _effects = new ArrayList();
+  private List<ExEventMatchSpelledInfo.Effect> _effects = new ArrayList<>();
 
   public ExEventMatchSpelledInfo() {
   }

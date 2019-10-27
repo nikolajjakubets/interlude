@@ -530,10 +530,10 @@ public class Player extends Playable implements PlayerGroup {
     this._freight = new PcFreight(this);
     this._lastNpcInteractionTime = 0L;
     this._msgBucket = new LinkedList();
-    this._recipebook = new TreeMap();
-    this._commonrecipebook = new TreeMap();
-    this._premiumItems = new TreeMap();
-    this._quests = new HashMap();
+    this._recipebook = new TreeMap<>();
+    this._commonrecipebook = new TreeMap<>();
+    this._premiumItems = new TreeMap<>();
+    this._quests = new HashMap<>();
     this._shortCuts = new ShortCutList(this);
     this._macroses = new MacroList(this);
     this._privatestore = new AtomicInteger(0);
@@ -585,13 +585,13 @@ public class Player extends Playable implements PlayerGroup {
     this._fishing = new Fishing(this);
     this._storeLock = new ReentrantLock();
     this._offline = false;
-    this._transformationSkills = new HashMap();
+    this._transformationSkills = new HashMap<>();
     this._expandInventory = 0;
     this._expandWarehouse = 0;
     this._buffAnimRange = 1500;
     this._invisibleType = InvisibleType.NONE;
     this._postFriends = Containers.emptyIntObjectMap();
-    this._blockedActions = new ArrayList();
+    this._blockedActions = new ArrayList<>();
     this._notShowTraders = false;
     this._debug = false;
     this._sharedGroupReuses = new CHashIntObjectMap();
@@ -1103,7 +1103,7 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public List<QuestState> getQuestsForEvent(NpcInstance npc, QuestEventType event) {
-    List<QuestState> states = new ArrayList();
+    List<QuestState> states = new ArrayList<>();
     Quest[] quests = npc.getTemplate().getEventQuests(event);
     if (quests != null) {
       Quest[] var6 = quests;
@@ -3209,7 +3209,7 @@ public class Player extends Playable implements PlayerGroup {
     } else if (this.isInObserverMode() && this.getCurrentRegion() != this.getObserverRegion() && this.getObserverRegion() == forPlayer.getCurrentRegion()) {
       return Collections.emptyList();
     } else {
-      List<L2GameServerPacket> list = new ArrayList();
+      List<L2GameServerPacket> list = new ArrayList<>();
       if (forPlayer.getObjectId() != this.getObjectId()) {
         list.add(this.isPolymorphed() ? new NpcInfoPoly(this) : new CharInfo(this));
       }
@@ -7381,7 +7381,7 @@ public class Player extends Playable implements PlayerGroup {
     if (this._transformationId == 0 && !this.isCursedWeaponEquipped()) {
       return super.getAllSkills();
     } else {
-      Map<Integer, Skill> tempSkills = new HashMap();
+      Map<Integer, Skill> tempSkills = new HashMap<>();
       Iterator var2 = super.getAllSkills().iterator();
 
       while(var2.hasNext()) {
@@ -8067,7 +8067,7 @@ public class Player extends Playable implements PlayerGroup {
 
   public void addTrap(TrapInstance trap) {
     if (this._traps == null) {
-      this._traps = new HashMap();
+      this._traps = new HashMap<>();
     }
 
     this._traps.put(trap.getObjectId(), trap.getStoredId());
@@ -8097,7 +8097,7 @@ public class Player extends Playable implements PlayerGroup {
   public void destroyAllTraps() {
     Map<Integer, Long> traps = this._traps;
     if (traps != null && !traps.isEmpty()) {
-      List<TrapInstance> toRemove = new ArrayList();
+      List<TrapInstance> toRemove = new ArrayList<>();
       Iterator var3 = traps.keySet().iterator();
 
       while(var3.hasNext()) {

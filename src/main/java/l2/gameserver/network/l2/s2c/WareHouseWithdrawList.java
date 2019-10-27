@@ -19,7 +19,7 @@ import l2.gameserver.templates.item.ItemTemplate.ItemClass;
 
 public class WareHouseWithdrawList extends L2GameServerPacket {
   private long _adena;
-  private List<ItemInfo> _itemList = new ArrayList();
+  private List<ItemInfo> _itemList = new ArrayList<>();
   private int _type;
 
   public WareHouseWithdrawList(Player player, WarehouseType type, ItemClass clss) {

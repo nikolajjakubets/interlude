@@ -12,7 +12,7 @@ import l2.gameserver.model.Party;
 import l2.gameserver.model.Player;
 
 public class ExMPCCShowPartyMemberInfo extends L2GameServerPacket {
-  private List<ExMPCCShowPartyMemberInfo.PartyMemberInfo> members = new ArrayList();
+  private List<ExMPCCShowPartyMemberInfo.PartyMemberInfo> members = new ArrayList<>();
 
   public ExMPCCShowPartyMemberInfo(Party party) {
     Iterator var2 = party.getPartyMembers().iterator();

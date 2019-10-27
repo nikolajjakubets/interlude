@@ -30,7 +30,7 @@ public class MultiValueIntegerMap {
   }
 
   public List<Integer> allValues() {
-    List<Integer> result = new ArrayList();
+    List<Integer> result = new ArrayList<>();
     Iterator var2 = this.map.entrySet().iterator();
 
     while(var2.hasNext()) {

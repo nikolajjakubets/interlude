@@ -71,7 +71,7 @@ public class OlympiadBufferInstance extends NpcInstance {
         int id = Integer.parseInt(st.nextToken());
         int lvl = Integer.parseInt(st.nextToken());
         Skill skill = SkillTable.getInstance().getInfo(id, lvl);
-        List<Creature> target = new ArrayList();
+        List<Creature> target = new ArrayList<>();
         target.add(player);
         this.broadcastPacket(new L2GameServerPacket[]{new MagicSkillUse(this, player, id, lvl, 0, 0L)});
         this.callSkill(skill, target, true);

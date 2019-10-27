@@ -179,7 +179,7 @@ public class CursedWeapon {
     }
 
     Skill skill = SkillTable.getInstance().getInfo(this._skillId, level);
-    List<Skill> ret = new ArrayList();
+    List<Skill> ret = new ArrayList<>();
     ret.add(skill);
     AddedSkill[] var5 = skill.getAddedSkills();
     int var6 = var5.length;

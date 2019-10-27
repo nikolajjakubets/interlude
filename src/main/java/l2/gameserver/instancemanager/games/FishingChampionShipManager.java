@@ -33,12 +33,12 @@ public class FishingChampionShipManager {
   private static final Logger _log = LoggerFactory.getLogger(FishingChampionShipManager.class);
   private static final FishingChampionShipManager _instance = new FishingChampionShipManager();
   private long _enddate = 0L;
-  private List<String> _playersName = new ArrayList();
-  private List<String> _fishLength = new ArrayList();
-  private List<String> _winPlayersName = new ArrayList();
-  private List<String> _winFishLength = new ArrayList();
-  private List<FishingChampionShipManager.Fisher> _tmpPlayers = new ArrayList();
-  private List<FishingChampionShipManager.Fisher> _winPlayers = new ArrayList();
+  private List<String> _playersName = new ArrayList<>();
+  private List<String> _fishLength = new ArrayList<>();
+  private List<String> _winPlayersName = new ArrayList<>();
+  private List<String> _winFishLength = new ArrayList<>();
+  private List<FishingChampionShipManager.Fisher> _tmpPlayers = new ArrayList<>();
+  private List<FishingChampionShipManager.Fisher> _winPlayers = new ArrayList<>();
   private double _minFishLength = 0.0D;
   private boolean _needRefresh = true;
 

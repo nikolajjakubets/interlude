@@ -65,7 +65,7 @@ public class SendWareHouseDepositList extends L2GameClientPacket {
         if (whkeeper != null && whkeeper.isInActingRange(activeChar)) {
           PcInventory inventory = activeChar.getInventory();
           boolean privatewh = activeChar.getUsingWarehouseType() != WarehouseType.CLAN;
-          Object warehouse;
+          Warehouse warehouse;
           if (privatewh) {
             warehouse = activeChar.getWarehouse();
           } else {
@@ -73,16 +73,16 @@ public class SendWareHouseDepositList extends L2GameClientPacket {
           }
 
           inventory.writeLock();
-          ((Warehouse)warehouse).writeLock();
+          warehouse.writeLock();
 
           try {
-            int slotsleft = false;
+//            int slotsleft = false;
             long adenaDeposit = 0L;
             int slotsleft;
             if (privatewh) {
-              slotsleft = activeChar.getWarehouseLimit() - ((Warehouse)warehouse).getSize();
+              slotsleft = activeChar.getWarehouseLimit() - warehouse.getSize();
             } else {
-              slotsleft = activeChar.getClan().getWhBonus() + Config.WAREHOUSE_SLOTS_CLAN - ((Warehouse)warehouse).getSize();
+              slotsleft = activeChar.getClan().getWhBonus() + Config.WAREHOUSE_SLOTS_CLAN - warehouse.getSize();
             }
 
             int items = 0;
@@ -90,7 +90,7 @@ public class SendWareHouseDepositList extends L2GameClientPacket {
             for(int i = 0; i < this._count; ++i) {
               ItemInstance item = inventory.getItemByObjectId(this._items[i]);
               if (item != null && item.getCount() >= this._itemQ[i] && item.canBeStored(activeChar, privatewh)) {
-                if (!item.isStackable() || ((Warehouse)warehouse).getItemByItemId(item.getItemId()) == null) {
+                if (!item.isStackable() || warehouse.getItemByItemId(item.getItemId()) == null) {
                   if (slotsleft <= 0) {
                     this._items[i] = 0;
                     this._itemQ[i] = 0L;
@@ -135,14 +135,14 @@ public class SendWareHouseDepositList extends L2GameClientPacket {
               if (this._items[i] != 0) {
                 ItemInstance item = inventory.removeItemByObjectId(this._items[i], this._itemQ[i]);
                 Log.LogItem(activeChar, privatewh ? ItemLog.WarehouseDeposit : ItemLog.ClanWarehouseDeposit, item);
-                ((Warehouse)warehouse).addItem(item);
+                warehouse.addItem(item);
               }
             }
           } catch (ArithmeticException var17) {
             this.sendPacket(Msg.YOU_HAVE_EXCEEDED_THE_QUANTITY_THAT_CAN_BE_INPUTTED);
             return;
           } finally {
-            ((Warehouse)warehouse).writeUnlock();
+            warehouse.writeUnlock();
             inventory.writeUnlock();
           }
 

@@ -81,7 +81,7 @@ public final class SkillAcquireParser extends AbstractDirParser<SkillAcquireHold
   }
 
   private List<SkillLearn> parseSkillLearn(Element tree) {
-    List<SkillLearn> skillLearns = new ArrayList();
+    List<SkillLearn> skillLearns = new ArrayList<>();
     Iterator iterator = tree.elementIterator("skill");
 
     while(iterator.hasNext()) {

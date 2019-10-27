@@ -37,13 +37,13 @@ public class ParticipantPool {
   }
 
   public void AllocatePools() {
-    this._pools = new HashMap();
+    this._pools = new HashMap<>();
     CompetitionType[] var1 = CompetitionType.values();
     int var2 = var1.length;
 
     for(int var3 = 0; var3 < var2; ++var3) {
       CompetitionType type = var1[var3];
-      this._pools.put(type, new ArrayList());
+      this._pools.put(type, new ArrayList<>());
     }
 
     _log.info("OlyParticipantPool: Allocated " + this._pools.size() + " particiant pools.");
@@ -353,7 +353,7 @@ public class ParticipantPool {
   private void cleadInvalidEntrys(CompetitionType type) {
     ArrayList<ParticipantPool.EntryRec> pool = (ArrayList)this._pools.get(type);
     synchronized(pool) {
-      ArrayList<Integer> invalid_entrys = new ArrayList();
+      ArrayList<Integer> invalid_entrys = new ArrayList<>();
 
       for(int i = 0; i < pool.size(); ++i) {
         if (!this.isValidEntry((ParticipantPool.EntryRec)pool.get(i))) {

@@ -65,7 +65,7 @@ public final class ItemHolder extends AbstractHolder {
   }
 
   private void itemBreakCrystalPrice() {
-    Map<Grade, Long> refGradeCrystalPrices = new HashMap();
+    Map<Grade, Long> refGradeCrystalPrices = new HashMap<>();
     Grade[] var2 = Grade.values();
     int var3 = var2.length;
 

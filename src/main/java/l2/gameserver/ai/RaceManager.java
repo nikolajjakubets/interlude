@@ -16,7 +16,7 @@ import l2.gameserver.network.l2.s2c.MonRaceInfo;
 
 public class RaceManager extends DefaultAI {
   private boolean thinking = false;
-  private List<Player> _knownPlayers = new ArrayList();
+  private List<Player> _knownPlayers = new ArrayList<>();
 
   public RaceManager(NpcInstance actor) {
     super(actor);
@@ -41,7 +41,7 @@ public class RaceManager extends DefaultAI {
         }
 
         try {
-          List<Player> newPlayers = new ArrayList();
+          List<Player> newPlayers = new ArrayList<>();
           Iterator var4 = World.getAroundPlayers(actor, 1200, 200).iterator();
 
           Player player;

@@ -23,7 +23,7 @@ import org.w3c.dom.Node;
 public class BuyListHolder {
   private static final Logger _log = LoggerFactory.getLogger(BuyListHolder.class);
   private static BuyListHolder _instance;
-  private Map<Integer, BuyListHolder.NpcTradeList> _lists = new HashMap();
+  private Map<Integer, BuyListHolder.NpcTradeList> _lists = new HashMap<>();
 
   public static BuyListHolder getInstance() {
     if (_instance == null) {
@@ -173,7 +173,7 @@ public class BuyListHolder {
   }
 
   public static class NpcTradeList {
-    private List<TradeItem> tradeList = new ArrayList();
+    private List<TradeItem> tradeList = new ArrayList<>();
     private int _id;
     private int _npcId;
 
@@ -198,7 +198,7 @@ public class BuyListHolder {
     }
 
     public synchronized List<TradeItem> getItems() {
-      List<TradeItem> result = new ArrayList();
+      List<TradeItem> result = new ArrayList<>();
       long currentTime = System.currentTimeMillis() / 60000L;
       Iterator var4 = this.tradeList.iterator();
 

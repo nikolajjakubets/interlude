@@ -12,7 +12,7 @@ import l2.gameserver.templates.ZoneTemplate;
 
 public class ZoneHolder extends AbstractHolder {
   private static final ZoneHolder _instance = new ZoneHolder();
-  private final Map<String, ZoneTemplate> _zones = new HashMap();
+  private final Map<String, ZoneTemplate> _zones = new HashMap<>();
 
   public ZoneHolder() {
   }

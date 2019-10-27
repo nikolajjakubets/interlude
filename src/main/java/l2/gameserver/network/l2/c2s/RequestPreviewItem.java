@@ -71,7 +71,7 @@ public class RequestPreviewItem extends L2GameClientPacket {
             activeChar.sendActionFailed();
           } else {
             long totalPrice = 0L;
-            HashMap itemList = new HashMap();
+            HashMap itemList = new HashMap<>();
 
             try {
               for(int i = 0; i < this._count; ++i) {

@@ -21,7 +21,7 @@ import l2.gameserver.taskmanager.actionrunner.tasks.DeleteExpiredVarsTask;
 
 public class ActionRunner extends LoggerObject {
   private static ActionRunner _instance = new ActionRunner();
-  private Map<String, List<ActionWrapper>> _futures = new HashMap();
+  private Map<String, List<ActionWrapper>> _futures = new HashMap<>();
   private final Lock _lock = new ReentrantLock();
 
   public static ActionRunner getInstance() {
@@ -54,7 +54,7 @@ public class ActionRunner extends LoggerObject {
       String lower = name.toLowerCase();
       List<ActionWrapper> wrapperList = (List)this._futures.get(lower);
       if (wrapperList == null) {
-        this._futures.put(lower, wrapperList = new ArrayList());
+        this._futures.put(lower, wrapperList = new ArrayList<>());
       }
 
       r.schedule(diff);

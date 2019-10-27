@@ -189,7 +189,7 @@ public class PathFindBuffers {
       String e = var2[count];
       String[] k;
       if (!e.isEmpty() && (k = e.split("x")).length == 2) {
-        config.put(Integer.valueOf(k[1]), Integer.valueOf(k[0]));
+        config.put(Integer.parseInt(k[1]), Integer.parseInt(k[0]));
       }
     }
 

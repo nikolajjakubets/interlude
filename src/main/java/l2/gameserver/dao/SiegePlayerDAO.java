@@ -32,7 +32,7 @@ public class SiegePlayerDAO {
   }
 
   public List<Integer> select(Residence residence, int clanId) {
-    List<Integer> set = new ArrayList();
+    List<Integer> set = new ArrayList<>();
     Connection con = null;
     PreparedStatement statement = null;
     ResultSet rset = null;

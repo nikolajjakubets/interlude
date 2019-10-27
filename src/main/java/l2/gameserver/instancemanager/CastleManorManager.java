@@ -82,10 +82,10 @@ public class CastleManorManager {
 
       for(Iterator var5 = castleList.iterator(); var5.hasNext(); DbUtils.close(statement, rs)) {
         Castle castle = (Castle)var5.next();
-        List<SeedProduction> production = new ArrayList();
-        List<SeedProduction> productionNext = new ArrayList();
-        List<CropProcure> procure = new ArrayList();
-        List<CropProcure> procureNext = new ArrayList();
+        List<SeedProduction> production = new ArrayList<>();
+        List<SeedProduction> productionNext = new ArrayList<>();
+        List<CropProcure> procure = new ArrayList<>();
+        List<CropProcure> procureNext = new ArrayList<>();
         statement = con.prepareStatement("SELECT * FROM castle_manor_production WHERE castle_id=?");
         statement.setInt(1, castle.getId());
         rs = statement.executeQuery();
@@ -222,8 +222,8 @@ public class CastleManorManager {
         c.setCropProcure(this.getNewCropsList(c.getId()), 1);
         Log.add(c.getName() + "|" + manor_cost + "|ManorManager Error@setNextPeriod", "treasury");
       } else {
-        List<SeedProduction> production = new ArrayList();
-        List<CropProcure> procure = new ArrayList();
+        List<SeedProduction> production = new ArrayList<>();
+        List<CropProcure> procure = new ArrayList<>();
         Iterator var14 = c.getSeedProduction(0).iterator();
 
         while(var14.hasNext()) {
@@ -281,7 +281,7 @@ public class CastleManorManager {
   }
 
   private List<SeedProduction> getNewSeedsList(int castleId) {
-    List<SeedProduction> seeds = new ArrayList();
+    List<SeedProduction> seeds = new ArrayList<>();
     List<Integer> seedsIds = Manor.getInstance().getSeedsForCastle(castleId);
     Iterator var4 = seedsIds.iterator();
 
@@ -294,7 +294,7 @@ public class CastleManorManager {
   }
 
   private List<CropProcure> getNewCropsList(int castleId) {
-    List<CropProcure> crops = new ArrayList();
+    List<CropProcure> crops = new ArrayList<>();
     List<Integer> cropsIds = Manor.getInstance().getCropsForCastle(castleId);
     Iterator var4 = cropsIds.iterator();
 

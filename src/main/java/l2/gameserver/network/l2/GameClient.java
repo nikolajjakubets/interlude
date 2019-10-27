@@ -54,7 +54,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
   private int revision = 0;
   private int serverId;
   private String _hwid;
-  private List<Integer> _charSlotMapping = new ArrayList();
+  private List<Integer> _charSlotMapping = new ArrayList<>();
   private List<String> _bypasses = null;
   private List<String> _bypasses_bbs = null;
   private Map<Class<? extends L2GameClientPacket>, MutableLong> _lastIncomePacketTimeStamp = new ConcurrentHashMap();
@@ -217,7 +217,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
     List<Integer> charSlotMapping = this._charSlotMapping;
 
     for(int slotIdx = 0; slotIdx < charSlotMapping.size(); ++slotIdx) {
-      if (Integer.valueOf(objectId).equals(charSlotMapping.get(slotIdx))) {
+      if (Integer.parseInt(objectId).equals(charSlotMapping.get(slotIdx))) {
         return slotIdx;
       }
     }

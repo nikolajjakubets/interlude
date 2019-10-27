@@ -35,7 +35,7 @@ public class PathFind {
     int ydiff = Math.abs(this.endPoint.y - this.startPoint.y);
     if (xdiff == 0 && ydiff == 0) {
       if (Math.abs(this.endPoint.z - this.startPoint.z) < 32) {
-        this.path = new ArrayList();
+        this.path = new ArrayList<>();
         this.path.add(0, this.startPoint);
       }
 
@@ -97,7 +97,7 @@ public class PathFind {
   }
 
   private List<Location> tracePath(GeoNode f) {
-    ArrayList locations = new ArrayList();
+    ArrayList locations = new ArrayList<>();
 
     do {
       locations.add(0, f.getLoc());

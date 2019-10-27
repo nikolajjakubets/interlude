@@ -212,7 +212,7 @@ public class SevenSignsFestival {
 
         Map<Integer, StatsSet> tempData = (Map)this._festivalData.get(cycle);
         if (tempData == null) {
-          tempData = new TreeMap();
+          tempData = new TreeMap<>();
         }
 
         ((Map)tempData).put(i, festivalDat);
@@ -264,7 +264,7 @@ public class SevenSignsFestival {
           int festivalCycle = festivalDat.getInteger("cycle");
           int festivalId = festivalDat.getInteger("festivalId");
           String cabal = SevenSigns.getCabalShortName(festivalDat.getInteger("cabal"));
-          statement.setLong(1, Long.valueOf(festivalDat.getString("date")));
+          statement.setLong(1, Long.parseLong(festivalDat.getString("date")));
           statement.setInt(2, festivalDat.getInteger("score"));
           statement.setString(3, festivalDat.getString("members"));
           statement.setString(4, festivalDat.getString("names", ""));
@@ -276,7 +276,7 @@ public class SevenSignsFestival {
             statement2.setInt(1, festivalId);
             statement2.setString(2, cabal);
             statement2.setInt(3, festivalCycle);
-            statement2.setLong(4, Long.valueOf(festivalDat.getString("date")));
+            statement2.setLong(4, Long.parseLong(festivalDat.getString("date")));
             statement2.setInt(5, festivalDat.getInteger("score"));
             statement2.setString(6, festivalDat.getString("members"));
             statement2.setString(7, festivalDat.getString("names", ""));
@@ -365,7 +365,7 @@ public class SevenSignsFestival {
 
     _dawnFestivalScores.clear();
     _duskFestivalScores.clear();
-    Map<Integer, StatsSet> newData = new TreeMap();
+    Map<Integer, StatsSet> newData = new TreeMap<>();
 
     for(int i = 0; i < 10; ++i) {
       int festivalId = i;

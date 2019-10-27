@@ -11,7 +11,7 @@ import java.util.List;
 import l2.gameserver.model.pledge.Clan;
 
 public class PledgeReceiveWarList extends L2GameServerPacket {
-  private List<PledgeReceiveWarList.WarInfo> infos = new ArrayList();
+  private List<PledgeReceiveWarList.WarInfo> infos = new ArrayList<>();
   private int _updateType;
   private int _page;
 

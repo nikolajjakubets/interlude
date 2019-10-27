@@ -33,7 +33,7 @@ public final class HennaHolder extends AbstractHolder {
   }
 
   public List<Henna> generateList(Player player) {
-    List<Henna> list = new ArrayList();
+    List<Henna> list = new ArrayList<>();
     TIntObjectIterator iterator = this._hennas.iterator();
 
     while(iterator.hasNext()) {

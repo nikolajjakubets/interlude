@@ -50,8 +50,8 @@ public class AdminNochannel implements IAdminCommandHandler {
               return false;
             }
           } else {
-            int bonus_mod = banChatCount / 10;
-            bonus_mod = Math.max(1, bonus_mod);
+//            int bonus_mod = banChatCount / 10;
+//            bonus_mod = Math.max(1, bonus_mod);
             int bonus_mod = 1;
             if (activeChar.getPlayerAccess().BanChatBonusId > 0 && activeChar.getPlayerAccess().BanChatBonusCount > 0) {
               int add_count = activeChar.getPlayerAccess().BanChatBonusCount * bonus_mod;

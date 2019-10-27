@@ -6,7 +6,6 @@
 package l2.gameserver.network.l2.s2c;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import l2.gameserver.model.Creature;
 import l2.gameserver.model.GameObject;
@@ -37,7 +36,7 @@ public abstract class SysMsgContainer<T extends SysMsgContainer<T>> extends L2Ga
       throw new IllegalArgumentException("SystemMsg is null");
     } else {
       this._message = message;
-      this._arguments = new ArrayList(this._message.size());
+      this._arguments = new ArrayList<>(this._message.size());
     }
   }
 
@@ -47,19 +46,17 @@ public abstract class SysMsgContainer<T extends SysMsgContainer<T>> extends L2Ga
     } else {
       this.writeD(this._message.getId());
       this.writeD(this._arguments.size());
-      Iterator var1 = this._arguments.iterator();
 
-      while(var1.hasNext()) {
-        SysMsgContainer.IArgument argument = (SysMsgContainer.IArgument)var1.next();
+      for (IArgument argument : this._arguments) {
         argument.write(this);
       }
 
     }
   }
 
-  public T addName(GameObject object) {
+  public SysMsgContainer<T> addName(GameObject object) {
     if (object == null) {
-      return this.add(new SysMsgContainer.StringArgument((String)null));
+      return this.add(new SysMsgContainer.StringArgument(null));
     } else if (object.isNpc()) {
       return this.add(new SysMsgContainer.NpcNameArgument(((NpcInstance)object).getNpcId() + 1000000));
     } else if (object instanceof Summon) {
@@ -75,73 +72,74 @@ public abstract class SysMsgContainer<T extends SysMsgContainer<T>> extends L2Ga
     }
   }
 
-  public T addInstanceName(int id) {
+  public SysMsgContainer<T> addInstanceName(int id) {
     return this.add(new SysMsgContainer.InstanceNameArgument(id));
   }
 
-  public T addSysString(int id) {
+  public SysMsgContainer<T> addSysString(int id) {
     return this.add(new SysMsgContainer.SysStringArgument(id));
   }
 
-  public T addSkillName(Skill skill) {
+  public SysMsgContainer<T> addSkillName(Skill skill) {
     return this.addSkillName(skill.getDisplayId(), skill.getDisplayLevel());
   }
 
-  public T addSkillName(int id, int level) {
+  public SysMsgContainer<T> addSkillName(int id, int level) {
     return this.add(new SysMsgContainer.SkillArgument(id, level));
   }
 
-  public T addItemName(int item_id) {
+  public SysMsgContainer<T> addItemName(int item_id) {
     return this.add(new SysMsgContainer.ItemNameArgument(item_id));
   }
 
-  /** @deprecated */
+  /** @deprecated
+   * @return */
   @Deprecated
-  public T addItemNameWithAugmentation(ItemInstance item) {
+  public SysMsgContainer<T> addItemNameWithAugmentation(ItemInstance item) {
     return this.add(new SysMsgContainer.ItemNameWithAugmentationArgument(item.getItemId(), item.getVariationStat1(), item.getVariationStat2()));
   }
 
-  public T addZoneName(Creature c) {
+  public SysMsgContainer<T> addZoneName(Creature c) {
     return this.addZoneName(c.getX(), c.getY(), c.getZ());
   }
 
-  public T addZoneName(Location loc) {
+  public SysMsgContainer<T> addZoneName(Location loc) {
     return this.add(new SysMsgContainer.ZoneArgument(loc.x, loc.y, loc.z));
   }
 
-  public T addZoneName(int x, int y, int z) {
+  public SysMsgContainer<T> addZoneName(int x, int y, int z) {
     return this.add(new SysMsgContainer.ZoneArgument(x, y, z));
   }
 
-  public T addResidenceName(Residence r) {
+  public SysMsgContainer<T> addResidenceName(Residence r) {
     return this.add(new SysMsgContainer.ResidenceArgument(r.getId()));
   }
 
-  public T addResidenceName(int i) {
+  public SysMsgContainer<T> addResidenceName(int i) {
     return this.add(new SysMsgContainer.ResidenceArgument(i));
   }
 
-  public T addElementName(int i) {
+  public SysMsgContainer<T> addElementName(int i) {
     return this.add(new SysMsgContainer.ElementNameArgument(i));
   }
 
-  public T addElementName(Element i) {
+  public SysMsgContainer<T> addElementName(Element i) {
     return this.add(new SysMsgContainer.ElementNameArgument(i.getId()));
   }
 
-  public T addInteger(double i) {
+  public SysMsgContainer<T> addInteger(double i) {
     return this.add(new SysMsgContainer.IntegerArgument((int)i));
   }
 
-  public T addLong(long i) {
+  public SysMsgContainer<T> addLong(long i) {
     return this.add(new SysMsgContainer.LongArgument(i));
   }
 
-  public T addString(String t) {
+  public SysMsgContainer<T> addString(String t) {
     return this.add(new SysMsgContainer.StringArgument(t));
   }
 
-  protected T add(SysMsgContainer.IArgument arg) {
+  protected SysMsgContainer<T> add(IArgument arg) {
     this._arguments.add(arg);
     return this;
   }

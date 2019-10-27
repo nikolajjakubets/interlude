@@ -20,7 +20,7 @@ public class ExMultiPartyCommandChannelInfo extends L2GameServerPacket {
   public ExMultiPartyCommandChannelInfo(CommandChannel channel) {
     this.ChannelLeaderName = channel.getChannelLeader().getName();
     this.MemberCount = channel.getMemberCount();
-    this.parties = new ArrayList();
+    this.parties = new ArrayList<>();
     Iterator var2 = channel.getParties().iterator();
 
     while(var2.hasNext()) {

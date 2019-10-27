@@ -67,7 +67,7 @@ public class FishDataParser extends AbstractFileParser<FishDataHolder> {
             map.put(attribute.getName(), attribute.getValue());
           }
 
-          Map<FishGroup, Integer> chances = new HashMap();
+          Map<FishGroup, Integer> chances = new HashMap<>();
           Iterator elementIterator = e.elementIterator();
 
           while(elementIterator.hasNext()) {
@@ -84,7 +84,7 @@ public class FishDataParser extends AbstractFileParser<FishDataHolder> {
           while(forLureIterator.hasNext()) {
             Element forLureElement = (Element)forLureIterator.next();
             LureType lureType = LureType.valueOf(forLureElement.attributeValue("type"));
-            Map<FishGroup, Integer> chances = new HashMap();
+            Map<FishGroup, Integer> chances = new HashMap<>();
             Iterator chanceIterator = forLureElement.elementIterator();
 
             while(chanceIterator.hasNext()) {

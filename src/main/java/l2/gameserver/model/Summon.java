@@ -527,7 +527,7 @@ public abstract class Summon extends Playable {
   }
 
   public List<L2GameServerPacket> addPacketList(Player forPlayer, Creature dropper) {
-    List<L2GameServerPacket> list = new ArrayList();
+    List<L2GameServerPacket> list = new ArrayList<>();
     Player owner = this.getPlayer();
     if (owner == forPlayer) {
       list.add(new PetInfo(this));

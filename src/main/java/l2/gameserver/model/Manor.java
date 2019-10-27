@@ -44,7 +44,7 @@ public class Manor {
   }
 
   public List<Integer> getAllCrops() {
-    List<Integer> crops = new ArrayList();
+    List<Integer> crops = new ArrayList<>();
     Iterator var2 = _seeds.values().iterator();
 
     while(var2.hasNext()) {
@@ -193,7 +193,7 @@ public class Manor {
   }
 
   public List<Integer> getCropsForCastle(int castleId) {
-    List<Integer> crops = new ArrayList();
+    List<Integer> crops = new ArrayList<>();
     Iterator var3 = _seeds.values().iterator();
 
     while(var3.hasNext()) {
@@ -207,7 +207,7 @@ public class Manor {
   }
 
   public List<Integer> getSeedsForCastle(int castleId) {
-    List<Integer> seedsID = new ArrayList();
+    List<Integer> seedsID = new ArrayList<>();
     Iterator var3 = _seeds.values().iterator();
 
     while(var3.hasNext()) {

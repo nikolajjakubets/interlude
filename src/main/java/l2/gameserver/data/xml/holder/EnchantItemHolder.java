@@ -16,7 +16,7 @@ import org.napile.primitive.sets.impl.HashIntSet;
 
 public class EnchantItemHolder extends AbstractHolder {
   private static EnchantItemHolder _instance = new EnchantItemHolder();
-  private Map<Integer, EnchantItem> _items = new HashMap();
+  private Map<Integer, EnchantItem> _items = new HashMap<>();
 
   public static EnchantItemHolder getInstance() {
     return _instance;

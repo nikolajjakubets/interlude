@@ -42,7 +42,7 @@ public final class DocumentSkill extends DocumentBase {
   };
   protected Map<String, Map<Integer, Object>> tables = new LinkedHashMap();
   private DocumentSkill.SkillLoad currentSkill = null;
-  private Set<String> usedTables = new HashSet();
+  private Set<String> usedTables = new HashSet<>();
   private List<Skill> skillsInFile = new LinkedList();
 
   DocumentSkill(File file) {
@@ -147,7 +147,7 @@ public final class DocumentSkill extends DocumentBase {
     String skillName = attrs.getNamedItem("name").getNodeValue();
     int skillBaseLevels = Integer.parseInt(attrs.getNamedItem("levels").getNodeValue());
     this.setCurrentSkill(new DocumentSkill.SkillLoad(skillId, skillName));
-    ArrayList skillLevelsList = new ArrayList();
+    ArrayList skillLevelsList = new ArrayList<>();
 
     try {
       for(int skillLvl = 1; skillLvl <= skillBaseLevels; ++skillLvl) {
@@ -313,7 +313,7 @@ public final class DocumentSkill extends DocumentBase {
       throw new IllegalArgumentException("Table name must start with #");
     } else {
       StringTokenizer data = new StringTokenizer(n.getFirstChild().getNodeValue());
-      ArrayList array = new ArrayList();
+      ArrayList array = new ArrayList<>();
 
       while(data.hasMoreTokens()) {
         array.add(data.nextToken());
@@ -352,7 +352,7 @@ public final class DocumentSkill extends DocumentBase {
       this.id = id_;
       this.name = name_;
       this.sets = new TreeMap(DocumentSkill.INTEGER_KEY_ASC_COMPARATOR);
-      this.skills = new ArrayList();
+      this.skills = new ArrayList<>();
       this.currentSkills = new TreeMap(DocumentSkill.INTEGER_KEY_ASC_COMPARATOR);
     }
   }

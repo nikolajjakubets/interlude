@@ -88,14 +88,14 @@ public final class ResidenceParser extends AbstractDirParser<ResidenceHolder> {
 
         Element element = (Element)iterator.next();
         String nodeName = element.getName();
-        level = element.attributeValue("level") == null ? 0 : Integer.valueOf(element.attributeValue("level"));
-        lease = (int)((double)(element.attributeValue("lease") == null ? 0 : Integer.valueOf(element.attributeValue("lease"))) * Config.RESIDENCE_LEASE_FUNC_MULTIPLIER);
-        int npcId = element.attributeValue("npcId") == null ? 0 : Integer.valueOf(element.attributeValue("npcId"));
-        int listId = element.attributeValue("listId") == null ? 0 : Integer.valueOf(element.attributeValue("listId"));
+        level = element.attributeValue("level") == null ? 0 : Integer.parseInt(element.attributeValue("level"));
+        lease = (int)((double)(element.attributeValue("lease") == null ? 0 : Integer.parseInt(element.attributeValue("lease"))) * Config.RESIDENCE_LEASE_FUNC_MULTIPLIER);
+        int npcId = element.attributeValue("npcId") == null ? 0 : Integer.parseInt(element.attributeValue("npcId"));
+        int listId = element.attributeValue("listId") == null ? 0 : Integer.parseInt(element.attributeValue("listId"));
         function = null;
         if (nodeName.equalsIgnoreCase("teleport")) {
           function = this.checkAndGetFunction(residence, 1);
-          List<TeleportLocation> targets = new ArrayList();
+          List<TeleportLocation> targets = new ArrayList<>();
           Iterator it2 = element.elementIterator();
 
           while(it2.hasNext()) {

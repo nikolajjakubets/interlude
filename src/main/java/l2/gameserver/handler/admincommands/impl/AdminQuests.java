@@ -100,22 +100,20 @@ public class AdminQuests implements IAdminCommandHandler {
     String char_name = qs.getPlayer().getName();
     NpcHtmlMessage adminReply = new NpcHtmlMessage(5);
     StringBuilder replyMSG = new StringBuilder("<html><body>");
-    replyMSG.append(fmtHEAD.sprintf(new Object[]{qs.getQuest().getClass().getSimpleName(), id}));
+    replyMSG.append(fmtHEAD.sprintf(qs.getQuest().getClass().getSimpleName(), id));
     replyMSG.append("<table width=260>");
-    replyMSG.append(fmtRow.sprintf(new Object[]{"PLAYER: ", char_name, ""}));
-    replyMSG.append(fmtRow.sprintf(new Object[]{"STATE: ", qs.getStateName(), fmtSetButton.sprintf(new Object[]{id, "STATE", "$new_val", char_name, ""})}));
-    Iterator var7 = vars.keySet().iterator();
+    replyMSG.append(fmtRow.sprintf("PLAYER: ", char_name, ""));
+    replyMSG.append(fmtRow.sprintf("STATE: ", qs.getStateName(), fmtSetButton.sprintf(id, "STATE", "$new_val", char_name, "")));
 
-    while(var7.hasNext()) {
-      String key = (String)var7.next();
+    for (String key : vars.keySet()) {
       if (!key.equalsIgnoreCase("<state>")) {
-        replyMSG.append(fmtRow.sprintf(new Object[]{key + ": ", vars.get(key), fmtSetButton.sprintf(new Object[]{id, "VAR", key, "$new_val", char_name})}));
+        replyMSG.append(fmtRow.sprintf(key + ": ", vars.get(key), fmtSetButton.sprintf(id, "VAR", key, "$new_val", char_name)));
       }
     }
 
-    replyMSG.append(fmtRow.sprintf(new Object[]{"<edit var=\"new_name\" width=50 height=12>", "~new var~", fmtSetButton.sprintf(new Object[]{id, "VAR", "$new_name", "$new_val", char_name})}));
+    replyMSG.append(fmtRow.sprintf("<edit var=\"new_name\" width=50 height=12>", "~new var~", fmtSetButton.sprintf(id, "VAR", "$new_name", "$new_val", char_name)));
     replyMSG.append("</table>");
-    replyMSG.append(fmtFOOT.sprintf(new Object[]{id, char_name, char_name}));
+    replyMSG.append(fmtFOOT.sprintf(id, char_name, char_name));
     replyMSG.append("</body></html>");
     adminReply.setHtml(replyMSG.toString());
     activeChar.sendPacket(adminReply);
@@ -129,10 +127,9 @@ public class AdminQuests implements IAdminCommandHandler {
     QuestState[] var4 = targetChar.getAllQuestsStates();
     int var5 = var4.length;
 
-    for(int var6 = 0; var6 < var5; ++var6) {
-      QuestState qs = var4[var6];
+    for (QuestState qs : var4) {
       if (qs != null && qs.getQuest().getQuestIntId() != 255) {
-        replyMSG.append(fmtListRow.sprintf(new Object[]{qs.getQuest().getQuestIntId(), targetChar.getName(), qs.getQuest().getName(), qs.getStateName()}));
+        replyMSG.append(fmtListRow.sprintf(qs.getQuest().getQuestIntId(), targetChar.getName(), qs.getQuest().getName(), qs.getStateName()));
       }
     }
 
@@ -171,7 +168,6 @@ public class AdminQuests implements IAdminCommandHandler {
       activeChar.sendMessage("USAGE: //quest id|name STATE 1|2|3 [target]");
       return false;
     } else {
-      boolean var4 = false;
 
       int state;
       try {
@@ -213,11 +209,11 @@ public class AdminQuests implements IAdminCommandHandler {
     return AdminQuests.Commands.values();
   }
 
-  private static enum Commands {
+  private enum Commands {
     admin_quests,
     admin_quest;
 
-    private Commands() {
+    Commands() {
     }
   }
 }

@@ -95,13 +95,13 @@ public class CastleSiegeEvent extends SiegeEvent<Castle, SiegeClanObject> {
     String onSiegeEndAttackerOwnedLeaderReward = set.getString("on_siege_end_attacker_owned_leader_reward", (String)null);
     if (onSiegeEndAttackerOwnedLeaderReward != null) {
       String[] onSiegEndAttackerOwnedLeaderRewardParts = onSiegeEndAttackerOwnedLeaderReward.split(":");
-      this._onSiegeEndAttackerOwnedLeaderReward = Pair.of(ItemHolder.getInstance().getTemplate(Integer.parseInt(onSiegEndAttackerOwnedLeaderRewardParts[0])), Long.valueOf(onSiegEndAttackerOwnedLeaderRewardParts[1]));
+      this._onSiegeEndAttackerOwnedLeaderReward = Pair.of(ItemHolder.getInstance().getTemplate(Integer.parseInt(onSiegEndAttackerOwnedLeaderRewardParts[0])), Long.parseLong(onSiegEndAttackerOwnedLeaderRewardParts[1]));
     }
 
     String onSiegeEndDefenderOwnedLeaderReward = set.getString("on_siege_end_defender_owned_leader_reward", (String)null);
     if (onSiegeEndDefenderOwnedLeaderReward != null) {
       String[] onSiegeEndDefenderOwnedLeaderRewardParts = onSiegeEndDefenderOwnedLeaderReward.split(":");
-      this._onSiegeEndDefenderOwnedLeaderReward = Pair.of(ItemHolder.getInstance().getTemplate(Integer.parseInt(onSiegeEndDefenderOwnedLeaderRewardParts[0])), Long.valueOf(onSiegeEndDefenderOwnedLeaderRewardParts[1]));
+      this._onSiegeEndDefenderOwnedLeaderReward = Pair.of(ItemHolder.getInstance().getTemplate(Integer.parseInt(onSiegeEndDefenderOwnedLeaderRewardParts[0])), Long.parseLong(onSiegeEndDefenderOwnedLeaderRewardParts[1]));
     }
 
     this._nextSiegeDateSetDelay = set.getLong("next_siege_date_set_delay", 86400L) * 1000L;
@@ -400,7 +400,7 @@ public class CastleSiegeEvent extends SiegeEvent<Castle, SiegeClanObject> {
 
   private void initControlTowers() {
     List<SpawnExObject> objects = this.getObjects("guards");
-    List<Spawner> spawns = new ArrayList();
+    List<Spawner> spawns = new ArrayList<>();
     Iterator var3 = objects.iterator();
 
     while(var3.hasNext()) {

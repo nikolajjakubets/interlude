@@ -121,7 +121,7 @@ public class Config {
       while (itr.hasNext()) {
         Element node = (Element) itr.next();
         if (node.getName().equalsIgnoreCase("server")) {
-          Integer id = Integer.valueOf(node.attributeValue("id"));
+          Integer id = Integer.parseInt(node.attributeValue("id"));
           String name = node.attributeValue("name");
           SERVER_NAMES.put(id, name);
         }

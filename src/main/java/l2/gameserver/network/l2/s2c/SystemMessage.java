@@ -3073,12 +3073,12 @@ public class SystemMessage extends L2GameServerPacket {
   public static final int YOU_HAVE_EARNED_S1_B_S2_EXP_AND_S3_B_S4_SP = 3259;
 
   public SystemMessage(SystemMsg msg) {
-    this.args = new ArrayList();
+    this.args = new ArrayList<>();
     this._messageId = msg.getId();
   }
 
   public SystemMessage(int messageId) {
-    this.args = new ArrayList();
+    this.args = new ArrayList<>();
     this._messageId = messageId;
   }
 

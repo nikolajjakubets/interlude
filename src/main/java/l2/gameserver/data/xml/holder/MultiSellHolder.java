@@ -129,7 +129,7 @@ public class MultiSellHolder {
   }
 
   private void parse() {
-    List<File> files = new ArrayList();
+    List<File> files = new ArrayList<>();
     this.hashFiles("multisell", files);
     Iterator var2 = files.iterator();
 
@@ -419,7 +419,7 @@ public class MultiSellHolder {
         if (showall) {
           list.entries.add(ent);
         } else {
-          List<Integer> itms = new ArrayList();
+          List<Integer> itms = new ArrayList<>();
           Iterator var16 = ((List)ingridients).iterator();
 
           while(true) {
@@ -497,7 +497,7 @@ public class MultiSellHolder {
     private boolean keep_enchanted = false;
     private boolean is_dutyfree = false;
     private boolean nokey = false;
-    private List<MultiSellEntry> entries = new ArrayList();
+    private List<MultiSellEntry> entries = new ArrayList<>();
 
     public MultiSellListContainer() {
     }

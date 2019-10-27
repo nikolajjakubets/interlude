@@ -1,5 +1,7 @@
 package l2.commons.collections;
 
+import l2.gameserver.skills.effects.EffectCubic;
+
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -215,4 +217,8 @@ public final class CollectionUtils {
     public static <E> E safeGet(List<E> list, int index) {
         return list.size() > index ? list.get(index) : null;
     }
+
+//  public static int hashCode(Collection<EffectCubic> cubics) {
+//    return 0;
+//  }
 }

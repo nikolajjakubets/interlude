@@ -14,7 +14,7 @@ import l2.gameserver.model.Summon;
 public class ExEventMatchTeamInfo extends L2GameServerPacket {
   private int leader_id;
   private int loot;
-  private List<ExEventMatchTeamInfo.EventMatchTeamInfo> members = new ArrayList();
+  private List<ExEventMatchTeamInfo.EventMatchTeamInfo> members = new ArrayList<>();
 
   public ExEventMatchTeamInfo(List<Player> party, Player exclude) {
     this.leader_id = ((Player)party.get(0)).getObjectId();

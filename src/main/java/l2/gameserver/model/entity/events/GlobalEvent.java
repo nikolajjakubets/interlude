@@ -195,7 +195,7 @@ public abstract class GlobalEvent extends LoggerObject {
       if (list != null) {
         list.add(object);
       } else {
-        List<Serializable> list = new CopyOnWriteArrayList<>();
+        list = new CopyOnWriteArrayList<>();
         list.add(object);
         this._objects.put(name, list);
       }

@@ -29,7 +29,7 @@ public class CharacterFriendDAO {
   }
 
   public Map<Integer, Friend> select(Player owner) {
-    Map<Integer, Friend> map = new HashMap();
+    Map<Integer, Friend> map = new HashMap<>();
     Connection con = null;
     PreparedStatement statement = null;
     ResultSet rset = null;

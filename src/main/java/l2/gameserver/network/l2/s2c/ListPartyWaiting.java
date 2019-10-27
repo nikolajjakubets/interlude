@@ -20,7 +20,7 @@ public class ListPartyWaiting extends L2GameServerPacket {
   public ListPartyWaiting(int region, boolean allLevels, int page, Player activeChar) {
     int first = (page - 1) * 64;
     int firstNot = page * 64;
-    this._rooms = new ArrayList();
+    this._rooms = new ArrayList<>();
     int i = 0;
     List<MatchingRoom> temp = MatchingRoomManager.getInstance().getMatchingRooms(MatchingRoom.PARTY_MATCHING, region, allLevels, activeChar);
     this._fullSize = temp.size();

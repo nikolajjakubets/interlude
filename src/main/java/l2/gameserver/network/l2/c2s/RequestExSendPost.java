@@ -82,7 +82,7 @@ public class RequestExSendPost extends L2GameClientPacket {
       if (activeChar.isActionsDisabled()) {
         activeChar.sendActionFailed();
       } else if (activeChar.isGM() && this._recieverName.equalsIgnoreCase("ONLINE_ALL")) {
-        Map<Integer, Long> map = new HashMap();
+        Map<Integer, Long> map = new HashMap<>();
         if (this._items != null && this._items.length > 0) {
           for(int i = 0; i < this._items.length; ++i) {
             ItemInstance item = activeChar.getInventory().getItemByObjectId(this._items[i]);
@@ -164,7 +164,7 @@ public class RequestExSendPost extends L2GameClientPacket {
               activeChar.sendPacket(SystemMsg.INCORRECT_ITEM_COUNT);
             } else {
               long serviceCost = (long)(100 + this._count * 1000);
-              List<ItemInstance> attachments = new ArrayList();
+              List<ItemInstance> attachments = new ArrayList<>();
               activeChar.getInventory().writeLock();
 
               label393: {

@@ -56,7 +56,7 @@ public class SymbolInstance extends NpcInstance {
             target = (Creature)var1.next();
           } while(SymbolInstance.this._skill.checkTarget(SymbolInstance.this._owner, target, (Creature)null, false, false) != null);
 
-          List<Creature> targets = new ArrayList();
+          List<Creature> targets = new ArrayList<>();
           if (!SymbolInstance.this._skill.isAoE()) {
             targets.add(target);
           } else {

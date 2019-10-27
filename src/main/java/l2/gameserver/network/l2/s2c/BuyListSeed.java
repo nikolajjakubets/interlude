@@ -13,7 +13,7 @@ import l2.gameserver.model.items.TradeItem;
 
 public final class BuyListSeed extends L2GameServerPacket {
   private int _manorId;
-  private List<TradeItem> _list = new ArrayList();
+  private List<TradeItem> _list = new ArrayList<>();
   private long _money;
 
   public BuyListSeed(NpcTradeList list, int manorId, long currentMoney) {

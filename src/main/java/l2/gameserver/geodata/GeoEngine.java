@@ -1227,7 +1227,7 @@ public class GeoEngine {
       if (f.exists() && f.isDirectory()) {
         int counter = 0;
         Pattern p = Pattern.compile(Config.GEOFILES_PATTERN);
-        List<File> geoFiles = new ArrayList();
+        List<File> geoFiles = new ArrayList<>();
         File[] var4 = f.listFiles();
         int var5 = var4.length;
 

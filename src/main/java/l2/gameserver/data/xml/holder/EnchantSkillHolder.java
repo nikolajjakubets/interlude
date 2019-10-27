@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 public class EnchantSkillHolder extends AbstractHolder {
   private static final Logger LOG = LoggerFactory.getLogger(EnchantSkillHolder.class);
   private static final EnchantSkillHolder INSTANCE = new EnchantSkillHolder();
-  private final Map<Integer, Map<Integer, SkillEnchant>> _skillsEnchantLevels = new TreeMap();
-  private final Map<Integer, Map<Integer, Map<Integer, SkillEnchant>>> _skillsEnchantRoutes = new TreeMap();
+  private final Map<Integer, Map<Integer, SkillEnchant>> _skillsEnchantLevels = new TreeMap<>();
+  private final Map<Integer, Map<Integer, Map<Integer, SkillEnchant>>> _skillsEnchantRoutes = new TreeMap<>();
 
   private EnchantSkillHolder() {
   }
@@ -31,21 +31,21 @@ public class EnchantSkillHolder extends AbstractHolder {
     int skillId = skillEnchant.getSkillId();
     Map<Integer, SkillEnchant> skillEnchantLevels = (Map)this._skillsEnchantLevels.get(skillId);
     if (skillEnchantLevels == null) {
-      skillEnchantLevels = new TreeMap();
+      skillEnchantLevels = new TreeMap<>();
       this._skillsEnchantLevels.put(skillId, skillEnchantLevels);
     }
 
     ((Map)skillEnchantLevels).put(skillEnchant.getSkillLevel(), skillEnchant);
     Map<Integer, Map<Integer, SkillEnchant>> skillEnchantRoutes = (Map)this._skillsEnchantRoutes.get(skillId);
     if (skillEnchantRoutes == null) {
-      skillEnchantRoutes = new TreeMap();
+      skillEnchantRoutes = new TreeMap<>();
       this._skillsEnchantRoutes.put(skillId, skillEnchantRoutes);
     }
 
     int skillRouteId = skillEnchant.getRouteId();
     Map<Integer, SkillEnchant> skillRouteLevels = (Map)((Map)skillEnchantRoutes).get(skillRouteId);
     if (skillRouteLevels == null) {
-      skillRouteLevels = new TreeMap();
+      skillRouteLevels = new TreeMap<>();
       ((Map)skillEnchantRoutes).put(skillRouteId, skillRouteLevels);
     }
 

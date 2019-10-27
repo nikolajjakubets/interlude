@@ -20,8 +20,8 @@ public class ExServerPrimitive extends L2GameServerPacket {
   private final List<ExServerPrimitive.Line> _lines;
 
   public ExServerPrimitive(String name, int x, int y, int z) {
-    this._points = new ArrayList();
-    this._lines = new ArrayList();
+    this._points = new ArrayList<>();
+    this._lines = new ArrayList<>();
     this._name = name;
     this._x = x;
     this._y = y;

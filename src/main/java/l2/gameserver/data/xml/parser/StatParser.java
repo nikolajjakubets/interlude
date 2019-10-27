@@ -358,7 +358,7 @@ public abstract class StatParser<H extends AbstractHolder> extends AbstractDirPa
           radix = 16;
         }
 
-        return Integer.valueOf(value, radix);
+        return Integer.parseInt(value, radix);
       } else {
         return Double.valueOf(value);
       }

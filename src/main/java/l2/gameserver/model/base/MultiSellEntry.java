@@ -11,8 +11,8 @@ import java.util.List;
 
 public class MultiSellEntry {
   private int _entryId;
-  private List<MultiSellIngredient> _ingredients = new ArrayList();
-  private List<MultiSellIngredient> _production = new ArrayList();
+  private List<MultiSellIngredient> _ingredients = new ArrayList<>();
+  private List<MultiSellIngredient> _production = new ArrayList<>();
   private long _tax;
 
   public MultiSellEntry() {

@@ -41,7 +41,7 @@ public class MatchingRoomManager {
   }
 
   public List<Player> getWaitingList(int minLevel, int maxLevel, int[] classes) {
-    List<Player> res = new ArrayList();
+    List<Player> res = new ArrayList<>();
     Iterator var5 = this._players.iterator();
 
     while(true) {
@@ -63,7 +63,7 @@ public class MatchingRoomManager {
   }
 
   public List<MatchingRoom> getMatchingRooms(int type, int region, boolean allLevels, Player activeChar) {
-    List<MatchingRoom> res = new ArrayList();
+    List<MatchingRoom> res = new ArrayList<>();
     Iterator var6 = this._holder[type]._rooms.values().iterator();
 
     while(true) {

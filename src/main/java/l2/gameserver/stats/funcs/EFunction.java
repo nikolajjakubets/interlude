@@ -42,7 +42,7 @@ public enum EFunction {
   };
 
   public static final EFunction[] VALUES = values();
-  public static final Map<String, EFunction> VALUES_BY_LOWER_NAME = new HashMap();
+  public static final Map<String, EFunction> VALUES_BY_LOWER_NAME = new HashMap<>();
 
   private EFunction() {
   }

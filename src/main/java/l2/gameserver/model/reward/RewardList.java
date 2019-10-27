@@ -34,7 +34,7 @@ public class RewardList extends ArrayList<RewardGroup> {
   }
 
   public List<RewardItem> roll(Player player, double mod, boolean isRaid, boolean isSiegeGuard) {
-    List<RewardItem> temp = new ArrayList(this.size());
+    List<RewardItem> temp = new ArrayList<>(this.size());
     Iterator var7 = this.iterator();
 
     while(true) {
@@ -48,39 +48,33 @@ public class RewardList extends ArrayList<RewardGroup> {
         tdl = g.roll(this._type, player, mod, isRaid, isSiegeGuard);
       } while(tdl.isEmpty());
 
-      Iterator var10 = tdl.iterator();
-
-      while(var10.hasNext()) {
-        RewardItem itd = (RewardItem)var10.next();
+      for (Object o : tdl) {
+        RewardItem itd = (RewardItem) o;
         temp.add(itd);
       }
     }
   }
 
   public boolean validate() {
-    Iterator var1 = this.iterator();
 
-    while(var1.hasNext()) {
-      RewardGroup g = (RewardGroup)var1.next();
+    for (RewardGroup rewardGroup : this) {
       int chanceSum = 0;
 
       RewardData d;
-      for(Iterator var4 = g.getItems().iterator(); var4.hasNext(); chanceSum = (int)((double)chanceSum + d.getChance())) {
-        d = (RewardData)var4.next();
+      for (Iterator var4 = rewardGroup.getItems().iterator(); var4.hasNext(); chanceSum = (int) ((double) chanceSum + d.getChance())) {
+        d = (RewardData) var4.next();
       }
 
       if (chanceSum <= 1000000) {
         return true;
       }
 
-      double mod = (double)(1000000 / chanceSum);
-      Iterator var6 = g.getItems().iterator();
+      double mod = (double) (1000000 / chanceSum);
 
-      while(var6.hasNext()) {
-        RewardData d = (RewardData)var6.next();
-        double chance = d.getChance() * mod;
-        d.setChance(chance);
-        g.setChance(1000000.0D);
+      for (RewardData rewardData : rewardGroup.getItems()) {
+        double chance = rewardData.getChance() * mod;
+        rewardData.setChance(chance);
+        rewardGroup.setChance(1000000.0D);
       }
     }
 

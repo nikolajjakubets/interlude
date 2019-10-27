@@ -109,7 +109,7 @@ public class BoatWayEvent extends GlobalEvent {
 
   public List<Player> broadcastPlayers(int range) {
     if (range <= 0) {
-      List<Player> list = new ArrayList();
+      List<Player> list = new ArrayList<>();
       int rx = MapUtils.regionX(this._boat.getX());
       int ry = MapUtils.regionY(this._boat.getY());
       int offset = Config.SHOUT_OFFSET;

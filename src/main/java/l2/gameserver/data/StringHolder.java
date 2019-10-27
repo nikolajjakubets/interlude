@@ -20,7 +20,7 @@ import l2.gameserver.utils.Language;
 
 public final class StringHolder extends AbstractHolder {
   private static final StringHolder _instance = new StringHolder();
-  private Map<Language, Map<String, String>> _strings = new HashMap();
+  private Map<Language, Map<String, String>> _strings = new HashMap<>();
 
   public static StringHolder getInstance() {
     return _instance;
@@ -67,7 +67,7 @@ public final class StringHolder extends AbstractHolder {
     label134:
     for(int var3 = 0; var3 < var2; ++var3) {
       Language lang = var1[var3];
-      this._strings.put(lang, new HashMap());
+      this._strings.put(lang, new HashMap<>());
       File f = new File(Config.DATAPACK_ROOT, "data/string/strings_" + lang.getShortName() + ".properties");
       if (!f.exists()) {
         this.warn("Not find file: " + f.getAbsolutePath());

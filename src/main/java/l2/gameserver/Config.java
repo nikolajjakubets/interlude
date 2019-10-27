@@ -441,7 +441,7 @@ public class Config {
   public static long NONOWNER_ITEM_PICKUP_DELAY;
   public static long NONOWNER_ITEM_PICKUP_DELAY_RAID;
   public static boolean LOG_CHAT;
-  public static Map<Integer, PlayerAccess> gmlist = new HashMap();
+  public static Map<Integer, PlayerAccess> gmlist = new HashMap<>();
   public static double RATE_XP;
   public static double RATE_SP;
   public static double RATE_OVERHIT;
@@ -604,7 +604,7 @@ public class Config {
   public static int MIN_PK_TO_ITEMS_DROP;
   public static boolean DROP_ITEMS_ON_DIE;
   public static boolean DROP_ITEMS_AUGMENTED;
-  public static List<Integer> KARMA_LIST_NONDROPPABLE_ITEMS = new ArrayList();
+  public static List<Integer> KARMA_LIST_NONDROPPABLE_ITEMS = new ArrayList<>();
   public static int PVP_TIME;
   public static int PVP_BLINKING_UNFLAG_TIME;
   public static int PVP_FLAG_ON_UN_FLAG_TIME;
@@ -1185,7 +1185,7 @@ public class Config {
     SELECTOR_CONFIG.HELPER_BUFFER_COUNT = serverSettings.getProperty("BufferPoolSize", 64);
     CHAT_MESSAGE_MAX_LEN = serverSettings.getProperty("ChatMessageLimit", 1000);
     StringTokenizer st = new StringTokenizer(serverSettings.getProperty("ChatBanChannels", "ALL,SHOUT,TELL,TRADE,HERO_VOICE"), ",");
-    ArrayList channels = new ArrayList();
+    ArrayList channels = new ArrayList<>();
 
     while(st.hasMoreTokens()) {
       channels.add(ChatType.valueOf(st.nextToken()));
@@ -1311,7 +1311,7 @@ public class Config {
       CLANLEADER_NAME_COLOUR = Integer.decode("0x" + otherSettings.getProperty("ClanleaderNameColour", "FFFFFF"));
       SHOW_HTML_WELCOME = otherSettings.getProperty("ShowHTMLWelcome", false);
       GAME_POINT_ITEM_ID = otherSettings.getProperty("GamePointItemId", -1);
-      OTHER_MAGE_BUFF_ON_CHAR_CREATE = new ArrayList();
+      OTHER_MAGE_BUFF_ON_CHAR_CREATE = new ArrayList<>();
       String[] var1 = StringUtils.split(otherSettings.getProperty("StartMageBuff", "1303-1"), ";,");
       int var2 = var1.length;
 
@@ -1324,7 +1324,7 @@ public class Config {
         OTHER_MAGE_BUFF_ON_CHAR_CREATE.add(Pair.of(Integer.parseInt(ss[0]), Integer.parseInt(ss[1])));
       }
 
-      OTHER_WARRIOR_BUFF_ON_CHAR_CREATE = new ArrayList();
+      OTHER_WARRIOR_BUFF_ON_CHAR_CREATE = new ArrayList<>();
       var1 = StringUtils.split(otherSettings.getProperty("StartWarriorBuff", "1086-1"), ";,");
       var2 = var1.length;
 
@@ -1694,7 +1694,7 @@ public class Config {
   }
 
   private static Config.RateBonusInfo[] loadRateBonusInfo() {
-    ArrayList result = new ArrayList();
+    ArrayList result = new ArrayList<>();
 
     try {
       SAXReader reader = new SAXReader(true);
@@ -1964,7 +1964,7 @@ public class Config {
     PVP_PK_STAT_CACHE_UPDATE_INTERVAL = (long)(servicesSettings.getProperty("TopPvPPKCacheUpdateTimeInterval", 1) * 60) * 1000L;
     PVP_PK_STAT_RECORD_LIMIT = servicesSettings.getProperty("TopPvPPKRecordLimit", 15);
     PAWNSHOP_ENABLED = servicesSettings.getProperty("PawnShopEnabled", true);
-    List<ItemClass> pawnShopItemClasses = new ArrayList();
+    List<ItemClass> pawnShopItemClasses = new ArrayList<>();
     String[] var2 = servicesSettings.getProperty("PawnShopItemClasses", new String[]{"WEAPON", "ARMOR", "JEWELRY"});
     int var3 = var2.length;
 
@@ -2060,7 +2060,7 @@ public class Config {
     DROPCHANCE_ITEM = pvpSettings.getProperty("ChanceOfDropOther", 80);
     FUN_ZONE_PVP_COUNT = pvpSettings.getProperty("PvPCountingInFunZone", false);
     FUN_ZONE_FLAG_ON_ENTER = pvpSettings.getProperty("FlagOnEnterInFunZone", false);
-    KARMA_LIST_NONDROPPABLE_ITEMS = new ArrayList();
+    KARMA_LIST_NONDROPPABLE_ITEMS = new ArrayList<>();
     int[] var1 = pvpSettings.getProperty("ListOfNonDroppableItems", new int[]{57, 1147, 425, 1146, 461, 10, 2368, 7, 6, 2370, 2369, 3500, 3501, 3502, 4422, 4423, 4424, 2375, 6648, 6649, 6650, 6842, 6834, 6835, 6836, 6837, 6838, 6839, 6840, 5575, 7694, 6841, 8181});
     int var2 = var1.length;
 
@@ -2267,7 +2267,7 @@ public class Config {
 
   public static void loadQuestRateSettings() {
     ExProperties questRateSettings = load("config/quest_rates.properties");
-    Map<Integer, QuestRates> questRates = new HashMap();
+    Map<Integer, QuestRates> questRates = new HashMap<>();
     Iterator var2 = questRateSettings.keySet().iterator();
 
     while(var2.hasNext()) {
@@ -2387,7 +2387,7 @@ public class Config {
                 if (fld.getType().getName().equalsIgnoreCase("boolean")) {
                   fld.setBoolean(pa, Boolean.parseBoolean(d.getAttributes().getNamedItem("set").getNodeValue()));
                 } else if (fld.getType().getName().equalsIgnoreCase("int")) {
-                  fld.setInt(pa, Integer.valueOf(d.getAttributes().getNamedItem("set").getNodeValue()));
+                  fld.setInt(pa, Integer.parseInt(d.getAttributes().getNamedItem("set").getNodeValue()));
                 }
               }
             }
@@ -2485,7 +2485,7 @@ public class Config {
     public float dropRaidItems = 1.0F;
     public float dropSpoil = 1.0F;
     public float enchantItemMul = 1.0F;
-    public List<Pair<Integer, Long>> rewardItem = new ArrayList();
+    public List<Pair<Integer, Long>> rewardItem = new ArrayList<>();
     public Integer nameColor = null;
     public long bonusTimeSeconds = 0L;
 

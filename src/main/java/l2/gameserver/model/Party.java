@@ -125,7 +125,7 @@ public class Party implements PlayerGroup {
   }
 
   public List<Playable> getPartyMembersWithPets() {
-    List<Playable> result = new ArrayList();
+    List<Playable> result = new ArrayList<>();
     Iterator var2 = this._members.iterator();
 
     while(var2.hasNext()) {
@@ -538,7 +538,7 @@ public class Party implements PlayerGroup {
 
   private void distributeAdena(Player player, ItemInstance item, NpcInstance fromNpc) {
     if (player != null) {
-      List<Player> membersInRange = new ArrayList();
+      List<Player> membersInRange = new ArrayList<>();
       if (item.getCount() < (long)this._members.size()) {
         membersInRange.add(player);
       } else {
@@ -589,7 +589,7 @@ public class Party implements PlayerGroup {
 
   public void distributeXpAndSp(double xpReward, double spReward, List<Player> rewardedMembers, Creature lastAttacker, MonsterInstance monster) {
     this.recalculatePartyData();
-    List<Player> mtr = new ArrayList();
+    List<Player> mtr = new ArrayList<>();
     int partyLevel = lastAttacker.getLevel();
     int partyLvlSum = 0;
     Iterator var11 = rewardedMembers.iterator();

@@ -119,7 +119,7 @@ public class SpawnTaskManager {
     public void runImpl() throws Exception {
       if (SpawnTaskManager.this._spawnTasksSize > 0) {
         try {
-          List<NpcInstance> works = new ArrayList();
+          List<NpcInstance> works = new ArrayList<>();
           synchronized(SpawnTaskManager.this.spawnTasks_lock) {
             long current = System.currentTimeMillis();
             int size = SpawnTaskManager.this._spawnTasksSize;

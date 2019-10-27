@@ -44,7 +44,7 @@ public class Formulas {
       }
     }
 
-    return cha.calcStat(Stats.REGENERATE_HP_RATE, init, (Creature)null, (Skill)null);
+    return cha.calcStat(Stats.REGENERATE_HP_RATE, init, null, null);
   }
 
   public static double calcMpRegen(Creature cha) {
@@ -62,18 +62,18 @@ public class Formulas {
       }
     }
 
-    return cha.calcStat(Stats.REGENERATE_MP_RATE, init, (Creature)null, (Skill)null);
+    return cha.calcStat(Stats.REGENERATE_MP_RATE, init, null, null);
   }
 
   public static double calcCpRegen(Creature cha) {
     double init = (1.5D + (double)(cha.getLevel() / 10)) * cha.getLevelMod() * BaseStats.CON.calcBonus(cha);
-    return cha.calcStat(Stats.REGENERATE_CP_RATE, init, (Creature)null, (Skill)null);
+    return cha.calcStat(Stats.REGENERATE_CP_RATE, init, null, null);
   }
 
   public static Formulas.AttackInfo calcPhysDam(Creature attacker, Creature target, Skill skill, boolean dual, boolean blow, boolean ss, boolean onCrit) {
     Formulas.AttackInfo info = new Formulas.AttackInfo();
-    info.damage = (double)attacker.getPAtk(target);
-    info.defence = (double)target.getPDef(attacker);
+    info.damage = attacker.getPAtk(target);
+    info.defence = target.getPDef(attacker);
     info.crit_static = attacker.calcStat(Stats.CRITICAL_DAMAGE_STATIC, target, skill);
     info.death_rcpt = 0.01D * target.calcStat(Stats.DEATH_VULNERABILITY, attacker, skill);
     info.lethal1 = skill == null ? 0.0D : skill.getLethal1() * info.death_rcpt;
@@ -84,7 +84,7 @@ public class Formulas {
     info.miss = false;
     boolean isPvP = attacker.isPlayable() && target.isPlayable();
     if (info.shld) {
-      info.defence += (double)target.getShldDef();
+      info.defence += target.getShldDef();
     }
 
     info.defence = Math.max(info.defence, 1.0D);
@@ -123,9 +123,9 @@ public class Formulas {
       }
 
       if (skill.isChargeBoost()) {
-        info.damage = attacker.calcStat(Stats.SKILL_POWER, info.damage + skill.getPower(target), (Creature)null, (Skill)null);
+        info.damage = attacker.calcStat(Stats.SKILL_POWER, info.damage + skill.getPower(target), null, null);
       } else {
-        info.damage += attacker.calcStat(Stats.SKILL_POWER, skill.getPower(target), (Creature)null, (Skill)null);
+        info.damage += attacker.calcStat(Stats.SKILL_POWER, skill.getPower(target), null, null);
       }
 
       if (blow && skill.isBehind() && ss) {
@@ -178,7 +178,7 @@ public class Formulas {
         }
 
         if (Rnd.chance(chance)) {
-          attacker.setConsumedSouls(attacker.getConsumedSouls() + 1, (NpcInstance)null);
+          attacker.setConsumedSouls(attacker.getConsumedSouls() + 1, null);
         }
       }
     }
@@ -205,11 +205,11 @@ public class Formulas {
 
     if (isPvP) {
       if (skill == null) {
-        info.damage *= attacker.calcStat(Stats.PVP_PHYS_DMG_BONUS, 1.0D, (Creature)null, (Skill)null);
-        info.damage /= target.calcStat(Stats.PVP_PHYS_DEFENCE_BONUS, 1.0D, (Creature)null, (Skill)null);
+        info.damage *= attacker.calcStat(Stats.PVP_PHYS_DMG_BONUS, 1.0D, null, null);
+        info.damage /= target.calcStat(Stats.PVP_PHYS_DEFENCE_BONUS, 1.0D, null, null);
       } else {
-        info.damage *= attacker.calcStat(Stats.PVP_PHYS_SKILL_DMG_BONUS, 1.0D, (Creature)null, (Skill)null);
-        info.damage /= target.calcStat(Stats.PVP_PHYS_SKILL_DEFENCE_BONUS, 1.0D, (Creature)null, (Skill)null);
+        info.damage *= attacker.calcStat(Stats.PVP_PHYS_SKILL_DMG_BONUS, 1.0D, null, null);
+        info.damage /= target.calcStat(Stats.PVP_PHYS_SKILL_DEFENCE_BONUS, 1.0D, null, null);
       }
     }
 
@@ -285,16 +285,16 @@ public class Formulas {
   public static double calcMagicDam(Creature attacker, Creature target, Skill skill, int sps) {
     boolean isPvP = attacker.isPlayable() && target.isPlayable();
     boolean shield = skill.getShieldIgnore() && calcShldUse(attacker, target);
-    double mAtk = (double)attacker.getMAtk(target, skill);
+    double mAtk = attacker.getMAtk(target, skill);
     if (sps == 2) {
       mAtk *= 4.0D;
     } else if (sps == 1) {
       mAtk *= 2.0D;
     }
 
-    double mdef = (double)target.getMDef((Creature)null, skill);
+    double mdef = target.getMDef(null, skill);
     if (shield) {
-      mdef += (double)target.getShldDef();
+      mdef += target.getShldDef();
     }
 
     if (mdef == 0.0D) {
@@ -372,8 +372,8 @@ public class Formulas {
       }
 
       if (isPvP && damage > 1.0D) {
-        damage *= attacker.calcStat(Stats.PVP_MAGIC_SKILL_DMG_BONUS, 1.0D, (Creature)null, (Skill)null);
-        damage /= target.calcStat(Stats.PVP_MAGIC_SKILL_DEFENCE_BONUS, 1.0D, (Creature)null, (Skill)null);
+        damage *= attacker.calcStat(Stats.PVP_MAGIC_SKILL_DMG_BONUS, 1.0D, null, null);
+        damage /= target.calcStat(Stats.PVP_MAGIC_SKILL_DEFENCE_BONUS, 1.0D, null, null);
       }
 
       boolean gradePenalty = attacker.isPlayer() && ((Player)attacker).getGradePenalty() > 0;
@@ -453,7 +453,7 @@ public class Formulas {
     } else if (skill != null) {
       return (double)skill.getCriticalRate() * (blow ? BaseStats.DEX.calcBonus(attacker) : BaseStats.STR.calcBonus(attacker)) * 0.01D * attacker.calcStat(Stats.SKILL_CRIT_CHANCE_MOD, target, skill);
     } else {
-      double rate = (double)attacker.getCriticalHit(target, (Skill)null) * 0.01D * target.calcStat(Stats.CRIT_CHANCE_RECEPTIVE, attacker, skill);
+      double rate = (double)attacker.getCriticalHit(target, null) * 0.01D * target.calcStat(Stats.CRIT_CHANCE_RECEPTIVE, attacker, skill);
       switch(PositionUtils.getDirectionTo(target, attacker)) {
         case BEHIND:
           rate *= 1.1D;
@@ -468,16 +468,16 @@ public class Formulas {
 
   public static boolean calcMCrit(Creature attacker, Creature target, double mRate) {
     if (attacker != null && attacker.isNpc()) {
-      return Rnd.get() * 100.0D <= Math.min((double)Config.ALT_NPC_LIM_MCRIT, mRate);
+      return Rnd.get() * 100.0D <= Math.min(Config.ALT_NPC_LIM_MCRIT, mRate);
     } else {
-      return Rnd.get() * 100.0D <= Math.min((double)Config.LIM_MCRIT, mRate);
+      return Rnd.get() * 100.0D <= Math.min(Config.LIM_MCRIT, mRate);
     }
   }
 
   public static boolean calcCastBreak(Creature target, boolean crit) {
     if (target != null && !target.isInvul() && !target.isRaid() && target.isCastingNow()) {
       Skill skill = target.getCastingSkill();
-      return skill != null && (!skill.isMagic() || skill.getSkillType() == SkillType.TAKECASTLE) ? false : Rnd.chance(target.calcStat(Stats.CAST_INTERRUPT, crit ? 75.0D : 10.0D, (Creature)null, skill));
+      return (skill == null || (skill.isMagic() && skill.getSkillType() != SkillType.TAKECASTLE)) && Rnd.chance(target.calcStat(Stats.CAST_INTERRUPT, crit ? 75.0D : 10.0D, null, skill));
     } else {
       return false;
     }
@@ -508,9 +508,9 @@ public class Formulas {
         actor.removeSkillMastery(skill.getId());
         return 0L;
       } else if (skill.isMusic()) {
-        return (long)actor.calcStat(Stats.MUSIC_REUSE_RATE, (double)reuseDelay, (Creature)null, skill) * 333L / (long)Math.max(actor.getMAtkSpd(), 1);
+        return (long)actor.calcStat(Stats.MUSIC_REUSE_RATE, (double)reuseDelay, null, skill) * 333L / (long)Math.max(actor.getMAtkSpd(), 1);
       } else {
-        return skill.isMagic() ? (long)actor.calcStat(Stats.MAGIC_REUSE_RATE, (double)reuseDelay, (Creature)null, skill) * 333L / (long)Math.max(actor.getMAtkSpd(), 1) : (long)actor.calcStat(Stats.PHYSIC_REUSE_RATE, (double)reuseDelay, (Creature)null, skill) * 333L / (long)Math.max(actor.getPAtkSpd(), 1);
+        return skill.isMagic() ? (long)actor.calcStat(Stats.MAGIC_REUSE_RATE, (double)reuseDelay, null, skill) * 333L / (long)Math.max(actor.getMAtkSpd(), 1) : (long)actor.calcStat(Stats.PHYSIC_REUSE_RATE, (double)reuseDelay, null, skill) * 333L / (long)Math.max(actor.getPAtkSpd(), 1);
       }
     } else {
       return reuseDelay;
@@ -518,7 +518,7 @@ public class Formulas {
   }
 
   public static boolean calcHitMiss(Creature attacker, Creature target) {
-    double chanceToHit = 100.0D - 10.0D * Math.pow(1.085D, (double)(target.getEvasionRate(attacker) - attacker.getAccuracy()));
+    double chanceToHit = 100.0D - 10.0D * Math.pow(1.085D, target.getEvasionRate(attacker) - attacker.getAccuracy());
     chanceToHit = Math.max(chanceToHit, 28.0D);
     chanceToHit = Math.min(chanceToHit, 98.0D);
     TargetDirection direction = PositionUtils.getDirectionTo(attacker, target);
@@ -536,8 +536,8 @@ public class Formulas {
   public static boolean calcShldUse(Creature attacker, Creature target) {
     WeaponTemplate template = target.getSecondaryWeaponItem();
     if (template != null && template.getItemType() == WeaponType.NONE) {
-      int angle = (int)target.calcStat(Stats.SHIELD_ANGLE, attacker, (Skill)null);
-      return !PositionUtils.isFacing(target, attacker, angle) ? false : Rnd.chance((int)target.calcStat(Stats.SHIELD_RATE, attacker, (Skill)null));
+      int angle = (int)target.calcStat(Stats.SHIELD_ANGLE, attacker, null);
+      return PositionUtils.isFacing(target, attacker, angle) && Rnd.chance((int) target.calcStat(Stats.SHIELD_RATE, attacker, null));
     } else {
       return false;
     }
@@ -573,10 +573,10 @@ public class Formulas {
 
         env.value = Math.max(env.value, 1.0D);
         double mAtkMod = 1.0D;
-        int ssMod = false;
+//        int ssMod = false;
         if (skill.isMagic()) {
           int mdef = Math.max(1, target.getMDef(target, skill));
-          double matk = (double)caster.getMAtk(target, skill);
+          double matk = caster.getMAtk(target, skill);
           if (skill.isSSPossible()) {
             byte ssMod;
             switch(spiritshot) {
@@ -590,7 +590,7 @@ public class Formulas {
                 ssMod = 1;
             }
 
-            matk *= (double)ssMod;
+            matk *= ssMod;
           }
 
           mAtkMod = Config.SKILLS_CHANCE_MOD * Math.pow(matk, Config.SKILLS_CHANCE_POW) / (double)mdef;
@@ -598,7 +598,7 @@ public class Formulas {
           env.value = Math.max(env.value, 1.0D);
         }
 
-        double lvlDependMod = (double)skill.getLevelModifier();
+        double lvlDependMod = skill.getLevelModifier();
         if (lvlDependMod != 0.0D) {
           int attackLevel = skill.getMagicLevel() > 0 ? skill.getMagicLevel() : caster.getLevel();
           lvlDependMod = 1.0D + (double)(attackLevel - target.getLevel()) * 0.03D * lvlDependMod;
@@ -695,7 +695,7 @@ public class Formulas {
         double elementMod = 0.0D;
         Element element = skill.getElement();
         if (element != Element.NONE) {
-          elementMod = (double)skill.getElementPower();
+          elementMod = skill.getElementPower();
           Element attackElement = getAttackElement(caster, target);
           if (attackElement == element) {
             elementMod += caster.calcStat(element.getAttack(), 0.0D);
@@ -777,13 +777,13 @@ public class Formulas {
     env.character = player;
     env.target = target;
     env.skill = skill;
-    env.value = (double)activateRate;
-    return calcSkillSuccess(env, (EffectTemplate)null, player.getChargedSpiritShot());
+    env.value = activateRate;
+    return calcSkillSuccess(env, null, player.getChargedSpiritShot());
   }
 
   public static void calcSkillMastery(Skill skill, Creature activeChar) {
     if (!skill.isHandler()) {
-      if (activeChar.getSkillLevel(331) > 0 && activeChar.calcStat(Stats.SKILL_MASTERY, (double)activeChar.getINT(), (Creature)null, skill) >= (double)Rnd.get(5000) || activeChar.getSkillLevel(330) > 0 && activeChar.calcStat(Stats.SKILL_MASTERY, (double)activeChar.getSTR(), (Creature)null, skill) >= (double)Rnd.get(5000)) {
+      if (activeChar.getSkillLevel(331) > 0 && activeChar.calcStat(Stats.SKILL_MASTERY, activeChar.getINT(), null, skill) >= (double)Rnd.get(5000) || activeChar.getSkillLevel(330) > 0 && activeChar.calcStat(Stats.SKILL_MASTERY, activeChar.getSTR(), null, skill) >= (double)Rnd.get(5000)) {
         SkillType type = skill.getSkillType();
         byte masteryLevel;
         if (!skill.isMusic() && type != SkillType.BUFF && type != SkillType.HOT && type != SkillType.HEAL_PERCENT) {
@@ -825,7 +825,7 @@ public class Formulas {
       double power = 0.0D;
       if (skill != null) {
         element = skill.getElement();
-        power = (double)skill.getElementPower();
+        power = skill.getElementPower();
       } else {
         element = getAttackElement(attacker, defender);
       }
@@ -862,12 +862,11 @@ public class Formulas {
     Element[] var7 = Element.VALUES;
     int var8 = var7.length;
 
-    for(int var9 = 0; var9 < var8; ++var9) {
-      Element e = var7[var9];
-      double val = attacker.calcStat(e.getAttack(), 0.0D, (Creature)null, (Skill)null);
+    for (Element e : var7) {
+      double val = attacker.calcStat(e.getAttack(), 0.0D, null, null);
       if (val > 0.0D) {
         if (target != null) {
-          val -= target.calcStat(e.getDefence(), 0.0D, (Creature)null, (Skill)null);
+          val -= target.calcStat(e.getDefence(), 0.0D, null, null);
         }
 
         if (val > max) {

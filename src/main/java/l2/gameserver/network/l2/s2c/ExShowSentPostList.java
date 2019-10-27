@@ -5,6 +5,7 @@
 
 package l2.gameserver.network.l2.s2c;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import l2.commons.collections.CollectionUtils;
@@ -18,17 +19,15 @@ public class ExShowSentPostList extends L2GameServerPacket {
 
   public ExShowSentPostList(Player cha) {
     this.mails = MailDAO.getInstance().getSentMailByOwnerId(cha.getObjectId());
-    CollectionUtils.eqSort(this.mails);
+    Collections.sort(this.mails);
   }
 
   protected void writeImpl() {
     this.writeEx(172);
     this.writeD((int)(System.currentTimeMillis() / 1000L));
     this.writeD(this.mails.size());
-    Iterator var1 = this.mails.iterator();
 
-    while(var1.hasNext()) {
-      Mail mail = (Mail)var1.next();
+    for (Mail mail : this.mails) {
       this.writeD(mail.getMessageId());
       this.writeS(mail.getTopic());
       this.writeS(mail.getReceiverName());

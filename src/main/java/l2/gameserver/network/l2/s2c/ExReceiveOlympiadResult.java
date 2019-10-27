@@ -19,8 +19,8 @@ public class ExReceiveOlympiadResult extends L2GameServerPacket {
   public ExReceiveOlympiadResult(int winner_side, String winner) {
     this._winner = winner;
     this._winner_side = winner_side;
-    this._Red = new ArrayList();
-    this._Blue = new ArrayList();
+    this._Red = new ArrayList<>();
+    this._Blue = new ArrayList<>();
   }
 
   public void add(int side, Player player, int dmg, int points, int delta) {

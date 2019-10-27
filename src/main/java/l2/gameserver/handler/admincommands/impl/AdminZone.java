@@ -31,7 +31,7 @@ public class AdminZone implements IAdminCommandHandler {
         case admin_zone_check:
           activeChar.sendMessage("Current region: " + activeChar.getCurrentRegion());
           activeChar.sendMessage("Zone list:");
-          List<Zone> zones = new ArrayList();
+          List<Zone> zones = new ArrayList<>();
           World.getZones(zones, activeChar.getLoc(), activeChar.getReflection());
           Iterator var13 = zones.iterator();
 

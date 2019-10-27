@@ -45,8 +45,8 @@ public abstract class Residence implements JdbcEntity {
   protected final String _name;
   protected Clan _owner;
   protected Zone _zone;
-  protected List<ResidenceFunction> _functions = new ArrayList();
-  protected List<Skill> _skills = new ArrayList();
+  protected List<ResidenceFunction> _functions = new ArrayList<>();
+  protected List<Skill> _skills = new ArrayList<>();
   protected SiegeEvent<?, ?> _siegeEvent;
   protected Calendar _siegeDate = Calendar.getInstance();
   protected Calendar _lastSiegeDate = Calendar.getInstance();
@@ -63,10 +63,10 @@ public abstract class Residence implements JdbcEntity {
 
   public Residence(StatsSet set) {
     this._jdbcEntityState = JdbcEntityState.CREATED;
-    this._banishPoints = new ArrayList();
-    this._ownerRestartPoints = new ArrayList();
-    this._otherRestartPoints = new ArrayList();
-    this._chaosRestartPoints = new ArrayList();
+    this._banishPoints = new ArrayList<>();
+    this._ownerRestartPoints = new ArrayList<>();
+    this._otherRestartPoints = new ArrayList<>();
+    this._chaosRestartPoints = new ArrayList<>();
     this._id = set.getInteger("id");
     this._name = set.getString("name");
   }

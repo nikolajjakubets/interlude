@@ -20,7 +20,7 @@ import org.dom4j.Element;
 
 public class VariationGroupParser extends AbstractFileParser<VariationGroupHolder> {
   private static final VariationGroupParser _instance = new VariationGroupParser();
-  private HashMap<Integer, VariationGroupData> _byMineralId = new HashMap();
+  private HashMap<Integer, VariationGroupData> _byMineralId = new HashMap<>();
 
   public static VariationGroupParser getInstance() {
     return _instance;
@@ -44,8 +44,8 @@ public class VariationGroupParser extends AbstractFileParser<VariationGroupHolde
     while(it.hasNext()) {
       Element vge = (Element)it.next();
       String groupName = vge.attributeValue("name");
-      List<Integer> itemsList = new ArrayList();
-      List<VariationGroupData> variationGroupDataList = new ArrayList();
+      List<Integer> itemsList = new ArrayList<>();
+      List<VariationGroupData> variationGroupDataList = new ArrayList<>();
       Iterator it2 = vge.elementIterator();
 
       while(true) {

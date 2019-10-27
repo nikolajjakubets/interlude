@@ -74,7 +74,7 @@ public class RequestPrivateStoreManageBuy extends L2GameClientPacket {
             buyer.sendPacket(Msg.THE_ATTEMPT_TO_TRADE_HAS_FAILED);
             buyer.sendActionFailed();
           } else {
-            List<TradeItem> buyList = new ArrayList();
+            List<TradeItem> buyList = new ArrayList<>();
             long totalCost = 0L;
             int slots = 0;
             long weight = 0L;

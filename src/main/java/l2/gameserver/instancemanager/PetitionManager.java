@@ -402,7 +402,7 @@ public final class PetitionManager implements IPetitionHandler {
 
     public Petition(Player petitioner, String petitionText, int petitionType) {
       this._state = PetitionManager.PetitionState.Pending;
-      this._messageLog = new ArrayList();
+      this._messageLog = new ArrayList<>();
       this._id = PetitionManager.this.getNextId();
       this._type = PetitionManager.PetitionType.values()[petitionType - 1];
       this._content = petitionText;

@@ -65,7 +65,7 @@ public class ProductItem {
 
   public ArrayList<ProductItemComponent> getComponents() {
     if (this._components == null) {
-      this._components = new ArrayList();
+      this._components = new ArrayList<>();
     }
 
     return this._components;

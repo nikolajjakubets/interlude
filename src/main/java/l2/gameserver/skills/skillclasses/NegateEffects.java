@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class NegateEffects extends Skill {
-  private Map<EffectType, Integer> _negateEffects = new HashMap();
-  private Map<String, Integer> _negateStackType = new HashMap();
+  private Map<EffectType, Integer> _negateEffects = new HashMap<>();
+  private Map<String, Integer> _negateStackType = new HashMap<>();
   private final boolean _onlyPhysical;
   private final boolean _negateDebuffs;
 

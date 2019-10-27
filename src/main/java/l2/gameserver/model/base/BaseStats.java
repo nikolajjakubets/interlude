@@ -151,8 +151,8 @@ public enum BaseStats {
             for(d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
               node = d.getNodeName();
               if (node.equalsIgnoreCase("set")) {
-                i = Integer.valueOf(d.getAttributes().getNamedItem("attribute").getNodeValue());
-                val = (double)Integer.valueOf(d.getAttributes().getNamedItem("val").getNodeValue());
+                i = Integer.parseInt(d.getAttributes().getNamedItem("attribute").getNodeValue());
+                val = (double)Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
                 STRbonus[i] = (100.0D + val) / 100.0D;
               }
             }
@@ -162,8 +162,8 @@ public enum BaseStats {
             for(d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
               node = d.getNodeName();
               if (node.equalsIgnoreCase("set")) {
-                i = Integer.valueOf(d.getAttributes().getNamedItem("attribute").getNodeValue());
-                val = (double)Integer.valueOf(d.getAttributes().getNamedItem("val").getNodeValue());
+                i = Integer.parseInt(d.getAttributes().getNamedItem("attribute").getNodeValue());
+                val = (double)Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
                 INTbonus[i] = (100.0D + val) / 100.0D;
               }
             }
@@ -173,8 +173,8 @@ public enum BaseStats {
             for(d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
               node = d.getNodeName();
               if (node.equalsIgnoreCase("set")) {
-                i = Integer.valueOf(d.getAttributes().getNamedItem("attribute").getNodeValue());
-                val = (double)Integer.valueOf(d.getAttributes().getNamedItem("val").getNodeValue());
+                i = Integer.parseInt(d.getAttributes().getNamedItem("attribute").getNodeValue());
+                val = (double)Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
                 CONbonus[i] = (100.0D + val) / 100.0D;
               }
             }
@@ -184,8 +184,8 @@ public enum BaseStats {
             for(d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
               node = d.getNodeName();
               if (node.equalsIgnoreCase("set")) {
-                i = Integer.valueOf(d.getAttributes().getNamedItem("attribute").getNodeValue());
-                val = (double)Integer.valueOf(d.getAttributes().getNamedItem("val").getNodeValue());
+                i = Integer.parseInt(d.getAttributes().getNamedItem("attribute").getNodeValue());
+                val = (double)Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
                 MENbonus[i] = (100.0D + val) / 100.0D;
               }
             }
@@ -195,8 +195,8 @@ public enum BaseStats {
             for(d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
               node = d.getNodeName();
               if (node.equalsIgnoreCase("set")) {
-                i = Integer.valueOf(d.getAttributes().getNamedItem("attribute").getNodeValue());
-                val = (double)Integer.valueOf(d.getAttributes().getNamedItem("val").getNodeValue());
+                i = Integer.parseInt(d.getAttributes().getNamedItem("attribute").getNodeValue());
+                val = (double)Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
                 DEXbonus[i] = (100.0D + val) / 100.0D;
               }
             }
@@ -206,8 +206,8 @@ public enum BaseStats {
             for(d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
               node = d.getNodeName();
               if (node.equalsIgnoreCase("set")) {
-                i = Integer.valueOf(d.getAttributes().getNamedItem("attribute").getNodeValue());
-                val = (double)Integer.valueOf(d.getAttributes().getNamedItem("val").getNodeValue());
+                i = Integer.parseInt(d.getAttributes().getNamedItem("attribute").getNodeValue());
+                val = (double)Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
                 WITbonus[i] = (100.0D + val) / 100.0D;
               }
             }

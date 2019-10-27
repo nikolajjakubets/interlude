@@ -35,7 +35,7 @@ public class Mail implements JdbcEntity, Comparable<Mail> {
 
   public Mail() {
     this._type = Mail.SenderType.NORMAL;
-    this.attachments = new HashSet();
+    this.attachments = new HashSet<>();
     this._state = JdbcEntityState.CREATED;
   }
 

@@ -16,7 +16,7 @@ import l2.gameserver.templates.spawn.SpawnTemplate;
 
 public final class SpawnHolder extends AbstractHolder {
   private static final SpawnHolder _instance = new SpawnHolder();
-  private Map<String, List<SpawnTemplate>> _spawns = new HashMap();
+  private Map<String, List<SpawnTemplate>> _spawns = new HashMap<>();
 
   public SpawnHolder() {
   }
@@ -28,7 +28,7 @@ public final class SpawnHolder extends AbstractHolder {
   public void addSpawn(String group, SpawnTemplate spawn) {
     List<SpawnTemplate> spawns = (List)this._spawns.get(group);
     if (spawns == null) {
-      this._spawns.put(group, spawns = new ArrayList());
+      this._spawns.put(group, spawns = new ArrayList<>());
     }
 
     ((List)spawns).add(spawn);

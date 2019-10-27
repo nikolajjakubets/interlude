@@ -88,7 +88,7 @@ public class SpawnExObject implements SpawnableObject {
   }
 
   public List<NpcInstance> getAllSpawned() {
-    List<NpcInstance> npcs = new ArrayList();
+    List<NpcInstance> npcs = new ArrayList<>();
     Iterator var2 = this._spawns.iterator();
 
     while(var2.hasNext()) {

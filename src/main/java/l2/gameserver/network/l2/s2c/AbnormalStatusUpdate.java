@@ -11,7 +11,7 @@ import java.util.List;
 
 public class AbnormalStatusUpdate extends L2GameServerPacket {
   public static final int INFINITIVE_EFFECT = -1;
-  private List<AbnormalStatusUpdate.Effect> _effects = new ArrayList();
+  private List<AbnormalStatusUpdate.Effect> _effects = new ArrayList<>();
 
   public AbnormalStatusUpdate() {
   }

@@ -325,8 +325,8 @@ public class NoblesController {
   }
 
   public String[] getClassLeaders(int cid) {
-    ArrayList<NoblesController.NobleRecord> tmp = new ArrayList();
-    ArrayList<String> result = new ArrayList();
+    ArrayList<NoblesController.NobleRecord> tmp = new ArrayList<>();
+    ArrayList<String> result = new ArrayList<>();
     Iterator var4 = this._nobleses.iterator();
 
     while(var4.hasNext()) {
@@ -349,7 +349,7 @@ public class NoblesController {
   }
 
   public int getPlayerClassRank(int cid, int playerId) {
-    ArrayList<NoblesController.NobleRecord> tmp = new ArrayList();
+    ArrayList<NoblesController.NobleRecord> tmp = new ArrayList<>();
     Iterator var4 = this._nobleses.iterator();
 
     while(var4.hasNext()) {

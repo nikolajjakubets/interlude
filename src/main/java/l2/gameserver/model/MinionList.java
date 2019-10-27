@@ -26,8 +26,8 @@ public class MinionList {
 
   public MinionList(MonsterInstance master) {
     this._master = master;
-    this._minions = new HashSet();
-    this._minionData = new HashSet();
+    this._minions = new HashSet<>();
+    this._minionData = new HashSet<>();
     this._minionData.addAll(this._master.getTemplate().getMinionData());
     this.lock = new ReentrantLock();
   }

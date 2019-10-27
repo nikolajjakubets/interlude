@@ -40,8 +40,8 @@ public class EffectDispelEffects extends Effect {
   }
 
   public void onStart() {
-    List<Effect> musicList = new ArrayList();
-    List<Effect> buffList = new ArrayList();
+    List<Effect> musicList = new ArrayList<>();
+    List<Effect> buffList = new ArrayList<>();
     Iterator var3 = this._effected.getEffectList().getAllEffects().iterator();
 
     while(true) {
@@ -64,22 +64,22 @@ public class EffectDispelEffects extends Effect {
         }
       }
 
-      List<Effect> _effectList = new ArrayList();
+      List<Effect> _effectList = new ArrayList<>();
       _effectList.addAll(musicList);
       _effectList.addAll(buffList);
       if (_effectList.isEmpty()) {
         return;
       }
 
-      double cancel_res_multiplier = this._effected.calcStat(Stats.CANCEL_RESIST, 0.0D, (Creature)null, (Skill)null);
+      double cancel_res_multiplier = this._effected.calcStat(Stats.CANCEL_RESIST, 0.0D, null, null);
       Collections.shuffle(_effectList);
-      List<Effect> _effectList = _effectList.subList(0, Math.min(this._negateCount, _effectList.size()));
-      Set<Skill> _stopSkills = new HashSet();
-      Iterator var14 = _effectList.iterator();
+      List<Effect> subList = _effectList.subList(0, Math.min(this._negateCount, _effectList.size()));
+      Set<Skill> _stopSkills = new HashSet<>();
+      Iterator var14 = subList.iterator();
 
       while(var14.hasNext()) {
         Effect e = (Effect)var14.next();
-        double eml = (double)e.getSkill().getMagicLevel();
+        double eml = e.getSkill().getMagicLevel();
         double dml = (double)this.getSkill().getMagicLevel() - (eml == 0.0D ? (double)this._effected.getLevel() : eml);
         int buffTime = e.getTimeLeft();
         cancel_res_multiplier = 1.0D - cancel_res_multiplier * 0.01D;
@@ -99,11 +99,9 @@ public class EffectDispelEffects extends Effect {
 
       if (this._effected.isPlayer() && this._reApplyDelay > 0) {
         final HardReference<Player> reApplyRef = this._effected.getPlayer().getRef();
-        final List<Skill> reApplySkills = new LinkedList();
-        Iterator var16 = _stopSkills.iterator();
+        final List<Skill> reApplySkills = new LinkedList<>();
 
-        while(var16.hasNext()) {
-          Skill stopSkill = (Skill)var16.next();
+        for (Skill stopSkill : _stopSkills) {
           if (!stopSkill.isOffensive() && !stopSkill.isToggle() && !stopSkill.isTrigger()) {
             reApplySkills.add(stopSkill);
           }
@@ -111,12 +109,10 @@ public class EffectDispelEffects extends Effect {
 
         ThreadPoolManager.getInstance().schedule(new RunnableImpl() {
           public void runImpl() throws Exception {
-            Player player = (Player)reApplyRef.get();
+            Player player = reApplyRef.get();
             if (player != null && !player.isLogoutStarted() && !player.isOutOfControl() && !player.isDead() && !player.isInDuel() && !player.isAlikeDead() && !player.isOlyParticipant() && !player.isFlying() && !player.isSitting() && player.getTeam() == TeamType.NONE && !player.isInStoreMode()) {
-              Iterator var2 = reApplySkills.iterator();
 
-              while(var2.hasNext()) {
-                Skill reApplySkill = (Skill)var2.next();
+              for (Skill reApplySkill : reApplySkills) {
                 reApplySkill.getEffects(player, player, false, false);
               }
 
@@ -140,11 +136,11 @@ public class EffectDispelEffects extends Effect {
       }
     } else {
       if (this._dispelType.equals("cancellation")) {
-        return Math.max((double)Config.SKILLS_DISPEL_MOD_MIN, Math.min((double)Config.SKILLS_DISPEL_MOD_MAX, prelimChance));
+        return Math.max(Config.SKILLS_DISPEL_MOD_MIN, Math.min(Config.SKILLS_DISPEL_MOD_MAX, prelimChance));
       }
 
       if (this._dispelType.equals("cleanse")) {
-        return (double)this._cancelRate;
+        return this._cancelRate;
       }
     }
 

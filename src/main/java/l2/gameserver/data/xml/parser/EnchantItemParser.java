@@ -58,7 +58,7 @@ public class EnchantItemParser extends AbstractFileParser<EnchantItemHolder> {
           int maxLvl = Config.ENCHANT_MAX;
           int increment = Integer.parseInt(el.attributeValue("increment", "1"));
           EnchantTargetType ett = EnchantTargetType.ALL;
-          ArrayList<Integer> itemRestricted = new ArrayList();
+          ArrayList<Integer> itemRestricted = new ArrayList<>();
           Iterator it2 = el.elementIterator();
 
           while(true) {
@@ -72,7 +72,7 @@ public class EnchantItemParser extends AbstractFileParser<EnchantItemHolder> {
                 Iterator irit = el2.elementIterator("item");
 
                 while(irit.hasNext()) {
-                  itemRestricted.add(Integer.valueOf(((Element)irit.next()).attributeValue("id")));
+                  itemRestricted.add(Integer.parseInt(((Element)irit.next()).attributeValue("id")));
                 }
               }
             }

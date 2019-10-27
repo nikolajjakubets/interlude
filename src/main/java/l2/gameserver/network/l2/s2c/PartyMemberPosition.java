@@ -13,7 +13,7 @@ import l2.gameserver.model.Player;
 import l2.gameserver.utils.Location;
 
 public class PartyMemberPosition extends L2GameServerPacket {
-  private final Map<Integer, Location> positions = new HashMap();
+  private final Map<Integer, Location> positions = new HashMap<>();
 
   public PartyMemberPosition() {
   }

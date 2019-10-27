@@ -52,8 +52,8 @@ public class HeroController {
   private static final String SQL_GET_HEROES = "SELECT  `oly_heroes`.`char_id` AS `char_id`, `oly_nobles`.`char_name` AS `name`, `oly_nobles`.`class_id` AS `class_id`, `oly_heroes`.`count` AS `count`, `oly_heroes`.`played` AS `played`, `oly_heroes`.`active` AS `active`, `oly_heroes`.`message` AS `message` FROM    `oly_heroes`,`oly_nobles` WHERE   `oly_heroes`.`char_id` = `oly_nobles`.`char_id`";
   private static final String SQL_SET_HEROES = "REPLACE INTO `oly_heroes` (`char_id`, `count`, `played`, `active`, `message`) VALUES (?, ?, ?, ?, ?)";
   private static HeroController _instance;
-  private ArrayList<HeroController.HeroRecord> _currentHeroes = new ArrayList();
-  private ArrayList<HeroController.HeroRecord> _allHeroes = new ArrayList();
+  private ArrayList<HeroController.HeroRecord> _currentHeroes = new ArrayList<>();
+  private ArrayList<HeroController.HeroRecord> _allHeroes = new ArrayList<>();
   private static Map<Integer, List<HeroDiary>> _herodiary;
   private static Map<Integer, String> _heroMessage;
 
@@ -73,7 +73,7 @@ public class HeroController {
 
   private synchronized Collection<NobleRecord> CalcHeroesContenders() {
     _log.info("HeroController: Calculating heroes contenders.");
-    HashMap<ClassId, NobleRecord> hero_contenders_map = new HashMap();
+    HashMap<ClassId, NobleRecord> hero_contenders_map = new HashMap<>();
     Iterator var2 = NoblesController.getInstance().getNoblesRecords().iterator();
 
     NobleRecord nr;
@@ -116,7 +116,7 @@ public class HeroController {
       Log.add(String.format("HeroController: %s(%d) pretended to be a hero. points_current = %d", nr.char_name, nr.char_id, nr.points_current), "olympiad");
     }
 
-    ArrayList<NobleRecord> result = new ArrayList();
+    ArrayList<NobleRecord> result = new ArrayList<>();
     result.addAll(hero_contenders_map.values());
     return result;
   }
@@ -501,7 +501,7 @@ public class HeroController {
   }
 
   public void loadDiary(int charId) {
-    List<HeroDiary> diary = new ArrayList();
+    List<HeroDiary> diary = new ArrayList<>();
     Connection con = null;
     PreparedStatement statement = null;
     ResultSet rset = null;

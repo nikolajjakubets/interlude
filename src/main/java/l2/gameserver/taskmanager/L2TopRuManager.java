@@ -40,12 +40,13 @@ import org.slf4j.LoggerFactory;
 
 public class L2TopRuManager {
   private static final Logger _log = LoggerFactory.getLogger(L2TopRuManager.class);
+  private static final String USERAGENT = "Mozilla/5.0 (SunOS; 5.10; amd64; U) Java HotSpot(TM) 64-Bit Server VM/16.2-b04";
+
   private static L2TopRuManager _instance;
-  private static String USERAGENT = "Mozilla/5.0 (SunOS; 5.10; amd64; U) Java HotSpot(TM) 64-Bit Server VM/16.2-b04";
   private Pattern _webPattern;
   private Pattern _smsPattern;
   private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-  private static Map<Integer, Long> _voteDateCache = new ConcurrentHashMap();
+  private static Map<Integer, Long> _voteDateCache = new ConcurrentHashMap<>();
 
   public static L2TopRuManager getInstance() {
     if (_instance == null) {
@@ -60,13 +61,13 @@ public class L2TopRuManager {
       _log.info("L2TopRuManager: Initializing.");
       this._webPattern = Pattern.compile("^([\\d-]+\\s[\\d:]+)\\s+(?:" + Config.L2TOPRU_PREFIX + "-)*([^\\s]+)$", 8);
       this._smsPattern = Pattern.compile("^([\\d-]+\\s[\\d:]+)\\s+(?:" + Config.L2TOPRU_PREFIX + "-)*([^\\s]+)\\s+x(\\d{1,2})$", 8);
-      ThreadPoolManager.getInstance().scheduleAtFixedRate(new L2TopRuManager.L2TopRuTask((SyntheticClass_1)null), Config.L2TOPRU_DELAY, Config.L2TOPRU_DELAY);
+      ThreadPoolManager.getInstance().scheduleAtFixedRate(new L2TopRuManager.L2TopRuTask(), Config.L2TOPRU_DELAY, Config.L2TOPRU_DELAY);
     }
   }
 
   protected ArrayList<L2TopRuManager.L2TopRuVote> filterVotes(ArrayList<L2TopRuManager.L2TopRuVote> votes) {
-    ArrayList<L2TopRuManager.L2TopRuVote> result = new ArrayList();
-    HashMap<String, Integer> chars = new HashMap();
+    ArrayList<L2TopRuManager.L2TopRuVote> result = new ArrayList<>();
+    HashMap<String, Integer> chars = new HashMap<>();
     Connection con = null;
     Statement stmt = null;
     ResultSet rset = null;
@@ -85,13 +86,11 @@ public class L2TopRuManager {
       DbUtils.closeQuietly(con, stmt, rset);
     }
 
-    int charObjId = false;
-    Iterator var8 = votes.iterator();
+//    int charObjId = false;
 
-    while(var8.hasNext()) {
-      L2TopRuManager.L2TopRuVote vote = (L2TopRuManager.L2TopRuVote)var8.next();
+    for (L2TopRuVote vote : votes) {
       if (chars.containsKey(vote.charname)) {
-        int charObjId = (Integer)chars.get(vote.charname);
+        int charObjId = chars.get(vote.charname);
         if (this.isRewardReq(charObjId, vote.datetime)) {
           vote.char_obj_id = charObjId;
           result.add(vote);
@@ -103,12 +102,12 @@ public class L2TopRuManager {
   }
 
   private boolean isRewardReq(int charObjId, long date) {
-    long lastDate = 0L;
+    long lastDate;
     Connection con = null;
-    PreparedStatement pstmt = null;
-    ResultSet rset = null;
+    PreparedStatement pstmt;
+    ResultSet rset;
     if (_voteDateCache.containsKey(charObjId)) {
-      lastDate = (Long)_voteDateCache.get(charObjId);
+      lastDate = _voteDateCache.get(charObjId);
       if (date > lastDate) {
         _voteDateCache.put(charObjId, date);
 
@@ -146,8 +145,7 @@ public class L2TopRuManager {
             var18.printStackTrace();
           }
 
-          var9 = true;
-          return var9;
+          return true;
         }
 
         lastDate = rset.getLong("last_vote");
@@ -184,10 +182,10 @@ public class L2TopRuManager {
     if (charObjId >= 1) {
       Player player = GameObjectsStorage.getPlayer(charObjId);
       if (player != null) {
-        player.sendMessage((new CustomMessage("l2.gameserver.taskmanager.L2TopRuManager", player, new Object[0])).addItemName(player.getInventory().addItem(itemId, (long)itemCount)));
+        player.sendMessage((new CustomMessage("l2.gameserver.taskmanager.L2TopRuManager", player)).addItemName(player.getInventory().addItem(itemId, itemCount)));
       } else {
         ItemInstance newItem = new ItemInstance(IdFactory.getInstance().getNextId(), itemId);
-        newItem.setCount((long)itemCount);
+        newItem.setCount(itemCount);
         newItem.setOwnerId(charObjId);
         newItem.setLocation(ItemLocation.INVENTORY);
         newItem.save();
@@ -217,7 +215,7 @@ public class L2TopRuManager {
   }
 
   private ArrayList<L2TopRuManager.L2TopRuVote> getAllVotes() {
-    ArrayList result = new ArrayList();
+    ArrayList result = new ArrayList<>();
 
     try {
       Matcher m = this._webPattern.matcher(this.getPage(Config.L2TOPRU_WEB_VOTE_URL));
@@ -246,7 +244,7 @@ public class L2TopRuManager {
         }
       }
 
-      Collections.sort(result, new L2TopRuManager.L2TopRuVoteComparator((SyntheticClass_1)null));
+      Collections.sort(result, new L2TopRuManager.L2TopRuVoteComparator());
     } catch (Exception var7) {
       var7.printStackTrace();
     }
@@ -322,11 +320,11 @@ public class L2TopRuManager {
     }
   }
 
-  private static enum L2TopRuVoteType {
+  private enum L2TopRuVoteType {
     WEB,
     SMS;
 
-    private L2TopRuVoteType() {
+    L2TopRuVoteType() {
     }
   }
 

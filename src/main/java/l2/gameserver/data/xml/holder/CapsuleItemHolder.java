@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 public class CapsuleItemHolder extends AbstractHolder {
   private static final Logger LOG = LoggerFactory.getLogger(CapsuleItemHolder.class);
   private static final CapsuleItemHolder INSTANCE = new CapsuleItemHolder();
-  private final Map<Integer, List<CapsuleItemHolder.CapsuledItem>> _capsuleItems = new HashMap();
-  private final Map<Integer, Pair<Integer, Long>> _capsuleRequiredItems = new HashMap();
+  private final Map<Integer, List<CapsuleItemHolder.CapsuledItem>> _capsuleItems = new HashMap<>();
+  private final Map<Integer, Pair<Integer, Long>> _capsuleRequiredItems = new HashMap<>();
   private CapsuleItemHolder.CapsuleItemsHandler _itemsHandler;
 
   public static CapsuleItemHolder getInstance() {
@@ -153,7 +153,7 @@ public class CapsuleItemHolder extends AbstractHolder {
           return false;
         } else {
           playable.sendPacket((new SystemMessage(47)).addItemName(item.getItemId()));
-          List<Pair<CapsuleItemHolder.CapsuledItem, Double>> chancedItems = new ArrayList();
+          List<Pair<CapsuleItemHolder.CapsuledItem, Double>> chancedItems = new ArrayList<>();
           Iterator var8 = capsuledItems.iterator();
 
           while(true) {

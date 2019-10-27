@@ -173,13 +173,13 @@ public class SSQStatus extends L2GameServerPacket {
         dawnProportion = SevenSigns.getInstance().getTotalMembers(2);
         duskProportion = SevenSigns.getInstance().getTotalMembers(1);
 
-        for(int i = 1; i < 4; ++i) {
-          this.writeC(i);
-          int dawnSealPlayers = SevenSigns.getInstance().getSealProportion(i, 2);
-          int duskSealPlayers = SevenSigns.getInstance().getSealProportion(i, 1);
+        for(int counter = 1; counter < 4; ++counter) {
+          this.writeC(counter);
+          int dawnSealPlayers = SevenSigns.getInstance().getSealProportion(counter, 2);
+          int duskSealPlayers = SevenSigns.getInstance().getSealProportion(counter, 1);
           dawnProp = dawnProportion > 0 ? dawnSealPlayers * 100 / dawnProportion : 0;
           duskProp = duskProportion > 0 ? duskSealPlayers * 100 / duskProportion : 0;
-          int curSealOwner = SevenSigns.getInstance().getSealOwner(i);
+          int curSealOwner = SevenSigns.getInstance().getSealOwner(counter);
           if (Math.max(dawnProp, duskProp) < 10) {
             this.writeC(0);
             if (curSealOwner == 0) {

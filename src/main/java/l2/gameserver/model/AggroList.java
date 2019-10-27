@@ -317,7 +317,7 @@ public class AggroList {
     if (this.isEmpty()) {
       return Collections.emptyMap();
     } else {
-      Map<Creature, AggroList.HateInfo> aggroMap = new HashMap();
+      Map<Creature, AggroList.HateInfo> aggroMap = new HashMap<>();
       List<Creature> chars = World.getAroundCharacters(this.npc);
       this.readLock.lock();
 
@@ -357,7 +357,7 @@ public class AggroList {
     if (this.isEmpty()) {
       return Collections.emptyMap();
     } else {
-      Map<Playable, AggroList.HateInfo> aggroMap = new HashMap();
+      Map<Playable, AggroList.HateInfo> aggroMap = new HashMap<>();
       List<Playable> chars = World.getAroundPlayables(this.npc);
       this.readLock.lock();
 

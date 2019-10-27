@@ -22,7 +22,7 @@ public class StatusUpdate extends L2GameServerPacket {
   public static final int CUR_CP = 33;
   public static final int MAX_CP = 34;
   private final int _objectId;
-  private final List<StatusUpdate.Attribute> _attributes = new ArrayList();
+  private final List<StatusUpdate.Attribute> _attributes = new ArrayList<>();
 
   public StatusUpdate(Creature creature) {
     this._objectId = creature.getObjectId();

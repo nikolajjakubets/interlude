@@ -62,9 +62,9 @@ public class RecipeParser extends AbstractFileParser<RecipeHolder> {
       int recipeItemId = Integer.parseInt(recipeListElement.attributeValue("item_id"));
       ItemTemplate recipeItem = ItemHolder.getInstance().getTemplate(recipeItemId);
       ERecipeType recipeType = Boolean.parseBoolean(recipeListElement.attributeValue("is_common")) ? ERecipeType.ERT_COMMON : ERecipeType.ERT_DWARF;
-      List<Pair<ItemTemplate, Long>> materials = new ArrayList();
-      List<Pair<ItemTemplate, Long>> products = new ArrayList();
-      List<Pair<ItemTemplate, Long>> npcFees = new ArrayList();
+      List<Pair<ItemTemplate, Long>> materials = new ArrayList<>();
+      List<Pair<ItemTemplate, Long>> products = new ArrayList<>();
+      List<Pair<ItemTemplate, Long>> npcFees = new ArrayList<>();
       Iterator recipeElementIt = recipeListElement.elementIterator();
 
       while(true) {

@@ -36,7 +36,7 @@ public class NpcHtmlMessage extends L2GameServerPacket {
 
   public NpcHtmlMessage(Player player, int npcId, String filename, int val) {
     this._file = null;
-    this._replaces = new ArrayList();
+    this._replaces = new ArrayList<>();
     this.have_appends = false;
     List<ScriptClassAndMethod> appends = (List)Scripts.dialogAppends.get(npcId);
     if (appends != null && appends.size() > 0) {
@@ -79,7 +79,7 @@ public class NpcHtmlMessage extends L2GameServerPacket {
 
   public NpcHtmlMessage(Player player, NpcInstance npc) {
     this._file = null;
-    this._replaces = new ArrayList();
+    this._replaces = new ArrayList<>();
     this.have_appends = false;
     if (npc == null) {
       this._npcObjId = 5;
@@ -93,7 +93,7 @@ public class NpcHtmlMessage extends L2GameServerPacket {
 
   public NpcHtmlMessage(int npcObjId) {
     this._file = null;
-    this._replaces = new ArrayList();
+    this._replaces = new ArrayList<>();
     this.have_appends = false;
     this._npcObjId = npcObjId;
   }

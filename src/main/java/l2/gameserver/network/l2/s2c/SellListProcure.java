@@ -18,8 +18,8 @@ import l2.gameserver.templates.manor.CropProcure;
 
 public class SellListProcure extends L2GameServerPacket {
   private long _money;
-  private Map<ItemInstance, Long> _sellList = new HashMap();
-  private List<CropProcure> _procureList = new ArrayList();
+  private Map<ItemInstance, Long> _sellList = new HashMap<>();
+  private List<CropProcure> _procureList = new ArrayList<>();
   private int _castle;
 
   public SellListProcure(Player player, int castleId) {

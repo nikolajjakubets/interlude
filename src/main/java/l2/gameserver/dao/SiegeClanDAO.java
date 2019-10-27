@@ -46,7 +46,7 @@ public class SiegeClanDAO {
       statement.setInt(1, residence.getId());
       statement.setString(2, name);
       rset = statement.executeQuery();
-      siegeClans = new ArrayList();
+      siegeClans = new ArrayList<>();
 
       while(rset.next()) {
         int clanId = rset.getInt("clan_id");

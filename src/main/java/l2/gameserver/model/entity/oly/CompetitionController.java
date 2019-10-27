@@ -274,7 +274,7 @@ public class CompetitionController {
   }
 
   public Collection<CompetitionController.CompetitionResults> getCompetitionResults(int obj_id, int season) {
-    ArrayList<CompetitionController.CompetitionResults> result = new ArrayList();
+    ArrayList<CompetitionController.CompetitionResults> result = new ArrayList<>();
     Connection conn = null;
     PreparedStatement pstmt = null;
     ResultSet rset = null;

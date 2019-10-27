@@ -29,7 +29,7 @@ public class DimensionalRift extends Reflection {
   protected static final long seconds_5 = 5000L;
   protected static final int MILLISECONDS_IN_MINUTE = 60000;
   protected int _roomType;
-  protected List<Integer> _completedRooms = new ArrayList();
+  protected List<Integer> _completedRooms = new ArrayList<>();
   protected int jumps_current = 0;
   private Future<?> teleporterTask;
   private Future<?> spawnTask;
@@ -206,7 +206,7 @@ public class DimensionalRift extends Reflection {
     if (this.getType() >= 5 && this.jumps_current == this.getMaxJumps()) {
       this._choosenRoom = 9;
     } else {
-      List<Integer> notCompletedRooms = new ArrayList();
+      List<Integer> notCompletedRooms = new ArrayList<>();
 
       for(int i = 1; i <= size; ++i) {
         if (!this._completedRooms.contains(i)) {

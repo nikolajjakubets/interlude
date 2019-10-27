@@ -54,7 +54,7 @@ public class SkillsEngine {
         }
       });
       Arrays.sort(files, NaturalOrderComparator.FILE_NAME_COMPARATOR);
-      Map<Integer, Map<Integer, Skill>> result = new HashMap();
+      Map<Integer, Map<Integer, Skill>> result = new HashMap<>();
       int maxId = 0;
       int maxLvl = 0;
       File[] var6 = files;
@@ -72,7 +72,7 @@ public class SkillsEngine {
             int skillLevel = skill.getLevel();
             Map<Integer, Skill> skillLevels = (Map)result.get(skillId);
             if (skillLevels == null) {
-              skillLevels = new HashMap();
+              skillLevels = new HashMap<>();
               result.put(skillId, skillLevels);
             }
 

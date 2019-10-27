@@ -86,7 +86,7 @@ public class RequestMultiSellChoose extends L2GameClientPacket {
           if (entry != null) {
             boolean keepenchant = list1.isKeepEnchant();
             boolean notax = list1.isNoTax();
-            List<RequestMultiSellChoose.ItemData> items = new ArrayList();
+            List<RequestMultiSellChoose.ItemData> items = new ArrayList<>();
             PcInventory inventory = activeChar.getInventory();
             long totalPrice = 0L;
             Castle castle = merchant != null ? merchant.getCastle(activeChar) : null;

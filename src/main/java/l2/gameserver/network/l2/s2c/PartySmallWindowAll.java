@@ -14,7 +14,7 @@ import l2.gameserver.model.Player;
 public class PartySmallWindowAll extends L2GameServerPacket {
   private int leaderId;
   private int loot;
-  private List<PartySmallWindowAll.PartySmallWindowMemberInfo> members = new ArrayList();
+  private List<PartySmallWindowAll.PartySmallWindowMemberInfo> members = new ArrayList<>();
 
   public PartySmallWindowAll(Party party, Player exclude) {
     this.leaderId = party.getPartyLeader().getObjectId();

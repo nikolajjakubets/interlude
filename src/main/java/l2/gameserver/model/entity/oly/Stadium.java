@@ -43,8 +43,8 @@ public class Stadium extends Reflection {
   }
 
   public void clear() {
-    ArrayList<Player> teleport_list = new ArrayList();
-    ArrayList<GameObject> delete_list = new ArrayList();
+    ArrayList<Player> teleport_list = new ArrayList<>();
+    ArrayList<GameObject> delete_list = new ArrayList<>();
     this.lock.lock();
 
     Iterator var3;

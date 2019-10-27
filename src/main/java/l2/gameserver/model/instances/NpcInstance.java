@@ -986,7 +986,7 @@ public class NpcInstance extends Creature {
   }
 
   public void showQuestWindow(Player player) {
-    List<Quest> options = new ArrayList();
+    List<Quest> options = new ArrayList<>();
     List<QuestState> awaits = player.getQuestsForEvent(this, QuestEventType.QUEST_TALK);
     Quest[] starts = this.getTemplate().getEventQuests(QuestEventType.QUEST_START);
     if (awaits != null) {

@@ -32,7 +32,7 @@ public class Compiler {
     }
 
     public boolean compile(File... files) {
-        List<String> options = new ArrayList();
+        List<String> options = new ArrayList<>();
         options.add("-Xlint:all");
         options.add("-warn:none");
         options.add("-g");

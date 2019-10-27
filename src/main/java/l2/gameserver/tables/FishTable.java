@@ -88,7 +88,7 @@ public class FishTable {
         RewardData reward = new RewardData(rewardid, mindrop, maxdrop, (double)chance * 10000.0D);
         Object rewards;
         if ((rewards = this._fishRewards.get(fishid)) == null) {
-          this._fishRewards.put(fishid, rewards = new ArrayList());
+          this._fishRewards.put(fishid, new ArrayList<>());
         }
 
         ((List)rewards).add(reward);
@@ -108,7 +108,7 @@ public class FishTable {
   }
 
   public List<FishTemplate> getFish(int group, int type, int lvl) {
-    List<FishTemplate> result = new ArrayList();
+    List<FishTemplate> result = new ArrayList<>();
     List<FishTemplate> fishs = this._fishes.get(group);
     if (fishs == null) {
       _log.warn("No fishes defined for group : " + group + "!");

@@ -15,7 +15,7 @@ public class RndSelector<E> {
     private final List<RndSelector<E>.RndNode<E>> nodes;
 
     public RndSelector() {
-        this.nodes = new ArrayList();
+        this.nodes = new ArrayList<>();
     }
 
     public RndSelector(int initialCapacity) {

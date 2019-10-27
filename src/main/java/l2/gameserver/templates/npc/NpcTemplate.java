@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
 
 public final class NpcTemplate extends CharTemplate {
   private static final Logger _log = LoggerFactory.getLogger(NpcTemplate.class);
-  public static final Constructor<NpcInstance> DEFAULT_TYPE_CONSTRUCTOR = NpcInstance.class.getConstructors()[0];
-  public static final Constructor<CharacterAI> DEFAULT_AI_CONSTRUCTOR = CharacterAI.class.getConstructors()[0];
+  public static final Constructor<?> DEFAULT_TYPE_CONSTRUCTOR = NpcInstance.class.getConstructors()[0];
+  public static final Constructor<?> DEFAULT_AI_CONSTRUCTOR = CharacterAI.class.getConstructors()[0];
   public final int npcId;
   public final String name;
   public final String title;
@@ -96,9 +96,9 @@ public final class NpcTemplate extends CharTemplate {
     this._stunSkills = Skill.EMPTY_ARRAY;
     this._healSkills = Skill.EMPTY_ARRAY;
     this._classType = NpcInstance.class;
-    this._constructorType = DEFAULT_TYPE_CONSTRUCTOR;
+    this._constructorType = (Constructor<NpcInstance>) DEFAULT_TYPE_CONSTRUCTOR;
     this._classAI = CharacterAI.class;
-    this._constructorAI = DEFAULT_AI_CONSTRUCTOR;
+    this._constructorAI = (Constructor<CharacterAI>) DEFAULT_AI_CONSTRUCTOR;
     this.npcId = set.getInteger("npcId");
     this.displayId = set.getInteger("displayId");
     this.name = set.getString("name");
@@ -111,13 +111,13 @@ public final class NpcTemplate extends CharTemplate {
     this.rhand = set.getInteger("rhand", 0);
     this.lhand = set.getInteger("lhand", 0);
     this.rateHp = set.getDouble("baseHpRate");
-    this.jClass = set.getString("texture", (String)null);
-    this._htmRoot = set.getString("htm_root", (String)null);
-    this.shots = (NpcTemplate.ShotsType)set.getEnum("shots", NpcTemplate.ShotsType.class, NpcTemplate.ShotsType.NONE);
+    this.jClass = set.getString("texture", null);
+    this._htmRoot = set.getString("htm_root", null);
+    this.shots = set.getEnum("shots", ShotsType.class, ShotsType.NONE);
     this._castleId = set.getInteger("castle_id", 0);
     this._AIParams = (StatsSet)set.getObject("aiParams", StatsSet.EMPTY);
-    this.setType(set.getString("type", (String)null));
-    this.setAI(set.getString("ai_type", (String)null));
+    this.setType(set.getString("type", null));
+    this.setAI(set.getString("ai_type", null));
   }
 
   public Class<? extends NpcInstance> getInstanceClass() {
@@ -134,7 +134,7 @@ public final class NpcTemplate extends CharTemplate {
 
   public NpcInstance getNewInstance() {
     try {
-      return (NpcInstance)this._constructorType.newInstance(IdFactory.getInstance().getNextId(), this);
+      return this._constructorType.newInstance(IdFactory.getInstance().getNextId(), this);
     } catch (Exception var2) {
       _log.error("Unable to create instance of NPC " + this.npcId, var2);
       return null;
@@ -143,7 +143,7 @@ public final class NpcTemplate extends CharTemplate {
 
   public CharacterAI getNewAI(NpcInstance npc) {
     try {
-      return (CharacterAI)this._constructorAI.newInstance(npc);
+      return this._constructorAI.newInstance(npc);
     } catch (Exception var3) {
       _log.error("Unable to create ai of NPC " + this.npcId, var3);
       return new CharacterAI(npc);
@@ -156,14 +156,14 @@ public final class NpcTemplate extends CharTemplate {
     try {
       classType = Class.forName("l2.gameserver.model.instances." + type + "Instance");
     } catch (ClassNotFoundException var4) {
-      classType = (Class)Scripts.getInstance().getClasses().get("npc.model." + type + "Instance");
+      classType = Scripts.getInstance().getClasses().get("npc.model." + type + "Instance");
     }
 
     if (classType == null) {
       _log.error("Not found type class for type: " + type + ". NpcId: " + this.npcId);
     } else {
       this._classType = classType;
-      this._constructorType = this._classType.getConstructors()[0];
+      this._constructorType = (Constructor<NpcInstance>) this._classType.getConstructors()[0];
     }
 
     if (this._classType.isAnnotationPresent(Deprecated.class)) {
@@ -179,14 +179,14 @@ public final class NpcTemplate extends CharTemplate {
     try {
       classAI = Class.forName("l2.gameserver.ai." + ai);
     } catch (ClassNotFoundException var4) {
-      classAI = (Class)Scripts.getInstance().getClasses().get("ai." + ai);
+      classAI = Scripts.getInstance().getClasses().get("ai." + ai);
     }
 
     if (classAI == null) {
       _log.error("Not found ai class for ai: " + ai + ". NpcId: " + this.npcId);
     } else {
       this._classAI = classAI;
-      this._constructorAI = this._classAI.getConstructors()[0];
+      this._constructorAI = (Constructor<CharacterAI>) this._classAI.getConstructors()[0];
     }
 
     if (this._classAI.isAnnotationPresent(Deprecated.class)) {
@@ -197,7 +197,7 @@ public final class NpcTemplate extends CharTemplate {
 
   public void addTeachInfo(ClassId classId) {
     if (this._teachInfo.isEmpty()) {
-      this._teachInfo = new ArrayList(1);
+      this._teachInfo = new ArrayList<>(1);
     }
 
     this._teachInfo.add(classId);
@@ -213,14 +213,14 @@ public final class NpcTemplate extends CharTemplate {
 
   public void addTeleportList(int id, TeleportLocation[] list) {
     if (this._teleportList.isEmpty()) {
-      this._teleportList = new TIntObjectHashMap(1);
+      this._teleportList = new TIntObjectHashMap<>(1);
     }
 
     this._teleportList.put(id, list);
   }
 
   public TeleportLocation[] getTeleportList(int id) {
-    return (TeleportLocation[])this._teleportList.get(id);
+    return this._teleportList.get(id);
   }
 
   public TIntObjectHashMap<TeleportLocation[]> getTeleportList() {
@@ -229,14 +229,14 @@ public final class NpcTemplate extends CharTemplate {
 
   public void putRewardList(RewardType rewardType, RewardList list) {
     if (this._rewards.isEmpty()) {
-      this._rewards = new HashMap(RewardType.values().length);
+      this._rewards = new HashMap<>(RewardType.values().length);
     }
 
     this._rewards.put(rewardType, list);
   }
 
   public RewardList getRewardList(RewardType t) {
-    return (RewardList)this._rewards.get(t);
+    return this._rewards.get(t);
   }
 
   public Map<RewardType, RewardList> getRewards() {
@@ -245,7 +245,7 @@ public final class NpcTemplate extends CharTemplate {
 
   public void addAbsorbInfo(AbsorbInfo absorbInfo) {
     if (this._absorbInfo.isEmpty()) {
-      this._absorbInfo = new ArrayList(1);
+      this._absorbInfo = new ArrayList<>(1);
     }
 
     this._absorbInfo.add(absorbInfo);
@@ -253,7 +253,7 @@ public final class NpcTemplate extends CharTemplate {
 
   public void addMinion(MinionData minion) {
     if (this._minions.isEmpty()) {
-      this._minions = new ArrayList(1);
+      this._minions = new ArrayList<>(1);
     }
 
     this._minions.add(minion);
@@ -269,7 +269,7 @@ public final class NpcTemplate extends CharTemplate {
 
   public void addSkill(Skill skill) {
     if (this._skills.isEmpty()) {
-      this._skills = new TIntObjectHashMap();
+      this._skills = new TIntObjectHashMap<>();
     }
 
     this._skills.put(skill.getId(), skill);
@@ -285,32 +285,31 @@ public final class NpcTemplate extends CharTemplate {
             EffectTemplate[] var3 = skill.getEffectTemplates();
             int var4 = var3.length;
 
-            for(int var5 = 0; var5 < var4; ++var5) {
-              EffectTemplate eff = var3[var5];
-              switch(eff.getEffectType()) {
+            for (EffectTemplate eff : var3) {
+              switch (eff.getEffectType()) {
                 case Stun:
-                  this._stunSkills = (Skill[])((Skill[])ArrayUtils.add(this._stunSkills, skill));
+                  this._stunSkills = ArrayUtils.add(this._stunSkills, skill);
                   added = true;
                   break;
                 case DamOverTime:
                 case DamOverTimeLethal:
                 case ManaDamOverTime:
                 case LDManaDamOverTime:
-                  this._dotSkills = (Skill[])((Skill[])ArrayUtils.add(this._dotSkills, skill));
+                  this._dotSkills = ArrayUtils.add(this._dotSkills, skill);
                   added = true;
               }
             }
           }
 
           if (!added) {
-            this._damageSkills = (Skill[])((Skill[])ArrayUtils.add(this._damageSkills, skill));
+            this._damageSkills = ArrayUtils.add(this._damageSkills, skill);
           }
           break;
         case DOT:
         case MDOT:
         case POISON:
         case BLEED:
-          this._dotSkills = (Skill[])((Skill[])ArrayUtils.add(this._dotSkills, skill));
+          this._dotSkills = ArrayUtils.add(this._dotSkills, skill);
           break;
         case DEBUFF:
         case SLEEP:
@@ -319,18 +318,18 @@ public final class NpcTemplate extends CharTemplate {
         case MUTE:
         case TELEPORT_NPC:
         case AGGRESSION:
-          this._debuffSkills = (Skill[])((Skill[])ArrayUtils.add(this._debuffSkills, skill));
+          this._debuffSkills = ArrayUtils.add(this._debuffSkills, skill);
           break;
         case BUFF:
-          this._buffSkills = (Skill[])((Skill[])ArrayUtils.add(this._buffSkills, skill));
+          this._buffSkills = ArrayUtils.add(this._buffSkills, skill);
           break;
         case STUN:
-          this._stunSkills = (Skill[])((Skill[])ArrayUtils.add(this._stunSkills, skill));
+          this._stunSkills = ArrayUtils.add(this._stunSkills, skill);
           break;
         case HEAL:
         case HEAL_PERCENT:
         case HOT:
-          this._healSkills = (Skill[])((Skill[])ArrayUtils.add(this._healSkills, skill));
+          this._healSkills = ArrayUtils.add(this._healSkills, skill);
       }
 
     }
@@ -370,13 +369,13 @@ public final class NpcTemplate extends CharTemplate {
 
   public void addQuestEvent(QuestEventType EventType, Quest q) {
     if (this._questEvents.isEmpty()) {
-      this._questEvents = new HashMap();
+      this._questEvents = new HashMap<>();
     }
 
     if (this._questEvents.get(EventType) == null) {
       this._questEvents.put(EventType, new Quest[]{q});
     } else {
-      Quest[] _quests = (Quest[])this._questEvents.get(EventType);
+      Quest[] _quests = this._questEvents.get(EventType);
       int len = _quests.length;
       Quest[] tmp = new Quest[len + 1];
 
@@ -396,7 +395,7 @@ public final class NpcTemplate extends CharTemplate {
   }
 
   public Quest[] getEventQuests(QuestEventType EventType) {
-    return (Quest[])this._questEvents.get(EventType);
+    return this._questEvents.get(EventType);
   }
 
   public int getRace() {
@@ -447,7 +446,7 @@ public final class NpcTemplate extends CharTemplate {
     return this._htmRoot;
   }
 
-  public static enum ShotsType {
+  public enum ShotsType {
     NONE,
     SOUL,
     SPIRIT,
@@ -455,7 +454,7 @@ public final class NpcTemplate extends CharTemplate {
     SOUL_SPIRIT,
     SOUL_BSPIRIT;
 
-    private ShotsType() {
+    ShotsType() {
     }
   }
 }

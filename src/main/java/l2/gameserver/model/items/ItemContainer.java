@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public abstract class ItemContainer {
   private static final Logger _log = LoggerFactory.getLogger(ItemContainer.class);
   protected static final ItemsDAO _itemsDAO = ItemsDAO.getInstance();
-  protected final List<ItemInstance> _items = new ArrayList();
+  protected final List<ItemInstance> _items = new ArrayList<>();
   protected final ReadWriteLock lock = new ReentrantReadWriteLock();
   protected final Lock readLock;
   protected final Lock writeLock;
@@ -111,7 +111,7 @@ public abstract class ItemContainer {
   }
 
   public List<ItemInstance> getItemsByItemId(int itemId) {
-    List<ItemInstance> result = new ArrayList();
+    List<ItemInstance> result = new ArrayList<>();
     this.readLock();
 
     try {

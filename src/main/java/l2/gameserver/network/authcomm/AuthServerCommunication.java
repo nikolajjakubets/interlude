@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
 public class AuthServerCommunication extends Thread {
   private static final Logger _log = LoggerFactory.getLogger(AuthServerCommunication.class);
   private static final AuthServerCommunication instance = new AuthServerCommunication();
-  private final Map<String, GameClient> waitingClients = new HashMap();
-  private final Map<String, GameClient> authedClients = new HashMap();
+  private final Map<String, GameClient> waitingClients = new HashMap<>();
+  private final Map<String, GameClient> authedClients = new HashMap<>();
   private final ReadWriteLock lock = new ReentrantReadWriteLock();
   private final Lock readLock;
   private final Lock writeLock;

@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public class Announcements {
   private static final Logger _log = LoggerFactory.getLogger(Announcements.class);
   private static final Announcements _instance = new Announcements();
-  private List<Announcements.Announce> _announcements = new ArrayList();
+  private List<Announcements.Announce> _announcements = new ArrayList<>();
 
   public static final Announcements getInstance() {
     return _instance;

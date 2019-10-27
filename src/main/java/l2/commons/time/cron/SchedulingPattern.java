@@ -32,17 +32,17 @@ public class SchedulingPattern implements NextTime {
     private static final SchedulingPattern.ValueParser MONTH_VALUE_PARSER = new SchedulingPattern.MonthValueParser();
     private static final SchedulingPattern.ValueParser DAY_OF_WEEK_VALUE_PARSER = new SchedulingPattern.DayOfWeekValueParser();
     private String asString;
-    protected List<SchedulingPattern.ValueMatcher> minuteMatchers = new ArrayList();
-    protected List<SchedulingPattern.ValueMatcher> hourMatchers = new ArrayList();
-    protected List<SchedulingPattern.ValueMatcher> dayOfMonthMatchers = new ArrayList();
-    protected List<SchedulingPattern.ValueMatcher> monthMatchers = new ArrayList();
-    protected List<SchedulingPattern.ValueMatcher> dayOfWeekMatchers = new ArrayList();
+    protected List<SchedulingPattern.ValueMatcher> minuteMatchers = new ArrayList<>();
+    protected List<SchedulingPattern.ValueMatcher> hourMatchers = new ArrayList<>();
+    protected List<SchedulingPattern.ValueMatcher> dayOfMonthMatchers = new ArrayList<>();
+    protected List<SchedulingPattern.ValueMatcher> monthMatchers = new ArrayList<>();
+    protected List<SchedulingPattern.ValueMatcher> dayOfWeekMatchers = new ArrayList<>();
     protected int matcherSize = 0;
-    protected Map<Integer, Integer> hourAdder = new TreeMap();
-    protected Map<Integer, Integer> hourAdderRnd = new TreeMap();
-    protected Map<Integer, Integer> dayOfYearAdder = new TreeMap();
-    protected Map<Integer, Integer> minuteAdderRnd = new TreeMap();
-    protected Map<Integer, Integer> weekOfYearAdder = new TreeMap();
+    protected Map<Integer, Integer> hourAdder = new TreeMap<>();
+    protected Map<Integer, Integer> hourAdderRnd = new TreeMap<>();
+    protected Map<Integer, Integer> dayOfYearAdder = new TreeMap<>();
+    protected Map<Integer, Integer> minuteAdderRnd = new TreeMap<>();
+    protected Map<Integer, Integer> weekOfYearAdder = new TreeMap<>();
 
     public static boolean validate(String schedulingPattern) {
         try {
@@ -174,7 +174,7 @@ public class SchedulingPattern implements NextTime {
         if (str.length() == 1 && str.equals("*")) {
             return new SchedulingPattern.AlwaysTrueValueMatcher();
         } else {
-            List<Integer> values = new ArrayList();
+            List<Integer> values = new ArrayList<>();
             StringTokenizer st = new StringTokenizer(str, ",");
 
             while(st.hasMoreTokens()) {
@@ -233,7 +233,7 @@ public class SchedulingPattern implements NextTime {
                 if (div < 1) {
                     throw new Exception("non positive divisor \"" + div + "\"");
                 } else {
-                    List<Integer> values2 = new ArrayList();
+                    List<Integer> values2 = new ArrayList<>();
 
                     for(int i = 0; i < values.size(); i += div) {
                         values2.add((Integer) values.get(i));
@@ -253,7 +253,7 @@ public class SchedulingPattern implements NextTime {
         if (str.equals("*")) {
             int min = parser.getMinValue();
             size = parser.getMaxValue();
-            List<Integer> values = new ArrayList();
+            List<Integer> values = new ArrayList<>();
 
             for(v1 = min; v1 <= size; ++v1) {
                 values.add(new Integer(v1));
@@ -273,7 +273,7 @@ public class SchedulingPattern implements NextTime {
                 }
 
                 if (size == 1) {
-                    List<Integer> values = new ArrayList();
+                    List<Integer> values = new ArrayList<>();
                     values.add(new Integer(v1));
                     return values;
                 } else {
@@ -286,7 +286,7 @@ public class SchedulingPattern implements NextTime {
                         throw new Exception("invalid value \"" + v2Str + "\", " + var13.getMessage());
                     }
 
-                    List<Integer> values = new ArrayList();
+                    List<Integer> values = new ArrayList<>();
                     int min;
                     if (v1 < v2) {
                         for(min = v1; min <= v2; ++min) {

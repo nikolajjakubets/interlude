@@ -30,7 +30,7 @@ public final class TaskManager {
   private static TaskManager _instance;
   static final String[] SQL_STATEMENTS = new String[]{"SELECT id,task,type,last_activation,param1,param2,param3 FROM global_tasks", "UPDATE global_tasks SET last_activation=? WHERE id=?", "SELECT id FROM global_tasks WHERE task=?", "INSERT INTO global_tasks (task,type,last_activation,param1,param2,param3) VALUES(?,?,?,?,?,?)"};
   private final Map<String, Task> _tasks = new ConcurrentHashMap();
-  final List<TaskManager.ExecutedTask> _currentTasks = new ArrayList();
+  final List<TaskManager.ExecutedTask> _currentTasks = new ArrayList<>();
 
   public static TaskManager getInstance() {
     if (_instance == null) {
@@ -98,12 +98,12 @@ public final class TaskManager {
     } else {
       long interval;
       if (type == TaskTypes.TYPE_SHEDULED) {
-        interval = Long.valueOf(task.getParams()[0]);
+        interval = Long.parseLong(task.getParams()[0]);
         task._scheduled = scheduler.schedule(task, interval);
         return true;
       } else if (type == TaskTypes.TYPE_FIXED_SHEDULED) {
-        interval = Long.valueOf(task.getParams()[0]);
-        long interval = Long.valueOf(task.getParams()[1]);
+//        interval = Long.parseLong(task.getParams()[0]);
+        interval = Long.parseLong(task.getParams()[1]);
         task._scheduled = scheduler.scheduleAtFixedRate(task, interval, interval);
         return true;
       } else {
@@ -117,7 +117,8 @@ public final class TaskManager {
             }
 
             _log.info("Task " + task.getId() + " is obsoleted.");
-          } catch (Exception var12) {
+          } catch (Exception e) {
+            _log.error("launchTask: eMessage={}, eClause={}", e.getMessage(), e.getClass());
           }
         } else if (type == TaskTypes.TYPE_SPECIAL) {
           ScheduledFuture<?> result = task.getTask().launchSpecial(task);
@@ -126,7 +127,7 @@ public final class TaskManager {
             return true;
           }
         } else if (type == TaskTypes.TYPE_GLOBAL_TASK) {
-          interval = Long.valueOf(task.getParams()[0]) * 86400000L;
+          interval = Long.parseLong(task.getParams()[0]) * 86400000L;
           String[] hour = task.getParams()[1].split(":");
           if (hour.length != 3) {
             _log.warn("Task " + task.getId() + " has incorrect parameters");
@@ -138,9 +139,9 @@ public final class TaskManager {
           Calendar min = Calendar.getInstance();
 
           try {
-            min.set(11, Integer.valueOf(hour[0]));
-            min.set(12, Integer.valueOf(hour[1]));
-            min.set(13, Integer.valueOf(hour[2]));
+            min.set(Calendar.HOUR_OF_DAY, Integer.parseInt(hour[0]));
+            min.set(Calendar.MINUTE, Integer.parseInt(hour[1]));
+            min.set(Calendar.SECOND, Integer.parseInt(hour[2]));
           } catch (Exception var11) {
             _log.warn("Bad parameter on task " + task.getId() + ": " + var11.getMessage());
             return false;

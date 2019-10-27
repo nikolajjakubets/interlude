@@ -199,7 +199,7 @@ public abstract class Boat extends Creature {
   }
 
   public void broadcastPacket(L2GameServerPacket... packets) {
-    List<Player> players = new ArrayList();
+    List<Player> players = new ArrayList<>();
     players.addAll(this._players);
     players.addAll(World.getAroundPlayers(this));
     Iterator var3 = players.iterator();

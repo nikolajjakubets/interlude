@@ -29,7 +29,7 @@ public abstract class Warehouse extends ItemContainer {
   public abstract ItemLocation getItemLocation();
 
   public ItemInstance[] getItems(ItemClass itemClass) {
-    List<ItemInstance> result = new ArrayList();
+    List<ItemInstance> result = new ArrayList<>();
     this.readLock();
 
     try {

@@ -27,7 +27,7 @@ import l2.gameserver.handler.voicecommands.impl.WhoAmI;
 
 public class VoicedCommandHandler extends AbstractHolder {
   private static final VoicedCommandHandler _instance = new VoicedCommandHandler();
-  private Map<String, IVoicedCommandHandler> _datatable = new HashMap();
+  private Map<String, IVoicedCommandHandler> _datatable = new HashMap<>();
 
   public static VoicedCommandHandler getInstance() {
     return _instance;

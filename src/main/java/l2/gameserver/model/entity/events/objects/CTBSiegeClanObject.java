@@ -21,7 +21,7 @@ public class CTBSiegeClanObject extends SiegeClanObject {
 
   public CTBSiegeClanObject(String type, Clan clan, long param, long date) {
     super(type, clan, param, date);
-    this._players = new ArrayList();
+    this._players = new ArrayList<>();
     this._npcId = param;
   }
 

@@ -107,7 +107,7 @@ public class AdminChangeAccessLevel implements IAdminCommandHandler {
             }
 
             Config.loadGMAccess(af);
-            modAdd.setPlayerAccess((PlayerAccess)Config.gmlist.get(modAdd.getObjectId()));
+            modAdd.setPlayerAccess(Config.gmlist.get(modAdd.getObjectId()));
             activeChar.sendMessage("Moderator " + modAdd.getName() + " added.");
             showModersPannel(activeChar);
             break;
@@ -128,7 +128,7 @@ public class AdminChangeAccessLevel implements IAdminCommandHandler {
             Config.gmlist.remove(oid);
             Player modDel = GameObjectsStorage.getPlayer(oid);
             if (modDel != null) {
-              modDel.setPlayerAccess((PlayerAccess)null);
+              modDel.setPlayerAccess(null);
             }
 
             String fname = "m" + oid + ".xml";
@@ -168,7 +168,6 @@ public class AdminChangeAccessLevel implements IAdminCommandHandler {
             reason = wordList[3];
           }
 
-          int oId = false;
           Player player = GameObjectsStorage.getPlayer(wordList[1]);
           int oId;
           if (player != null && player.getPlayerAccess().CanBanChat) {
@@ -212,10 +211,8 @@ public class AdminChangeAccessLevel implements IAdminCommandHandler {
       html = html + "<center><font color=LEVEL>Moderators:</font></center>";
       html = html + "<table width=285>";
       File[] var4 = dir.listFiles();
-      int var5 = var4.length;
 
-      for(int var6 = 0; var6 < var5; ++var6) {
-        File f = var4[var6];
+      for (File f : var4) {
         if (!f.isDirectory() && f.getName().startsWith("m") && f.getName().endsWith(".xml")) {
           int oid = Integer.parseInt(f.getName().substring(1, 10));
           String pName = getPlayerNameByObjId(oid);
@@ -273,14 +270,14 @@ public class AdminChangeAccessLevel implements IAdminCommandHandler {
     return AdminChangeAccessLevel.Commands.values();
   }
 
-  private static enum Commands {
+  private enum Commands {
     admin_changelvl,
     admin_moders,
     admin_moders_add,
     admin_moders_del,
     admin_penalty;
 
-    private Commands() {
+    Commands() {
     }
   }
 }

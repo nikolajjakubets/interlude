@@ -115,18 +115,16 @@ public class AdminSkill implements IAdminCommandHandler {
       Creature target = (Creature)target_obj;
       Calculator[] calculators = target.getCalculators();
       String log_str = "--- Debug for " + target.getName() + " ---\r\n";
-      Calculator[] var6 = calculators;
       int var7 = calculators.length;
 
-      for(int var8 = 0; var8 < var7; ++var8) {
-        Calculator calculator = var6[var8];
+      for (Calculator calculator : calculators) {
         if (calculator != null) {
-          Env env = new Env(target, activeChar, (Skill)null);
+          Env env = new Env(target, activeChar, null);
           env.value = calculator.getBase();
           log_str = log_str + "Stat: " + calculator._stat.getValue() + ", prevValue: " + calculator.getLast() + "\r\n";
           Func[] funcs = calculator.getFunctions();
 
-          for(int i = 0; i < funcs.length; ++i) {
+          for (int i = 0; i < funcs.length; ++i) {
             String order = Integer.toHexString(funcs[i].order).toUpperCase();
             if (order.length() == 1) {
               order = "0" + order;
@@ -198,9 +196,9 @@ public class AdminSkill implements IAdminCommandHandler {
       activeChar.sendPacket(Msg.INVALID_TARGET);
     } else {
       Player player = (Player)target;
-      ArrayList skills = new ArrayList();
-      skills.addAll(player.getAllSkills());
-      List<Skill> skillList = skillList.subList(0, Math.min(skillList.size(), 50));
+      ArrayList skills = new ArrayList<>(player.getAllSkills());
+//      skills.addAll(player.getAllSkills());
+      List<Skill> skillList = skills.subList(0, Math.min(skills.size(), 50));
       NpcHtmlMessage adminReply = new NpcHtmlMessage(5);
       StringBuilder replyMSG = new StringBuilder("<html><body>");
       replyMSG.append("<table width=260><tr>");
@@ -209,16 +207,14 @@ public class AdminSkill implements IAdminCommandHandler {
       replyMSG.append("<td width=40><button value=\"Back\" action=\"bypass -h admin_show_skills\" width=40 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td>");
       replyMSG.append("</tr></table>");
       replyMSG.append("<br><br>");
-      replyMSG.append("<center>Editing character: " + player.getName() + "</center>");
-      replyMSG.append("<br><table width=270><tr><td>Lv: " + player.getLevel() + " " + player.getTemplate().className + "</td></tr></table>");
+      replyMSG.append("<center>Editing character: ").append(player.getName()).append("</center>");
+      replyMSG.append("<br><table width=270><tr><td>Lv: ").append(player.getLevel()).append(" ").append(player.getTemplate().className).append("</td></tr></table>");
       replyMSG.append("<br><center>Click on the skill you wish to remove:</center>");
       replyMSG.append("<br><table width=270>");
       replyMSG.append("<tr><td width=80>Name:</td><td width=60>Level:</td><td width=40>Id:</td></tr>");
-      Iterator var7 = skillList.iterator();
 
-      while(var7.hasNext()) {
-        Skill element = (Skill)var7.next();
-        replyMSG.append("<tr><td width=80><a action=\"bypass -h admin_remove_skill " + element.getId() + "\">" + element.getName() + "</a></td><td width=60>" + element.getLevel() + "</td><td width=40>" + element.getId() + "</td></tr>");
+      for (Skill element : skillList) {
+        replyMSG.append("<tr><td width=80><a action=\"bypass -h admin_remove_skill ").append(element.getId()).append("\">").append(element.getName()).append("</a></td><td width=60>").append(element.getLevel()).append("</td><td width=40>").append(element.getId()).append("</td></tr>");
       }
 
       replyMSG.append("</table>");
@@ -242,24 +238,23 @@ public class AdminSkill implements IAdminCommandHandler {
     } else {
       Player player = (Player)target;
       NpcHtmlMessage adminReply = new NpcHtmlMessage(5);
-      StringBuilder replyMSG = new StringBuilder("<html><body>");
-      replyMSG.append("<table width=260><tr>");
-      replyMSG.append("<td width=40><button value=\"Main\" action=\"bypass -h admin_admin\" width=40 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td>");
-      replyMSG.append("<td width=180><center>Character Selection Menu</center></td>");
-      replyMSG.append("<td width=40><button value=\"Back\" action=\"bypass -h admin_current_player\" width=40 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td>");
-      replyMSG.append("</tr></table>");
-      replyMSG.append("<br><br>");
-      replyMSG.append("<center>Editing character: " + player.getName() + "</center>");
-      replyMSG.append("<br><table width=270><tr><td>Lv: " + player.getLevel() + " " + player.getTemplate().className + "</td></tr></table>");
-      replyMSG.append("<br><center><table>");
-      replyMSG.append("<tr><td><button value=\"Add skills\" action=\"bypass -h admin_skill_list\" width=70 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td>");
-      replyMSG.append("<td><button value=\"Get skills\" action=\"bypass -h admin_get_skills\" width=70 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td></tr>");
-      replyMSG.append("<tr><td><button value=\"Delete skills\" action=\"bypass -h admin_remove_skills\" width=70 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td>");
-      replyMSG.append("<td><button value=\"Reset skills\" action=\"bypass -h admin_reset_skills\" width=70 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td></tr>");
-      replyMSG.append("<tr><td><button value=\"Give All Skills\" action=\"bypass -h admin_give_all_skills\" width=70 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td></tr>");
-      replyMSG.append("</table></center>");
-      replyMSG.append("</body></html>");
-      adminReply.setHtml(replyMSG.toString());
+      String replyMSG = "<html><body>" + "<table width=260><tr>" +
+        "<td width=40><button value=\"Main\" action=\"bypass -h admin_admin\" width=40 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td>" +
+        "<td width=180><center>Character Selection Menu</center></td>" +
+        "<td width=40><button value=\"Back\" action=\"bypass -h admin_current_player\" width=40 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td>" +
+        "</tr></table>" +
+        "<br><br>" +
+        "<center>Editing character: " + player.getName() + "</center>" +
+        "<br><table width=270><tr><td>Lv: " + player.getLevel() + " " + player.getTemplate().className + "</td></tr></table>" +
+        "<br><center><table>" +
+        "<tr><td><button value=\"Add skills\" action=\"bypass -h admin_skill_list\" width=70 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td>" +
+        "<td><button value=\"Get skills\" action=\"bypass -h admin_get_skills\" width=70 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td></tr>" +
+        "<tr><td><button value=\"Delete skills\" action=\"bypass -h admin_remove_skills\" width=70 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td>" +
+        "<td><button value=\"Reset skills\" action=\"bypass -h admin_reset_skills\" width=70 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td></tr>" +
+        "<tr><td><button value=\"Give All Skills\" action=\"bypass -h admin_give_all_skills\" width=70 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td></tr>" +
+        "</table></center>" +
+        "</body></html>";
+      adminReply.setHtml(replyMSG);
       activeChar.sendPacket(adminReply);
     }
   }
@@ -276,15 +271,14 @@ public class AdminSkill implements IAdminCommandHandler {
       replyMSG.append("<td width=40><button value=\"Back\" action=\"bypass -h admin_current_player\" width=40 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td>");
       replyMSG.append("</tr></table>");
       replyMSG.append("<br><br>");
-      replyMSG.append("<center>Editing character: " + playable.getName() + "</center>");
+      replyMSG.append("<center>Editing character: ").append(playable.getName()).append("</center>");
       replyMSG.append("<br><center><button value=\"Refresh\" action=\"bypass -h admin_show_effects\" width=100 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\" /></center>");
       replyMSG.append("<br>");
       List list = playable.getEffectList().getAllEffects();
       if (list != null && !list.isEmpty()) {
-        Iterator var7 = list.iterator();
 
-        while(var7.hasNext()) {
-          Effect e = (Effect)var7.next();
+        for (Object o : list) {
+          Effect e = (Effect) o;
           replyMSG.append("&nbsp;<a action=\"bypass -h admin_stop_effect ").append(e.getSkill().getId()).append("\">");
           replyMSG.append(e.getSkill().getName()).append(" ").append(e.getSkill().getLevel());
           replyMSG.append("</a> - ").append(e.getSkill().isToggle() ? "Infinity" : e.getTimeLeft() + " seconds").append("<br1>");
@@ -307,10 +301,8 @@ public class AdminSkill implements IAdminCommandHandler {
         int id = Integer.parseInt(wordList[1]);
         List<Effect> effects = playable.getEffectList().getEffectsBySkillId(id);
         if (effects != null && !effects.isEmpty()) {
-          Iterator var7 = effects.iterator();
 
-          while(var7.hasNext()) {
-            Effect eff = (Effect)var7.next();
+          for (Effect eff : effects) {
             eff.exit();
             playable.getPlayer().sendMessage("Admin removed effect of " + eff.getSkill().getName() + ".");
             playable.sendChanges();
@@ -344,15 +336,11 @@ public class AdminSkill implements IAdminCommandHandler {
         Skill[] var5 = adminSkills;
         int var6 = var5.length;
 
-        for(int var7 = 0; var7 < var6; ++var7) {
-          Skill element = var5[var7];
+        for (Skill element : var5) {
           activeChar.removeSkill(element, true);
         }
 
-        Iterator var9 = skills.iterator();
-
-        while(var9.hasNext()) {
-          Skill element = (Skill)var9.next();
+        for (Skill element : skills) {
           activeChar.addSkill(element, true);
         }
 
@@ -441,7 +429,7 @@ public class AdminSkill implements IAdminCommandHandler {
     }
   }
 
-  private static enum Commands {
+  private enum Commands {
     admin_show_skills,
     admin_remove_skills,
     admin_skill_list,
@@ -459,7 +447,7 @@ public class AdminSkill implements IAdminCommandHandler {
     admin_skill_ench,
     admin_skill_enchant;
 
-    private Commands() {
+    Commands() {
     }
   }
 }

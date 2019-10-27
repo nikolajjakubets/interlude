@@ -185,7 +185,7 @@ public final class EventParser extends AbstractDirParser<EventHolder> {
               for(Iterator oIterator = objectsElement.elementIterator(); oIterator.hasNext(); ((Set)set).add(sub.attributeValue("name"))) {
                 sub = (Element)oIterator.next();
                 if (((Set)set).isEmpty()) {
-                  set = new HashSet();
+                  set = new HashSet<>();
                 }
               }
 

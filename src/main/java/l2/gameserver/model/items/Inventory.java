@@ -120,13 +120,12 @@ public abstract class Inventory extends ItemContainer {
   }
 
   private int findSlot() {
-    int slot = false;
+//    int slot = false;
     int slot = 0;
 
     label28:
     while(slot < this._items.size()) {
-      for(int i = 0; i < this._items.size(); ++i) {
-        ItemInstance item = (ItemInstance)this._items.get(i);
+      for (ItemInstance item : this._items) {
         if (!item.isEquipped() && !item.getTemplate().isQuest() && item.getEquipSlot() == slot) {
           ++slot;
           continue label28;
@@ -243,7 +242,7 @@ public abstract class Inventory extends ItemContainer {
   }
 
   public void unEquipItemInBodySlot(int bodySlot) {
-    this.unEquipItemInBodySlot(bodySlot, (ItemInstance)null);
+    this.unEquipItemInBodySlot(bodySlot, null);
   }
 
   private void unEquipItemInBodySlot(int bodySlot, ItemInstance item) {
@@ -320,7 +319,7 @@ public abstract class Inventory extends ItemContainer {
         pdollSlot = 13;
         break;
       case 16384:
-        this.setPaperdollItem(8, (ItemInstance)null);
+        this.setPaperdollItem(8, null);
         pdollSlot = 7;
         break;
       case 65536:
@@ -330,7 +329,7 @@ public abstract class Inventory extends ItemContainer {
         pdollSlot = 16;
         break;
       case 524288:
-        this.setPaperdollItem(16, (ItemInstance)null);
+        this.setPaperdollItem(16, null);
         pdollSlot = 15;
         break;
       default:
@@ -339,7 +338,7 @@ public abstract class Inventory extends ItemContainer {
     }
 
     if (pdollSlot >= 0) {
-      this.setPaperdollItem(pdollSlot, (ItemInstance)null);
+      this.setPaperdollItem(pdollSlot, null);
     }
 
   }
@@ -381,7 +380,7 @@ public abstract class Inventory extends ItemContainer {
         break;
       case 64:
         if (this.getPaperdollBodyPart(10) == 131072) {
-          this.setPaperdollItem(10, (ItemInstance)null);
+          this.setPaperdollItem(10, null);
         }
 
         this.setPaperdollItem(6, item);
@@ -421,14 +420,14 @@ public abstract class Inventory extends ItemContainer {
           Player owner = (Player)this.getActor();
           owner.setVar("LastLure", String.valueOf(item.getObjectId()), -1L);
         } else if (rHandItemTemplate != null && rHandItemTemplate.getBodyPart() == 16384) {
-          this.setPaperdollItem(7, (ItemInstance)null);
+          this.setPaperdollItem(7, null);
         }
 
         this.setPaperdollItem(8, item);
         break;
       case 512:
         if (this.getPaperdollBodyPart(10) == 131072) {
-          this.setPaperdollItem(10, (ItemInstance)null);
+          this.setPaperdollItem(10, null);
         }
 
         this.setPaperdollItem(9, item);
@@ -439,14 +438,14 @@ public abstract class Inventory extends ItemContainer {
       case 2048:
         old = this.getPaperdollItem(10);
         if (old != null && old.getBodyPart() == 32768 || this.getPaperdollBodyPart(10) == 131072) {
-          this.setPaperdollItem(10, (ItemInstance)null);
+          this.setPaperdollItem(10, null);
         }
 
         this.setPaperdollItem(11, item);
         break;
       case 4096:
         if (this.getPaperdollBodyPart(10) == 131072) {
-          this.setPaperdollItem(10, (ItemInstance)null);
+          this.setPaperdollItem(10, null);
         }
 
         this.setPaperdollItem(12, item);
@@ -455,38 +454,38 @@ public abstract class Inventory extends ItemContainer {
         this.setPaperdollItem(13, item);
         break;
       case 16384:
-        this.setPaperdollItem(8, (ItemInstance)null);
+        this.setPaperdollItem(8, null);
         this.setPaperdollItem(7, item);
         break;
       case 32768:
-        this.setPaperdollItem(11, (ItemInstance)null);
+        this.setPaperdollItem(11, null);
         this.setPaperdollItem(10, item);
         break;
       case 65536:
         old = this.getPaperdollItem(16);
         if (old != null && old.getBodyPart() == 524288) {
-          this.setPaperdollItem(16, (ItemInstance)null);
+          this.setPaperdollItem(16, null);
         }
 
         this.setPaperdollItem(15, item);
         break;
       case 131072:
-        this.setPaperdollItem(11, (ItemInstance)null);
-        this.setPaperdollItem(6, (ItemInstance)null);
-        this.setPaperdollItem(12, (ItemInstance)null);
-        this.setPaperdollItem(9, (ItemInstance)null);
+        this.setPaperdollItem(11, null);
+        this.setPaperdollItem(6, null);
+        this.setPaperdollItem(12, null);
+        this.setPaperdollItem(9, null);
         this.setPaperdollItem(10, item);
         break;
       case 262144:
         ItemInstance slot2 = this.getPaperdollItem(16);
         if (slot2 != null && slot2.getBodyPart() == 524288) {
-          this.setPaperdollItem(15, (ItemInstance)null);
+          this.setPaperdollItem(15, null);
         }
 
         this.setPaperdollItem(16, item);
         break;
       case 524288:
-        this.setPaperdollItem(15, (ItemInstance)null);
+        this.setPaperdollItem(15, null);
         this.setPaperdollItem(16, item);
         break;
       default:
@@ -515,7 +514,7 @@ public abstract class Inventory extends ItemContainer {
 
     try {
       for(int i = 0; i < this._items.size(); ++i) {
-        ItemInstance item = (ItemInstance)this._items.get(i);
+        ItemInstance item = this._items.get(i);
         weight = (int)((long)weight + (long)item.getTemplate().getWeight() * item.getCount());
       }
     } finally {

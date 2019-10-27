@@ -295,7 +295,7 @@ public class EffectList {
     double cp = this._actor.getCurrentCp();
     String stackType = effect.getStackType();
     boolean add = false;
-    HashSet<Skill> removed = new HashSet();
+    HashSet<Skill> removed = new HashSet<>();
     this.lock.lock();
 
     Iterator var11;

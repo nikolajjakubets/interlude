@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MoveRoute {
-  private final List<MoveNode> _nodes = new ArrayList();
+  private final List<MoveNode> _nodes = new ArrayList<>();
   private final String _name;
   private final MoveRouteType _type;
   private final boolean _isRunning;

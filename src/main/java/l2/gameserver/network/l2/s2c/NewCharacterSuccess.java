@@ -11,7 +11,7 @@ import java.util.List;
 import l2.gameserver.templates.PlayerTemplate;
 
 public class NewCharacterSuccess extends L2GameServerPacket {
-  private List<PlayerTemplate> _chars = new ArrayList();
+  private List<PlayerTemplate> _chars = new ArrayList<>();
 
   public NewCharacterSuccess() {
   }

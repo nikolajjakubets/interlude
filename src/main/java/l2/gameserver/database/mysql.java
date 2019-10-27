@@ -97,7 +97,7 @@ public abstract class mysql {
       ResultSetMetaData md = rset.getMetaData();
       if (rset.next()) {
         if (md.getColumnCount() > 1) {
-          Map<String, Object> tmp = new HashMap();
+          Map<String, Object> tmp = new HashMap<>();
 
           for(int i = md.getColumnCount(); i > 0; --i) {
             tmp.put(md.getColumnName(i), rset.getObject(i));
@@ -119,7 +119,7 @@ public abstract class mysql {
   }
 
   public static List<Map<String, Object>> getAll(String query) {
-    List<Map<String, Object>> ret = new ArrayList();
+    List<Map<String, Object>> ret = new ArrayList<>();
     Connection con = null;
     Statement statement = null;
     ResultSet rset = null;
@@ -131,7 +131,7 @@ public abstract class mysql {
       ResultSetMetaData md = rset.getMetaData();
 
       while(rset.next()) {
-        Map<String, Object> tmp = new HashMap();
+        Map<String, Object> tmp = new HashMap<>();
 
         for(int i = md.getColumnCount(); i > 0; --i) {
           tmp.put(md.getColumnName(i), rset.getObject(i));
@@ -150,7 +150,7 @@ public abstract class mysql {
   }
 
   public static List<Object> get_array(DatabaseFactory db, String query) {
-    List<Object> ret = new ArrayList();
+    List<Object> ret = new ArrayList<>();
     Connection con = null;
     PreparedStatement statement = null;
     ResultSet rset = null;
@@ -168,7 +168,7 @@ public abstract class mysql {
       while(true) {
         while(rset.next()) {
           if (md.getColumnCount() > 1) {
-            Map<String, Object> tmp = new HashMap();
+            Map<String, Object> tmp = new HashMap<>();
 
             for(int i = 0; i < md.getColumnCount(); ++i) {
               tmp.put(md.getColumnName(i + 1), rset.getObject(i + 1));
@@ -249,7 +249,7 @@ public abstract class mysql {
       con = db.getConnection();
       statement = con.prepareStatement(query);
       rset = statement.executeQuery();
-      List<Integer[]> al = new ArrayList();
+      List<Integer[]> al = new ArrayList<>();
 
       int row;
       for(row = 0; rset.next(); ++row) {

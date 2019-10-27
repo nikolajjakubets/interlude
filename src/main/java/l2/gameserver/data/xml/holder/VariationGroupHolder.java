@@ -16,7 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class VariationGroupHolder extends AbstractHolder {
   private static final VariationGroupHolder _instance = new VariationGroupHolder();
-  private List<Pair<int[], VariationGroupData>> _variationGroupData = new ArrayList();
+  private List<Pair<int[], VariationGroupData>> _variationGroupData = new ArrayList<>();
 
   public static VariationGroupHolder getInstance() {
     return _instance;
@@ -44,7 +44,7 @@ public class VariationGroupHolder extends AbstractHolder {
   }
 
   public List<VariationGroupData> getDataForItemId(int itemId) {
-    List<VariationGroupData> resultList = new ArrayList();
+    List<VariationGroupData> resultList = new ArrayList<>();
     Iterator var3 = this._variationGroupData.iterator();
 
     while(var3.hasNext()) {

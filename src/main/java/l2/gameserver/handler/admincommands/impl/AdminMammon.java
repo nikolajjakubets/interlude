@@ -15,7 +15,7 @@ import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 
 public class AdminMammon implements IAdminCommandHandler {
-  List<Integer> npcIds = new ArrayList();
+  List<Integer> npcIds = new ArrayList<>();
 
   public AdminMammon() {
   }

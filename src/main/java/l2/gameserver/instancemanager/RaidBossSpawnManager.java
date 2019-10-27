@@ -255,7 +255,7 @@ public class RaidBossSpawnManager {
       while(rset.next()) {
         if (currentOwner != rset.getInt("owner_id")) {
           currentOwner = rset.getInt("owner_id");
-          score = new HashMap();
+          score = new HashMap<>();
           _points.put(currentOwner, score);
         }
 
@@ -354,7 +354,7 @@ public class RaidBossSpawnManager {
       this.pointsLock.lock();
       Map<Integer, Integer> pointsTable = (Map)_points.get(ownerId);
       if (pointsTable == null) {
-        pointsTable = new HashMap();
+        pointsTable = new HashMap<>();
         _points.put(ownerId, pointsTable);
       }
 
@@ -370,7 +370,7 @@ public class RaidBossSpawnManager {
   }
 
   public TreeMap<Integer, Integer> calculateRanking() {
-    TreeMap<Integer, Integer> tmpRanking = new TreeMap();
+    TreeMap<Integer, Integer> tmpRanking = new TreeMap<>();
     this.pointsLock.lock();
     Iterator var2 = _points.entrySet().iterator();
 

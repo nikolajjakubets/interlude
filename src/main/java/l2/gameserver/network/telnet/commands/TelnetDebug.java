@@ -47,7 +47,7 @@ public class TelnetDebug implements TelnetCommandHolder {
             int id = npcx.getNpcId();
             Object listx;
             if ((listx = (List)npcStats.get(id)) == null) {
-              npcStats.put(id, listx = new ArrayList());
+              npcStats.put(id, listx = new ArrayList<>());
             }
 
             ((List)listx).add(npcx);

@@ -50,12 +50,12 @@ public class Say2C extends L2GameClientPacket {
 
   protected void readImpl() {
     this._text = this.readS(Config.CHAT_MESSAGE_MAX_LEN);
-    this._type = (ChatType)ArrayUtils.valid(ChatType.VALUES, this.readD());
+    this._type = ArrayUtils.valid(ChatType.VALUES, this.readD());
     this._target = this._type == ChatType.TELL ? this.readS(Config.CNAME_MAXLEN) : null;
   }
 
   protected void runImpl() {
-    Player activeChar = ((GameClient)this.getClient()).getActiveChar();
+    Player activeChar = this.getClient().getActiveChar();
     if (activeChar != null) {
       if (this._type != null && this._text != null && this._text.length() != 0) {
         this._text = this._text.replaceAll("\\\\n", "\n");
@@ -89,7 +89,7 @@ public class Say2C extends L2GameClientPacket {
             }
           }
 
-          activeChar.sendMessage(new CustomMessage("common.command404", activeChar, new Object[0]));
+          activeChar.sendMessage(new CustomMessage("common.command404", activeChar));
         } else {
           Player receiver = this._target == null ? null : World.getPlayer(this._target);
           long currentTimeMillis = System.currentTimeMillis();
@@ -107,7 +107,7 @@ public class Say2C extends L2GameClientPacket {
                     activeChar.updateNoChannel((long)Integer.parseInt(f.getValue()) * 1000L);
                     break label309;
                   case 2:
-                    activeChar.sendMessage(new CustomMessage(f.getValue(), activeChar, new Object[0]));
+                    activeChar.sendMessage(new CustomMessage(f.getValue(), activeChar));
                     return;
                   case 3:
                     this._text = f.getValue();
@@ -122,7 +122,7 @@ public class Say2C extends L2GameClientPacket {
           if (activeChar.getNoChannel() > 0L && org.apache.commons.lang3.ArrayUtils.contains(Config.BAN_CHANNEL_LIST, this._type)) {
             if (activeChar.getNoChannelRemained() > 0L) {
               long timeRemained = activeChar.getNoChannelRemained() / 60000L;
-              activeChar.sendMessage((new CustomMessage("common.ChatBanned", activeChar, new Object[0])).addNumber(timeRemained));
+              activeChar.sendMessage((new CustomMessage("common.ChatBanned", activeChar)).addNumber(timeRemained));
               return;
             }
 
@@ -151,10 +151,10 @@ public class Say2C extends L2GameClientPacket {
 
               while(m.find()) {
                 sb.append(Strings.fromTranslit(this._text.substring(end, end = m.start()), translit.equals("tl") ? 1 : 2));
-                sb.append(this._text.substring(end, end = m.end()));
+                sb.append(this._text, end, end = m.end());
               }
 
-              this._text = sb.append(Strings.fromTranslit(this._text.substring(end, this._text.length()), translit.equals("tl") ? 1 : 2)).toString();
+              this._text = sb.append(Strings.fromTranslit(this._text.substring(end), translit.equals("tl") ? 1 : 2)).toString();
             }
 
             Say2 cs = new Say2(activeChar.getObjectId(), this._type, activeChar.getName(), this._text);
@@ -169,7 +169,7 @@ public class Say2C extends L2GameClientPacket {
                 }
 
                 if (receiver.isInOfflineMode()) {
-                  activeChar.sendMessage(new CustomMessage("common.PlayerInOfflineTrade", activeChar, new Object[0]));
+                  activeChar.sendMessage(new CustomMessage("common.PlayerInOfflineTrade", activeChar));
                   return;
                 }
 
@@ -192,7 +192,7 @@ public class Say2C extends L2GameClientPacket {
                 break;
               case SHOUT:
                 if (activeChar.isCursedWeaponEquipped()) {
-                  activeChar.sendMessage(new CustomMessage("SHOUT_AND_TRADE_CHATING_CANNOT_BE_USED_SHILE_POSSESSING_A_CURSED_WEAPON", activeChar, new Object[0]));
+                  activeChar.sendMessage(new CustomMessage("SHOUT_AND_TRADE_CHATING_CANNOT_BE_USED_SHILE_POSSESSING_A_CURSED_WEAPON", activeChar));
                   return;
                 }
 
@@ -211,7 +211,7 @@ public class Say2C extends L2GameClientPacket {
                 break;
               case TRADE:
                 if (activeChar.isCursedWeaponEquipped()) {
-                  activeChar.sendMessage(new CustomMessage("SHOUT_AND_TRADE_CHATING_CANNOT_BE_USED_SHILE_POSSESSING_A_CURSED_WEAPON", activeChar, new Object[0]));
+                  activeChar.sendMessage(new CustomMessage("SHOUT_AND_TRADE_CHATING_CANNOT_BE_USED_SHILE_POSSESSING_A_CURSED_WEAPON", activeChar));
                   return;
                 }
 
@@ -233,16 +233,12 @@ public class Say2C extends L2GameClientPacket {
                   cs = new Say2(activeChar.getObjectId(), this._type, activeChar.getTransformationName(), this._text);
                 }
 
-                List<Player> list = null;
+                List<Player> list;
                 list = World.getAroundPlayers(activeChar);
-                if (list != null) {
-                  Iterator var25 = list.iterator();
 
-                  while(var25.hasNext()) {
-                    Player player = (Player)var25.next();
-                    if (player != activeChar && player.getReflection() == activeChar.getReflection() && !player.isBlockAll() && !player.isInBlockList(activeChar)) {
-                      player.sendPacket(cs);
-                    }
+                for (Player players : list) {
+                  if (players != activeChar && players.getReflection() == activeChar.getReflection() && !players.isBlockAll() && !players.isInBlockList(activeChar)) {
+                    players.sendPacket(cs);
                   }
                 }
 
@@ -250,7 +246,7 @@ public class Say2C extends L2GameClientPacket {
                 break;
               case CLAN:
                 if (activeChar.getClan() != null) {
-                  activeChar.getClan().broadcastToOnlineMembers(new L2GameServerPacket[]{cs});
+                  activeChar.getClan().broadcastToOnlineMembers(cs);
                 }
                 break;
               case ALLIANCE:
@@ -260,13 +256,13 @@ public class Say2C extends L2GameClientPacket {
                 break;
               case PARTY:
                 if (activeChar.isInParty()) {
-                  activeChar.getParty().broadCast(new IStaticPacket[]{cs});
+                  activeChar.getParty().broadCast(cs);
                 }
                 break;
               case PARTY_ROOM:
                 MatchingRoom r = activeChar.getMatchingRoom();
                 if (r != null && r.getType() == MatchingRoom.PARTY_MATCHING) {
-                  r.broadCast(new IStaticPacket[]{cs});
+                  r.broadCast(cs);
                 }
                 break;
               case COMMANDCHANNEL_ALL:
@@ -276,7 +272,7 @@ public class Say2C extends L2GameClientPacket {
                 }
 
                 if (activeChar.getParty().getCommandChannel().getChannelLeader() == activeChar) {
-                  activeChar.getParty().getCommandChannel().broadCast(new IStaticPacket[]{cs});
+                  activeChar.getParty().getCommandChannel().broadCast(cs);
                 } else {
                   activeChar.sendPacket(Msg.ONLY_CHANNEL_OPENER_CAN_GIVE_ALL_COMMAND);
                 }
@@ -334,7 +330,7 @@ public class Say2C extends L2GameClientPacket {
               case MPCC_ROOM:
                 MatchingRoom r2 = activeChar.getMatchingRoom();
                 if (r2 != null && r2.getType() == MatchingRoom.CC_MATCHING) {
-                  r2.broadCast(new IStaticPacket[]{cs});
+                  r2.broadCast(cs);
                 }
                 break;
               default:
@@ -378,17 +374,15 @@ public class Say2C extends L2GameClientPacket {
 
         tx = MapUtils.regionX(player);
         ty = MapUtils.regionY(player);
-      } while((tx < rx - offset || tx > rx + offset || ty < ry - offset || ty > ry + offset) && !activeChar.isInRangeZ(player, (long)Config.CHAT_RANGE));
+      } while((tx < rx - offset || tx > rx + offset || ty < ry - offset || ty > ry + offset) && !activeChar.isInRangeZ(player, Config.CHAT_RANGE));
 
       player.sendPacket(cs);
     }
   }
 
   private static void announce(Player activeChar, Say2 cs) {
-    Iterator var2 = GameObjectsStorage.getAllPlayersForIterate().iterator();
 
-    while(var2.hasNext()) {
-      Player player = (Player)var2.next();
+    for (Player player : GameObjectsStorage.getAllPlayersForIterate()) {
       if (player != activeChar && activeChar.getReflection() == player.getReflection() && !player.isBlockAll() && !player.isInBlockList(activeChar)) {
         player.sendPacket(cs);
       }

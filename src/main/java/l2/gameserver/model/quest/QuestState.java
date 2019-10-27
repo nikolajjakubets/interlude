@@ -706,7 +706,7 @@ public final class QuestState {
   }
 
   public List<Player> getPartyMembers(int state, int maxrange, GameObject rangefrom) {
-    List<Player> result = new ArrayList();
+    List<Player> result = new ArrayList<>();
     Party party = this.getPlayer().getParty();
     if (party == null) {
       if (this.checkPartyMember(this.getPlayer(), state, maxrange, rangefrom)) {

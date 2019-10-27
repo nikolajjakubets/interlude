@@ -66,7 +66,7 @@ import l2.gameserver.utils.Log;
 
 public class AdminCommandHandler extends AbstractHolder {
   private static final AdminCommandHandler _instance = new AdminCommandHandler();
-  private Map<String, IAdminCommandHandler> _datatable = new HashMap();
+  private Map<String, IAdminCommandHandler> _datatable = new HashMap<>();
 
   public static AdminCommandHandler getInstance() {
     return _instance;

@@ -19,7 +19,7 @@ public class PlayerTemplate extends CharTemplate {
   public final String className;
   public final Location spawnLoc = new Location();
   public final boolean isMale;
-  private List<ItemTemplate> _items = new ArrayList();
+  private List<ItemTemplate> _items = new ArrayList<>();
 
   public PlayerTemplate(StatsSet set) {
     super(set);

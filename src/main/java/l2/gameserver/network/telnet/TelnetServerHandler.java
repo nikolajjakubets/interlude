@@ -156,7 +156,7 @@ public class TelnetServerHandler extends SimpleChannelUpstreamHandler implements
 
         ArrayList args;
         String arg;
-        for(args = new ArrayList(); m.find(); args.add(arg)) {
+        for(args = new ArrayList<>(); m.find(); args.add(arg)) {
           arg = m.group(1);
           if (arg == null) {
             arg = m.group(0);

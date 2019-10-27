@@ -233,7 +233,7 @@ public class GameObjectsStorage {
   }
 
   public static List<NpcInstance> getAllByNpcId(int npc_id, boolean justAlive) {
-    List<NpcInstance> result = new ArrayList();
+    List<NpcInstance> result = new ArrayList<>();
     Iterator var3 = getStorageNpcs().iterator();
 
     while(true) {
@@ -255,7 +255,7 @@ public class GameObjectsStorage {
   }
 
   public static List<NpcInstance> getAllByNpcId(int[] npc_ids, boolean justAlive) {
-    List<NpcInstance> result = new ArrayList();
+    List<NpcInstance> result = new ArrayList<>();
     Iterator var3 = getStorageNpcs().iterator();
 
     while(true) {

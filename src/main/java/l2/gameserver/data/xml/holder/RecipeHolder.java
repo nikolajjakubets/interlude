@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 public final class RecipeHolder extends AbstractHolder {
   private static final Logger LOG = LoggerFactory.getLogger(RecipeHolder.class);
   private static final RecipeHolder INSTANCE = new RecipeHolder();
-  private final Map<Integer, Recipe> _recipesById = new HashMap();
-  private final Map<Integer, Recipe> _recipesByRecipeItemId = new HashMap();
+  private final Map<Integer, Recipe> _recipesById = new HashMap<>();
+  private final Map<Integer, Recipe> _recipesByRecipeItemId = new HashMap<>();
 
   public static final RecipeHolder getInstance() {
     return INSTANCE;

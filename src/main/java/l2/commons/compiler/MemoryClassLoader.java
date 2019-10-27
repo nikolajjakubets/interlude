@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MemoryClassLoader extends ClassLoader {
-    private final Map<String, MemoryByteCode> classes = new HashMap();
-    private final Map<String, MemoryByteCode> loaded = new HashMap();
+    private final Map<String, MemoryByteCode> classes = new HashMap<>();
+    private final Map<String, MemoryByteCode> loaded = new HashMap<>();
 
     public MemoryClassLoader() {
     }

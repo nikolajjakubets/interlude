@@ -18,9 +18,9 @@ public class StrTable {
     private final List<String> titles;
 
     public StrTable(String title) {
-        this.rows = new HashMap();
+        this.rows = new HashMap<>();
         this.columns = new LinkedHashMap();
-        this.titles = new ArrayList();
+        this.titles = new ArrayList<>();
         if (title != null) {
             this.titles.add(title);
         }
@@ -72,7 +72,7 @@ public class StrTable {
         if (this.rows.containsKey(rowIndex)) {
             row = (Map)this.rows.get(rowIndex);
         } else {
-            row = new HashMap();
+            row = new HashMap<>();
             //TODO: i add cast
             this.rows.put(rowIndex, (Map<String, String>) row);
         }

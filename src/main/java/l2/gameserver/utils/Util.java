@@ -249,7 +249,7 @@ public class Util {
   public static String dumpObject(Object o, boolean simpleTypes, boolean parentFields, boolean ignoreStatics) {
     Class<?> cls = o.getClass();
     String result = "[" + (simpleTypes ? cls.getSimpleName() : cls.getName()) + "\n";
-    ArrayList fields = new ArrayList();
+    ArrayList fields = new ArrayList<>();
 
     while(cls != null) {
       Field[] var10 = cls.getDeclaredFields();
@@ -298,7 +298,7 @@ public class Util {
     Matcher m = _pattern.matcher(html);
 
     HashMap tpls;
-    for(tpls = new HashMap(); m.find(); html = html.replace(m.group(0), "")) {
+    for(tpls = new HashMap<>(); m.find(); html = html.replace(m.group(0), "")) {
       tpls.put(Integer.parseInt(m.group(1)), m.group(2));
     }
 
@@ -324,7 +324,7 @@ public class Util {
   }
 
   public static Player[] GetPlayersFromStoredIds(long[] sids) {
-    ArrayList<Player> result = new ArrayList();
+    ArrayList<Player> result = new ArrayList<>();
     long[] var2 = sids;
     int var3 = sids.length;
 

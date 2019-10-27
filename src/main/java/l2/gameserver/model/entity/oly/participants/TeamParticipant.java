@@ -153,7 +153,7 @@ public class TeamParticipant extends Participant {
   }
 
   public Player[] getPlayers() {
-    List<Player> result = new ArrayList();
+    List<Player> result = new ArrayList<>();
     HardReference[] var2 = this._playerRefs;
     int var3 = var2.length;
 

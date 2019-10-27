@@ -425,7 +425,7 @@ public abstract class Skill extends StatTemplate implements Cloneable {
     if (canLearn == null) {
       this._canLearn = null;
     } else {
-      this._canLearn = new ArrayList();
+      this._canLearn = new ArrayList<>();
       st = new StringTokenizer(canLearn, " \r\n\t,;");
 
       while(st.hasMoreTokens()) {
@@ -438,7 +438,7 @@ public abstract class Skill extends StatTemplate implements Cloneable {
     if (teachers == null) {
       this._teachers = null;
     } else {
-      this._teachers = new ArrayList();
+      this._teachers = new ArrayList<>();
       st = new StringTokenizer(teachers, " \r\n\t,;");
 
       while(st.hasMoreTokens()) {

@@ -51,7 +51,7 @@ public class RequestPackageSend extends L2GameClientPacket {
   }
 
   protected void runImpl() throws Exception {
-    Player player = ((GameClient)this.getClient()).getActiveChar();
+    Player player = this.getClient().getActiveChar();
     if (player != null && this._count != 0) {
       if (!player.getPlayerAccess().UseWarehouse) {
         player.sendActionFailed();
@@ -74,7 +74,7 @@ public class RequestPackageSend extends L2GameClientPacket {
 
           label300: {
             try {
-              int slotsleft = false;
+//              int slotsleft = false;
               long adenaDeposit = 0L;
               int slotsleft = Config.FREIGHT_SLOTS - freight.getSize();
               int items = 0;
@@ -93,7 +93,7 @@ public class RequestPackageSend extends L2GameClientPacket {
                   }
 
                   if (item.getItemId() == 57) {
-                    adenaDeposit = (long)this._itemQ[i];
+                    adenaDeposit = this._itemQ[i];
                   }
 
                   ++items;
@@ -112,7 +112,7 @@ public class RequestPackageSend extends L2GameClientPacket {
                 return;
               }
 
-              long fee = SafeMath.mulAndCheck((long)items, 1000L);
+              long fee = SafeMath.mulAndCheck(items, 1000L);
               if (fee + adenaDeposit <= player.getAdena()) {
                 if (!player.reduceAdena(fee, true)) {
                   player.sendPacket(SystemMsg.YOU_DO_NOT_HAVE_ENOUGH_ADENA);
@@ -127,7 +127,7 @@ public class RequestPackageSend extends L2GameClientPacket {
                   }
 
                   if (this._items[i] != 0) {
-                    ItemInstance item = inventory.removeItemByObjectId(this._items[i], (long)this._itemQ[i]);
+                    ItemInstance item = inventory.removeItemByObjectId(this._items[i], this._itemQ[i]);
                     Log.LogItem(player, ItemLog.FreightDeposit, item);
                     freight.addItem(item);
                   }

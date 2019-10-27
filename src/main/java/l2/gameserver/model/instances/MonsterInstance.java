@@ -299,7 +299,7 @@ public class MonsterInstance extends NpcInstance {
   }
 
   private Creature getTopDamager(Map<Playable, HateInfo> hateMap) {
-    Set<PlayerGroup> players = new HashSet();
+    Set<PlayerGroup> players = new HashSet<>();
     Iterator var3 = hateMap.keySet().iterator();
 
     while(var3.hasNext()) {
@@ -332,7 +332,7 @@ public class MonsterInstance extends NpcInstance {
         if (quests != null && quests.length > 0) {
           List<Player> players = null;
           if (this.isRaid() && Config.ALT_NO_LASTHIT) {
-            players = new ArrayList();
+            players = new ArrayList<>();
             var7 = aggroMap.keySet().iterator();
 
             label224:
@@ -424,7 +424,7 @@ public class MonsterInstance extends NpcInstance {
           }
         }
 
-        Map<Player, MonsterInstance.RewardInfo> rewards = new HashMap();
+        Map<Player, MonsterInstance.RewardInfo> rewards = new HashMap<>();
         var7 = aggroMap.values().iterator();
 
         while(var7.hasNext()) {
@@ -471,7 +471,7 @@ public class MonsterInstance extends NpcInstance {
               } else {
                 partyDmg = 0;
                 int partyMaxLevel = 1;
-                List<Player> rewardedMembers = new ArrayList();
+                List<Player> rewardedMembers = new ArrayList<>();
                 Iterator var19 = party.getPartyMembers().iterator();
 
                 while(var19.hasNext()) {

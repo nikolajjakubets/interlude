@@ -173,7 +173,7 @@ public final class TrapInstance extends NpcInstance {
           while(var3.hasNext()) {
             Creature target = (Creature)var3.next();
             if (target != owner && trap._skill.checkTarget(owner, target, (Creature)null, false, false) == null) {
-              List<Creature> targets = new ArrayList();
+              List<Creature> targets = new ArrayList<>();
               if (trap._skill.getTargetType() != SkillTargetType.TARGET_AREA) {
                 targets.add(target);
               } else {

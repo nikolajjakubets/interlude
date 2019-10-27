@@ -122,10 +122,10 @@ public class Castle extends Residence {
     this._TaxPercent = 0;
     this._TaxRate = 0.0D;
     this._treasury = 0L;
-    this._procure = new ArrayList();
-    this._production = new ArrayList();
-    this._procureNext = new ArrayList();
-    this._productionNext = new ArrayList();
+    this._procure = new ArrayList<>();
+    this._production = new ArrayList<>();
+    this._procureNext = new ArrayList<>();
+    this._productionNext = new ArrayList<>();
     this._isNextPeriodApproved = false;
     this._owner = ClanDataDAO.getInstance().getOwner(this);
     CastleDAO.getInstance().select(this);

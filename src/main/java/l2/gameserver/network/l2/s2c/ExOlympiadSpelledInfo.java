@@ -11,7 +11,7 @@ import l2.gameserver.model.Player;
 
 public class ExOlympiadSpelledInfo extends L2GameServerPacket {
   private int char_obj_id = 0;
-  private ArrayList<ExOlympiadSpelledInfo.Effect> _effects = new ArrayList();
+  private ArrayList<ExOlympiadSpelledInfo.Effect> _effects = new ArrayList<>();
 
   public ExOlympiadSpelledInfo() {
   }

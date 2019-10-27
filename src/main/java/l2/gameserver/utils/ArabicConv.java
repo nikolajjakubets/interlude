@@ -49,7 +49,7 @@ public class ArabicConv {
     return '\u0000';
   }
 
-  private static final char getReshapedGlphy(char ch, int off) {
+  private static char getReshapedGlphy(char ch, int off) {
     char[] forms = (char[])ARABIC_GLPHIES_MAP.get(ch);
     if (forms != null) {
       if (ch != forms[0]) {
@@ -62,7 +62,7 @@ public class ArabicConv {
     }
   }
 
-  private static final char getGlphyType(char ch) {
+  private static char getGlphyType(char ch) {
     char[] forms = (char[])ARABIC_GLPHIES_MAP.get(ch);
     if (forms != null) {
       if (ch != forms[0]) {
@@ -81,8 +81,6 @@ public class ArabicConv {
     } else {
       char currLetter;
       switch(src.length()) {
-        case 0:
-          return "";
         case 1:
           return new String(new char[]{getReshapedGlphy(src.charAt(0), 0)});
         case 2:
@@ -97,33 +95,33 @@ public class ArabicConv {
           currLetter = src.charAt(0);
           reshapedLetters[0] = getReshapedGlphy(currLetter, 2);
 
-          char lam_alif;
+          char lamAlif;
           int i;
           for(i = 1; i < src.length() - 1; ++i) {
-            lam_alif = getLamAlef(src.charAt(i), currLetter, true);
-            if (lam_alif <= 0) {
+            lamAlif = getLamAlef(src.charAt(i), currLetter, true);
+            if (lamAlif <= 0) {
               if (getGlphyType(src.charAt(i - 1)) == 2) {
                 reshapedLetters[i] = getReshapedGlphy(src.charAt(i), 2);
               } else {
                 reshapedLetters[i] = getReshapedGlphy(src.charAt(i), 3);
               }
-            } else if (i - 2 >= 0 && (i - 2 < 0 || getGlphyType(src.charAt(i - 2)) != 2)) {
+            } else if (i - 2 >= 0 && getGlphyType(src.charAt(i - 2)) != 2) {
               reshapedLetters[i - 1] = 0;
               reshapedLetters[i] = getLamAlef(src.charAt(i), currLetter, false);
             } else {
               reshapedLetters[i - 1] = 0;
-              reshapedLetters[i] = lam_alif;
+              reshapedLetters[i] = lamAlif;
             }
 
             currLetter = src.charAt(i);
           }
 
           i = src.length();
-          lam_alif = getLamAlef(src.charAt(i - 1), src.charAt(i - 2), true);
-          if (lam_alif > 0) {
+          lamAlif = getLamAlef(src.charAt(i - 1), src.charAt(i - 2), true);
+          if (lamAlif > 0) {
             if (i > 3 && getGlphyType(src.charAt(i - 3)) == 2) {
               reshapedLetters[i - 2] = 0;
-              reshapedLetters[i - 1] = lam_alif;
+              reshapedLetters[i - 1] = lamAlif;
             } else {
               reshapedLetters[i - 2] = 0;
               reshapedLetters[i - 1] = getLamAlef(src.charAt(i - 1), src.charAt(i - 2), false);
@@ -135,11 +133,8 @@ public class ArabicConv {
           }
 
           StringBuilder sb = new StringBuilder();
-          char[] var6 = reshapedLetters;
-          int var7 = reshapedLetters.length;
 
-          for(int var8 = 0; var8 < var7; ++var8) {
-            char ch = var6[var8];
+          for (char ch : reshapedLetters) {
             if (ch != 0) {
               sb.append(ch);
             }
@@ -177,16 +172,13 @@ public class ArabicConv {
     return sb.toString();
   }
 
-  public static final void main(String... args) {
-  }
 
   static {
-    Map<Character, char[]> arabivGlphiesMap = new HashMap();
+    Map<Character, char[]> arabivGlphiesMap = new HashMap<>();
     char[][] var1 = ARABIC_GLPHIES;
     int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      char[] forms = var1[var3];
+    for (char[] forms : var1) {
       arabivGlphiesMap.put(forms[0], forms);
     }
 

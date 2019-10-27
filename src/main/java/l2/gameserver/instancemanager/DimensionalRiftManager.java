@@ -331,7 +331,7 @@ public class DimensionalRiftManager {
       this._territory = territory;
       this._teleportCoords = tele;
       this._isBossRoom = isBossRoom;
-      this._roomSpawns = new ArrayList();
+      this._roomSpawns = new ArrayList<>();
     }
 
     public Location getTeleportCoords() {

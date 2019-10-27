@@ -272,7 +272,7 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
                 while(sublistIterator.hasNext()) {
                   subListElement = (Element)sublistIterator.next();
                   id = Integer.parseInt(subListElement.attributeValue("id"));
-                  List<TeleportLocation> list = new ArrayList();
+                  List<TeleportLocation> list = new ArrayList<>();
                   Iterator targetIterator = subListElement.elementIterator();
 
                   while(targetIterator.hasNext()) {

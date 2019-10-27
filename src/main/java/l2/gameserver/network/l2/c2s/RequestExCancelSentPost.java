@@ -30,7 +30,7 @@ public class RequestExCancelSentPost extends L2GameClientPacket {
   }
 
   protected void runImpl() {
-    Player activeChar = ((GameClient)this.getClient()).getActiveChar();
+    Player activeChar = this.getClient().getActiveChar();
     if (activeChar != null) {
       if (activeChar.isActionsDisabled()) {
         activeChar.sendActionFailed();
@@ -69,7 +69,7 @@ public class RequestExCancelSentPost extends L2GameClientPacket {
                     return;
                   }
 
-                  if (!activeChar.getInventory().validateCapacity((long)slots)) {
+                  if (!activeChar.getInventory().validateCapacity(slots)) {
                     this.sendPacket(Msg.YOU_COULD_NOT_CANCEL_RECEIPT_BECAUSE_YOUR_INVENTORY_IS_FULL);
                     return;
                   }
@@ -77,7 +77,7 @@ public class RequestExCancelSentPost extends L2GameClientPacket {
                   Set<ItemInstance> attachments = mail.getAttachments();
                   ItemInstance[] items;
                   synchronized(attachments) {
-                    items = (ItemInstance[])mail.getAttachments().toArray(new ItemInstance[attachments.size()]);
+                    items = mail.getAttachments().toArray(new ItemInstance[attachments.size()]);
                     attachments.clear();
                   }
 
@@ -85,10 +85,10 @@ public class RequestExCancelSentPost extends L2GameClientPacket {
                   int var9 = items.length;
 
                   for(int var10 = 0; var10 < var9; ++var10) {
-                    ItemInstance item = var8[var10];
-                    activeChar.sendPacket((new SystemMessage(3073)).addItemName(item.getItemId()).addNumber(item.getCount()));
-                    Log.LogItem(activeChar, ItemLog.PostCancel, item);
-                    activeChar.getInventory().addItem(item);
+                    ItemInstance itemInstance = var8[var10];
+                    activeChar.sendPacket((new SystemMessage(3073)).addItemName(itemInstance.getItemId()).addNumber(itemInstance.getCount()));
+                    Log.LogItem(activeChar, ItemLog.PostCancel, itemInstance);
+                    activeChar.getInventory().addItem(itemInstance);
                   }
 
                   mail.update();
@@ -100,7 +100,7 @@ public class RequestExCancelSentPost extends L2GameClientPacket {
                 }
 
                 item = (ItemInstance)var6.next();
-                weight = SafeMath.addAndCheck(weight, SafeMath.mulAndCheck(item.getCount(), (long)item.getTemplate().getWeight()));
+                weight = SafeMath.addAndCheck(weight, SafeMath.mulAndCheck(item.getCount(), item.getTemplate().getWeight()));
               } while(item.getTemplate().isStackable() && activeChar.getInventory().getItemByItemId(item.getItemId()) != null);
 
               ++slots;

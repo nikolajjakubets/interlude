@@ -16,7 +16,7 @@ import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 
 public class PlayerMessageStack {
   private static PlayerMessageStack _instance;
-  private final Map<Integer, List<L2GameServerPacket>> _stack = new HashMap();
+  private final Map<Integer, List<L2GameServerPacket>> _stack = new HashMap<>();
 
   public static PlayerMessageStack getInstance() {
     if (_instance == null) {
@@ -39,7 +39,7 @@ public class PlayerMessageStack {
         if (this._stack.containsKey(char_obj_id)) {
           messages = (List)this._stack.remove(char_obj_id);
         } else {
-          messages = new ArrayList();
+          messages = new ArrayList<>();
         }
 
         ((List)messages).add(message);

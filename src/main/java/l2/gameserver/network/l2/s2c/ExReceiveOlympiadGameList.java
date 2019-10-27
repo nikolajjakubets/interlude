@@ -11,7 +11,7 @@ import l2.gameserver.model.entity.oly.CompetitionType;
 import l2.gameserver.model.entity.oly.Stadium;
 
 public class ExReceiveOlympiadGameList extends L2GameServerPacket {
-  private ArrayList<ExReceiveOlympiadGameList.GameRec> _games = new ArrayList();
+  private ArrayList<ExReceiveOlympiadGameList.GameRec> _games = new ArrayList<>();
 
   public ExReceiveOlympiadGameList() {
   }

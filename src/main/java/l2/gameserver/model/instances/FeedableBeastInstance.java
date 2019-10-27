@@ -49,7 +49,7 @@ public class FeedableBeastInstance extends MonsterInstance {
   }
 
   public int getItemIdBySkillId(int skillId) {
-    int itemId = false;
+//    int itemId = false;
     short itemId;
     switch(skillId) {
       case 2188:
@@ -71,10 +71,10 @@ public class FeedableBeastInstance extends MonsterInstance {
 
   private void spawnNext(Player player, int growthLevel, int food) {
     int npcId = this.getNpcId();
-    int nextNpcId = false;
-    int nextNpcId = ((FeedableBeastInstance.growthInfo)growthCapableMobs.get(npcId)).spice[food][Rnd.get(((FeedableBeastInstance.growthInfo)growthCapableMobs.get(npcId)).spice[food].length)];
+//    int nextNpcId = false;
+    int nextNpcId = growthCapableMobs.get(npcId).spice[food][Rnd.get(growthCapableMobs.get(npcId).spice[food].length)];
     feedInfo.remove(this.getObjectId());
-    if (((FeedableBeastInstance.growthInfo)growthCapableMobs.get(npcId)).growth_level == 0) {
+    if (growthCapableMobs.get(npcId).growth_level == 0) {
       this.onDecay();
     } else {
       this.deleteMe();
@@ -137,18 +137,18 @@ public class FeedableBeastInstance extends MonsterInstance {
       if (!this.isGoldenSpice(skillId) || !this.isCrystalSpice(skillId)) {
         int food = this.isGoldenSpice(skillId) ? 0 : 1;
         int objectId = this.getObjectId();
-        this.broadcastPacket(new L2GameServerPacket[]{new SocialAction(objectId, 2)});
+        this.broadcastPacket(new SocialAction(objectId, 2));
         if (growthCapableMobs.containsKey(npcId)) {
-          if (((FeedableBeastInstance.growthInfo)growthCapableMobs.get(npcId)).spice[food].length == 0) {
+          if (growthCapableMobs.get(npcId).spice[food].length == 0) {
             return;
           }
 
-          int growthLevel = ((FeedableBeastInstance.growthInfo)growthCapableMobs.get(npcId)).growth_level;
-          if (growthLevel > 0 && feedInfo.get(objectId) != null && (Integer)feedInfo.get(objectId) != player.getObjectId()) {
+          int growthLevel = growthCapableMobs.get(npcId).growth_level;
+          if (growthLevel > 0 && feedInfo.get(objectId) != null && feedInfo.get(objectId) != player.getObjectId()) {
             return;
           }
 
-          if (Rnd.chance(((FeedableBeastInstance.growthInfo)growthCapableMobs.get(npcId)).growth_chance)) {
+          if (Rnd.chance(growthCapableMobs.get(npcId).growth_chance)) {
             this.spawnNext(player, growthLevel, food);
           }
         } else if (Rnd.chance(60)) {

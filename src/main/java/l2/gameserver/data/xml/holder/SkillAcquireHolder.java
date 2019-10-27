@@ -30,7 +30,7 @@ public final class SkillAcquireHolder extends AbstractHolder {
   private static final SkillAcquireHolder _instance = new SkillAcquireHolder();
   private TIntObjectHashMap<List<SkillLearn>> _normalSkillTree = new TIntObjectHashMap();
   private TIntObjectHashMap<List<SkillLearn>> _fishingSkillTree = new TIntObjectHashMap();
-  private List<SkillLearn> _pledgeSkillTree = new ArrayList();
+  private List<SkillLearn> _pledgeSkillTree = new ArrayList<>();
 
   public SkillAcquireHolder() {
   }
@@ -107,7 +107,7 @@ public final class SkillAcquireHolder extends AbstractHolder {
   }
 
   private Collection<SkillLearn> getAvaliableList(Collection<SkillLearn> skillLearns, Skill[] skills, int level, Player target) {
-    Map<Integer, SkillLearn> skillLearnMap = new TreeMap();
+    Map<Integer, SkillLearn> skillLearnMap = new TreeMap<>();
     Iterator var6 = skillLearns.iterator();
 
     while(true) {
@@ -319,7 +319,7 @@ public final class SkillAcquireHolder extends AbstractHolder {
   }
 
   public List<SkillLearn> getAllNormalSkillTreeWithForgottenScrolls() {
-    List<SkillLearn> a = new ArrayList();
+    List<SkillLearn> a = new ArrayList<>();
     TIntObjectIterator i = this._normalSkillTree.iterator();
 
     while(i.hasNext()) {

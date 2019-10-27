@@ -90,7 +90,7 @@ public class EffectDiscord extends Effect {
   }
 
   public boolean onActionTime() {
-    List<Creature> targetList = new ArrayList();
+    List<Creature> targetList = new ArrayList<>();
     Iterator var2 = this._effected.getAroundCharacters(900, 200).iterator();
 
     while(var2.hasNext()) {

@@ -251,7 +251,7 @@ public class GeoOptimizer {
         notready[i] = true;
       }
 
-      List<GeoOptimizer.BlockLink> links = new ArrayList();
+      List<GeoOptimizer.BlockLink> links = new ArrayList<>();
       int[] _checkSums = GeoOptimizer.checkSums[this.geoX][this.geoY];
       int n = 0;
 

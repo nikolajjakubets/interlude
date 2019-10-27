@@ -24,7 +24,7 @@ public class PrivateStoreManageListSell extends L2GameServerPacket {
     this._adena = seller.getAdena();
     this._package = pkg;
     this._sellList0 = seller.getSellList(this._package);
-    this._sellList = new ArrayList();
+    this._sellList = new ArrayList<>();
     Iterator var3 = this._sellList0.iterator();
 
     while(true) {

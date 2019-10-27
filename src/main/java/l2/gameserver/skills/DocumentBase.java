@@ -134,7 +134,7 @@ abstract class DocumentBase {
         if (n.getNodeType() != 3) {
           String nodeName = n.getNodeName();
           if (EFunction.VALUES_BY_LOWER_NAME.containsKey(nodeName.toLowerCase())) {
-            this.attachFunc(n, template, (EFunction)EFunction.VALUES_BY_LOWER_NAME.get(nodeName.toLowerCase()));
+            this.attachFunc(n, template, EFunction.VALUES_BY_LOWER_NAME.get(nodeName.toLowerCase()));
           } else if ("effect".equalsIgnoreCase(nodeName)) {
             if (template instanceof EffectTemplate) {
               throw new RuntimeException("Nested effects");
@@ -399,34 +399,34 @@ abstract class DocumentBase {
         } else {
           boolean val;
           if ("resting".equalsIgnoreCase(nodeName)) {
-            val = Boolean.valueOf(a.getNodeValue());
+            val = Boolean.parseBoolean(a.getNodeValue());
             cond = this.joinAnd(cond, new ConditionPlayerState(CheckPlayerState.RESTING, val));
           } else if ("moving".equalsIgnoreCase(nodeName)) {
-            val = Boolean.valueOf(a.getNodeValue());
+            val = Boolean.parseBoolean(a.getNodeValue());
             cond = this.joinAnd(cond, new ConditionPlayerState(CheckPlayerState.MOVING, val));
           } else if ("running".equalsIgnoreCase(nodeName)) {
-            val = Boolean.valueOf(a.getNodeValue());
+            val = Boolean.parseBoolean(a.getNodeValue());
             cond = this.joinAnd(cond, new ConditionPlayerState(CheckPlayerState.RUNNING, val));
           } else if ("standing".equalsIgnoreCase(nodeName)) {
-            val = Boolean.valueOf(a.getNodeValue());
+            val = Boolean.parseBoolean(a.getNodeValue());
             cond = this.joinAnd(cond, new ConditionPlayerState(CheckPlayerState.STANDING, val));
           } else if ("flying".equalsIgnoreCase(a.getNodeName())) {
-            val = Boolean.valueOf(a.getNodeValue());
+            val = Boolean.parseBoolean(a.getNodeValue());
             cond = this.joinAnd(cond, new ConditionPlayerState(CheckPlayerState.FLYING, val));
           } else if ("flyingTransform".equalsIgnoreCase(a.getNodeName())) {
-            val = Boolean.valueOf(a.getNodeValue());
+            val = Boolean.parseBoolean(a.getNodeValue());
             cond = this.joinAnd(cond, new ConditionPlayerState(CheckPlayerState.FLYING_TRANSFORM, val));
           } else if ("olympiad".equalsIgnoreCase(a.getNodeName())) {
-            val = Boolean.valueOf(a.getNodeValue());
+            val = Boolean.parseBoolean(a.getNodeValue());
             cond = this.joinAnd(cond, new ConditionPlayerOlympiad(val));
           } else if ("on_pvp_event".equalsIgnoreCase(a.getNodeName())) {
-            val = Boolean.valueOf(a.getNodeValue());
+            val = Boolean.parseBoolean(a.getNodeValue());
             cond = this.joinAnd(cond, new ConditionPlayerInTeam(val));
           } else if ("is_hero".equalsIgnoreCase(nodeName)) {
-            val = Boolean.valueOf(a.getNodeValue());
+            val = Boolean.parseBoolean(a.getNodeValue());
             cond = this.joinAnd(cond, new ConditionPlayerIsHero(val));
           } else if ("class_is_mage".equalsIgnoreCase(nodeName)) {
-            val = Boolean.valueOf(a.getNodeValue());
+            val = Boolean.parseBoolean(a.getNodeValue());
             cond = this.joinAnd(cond, new ConditionPlayerClassIsMage(val));
           } else if ("min_pledge_rank".equalsIgnoreCase(nodeName)) {
             cond = this.joinAnd(cond, new ConditionClanPlayerMinPledgeRank(a.getNodeValue()));
@@ -482,7 +482,7 @@ abstract class DocumentBase {
               cond = this.joinAnd(cond, new ConditionPlayerHasBuffId(skillId, skillMinSeed));
             } else if ("hasBuff".equalsIgnoreCase(nodeName)) {
               st = new StringTokenizer(a.getNodeValue(), ";");
-              EffectType et = (EffectType)Enum.valueOf(EffectType.class, st.nextToken().trim());
+              EffectType et = Enum.valueOf(EffectType.class, st.nextToken().trim());
               skillMinSeed = -1;
               if (st.hasMoreTokens()) {
                 skillMinSeed = Integer.parseInt(st.nextToken().trim());
@@ -490,8 +490,8 @@ abstract class DocumentBase {
 
               cond = this.joinAnd(cond, new ConditionPlayerHasBuff(et, skillMinSeed));
             } else if ("damage".equalsIgnoreCase(nodeName)) {
-              String[] st = a.getNodeValue().split(";");
-              cond = this.joinAnd(cond, new ConditionPlayerMinMaxDamage(Double.parseDouble(st[0]), Double.parseDouble(st[1])));
+              String[] split = a.getNodeValue().split(";");
+              cond = this.joinAnd(cond, new ConditionPlayerMinMaxDamage(Double.parseDouble(split[0]), Double.parseDouble(split[1])));
             } else if ("skillMinSeed".equalsIgnoreCase(nodeName)) {
               st = new StringTokenizer(a.getNodeValue(), ";");
               skillId = Integer.parseInt(st.nextToken().trim());
@@ -519,19 +519,19 @@ abstract class DocumentBase {
       String nodeName = a.getNodeName();
       String nodeValue = a.getNodeValue();
       if ("aggro".equalsIgnoreCase(nodeName)) {
-        cond = this.joinAnd(cond, new ConditionTargetAggro(Boolean.valueOf(nodeValue)));
+        cond = this.joinAnd(cond, new ConditionTargetAggro(Boolean.parseBoolean(nodeValue)));
       } else if ("pvp".equalsIgnoreCase(nodeName)) {
-        cond = this.joinAnd(cond, new ConditionTargetPlayable(Boolean.valueOf(nodeValue)));
+        cond = this.joinAnd(cond, new ConditionTargetPlayable(Boolean.parseBoolean(nodeValue)));
       } else if ("player".equalsIgnoreCase(nodeName)) {
-        cond = this.joinAnd(cond, new ConditionTargetPlayer(Boolean.valueOf(nodeValue)));
+        cond = this.joinAnd(cond, new ConditionTargetPlayer(Boolean.parseBoolean(nodeValue)));
       } else if ("exclude_caster".equalsIgnoreCase(nodeName)) {
-        cond = this.joinAnd(cond, new ConditionTargetPlayerNotMe(Boolean.valueOf(nodeValue)));
+        cond = this.joinAnd(cond, new ConditionTargetPlayerNotMe(Boolean.parseBoolean(nodeValue)));
       } else if ("summon".equalsIgnoreCase(nodeName)) {
-        cond = this.joinAnd(cond, new ConditionTargetSummon(Boolean.valueOf(nodeValue)));
+        cond = this.joinAnd(cond, new ConditionTargetSummon(Boolean.parseBoolean(nodeValue)));
       } else if ("mob".equalsIgnoreCase(nodeName)) {
-        cond = this.joinAnd(cond, new ConditionTargetMob(Boolean.valueOf(nodeValue)));
+        cond = this.joinAnd(cond, new ConditionTargetMob(Boolean.parseBoolean(nodeValue)));
       } else if ("targetInTheSameParty".equalsIgnoreCase(nodeName)) {
-        cond = this.joinAnd(cond, new ConditionTargetInTheSameParty(Boolean.valueOf(nodeValue)));
+        cond = this.joinAnd(cond, new ConditionTargetInTheSameParty(Boolean.parseBoolean(nodeValue)));
       } else if ("mobId".equalsIgnoreCase(nodeName)) {
         cond = this.joinAnd(cond, new ConditionTargetMobId(Integer.parseInt(nodeValue)));
       } else if ("race".equalsIgnoreCase(nodeName)) {
@@ -545,7 +545,7 @@ abstract class DocumentBase {
       } else if ("playerSameClan".equalsIgnoreCase(nodeName)) {
         cond = this.joinAnd(cond, new ConditionTargetClan(nodeValue));
       } else if ("castledoor".equalsIgnoreCase(nodeName)) {
-        cond = this.joinAnd(cond, new ConditionTargetCastleDoor(Boolean.valueOf(nodeValue)));
+        cond = this.joinAnd(cond, new ConditionTargetCastleDoor(Boolean.parseBoolean(nodeValue)));
       } else if ("direction".equalsIgnoreCase(nodeName)) {
         cond = this.joinAnd(cond, new ConditionTargetDirection(TargetDirection.valueOf(nodeValue.toUpperCase())));
       } else if ("percentHP".equalsIgnoreCase(nodeName)) {
@@ -568,7 +568,7 @@ abstract class DocumentBase {
           cond = this.joinAnd(cond, new ConditionTargetHasBuffId(id, level));
         } else if ("hasBuff".equalsIgnoreCase(nodeName)) {
           st = new StringTokenizer(nodeValue, ";");
-          EffectType et = (EffectType)Enum.valueOf(EffectType.class, st.nextToken().trim());
+          EffectType et = Enum.valueOf(EffectType.class, st.nextToken().trim());
           level = -1;
           if (st.hasMoreTokens()) {
             level = Integer.parseInt(st.nextToken().trim());
@@ -696,7 +696,7 @@ abstract class DocumentBase {
     for(int i = 0; i < attrs.getLength(); ++i) {
       Node a = attrs.item(i);
       if ("night".equalsIgnoreCase(a.getNodeName())) {
-        boolean val = Boolean.valueOf(a.getNodeValue());
+        boolean val = Boolean.parseBoolean(a.getNodeValue());
         cond = this.joinAnd(cond, new ConditionGameTime(CheckGameTime.NIGHT, val));
       }
     }
@@ -737,8 +737,7 @@ abstract class DocumentBase {
         String[] var7 = value.split("[;: ]+");
         int var8 = var7.length;
 
-        for(int var9 = 0; var9 < var8; ++var9) {
-          String str = var7[var9];
+        for (String str : var7) {
           if (str.charAt(0) == '#') {
             value = value.replace(str, String.valueOf(this.getTableValue(str, level)));
           }
@@ -778,7 +777,7 @@ abstract class DocumentBase {
           radix = 16;
         }
 
-        return Integer.valueOf(value, radix);
+        return Integer.parseInt(value, radix);
       } else {
         return Double.valueOf(value);
       }

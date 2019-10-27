@@ -19,7 +19,7 @@ public class RewardGroup implements Cloneable {
   private boolean _isAdena = false;
   private boolean _isSealStone = false;
   private boolean _notRate = false;
-  private List<RewardData> _items = new ArrayList();
+  private List<RewardData> _items = new ArrayList<>();
   private double _chanceSum;
 
   public RewardGroup(double chance) {

@@ -245,7 +245,7 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
       statement.setInt(1, ownerId);
       statement.setBoolean(2, sent);
       rset = statement.executeQuery();
-      messageIds = new ArrayList();
+      messageIds = new ArrayList<>();
 
       while(rset.next()) {
         ((List)messageIds).add(rset.getInt(1));
@@ -342,7 +342,7 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
       statement = con.prepareStatement("SELECT message_id FROM mail WHERE expire_time <= ?");
       statement.setInt(1, expireTime);
       rset = statement.executeQuery();
-      messageIds = new ArrayList();
+      messageIds = new ArrayList<>();
 
       while(rset.next()) {
         ((List)messageIds).add(rset.getInt(1));

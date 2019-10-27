@@ -122,7 +122,7 @@ public class ClanTable {
   }
 
   public void restoreClans() {
-    List<Integer> clanIds = new ArrayList();
+    List<Integer> clanIds = new ArrayList<>();
     Connection con = null;
     PreparedStatement statement = null;
     ResultSet result = null;
@@ -163,7 +163,7 @@ public class ClanTable {
   }
 
   public void restoreAllies() {
-    List<Integer> allyIds = new ArrayList();
+    List<Integer> allyIds = new ArrayList<>();
     Connection con = null;
     PreparedStatement statement = null;
     ResultSet result = null;

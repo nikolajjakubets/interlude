@@ -98,7 +98,7 @@ public abstract class SteppingRunnableQueueManager implements Runnable {
 
     public CharSequence getStats() {
         StringBuilder list = new StringBuilder();
-        Map<String, MutableLong> stats = new TreeMap();
+        Map<String, MutableLong> stats = new TreeMap<>();
         int total = 0;
         int done = 0;
         Iterator var5 = this.queue.iterator();

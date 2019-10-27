@@ -19,7 +19,7 @@ import org.napile.primitive.maps.impl.HashIntObjectMap;
 
 public class FishDataHolder extends AbstractHolder {
   private static final FishDataHolder _instance = new FishDataHolder();
-  private List<FishTemplate> _fishes = new ArrayList();
+  private List<FishTemplate> _fishes = new ArrayList<>();
   private IntObjectMap<LureTemplate> _lures = new HashIntObjectMap();
   private IntObjectMap<Map<LureType, Map<FishGroup, Integer>>> _distributionsForZones = new HashIntObjectMap();
 
@@ -41,7 +41,7 @@ public class FishDataHolder extends AbstractHolder {
   public void addDistribution(int id, LureType lureType, Map<FishGroup, Integer> map) {
     Map<LureType, Map<FishGroup, Integer>> byLureType = (Map)this._distributionsForZones.get(id);
     if (byLureType == null) {
-      this._distributionsForZones.put(id, byLureType = new HashMap());
+      this._distributionsForZones.put(id, byLureType = new HashMap<>());
     }
 
     ((Map)byLureType).put(lureType, map);

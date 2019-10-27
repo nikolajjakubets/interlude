@@ -25,7 +25,7 @@ public class RequestExMpccPartymasterList extends L2GameClientPacket {
     if (player != null) {
       MatchingRoom room = player.getMatchingRoom();
       if (room != null && room.getType() == MatchingRoom.CC_MATCHING) {
-        Set<String> set = new HashSet();
+        Set<String> set = new HashSet<>();
         Iterator var4 = room.getPlayers().iterator();
 
         while(var4.hasNext()) {

@@ -41,11 +41,11 @@ import org.slf4j.LoggerFactory;
 public class Scripts {
   private static final Logger _log = LoggerFactory.getLogger(Scripts.class);
   private static final Scripts _instance = new Scripts();
-  public static final Map<Integer, List<Scripts.ScriptClassAndMethod>> dialogAppends = new HashMap();
-  public static final Map<String, Scripts.ScriptClassAndMethod> onAction = new HashMap();
-  public static final Map<String, Scripts.ScriptClassAndMethod> onActionShift = new HashMap();
+  public static final Map<Integer, List<Scripts.ScriptClassAndMethod>> dialogAppends = new HashMap<>();
+  public static final Map<String, Scripts.ScriptClassAndMethod> onAction = new HashMap<>();
+  public static final Map<String, Scripts.ScriptClassAndMethod> onActionShift = new HashMap<>();
   private final Compiler compiler = new Compiler();
-  private final Map<String, Class<?>> _classes = new TreeMap();
+  private final Map<String, Class<?>> _classes = new TreeMap<>();
 
   public static final Scripts getInstance() {
     return _instance;
@@ -58,7 +58,7 @@ public class Scripts {
 
   private void load() {
     _log.info("Scripts: Loading...");
-    List<Class<?>> classes = new ArrayList();
+    List<Class<?>> classes = new ArrayList<>();
     boolean result = false;
     File f = new File("scripts.jar");
     if (f.exists()) {
@@ -67,7 +67,7 @@ public class Scripts {
 
       try {
         stream = new JarInputStream(new FileInputStream(f));
-        JarEntry entry = null;
+        JarEntry entry;
 
         while((entry = stream.getNextJarEntry()) != null) {
           if (!entry.getName().contains(ClassUtils.INNER_CLASS_SEPARATOR) && entry.getName().endsWith(".class")) {
@@ -98,8 +98,7 @@ public class Scripts {
     } else {
       _log.info("Scripts: Loaded " + classes.size() + " classes.");
 
-      for(int i = 0; i < classes.size(); ++i) {
-        Class<?> clazz = (Class)classes.get(i);
+      for (Class<?> clazz : classes) {
         this._classes.put(clazz.getName(), clazz);
       }
 
@@ -107,26 +106,26 @@ public class Scripts {
   }
 
   private void loadExt() {
-    _log.info("Extensions: Loading...");
-    List<Class<?>> classes = new ArrayList();
+    _log.info("loadExt: Extensions: Loading...");
+    List<Class<?>> classes = new ArrayList<>();
     boolean result = false;
-    File[] extFiles = (new File(".")).listFiles(new FileFilter() {
-      public boolean accept(File pathname) {
-        return pathname.getName().endsWith(".ext.jar");
-      }
-    });
-    File[] var4 = extFiles;
-    int i = extFiles.length;
+    File[] extFiles = (new File(".")).listFiles(pathname -> pathname.getName().endsWith(".ext.jar"));
+    int i = 0;
+    if (extFiles != null) {
+      i = extFiles.length;
+    }else {
+      _log.error("loadExt: Extensions: error load!, extFiles empty");
+    }
 
     for(int var6 = 0; var6 < i; ++var6) {
-      File extFile = var4[var6];
+      File extFile = extFiles[var6];
       if (extFile.exists()) {
         JarInputStream stream = null;
         MemoryClassLoader classLoader = new MemoryClassLoader();
 
         try {
           stream = new JarInputStream(new FileInputStream(extFile));
-          JarEntry entry = null;
+          JarEntry entry;
 
           while((entry = stream.getNextJarEntry()) != null) {
             if (!entry.getName().startsWith("java/") && !entry.getName().startsWith("l2/authserver") && !entry.getName().startsWith("l2/commons") && !entry.getName().startsWith("l2/gameserver") && !entry.getName().contains(ClassUtils.INNER_CLASS_SEPARATOR) && entry.getName().endsWith(".class")) {
@@ -155,7 +154,7 @@ public class Scripts {
     _log.info("Extensions: Loaded " + classes.size() + " extension classes.");
 
     for(i = 0; i < classes.size(); ++i) {
-      Class<?> clazz = (Class)classes.get(i);
+      Class<?> clazz = classes.get(i);
       this._classes.put(clazz.getName(), clazz);
     }
 
@@ -191,20 +190,19 @@ public class Scripts {
   }
 
   public boolean reload(String target) {
-    List<Class<?>> classes = new ArrayList();
+    List<Class<?>> classes = new ArrayList<>();
     if (!this.load(classes, target)) {
       _log.error("Scripts: Failed reloading script(s): " + target + "!");
       return false;
     } else {
       _log.info("Scripts: Reloaded " + classes.size() + " classes.");
 
-      for(int i = 0; i < classes.size(); ++i) {
-        Class<?> clazz = (Class)classes.get(i);
-        Class<?> prevClazz = (Class)this._classes.put(clazz.getName(), clazz);
+      for (Class<?> clazz : classes) {
+        Class<?> prevClazz = this._classes.put(clazz.getName(), clazz);
         if (prevClazz != null) {
           if (ClassUtils.isAssignable(prevClazz, ScriptFile.class)) {
             try {
-              ((ScriptFile)prevClazz.newInstance()).onReload();
+              ((ScriptFile) prevClazz.newInstance()).onReload();
             } catch (Exception var7) {
               _log.error("Scripts: Failed running " + prevClazz.getName() + ".onReload()", var7);
             }
@@ -216,7 +214,7 @@ public class Scripts {
         if (!Config.DONTLOADQUEST || !ClassUtils.isAssignable(clazz, Quest.class)) {
           if (ClassUtils.isAssignable(clazz, ScriptFile.class)) {
             try {
-              ((ScriptFile)clazz.newInstance()).onLoad();
+              ((ScriptFile) clazz.newInstance()).onLoad();
             } catch (Exception var8) {
               _log.error("Scripts: Failed running " + clazz.getName() + ".onLoad()", var8);
             }
@@ -231,13 +229,11 @@ public class Scripts {
   }
 
   public void shutdown() {
-    Iterator var1 = this._classes.values().iterator();
 
-    while(var1.hasNext()) {
-      Class<?> clazz = (Class)var1.next();
+    for (Class<?> clazz : this._classes.values()) {
       if (!ClassUtils.isAssignable(clazz, Quest.class) && ClassUtils.isAssignable(clazz, ScriptFile.class)) {
         try {
-          ((ScriptFile)clazz.newInstance()).onShutdown();
+          ((ScriptFile) clazz.newInstance()).onShutdown();
         } catch (Exception var4) {
           _log.error("Scripts: Failed running " + clazz.getName() + ".onShutdown()", var4);
         }
@@ -250,8 +246,8 @@ public class Scripts {
     Collection<File> scriptFiles = Collections.emptyList();
     File file = new File(Config.DATAPACK_ROOT, "data/scripts/" + target.replace(".", "/") + ".java");
     if (file.isFile()) {
-      scriptFiles = new ArrayList(1);
-      ((Collection)scriptFiles).add(file);
+      scriptFiles = new ArrayList<>(1);
+      scriptFiles.add(file);
     } else {
       file = new File(Config.DATAPACK_ROOT, "data/scripts/" + target);
       if (file.isDirectory()) {
@@ -259,17 +255,15 @@ public class Scripts {
       }
     }
 
-    if (((Collection)scriptFiles).isEmpty()) {
+    if (scriptFiles.isEmpty()) {
       return false;
     } else {
       boolean success;
-      if (success = this.compiler.compile((Collection)scriptFiles)) {
+      if (success = this.compiler.compile(scriptFiles)) {
         MemoryClassLoader classLoader = this.compiler.getClassLoader();
         String[] var8 = classLoader.getLoadedClasses();
-        int var9 = var8.length;
 
-        for(int var10 = 0; var10 < var9; ++var10) {
-          String name = var8[var10];
+        for (String name : var8) {
           if (!name.contains(ClassUtils.INNER_CLASS_SEPARATOR)) {
             try {
               Class<?> clazz = classLoader.loadClass(name);
@@ -299,13 +293,13 @@ public class Scripts {
         Method method = var2[var4];
         if (method.getName().contains("DialogAppend_")) {
           Integer id = Integer.parseInt(method.getName().substring(13));
-          List<Scripts.ScriptClassAndMethod> handlers = (List)dialogAppends.get(id);
+          List<Scripts.ScriptClassAndMethod> handlers = dialogAppends.get(id);
           if (handlers == null) {
-            handlers = new ArrayList();
+            handlers = new ArrayList<>();
             dialogAppends.put(id, handlers);
           }
 
-          ((List)handlers).add(new Scripts.ScriptClassAndMethod(clazz.getName(), method.getName()));
+          handlers.add(new Scripts.ScriptClassAndMethod(clazz.getName(), method.getName()));
         } else {
           String name;
           if (method.getName().contains("OnAction_")) {
@@ -325,16 +319,15 @@ public class Scripts {
 
   private void removeHandlers(Class<?> script) {
     try {
-      Iterator var2 = dialogAppends.values().iterator();
 
-      while(var2.hasNext()) {
-        List<Scripts.ScriptClassAndMethod> entry = (List)var2.next();
-        List<Scripts.ScriptClassAndMethod> toRemove = new ArrayList();
+      for (List<ScriptClassAndMethod> entry : dialogAppends.values()) {
+//        List<ScriptClassAndMethod> entry = (List) scriptClassAndMethods;
+        List<ScriptClassAndMethod> toRemove = new ArrayList<>();
         Iterator var5 = entry.iterator();
 
-        Scripts.ScriptClassAndMethod sc;
-        while(var5.hasNext()) {
-          sc = (Scripts.ScriptClassAndMethod)var5.next();
+        ScriptClassAndMethod sc;
+        while (var5.hasNext()) {
+          sc = (ScriptClassAndMethod) var5.next();
           if (sc.className.equals(script.getName())) {
             toRemove.add(sc);
           }
@@ -342,75 +335,70 @@ public class Scripts {
 
         var5 = toRemove.iterator();
 
-        while(var5.hasNext()) {
-          sc = (Scripts.ScriptClassAndMethod)var5.next();
+        while (var5.hasNext()) {
+          sc = (ScriptClassAndMethod) var5.next();
           entry.remove(sc);
         }
       }
 
-      List<String> toRemove = new ArrayList();
-      Iterator var9 = onAction.entrySet().iterator();
-
-      Entry entry;
+      List<String> toRemove = new ArrayList<>();
+      Iterator<Entry<String, ScriptClassAndMethod>> var9 = onAction.entrySet().iterator();
+      Entry<String, ScriptClassAndMethod> entry;
       while(var9.hasNext()) {
-        entry = (Entry)var9.next();
-        if (((Scripts.ScriptClassAndMethod)entry.getValue()).className.equals(script.getName())) {
+        entry = var9.next();
+        if (entry.getValue().className.equals(script.getName())) {
           toRemove.add(entry.getKey());
         }
       }
 
-      var9 = toRemove.iterator();
+      Iterator<String> stringIterator = toRemove.iterator();
 
       String key;
-      while(var9.hasNext()) {
-        key = (String)var9.next();
+      while(stringIterator.hasNext()) {
+        key = stringIterator.next();
         onAction.remove(key);
       }
 
-      toRemove = new ArrayList();
-      var9 = onActionShift.entrySet().iterator();
+      toRemove = new ArrayList<>();
 
-      while(var9.hasNext()) {
-        entry = (Entry)var9.next();
-        if (((Scripts.ScriptClassAndMethod)entry.getValue()).className.equals(script.getName())) {
+      for (Entry<String, ScriptClassAndMethod> stringScriptClassAndMethodEntry : onActionShift.entrySet()) {
+        entry = stringScriptClassAndMethodEntry;
+        if (entry.getValue().className.equals(script.getName())) {
           toRemove.add(entry.getKey());
         }
       }
 
-      var9 = toRemove.iterator();
-
-      while(var9.hasNext()) {
-        key = (String)var9.next();
-        onActionShift.remove(key);
+      for (String nameToRemove : toRemove) {
+        onActionShift.remove(nameToRemove);
       }
-    } catch (Exception var7) {
-      _log.error("", var7);
+    } catch (Exception e) {
+      _log.error("removeHandlers: eMessage={}, eClause={}", e.getMessage(), e.getClass());
     }
 
   }
 
   public Object callScripts(String className, String methodName) {
-    return this.callScripts((Player)null, className, methodName, (Object[])null, (Map)null);
+    return this.callScripts(null, className, methodName, null, null);
   }
 
   public Object callScripts(String className, String methodName, Object[] args) {
-    return this.callScripts((Player)null, className, methodName, args, (Map)null);
+    return this.callScripts(null, className, methodName, args, null);
   }
 
   public Object callScripts(String className, String methodName, Map<String, Object> variables) {
-    return this.callScripts((Player)null, className, methodName, ArrayUtils.EMPTY_OBJECT_ARRAY, variables);
+    return this.callScripts(null, className, methodName, ArrayUtils.EMPTY_OBJECT_ARRAY, variables);
   }
 
   public Object callScripts(String className, String methodName, Object[] args, Map<String, Object> variables) {
-    return this.callScripts((Player)null, className, methodName, args, variables);
+    return this.callScripts(null, className, methodName, args, variables);
   }
 
   public Object callScripts(Player caller, String className, String methodName) {
-    return this.callScripts(caller, className, methodName, ArrayUtils.EMPTY_OBJECT_ARRAY, (Map)null);
+    return this.callScripts(caller, className, methodName, ArrayUtils.EMPTY_OBJECT_ARRAY, null);
   }
 
   public Object callScripts(Player caller, String className, String methodName, Object[] args) {
-    return this.callScripts(caller, className, methodName, args, (Map)null);
+    return this.callScripts(caller, className, methodName, args, null);
   }
 
   public Object callScripts(Player caller, String className, String methodName, Map<String, Object> variables) {
@@ -418,7 +406,7 @@ public class Scripts {
   }
 
   public Object callScripts(Player caller, String className, String methodName, Object[] args, Map<String, Object> variables) {
-    Class<?> clazz = (Class)this._classes.get(className);
+    Class<?> clazz = this._classes.get(className);
     if (clazz == null) {
       _log.error("Script class " + className + " not found!");
       return null;
@@ -448,10 +436,10 @@ public class Scripts {
 
       if (caller != null) {
         try {
-          field = null;
-          Field field;
-          if ((field = FieldUtils.getField(clazz, "self")) != null) {
-            FieldUtils.writeField(field, o, caller.getRef());
+//          field = null;
+          Field fieldSelf;
+          if ((fieldSelf = FieldUtils.getField(clazz, "self")) != null) {
+            FieldUtils.writeField(fieldSelf, o, caller.getRef());
           }
         } catch (Exception var11) {
           _log.error("Scripts: Failed setting field for " + clazz.getName(), var11);

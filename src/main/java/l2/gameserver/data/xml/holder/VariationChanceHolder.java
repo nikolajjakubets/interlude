@@ -12,7 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class VariationChanceHolder extends AbstractHolder {
   private static final VariationChanceHolder _instance = new VariationChanceHolder();
-  private HashMap<Integer, Pair<VariationChanceData, VariationChanceData>> _minerallChances = new HashMap();
+  private HashMap<Integer, Pair<VariationChanceData, VariationChanceData>> _minerallChances = new HashMap<>();
 
   public static VariationChanceHolder getInstance() {
     return _instance;

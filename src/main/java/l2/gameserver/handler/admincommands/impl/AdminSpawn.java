@@ -5,6 +5,19 @@
 
 package l2.gameserver.handler.admincommands.impl;
 
+import l2.commons.collections.MultiValueSet;
+import l2.gameserver.ai.CharacterAI;
+import l2.gameserver.data.xml.holder.NpcHolder;
+import l2.gameserver.handler.admincommands.IAdminCommandHandler;
+import l2.gameserver.instancemanager.RaidBossSpawnManager;
+import l2.gameserver.model.*;
+import l2.gameserver.model.instances.NpcInstance;
+import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
+import l2.gameserver.scripts.Scripts;
+import l2.gameserver.taskmanager.SpawnTaskManager;
+import l2.gameserver.templates.npc.NpcTemplate;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.lang.reflect.Constructor;
@@ -12,28 +25,14 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import l2.commons.collections.MultiValueSet;
-import l2.gameserver.ai.CharacterAI;
-import l2.gameserver.data.xml.holder.NpcHolder;
-import l2.gameserver.handler.admincommands.IAdminCommandHandler;
-import l2.gameserver.instancemanager.RaidBossSpawnManager;
-import l2.gameserver.model.GameObject;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.SimpleSpawner;
-import l2.gameserver.model.Spawner;
-import l2.gameserver.model.World;
-import l2.gameserver.model.instances.NpcInstance;
-import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
-import l2.gameserver.scripts.Scripts;
-import l2.gameserver.taskmanager.SpawnTaskManager;
-import l2.gameserver.templates.npc.NpcTemplate;
 
+@Slf4j
 public class AdminSpawn implements IAdminCommandHandler {
   public AdminSpawn() {
   }
 
   public boolean useAdminCommand(Enum comm, String[] wordList, String fullString, Player activeChar) {
-    AdminSpawn.Commands command = (AdminSpawn.Commands)comm;
+    AdminSpawn.Commands command = (AdminSpawn.Commands) comm;
     if (!activeChar.getPlayerAccess().CanEditNPC) {
       return false;
     } else {
@@ -41,7 +40,7 @@ public class AdminSpawn implements IAdminCommandHandler {
       NpcInstance target;
       String aiName;
       int respawnTime;
-      switch(command) {
+      switch (command) {
         case admin_show_spawns:
           activeChar.sendPacket((new NpcHtmlMessage(5)).setFile("admin/spawns.htm"));
           break;
@@ -49,7 +48,8 @@ public class AdminSpawn implements IAdminCommandHandler {
           try {
             aiName = fullString.substring(18);
             activeChar.sendPacket((new NpcHtmlMessage(5)).setFile("admin/spawns/" + aiName + ".htm"));
-          } catch (StringIndexOutOfBoundsException var37) {
+          } catch (StringIndexOutOfBoundsException e) {
+            log.error("useAdminCommand: eMessage={}, eClause={}", e.getMessage(), e.getClass());
           }
           break;
         case admin_spawn1:
@@ -64,7 +64,8 @@ public class AdminSpawn implements IAdminCommandHandler {
             }
 
             this.spawnMonster(activeChar, aiName, 0, respawnTime);
-          } catch (Exception var36) {
+          } catch (Exception e) {
+            log.error("useAdminCommand: eMessage={}, eClause={}", e.getMessage(), e.getClass());
           }
           break;
         case admin_spawn:
@@ -85,7 +86,8 @@ public class AdminSpawn implements IAdminCommandHandler {
             }
 
             this.spawnMonster(activeChar, aiName, respawnTime, mobCount);
-          } catch (Exception var35) {
+          } catch (Exception e) {
+            log.error("useAdminCommand: eMessage={}, eClause={}", e.getMessage(), e.getClass());
           }
           break;
         case admin_setai:
@@ -102,7 +104,7 @@ public class AdminSpawn implements IAdminCommandHandler {
           }
 
           aiName = st.nextToken();
-          target = (NpcInstance)activeChar.getTarget();
+          target = (NpcInstance) activeChar.getTarget();
           Constructor aiConstructor = null;
 
           try {
@@ -111,7 +113,7 @@ public class AdminSpawn implements IAdminCommandHandler {
             }
           } catch (Exception var34) {
             try {
-              aiConstructor = ((Class)Scripts.getInstance().getClasses().get("ai." + aiName)).getConstructors()[0];
+              aiConstructor = ((Class) Scripts.getInstance().getClasses().get("ai." + aiName)).getConstructors()[0];
             } catch (Exception var33) {
               activeChar.sendMessage("This type AI not found.");
               return false;
@@ -120,7 +122,7 @@ public class AdminSpawn implements IAdminCommandHandler {
 
           if (aiConstructor != null) {
             try {
-              target.setAI((CharacterAI)aiConstructor.newInstance(target));
+              target.setAI((CharacterAI) aiConstructor.newInstance(target));
             } catch (Exception var32) {
               var32.printStackTrace();
             }
@@ -150,7 +152,7 @@ public class AdminSpawn implements IAdminCommandHandler {
           }
 
           String paramValue = st.nextToken();
-          target = (NpcInstance)activeChar.getTarget();
+          target = (NpcInstance) activeChar.getTarget();
           target.setParameter(paramName, paramValue);
           target.decayMe();
           target.spawnMe();
@@ -162,7 +164,7 @@ public class AdminSpawn implements IAdminCommandHandler {
             return false;
           }
 
-          target = (NpcInstance)activeChar.getTarget();
+          target = (NpcInstance) activeChar.getTarget();
           MultiValueSet<String> set = target.getParameters();
           if (!set.isEmpty()) {
             System.out.println("Dump of Parameters:\r\n" + set.toString());
@@ -177,7 +179,7 @@ public class AdminSpawn implements IAdminCommandHandler {
             return false;
           }
 
-          NpcInstance npc = (NpcInstance)obj;
+          NpcInstance npc = (NpcInstance) obj;
           npc.setHeading(activeChar.getHeading());
           npc.decayMe();
           npc.spawnMe();
@@ -209,7 +211,7 @@ public class AdminSpawn implements IAdminCommandHandler {
           String name = "";
           Iterator var40 = World.getAroundNpc(activeChar).iterator();
 
-          while(true) {
+          while (true) {
             NpcInstance _npc;
             do {
               if (!var40.hasNext()) {
@@ -225,16 +227,10 @@ public class AdminSpawn implements IAdminCommandHandler {
                 return true;
               }
 
-              _npc = (NpcInstance)var40.next();
-            } while(_npc.getNpcId() != id && _npc.getNpcId() != id2);
+              _npc = (NpcInstance) var40.next();
+            } while (_npc.getNpcId() != id && _npc.getNpcId() != id2);
 
             name = _npc.getName();
-            min_x = Math.min(min_x, _npc.getX());
-            min_y = Math.min(min_y, _npc.getY());
-            min_z = Math.min(min_z, _npc.getZ());
-            max_x = Math.max(max_x, _npc.getX());
-            max_y = Math.max(max_y, _npc.getY());
-            max_z = Math.max(max_z, _npc.getZ());
           }
         case admin_dumpspawntasks:
           System.out.println(SpawnTaskManager.getInstance().toString());
@@ -245,7 +241,7 @@ public class AdminSpawn implements IAdminCommandHandler {
           try {
             st.nextToken();
             String id3 = st.nextToken();
-            int respawnTime = 30;
+            respawnTime = 30;
             int mobCount = 1;
             this.spawnMonster(activeChar, id3, respawnTime, mobCount);
 
@@ -259,9 +255,11 @@ public class AdminSpawn implements IAdminCommandHandler {
               FileWriter writer = new FileWriter(f, true);
               writer.write("<spawn count=\"1\" respawn=\"60\" respawn_random=\"0\" period_of_day=\"none\">\n\t<point x=\"" + activeChar.getLoc().x + "\" y=\"" + activeChar.getLoc().y + "\" z=\"" + activeChar.getLoc().z + "\" h=\"" + activeChar.getLoc().h + "\" />\n\t<npc id=\"" + Integer.parseInt(id3) + "\" /><!--" + NpcHolder.getInstance().getTemplate(Integer.parseInt(id3)).getName() + "-->\n</spawn>\n");
               writer.close();
-            } catch (Exception var30) {
+            } catch (Exception e) {
+              log.error("useAdminCommand: eMessage={}, eClause={}", e.getMessage(), e.getClass());
             }
-          } catch (Exception var31) {
+          } catch (Exception e) {
+            log.error("useAdminCommand: eMessage={}, eClause={}", e.getMessage(), e.getClass());
           }
       }
 
@@ -295,7 +293,7 @@ public class AdminSpawn implements IAdminCommandHandler {
     } else {
       try {
         SimpleSpawner spawn = new SimpleSpawner(template);
-        spawn.setLoc(((GameObject)target).getLoc());
+        spawn.setLoc(target.getLoc());
         spawn.setAmount(mobCount);
         spawn.setHeading(activeChar.getHeading());
         spawn.setRespawnDelay(respawnTime);
@@ -308,17 +306,18 @@ public class AdminSpawn implements IAdminCommandHandler {
             spawn.stopRespawn();
           }
 
-          activeChar.sendMessage("Created " + template.name + " on " + ((GameObject)target).getObjectId() + ".");
+          activeChar.sendMessage("Created " + template.name + " on " + target.getObjectId() + ".");
         }
-      } catch (Exception var10) {
-        var10.printStackTrace();
+      } catch (Exception e) {
+        log.error("spawnMonster: eMessage={}, eClause={}", e.getMessage(), e.getClass());
+        e.printStackTrace();
         activeChar.sendMessage("Target is not ingame.");
       }
 
     }
   }
 
-  private static enum Commands {
+  private enum Commands {
     admin_show_spawns,
     admin_spawn,
     admin_spawn_monster,
@@ -332,7 +331,7 @@ public class AdminSpawn implements IAdminCommandHandler {
     admin_dumpspawntasks,
     admin_dumpspawn;
 
-    private Commands() {
+    Commands() {
     }
   }
 }

@@ -399,7 +399,7 @@ public abstract class Creature extends GameObject {
 
   public void addBlockStats(List<Stats> stats) {
     if (this._blockedStats == null) {
-      this._blockedStats = new ArrayList();
+      this._blockedStats = new ArrayList<>();
     }
 
     this._blockedStats.addAll(stats);
@@ -2763,7 +2763,7 @@ public abstract class Creature extends GameObject {
 
   public void setSkillMastery(Integer skill, int mastery) {
     if (this._skillMastery == null) {
-      this._skillMastery = new HashMap();
+      this._skillMastery = new HashMap<>();
     }
 
     this._skillMastery.put(skill, mastery);

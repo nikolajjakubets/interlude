@@ -13,7 +13,7 @@ import l2.gameserver.model.base.Element;
 import l2.gameserver.model.items.ItemInstance;
 
 public class ExShowBaseAttributeCancelWindow extends L2GameServerPacket {
-  private final List<ItemInstance> _items = new ArrayList();
+  private final List<ItemInstance> _items = new ArrayList<>();
 
   public ExShowBaseAttributeCancelWindow(Player activeChar) {
     ItemInstance[] var2 = activeChar.getInventory().getItems();

@@ -131,7 +131,7 @@ public class GameObjectArray<E extends GameObject> implements Iterable<E> {
     if (s == null) {
       return null;
     } else {
-      List<E> result = new ArrayList();
+      List<E> result = new ArrayList<>();
 
       for(int i = 0; i < this.size; ++i) {
         E o = this.elementData[i];

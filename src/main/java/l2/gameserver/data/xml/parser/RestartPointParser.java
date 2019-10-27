@@ -48,8 +48,8 @@ public class RestartPointParser extends AbstractFileParser<MapRegionManager> {
   }
 
   protected void readData(Element rootElement) throws Exception {
-    List<Pair<Territory, Map<Race, String>>> restartArea = new ArrayList();
-    Map<String, RestartPoint> restartPoint = new HashMap();
+    List<Pair<Territory, Map<Race, String>>> restartArea = new ArrayList<>();
+    Map<String, RestartPoint> restartPoint = new HashMap<>();
     Iterator iterator = rootElement.elementIterator();
 
     while(true) {
@@ -57,7 +57,7 @@ public class RestartPointParser extends AbstractFileParser<MapRegionManager> {
         Element listElement = (Element)iterator.next();
         if ("restart_area".equals(listElement.getName())) {
           Territory territory = null;
-          Map<Race, String> restarts = new HashMap();
+          Map<Race, String> restarts = new HashMap<>();
           Iterator i = listElement.elementIterator();
 
           while(i.hasNext()) {
@@ -111,8 +111,8 @@ public class RestartPointParser extends AbstractFileParser<MapRegionManager> {
           String name = listElement.attributeValue("name");
           int bbs = Integer.parseInt(listElement.attributeValue("bbs", "0"));
           int msgId = Integer.parseInt(listElement.attributeValue("msg_id", "0"));
-          List<Location> restartPoints = new ArrayList();
-          List<Location> PKrestartPoints = new ArrayList();
+          List<Location> restartPoints = new ArrayList<>();
+          List<Location> PKrestartPoints = new ArrayList<>();
           Iterator i = listElement.elementIterator();
 
           while(true) {
@@ -163,7 +163,7 @@ public class RestartPointParser extends AbstractFileParser<MapRegionManager> {
 
       while(iterator.hasNext()) {
         Pair<Territory, Map<Race, String>> ra = (Pair)iterator.next();
-        Map<Race, RestartPoint> restarts = new HashMap();
+        Map<Race, RestartPoint> restarts = new HashMap<>();
         Iterator var24 = ((Map)ra.getValue()).entrySet().iterator();
 
         while(var24.hasNext()) {

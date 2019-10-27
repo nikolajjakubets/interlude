@@ -39,7 +39,7 @@ import org.xml.sax.SAXParseException;
 public class CharTemplateTable {
   private static final Logger _log = LoggerFactory.getLogger(CharTemplateTable.class);
   private static CharTemplateTable _instance;
-  private Map<Integer, PlayerTemplate> _templates = new HashMap();
+  private Map<Integer, PlayerTemplate> _templates = new HashMap<>();
   private Map<ClassId, List<ShortCut>> _shortCuts;
 
   public static CharTemplateTable getInstance() {
@@ -161,7 +161,7 @@ public class CharTemplateTable {
   }
 
   private static Map<ClassId, List<ShortCut>> parseShortCuts(final File file) {
-    Map<ClassId, List<ShortCut>> result = new HashMap();
+    Map<ClassId, List<ShortCut>> result = new HashMap<>();
     if (!file.exists()) {
       _log.warn("File " + file.getAbsolutePath() + " not exists");
       return Collections.emptyMap();
@@ -238,7 +238,7 @@ public class CharTemplateTable {
                 ClassId cId = var34[var20];
                 List<ShortCut> shortCuts = (List)result.get(cId);
                 if (shortCuts == null) {
-                  result.put(cId, shortCuts = new ArrayList());
+                  result.put(cId, shortCuts = new ArrayList<>());
                 }
 
                 ((List)shortCuts).add(shortCut);
@@ -246,7 +246,7 @@ public class CharTemplateTable {
             } else {
               List<ShortCut> shortCuts = (List)result.get(classId);
               if (shortCuts == null) {
-                result.put(classId, shortCuts = new ArrayList());
+                result.put(classId, shortCuts = new ArrayList<>());
               }
 
               ((List)shortCuts).add(shortCut);

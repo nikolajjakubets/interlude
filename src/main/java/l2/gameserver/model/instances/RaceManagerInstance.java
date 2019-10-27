@@ -52,7 +52,7 @@ public class RaceManagerInstance extends NpcInstance {
     if (notInitialized) {
       notInitialized = false;
       _raceNumber = ServerVariables.getInt("monster_race", 1);
-      history = new ArrayList();
+      history = new ArrayList<>();
       managers = new CopyOnWriteArraySet();
       ThreadPoolManager s = ThreadPoolManager.getInstance();
       s.scheduleAtFixedRate(new RaceManagerInstance.Announcement(816), 0L, 600000L);

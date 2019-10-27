@@ -73,19 +73,19 @@ public class InstantZoneParser extends AbstractDirParser<InstantZoneHolder> {
       boolean dispelBuffs = false;
       boolean onPartyDismiss = true;
       int sharedReuseGroup = 0;
-      int collapseIfEmpty = false;
-      int spawnType = false;
+//      int collapseIfEmpty = false;
+//      int spawnType = false;
       SpawnInfo spawnDat = null;
       int removedItemId = 0;
       int removedItemCount = 0;
       int giveItemId = 0;
       int givedItemCount = 0;
       int requiredQuestId = 0;
-      int maxChannels = true;
+//      int maxChannels = true;
       boolean removedItemNecessity = false;
       boolean setReuseUponEntry = true;
       StatsSet params = new StatsSet();
-      List<SpawnInfo> spawns = new ArrayList();
+      List<SpawnInfo> spawns = new ArrayList<>();
       IntObjectMap<DoorInfo> doors = Containers.emptyIntObjectMap();
       Map<String, ZoneInfo> zones = Collections.emptyMap();
       Map<String, SpawnInfo2> spawns2 = Collections.emptyMap();
@@ -173,7 +173,7 @@ public class InstantZoneParser extends AbstractDirParser<InstantZoneHolder> {
               while(var43.hasNext()) {
                 e = (Element)var43.next();
                 if (((Map)zones).isEmpty()) {
-                  zones = new HashMap();
+                  zones = new HashMap<>();
                 }
 
                 active = e.attributeValue("active") != null && Boolean.parseBoolean(e.attributeValue("active"));
@@ -224,7 +224,7 @@ public class InstantZoneParser extends AbstractDirParser<InstantZoneHolder> {
                     int respawnRnd = respawnRndNode != null ? Integer.parseInt(respawnRndNode) : 0;
                     String countNode = e.attributeValue("count");
                     int count = countNode != null ? Integer.parseInt(countNode) : 1;
-                    List<Location> coords = new ArrayList();
+                    List<Location> coords = new ArrayList<>();
                     int spawnType = 0;
                     String spawnTypeNode = e.attributeValue("type");
                     if (spawnTypeNode != null && !spawnTypeNode.equalsIgnoreCase("point")) {

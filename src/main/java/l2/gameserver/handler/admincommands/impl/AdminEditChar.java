@@ -782,7 +782,7 @@ public class AdminEditChar implements IAdminCommandHandler {
 
       for(int i = 0; i < strvals.length; ++i) {
         strvals[i] = strvals[i].trim();
-        vals[i] = strvals[i].isEmpty() ? null : Integer.valueOf(strvals[i]);
+        vals[i] = strvals[i].isEmpty() ? null : Integer.parseInt(strvals[i]);
       }
 
       if (vals[0] != null) {

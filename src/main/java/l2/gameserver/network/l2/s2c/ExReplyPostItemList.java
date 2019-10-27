@@ -13,7 +13,7 @@ import l2.gameserver.model.items.ItemInfo;
 import l2.gameserver.model.items.ItemInstance;
 
 public class ExReplyPostItemList extends L2GameServerPacket {
-  private List<ItemInfo> _itemsList = new ArrayList();
+  private List<ItemInfo> _itemsList = new ArrayList<>();
 
   public ExReplyPostItemList(Player activeChar) {
     ItemInstance[] items = activeChar.getInventory().getItems();

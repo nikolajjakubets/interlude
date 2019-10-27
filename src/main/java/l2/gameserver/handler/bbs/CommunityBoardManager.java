@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public class CommunityBoardManager {
   private static final Logger _log = LoggerFactory.getLogger(CommunityBoardManager.class);
   private static final CommunityBoardManager _instance = new CommunityBoardManager();
-  private final Map<String, ICommunityBoardHandler> _handlers = new HashMap();
+  private final Map<String, ICommunityBoardHandler> _handlers = new HashMap<>();
   private final StatsSet _properties = new StatsSet();
 
   public static CommunityBoardManager getInstance() {

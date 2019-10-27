@@ -57,7 +57,7 @@ public abstract class SiegeEvent<R extends Residence, S extends SiegeClanObject>
   protected int _hourOfDay;
   protected Clan _oldOwner;
   protected OnDeathListener _doorDeathListener = new SiegeEvent.DoorDeathListener();
-  protected List<HardReference<SummonInstance>> _siegeSummons = new ArrayList();
+  protected List<HardReference<SummonInstance>> _siegeSummons = new ArrayList<>();
 
   public SiegeEvent(MultiValueSet<String> set) {
     super(set);
@@ -119,7 +119,7 @@ public abstract class SiegeEvent<R extends Residence, S extends SiegeClanObject>
   }
 
   public void teleportPlayers(String t) {
-    List<Player> players = new ArrayList();
+    List<Player> players = new ArrayList<>();
     Clan ownerClan = this.getResidence().getOwner();
     Iterator var4;
     Player player;
@@ -302,8 +302,7 @@ public abstract class SiegeEvent<R extends Residence, S extends SiegeClanObject>
     if (siegeClanList.isEmpty()) {
       return null;
     } else {
-      for(int i = 0; i < siegeClanList.size(); ++i) {
-        SiegeClanObject siegeClan = (SiegeClanObject)siegeClanList.get(i);
+      for (SiegeClanObject siegeClan : siegeClanList) {
         if (siegeClan.getObjectId() == objectId) {
           return siegeClan;
         }

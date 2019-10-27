@@ -146,7 +146,7 @@ public class RaidBossInstance extends MonsterInstance {
   }
 
   private void calcRaidPointsReward(int totalPoints) {
-    Map<Object, Object[]> participants = new HashMap();
+    Map<Object, Object[]> participants = new HashMap<>();
     double totalHp = (double)this.getMaxHp();
 
     Iterator var5;
@@ -158,7 +158,7 @@ public class RaidBossInstance extends MonsterInstance {
       Object key = player.getParty() != null ? (player.getParty().getCommandChannel() != null ? player.getParty().getCommandChannel() : player.getParty()) : player.getPlayer();
       info = (Object[])participants.get(key);
       if (info == null) {
-        info = new Object[]{new HashSet(), new Long(0L)};
+        info = new Object[]{new HashSet<>(), new Long(0L)};
         participants.put(key, info);
       }
 

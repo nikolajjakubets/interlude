@@ -20,7 +20,7 @@ public class GmListTable {
   }
 
   public static List<Player> getAllGMs() {
-    List<Player> gmList = new ArrayList();
+    List<Player> gmList = new ArrayList<>();
     Iterator var1 = GameObjectsStorage.getAllPlayersForIterate().iterator();
 
     while(var1.hasNext()) {
@@ -34,7 +34,7 @@ public class GmListTable {
   }
 
   public static List<Player> getAllVisibleGMs() {
-    List<Player> gmList = new ArrayList();
+    List<Player> gmList = new ArrayList<>();
     Iterator var1 = GameObjectsStorage.getAllPlayersForIterate().iterator();
 
     while(var1.hasNext()) {

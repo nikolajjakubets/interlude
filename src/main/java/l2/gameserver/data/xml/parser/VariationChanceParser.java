@@ -39,7 +39,7 @@ public class VariationChanceParser extends AbstractFileParser<VariationChanceHol
   }
 
   private List<Pair<List<Pair<Integer, Double>>, Double>> readGroups(Element groupRootElement) throws Exception {
-    List<Pair<List<Pair<Integer, Double>>, Double>> variation = new ArrayList();
+    List<Pair<List<Pair<Integer, Double>>, Double>> variation = new ArrayList<>();
     Iterator it = groupRootElement.elementIterator();
 
     while(true) {
@@ -53,7 +53,7 @@ public class VariationChanceParser extends AbstractFileParser<VariationChanceHol
       } while(!"group".equalsIgnoreCase(ge.getName()));
 
       double groupChance = Double.parseDouble(ge.attributeValue("chance"));
-      List<Pair<Integer, Double>> groupOptions = new ArrayList();
+      List<Pair<Integer, Double>> groupOptions = new ArrayList<>();
       Iterator it2 = ge.elementIterator();
 
       while(it2.hasNext()) {

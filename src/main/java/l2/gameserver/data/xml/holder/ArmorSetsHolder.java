@@ -13,7 +13,7 @@ import l2.gameserver.model.ArmorSet;
 
 public final class ArmorSetsHolder extends AbstractHolder {
   private static final ArmorSetsHolder _instance = new ArmorSetsHolder();
-  private List<ArmorSet> _armorSets = new ArrayList();
+  private List<ArmorSet> _armorSets = new ArrayList<>();
 
   public ArmorSetsHolder() {
   }

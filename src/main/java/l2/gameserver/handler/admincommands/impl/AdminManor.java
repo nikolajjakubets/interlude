@@ -39,10 +39,10 @@ public class AdminManor implements IAdminCommandHandler {
 
         if (castleId > 0) {
           Castle castle = (Castle)ResidenceHolder.getInstance().getResidence(Castle.class, castleId);
-          castle.setCropProcure(new ArrayList(), 0);
-          castle.setCropProcure(new ArrayList(), 1);
-          castle.setSeedProduction(new ArrayList(), 0);
-          castle.setSeedProduction(new ArrayList(), 1);
+          castle.setCropProcure(new ArrayList<>(), 0);
+          castle.setCropProcure(new ArrayList<>(), 1);
+          castle.setSeedProduction(new ArrayList<>(), 0);
+          castle.setSeedProduction(new ArrayList<>(), 1);
           castle.saveCropData();
           castle.saveSeedData();
           activeChar.sendMessage("Manor data for " + castle.getName() + " was nulled");
@@ -51,10 +51,10 @@ public class AdminManor implements IAdminCommandHandler {
 
           while(var8.hasNext()) {
             Castle castle = (Castle)var8.next();
-            castle.setCropProcure(new ArrayList(), 0);
-            castle.setCropProcure(new ArrayList(), 1);
-            castle.setSeedProduction(new ArrayList(), 0);
-            castle.setSeedProduction(new ArrayList(), 1);
+            castle.setCropProcure(new ArrayList<>(), 0);
+            castle.setCropProcure(new ArrayList<>(), 1);
+            castle.setSeedProduction(new ArrayList<>(), 0);
+            castle.setSeedProduction(new ArrayList<>(), 1);
             castle.saveCropData();
             castle.saveSeedData();
           }

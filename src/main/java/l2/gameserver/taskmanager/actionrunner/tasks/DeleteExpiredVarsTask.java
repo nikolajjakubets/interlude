@@ -30,7 +30,7 @@ public class DeleteExpiredVarsTask extends AutomaticTask {
     long t = System.currentTimeMillis();
     Connection con = null;
     PreparedStatement query = null;
-    Map<Integer, String> varMap = new HashMap();
+    Map<Integer, String> varMap = new HashMap<>();
     ResultSet rs = null;
 
     try {

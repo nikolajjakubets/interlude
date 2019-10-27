@@ -35,7 +35,7 @@ public class QuestManager {
       return (Quest)_questsByName.get(nameOrId);
     } else {
       try {
-        int questId = Integer.valueOf(nameOrId);
+        int questId = Integer.parseInt(nameOrId);
         return (Quest)_questsById.get(questId);
       } catch (Exception var2) {
         return null;

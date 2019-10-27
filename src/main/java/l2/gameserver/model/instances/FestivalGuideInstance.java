@@ -337,7 +337,7 @@ public final class FestivalGuideInstance extends NpcInstance {
   }
 
   private String calculateDate(String milliFromEpoch) {
-    long numMillis = Long.valueOf(milliFromEpoch);
+    long numMillis = Long.parseLong(milliFromEpoch);
     Calendar calCalc = Calendar.getInstance();
     calCalc.setTimeInMillis(numMillis);
     return calCalc.get(1) + "/" + calCalc.get(2) + "/" + calCalc.get(5);

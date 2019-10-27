@@ -19,7 +19,7 @@ public class PartySpelled extends L2GameServerPacket {
   public PartySpelled(Playable activeChar, boolean full) {
     this._objId = activeChar.getObjectId();
     this._type = activeChar.isPet() ? 1 : (activeChar.isSummon() ? 2 : 0);
-    this._effects = new ArrayList();
+    this._effects = new ArrayList<>();
     if (full) {
       l2.gameserver.model.Effect[] effects = activeChar.getEffectList().getAllFirstEffects();
       EEffectSlot[] var4 = EEffectSlot.VALUES;

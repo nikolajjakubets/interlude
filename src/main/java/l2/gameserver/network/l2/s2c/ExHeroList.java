@@ -12,7 +12,7 @@ import l2.gameserver.model.entity.oly.HeroController;
 import l2.gameserver.model.entity.oly.HeroController.HeroRecord;
 
 public class ExHeroList extends L2GameServerPacket {
-  private Collection<HeroRecord> heroes = new ArrayList();
+  private Collection<HeroRecord> heroes = new ArrayList<>();
 
   public ExHeroList() {
     Iterator var1 = HeroController.getInstance().getCurrentHeroes().iterator();

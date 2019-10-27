@@ -62,7 +62,7 @@ public class EffectCubic extends Effect {
       label39:
       while(var4.hasNext()) {
         Entry<Integer, List<SkillInfo>> entry = (Entry)var4.next();
-        if ((chance -= (Integer)entry.getKey()) < 0) {
+        if ((chance -= entry.getKey()) < 0) {
           Iterator var6 = ((List)entry.getValue()).iterator();
 
           while(true) {
@@ -113,40 +113,39 @@ public class EffectCubic extends Effect {
 
   private static boolean doHeal(final Player player, SkillInfo info) {
     final Skill skill = info.getSkill();
-    final Creature target = null;
+     Creature creature = null;
     if (player.getParty() == null) {
       if (!player.isCurrentHpFull() && !player.isDead()) {
-        target = player;
+        creature = player;
       }
     } else {
       double currentHp = 2.147483647E9D;
-      Iterator var6 = player.getParty().getPartyMembers().iterator();
 
-      while(var6.hasNext()) {
-        Player member = (Player)var6.next();
-        if (member != null && player.isInRange(member, (long)info.getSkill().getCastRange()) && !member.isCurrentHpFull() && !member.isDead() && member.getCurrentHp() < currentHp) {
+      for (Player member : player.getParty().getPartyMembers()) {
+        if (player.isInRange(member, info.getSkill().getCastRange()) && !member.isCurrentHpFull() && !member.isDead() && member.getCurrentHp() < currentHp) {
           currentHp = member.getCurrentHp();
-          target = member;
+          creature = member;
         }
       }
     }
 
-    if (target == null) {
+    if (creature == null) {
       return false;
     } else {
-      int chance = info.getChance((int)target.getCurrentHpPercents());
+      int chance = info.getChance((int)creature.getCurrentHpPercents());
       if (!Rnd.chance(chance)) {
         return false;
       } else {
-        player.broadcastPacket(new L2GameServerPacket[]{new MagicSkillUse(player, target, skill.getDisplayId(), skill.getDisplayLevel(), skill.getHitTime(), 0L)});
+        player.broadcastPacket(new MagicSkillUse(player, creature, skill.getDisplayId(), skill.getDisplayLevel(), skill.getHitTime(), 0L));
+        Creature finalCreature = creature;
         ThreadPoolManager.getInstance().schedule(new RunnableImpl() {
           public void runImpl() throws Exception {
-            List<Creature> targets = new ArrayList(1);
-            targets.add(target);
-            player.broadcastPacket(new L2GameServerPacket[]{new MagicSkillLaunched(player, skill.getDisplayId(), skill.getDisplayLevel(), targets)});
+            List<Creature> targets = new ArrayList<>(1);
+            targets.add(finalCreature);
+            player.broadcastPacket(new MagicSkillLaunched(player, skill.getDisplayId(), skill.getDisplayLevel(), targets));
             player.callSkill(skill, targets, false);
           }
-        }, (long)skill.getHitTime());
+        }, skill.getHitTime());
         return true;
       }
     }
@@ -161,12 +160,12 @@ public class EffectCubic extends Effect {
         return false;
       } else {
         final Skill skill = info.getSkill();
-        player.broadcastPacket(new L2GameServerPacket[]{new MagicSkillUse(player, target, skill.getDisplayId(), skill.getDisplayLevel(), skill.getHitTime(), 0L)});
+        player.broadcastPacket(new MagicSkillUse(player, target, skill.getDisplayId(), skill.getDisplayLevel(), skill.getHitTime(), 0L));
         ThreadPoolManager.getInstance().schedule(new RunnableImpl() {
           public void runImpl() throws Exception {
-            List<Creature> targets = new ArrayList(1);
+            List<Creature> targets = new ArrayList<>(1);
             targets.add(target);
-            player.broadcastPacket(new L2GameServerPacket[]{new MagicSkillLaunched(player, skill.getDisplayId(), skill.getDisplayLevel(), targets)});
+            player.broadcastPacket(new MagicSkillLaunched(player, skill.getDisplayId(), skill.getDisplayLevel(), targets));
             player.callSkill(skill, targets, false);
             if (target.isNpc()) {
               if (target.paralizeOnAttack(player)) {
@@ -180,7 +179,7 @@ public class EffectCubic extends Effect {
             }
 
           }
-        }, (long)skill.getHitTime());
+        }, skill.getHitTime());
         return true;
       }
     }
@@ -195,15 +194,15 @@ public class EffectCubic extends Effect {
         return false;
       } else {
         final Skill skill = info.getSkill();
-        player.broadcastPacket(new L2GameServerPacket[]{new MagicSkillUse(player, target, skill.getDisplayId(), skill.getDisplayLevel(), skill.getHitTime(), 0L)});
+        player.broadcastPacket(new MagicSkillUse(player, target, skill.getDisplayId(), skill.getDisplayLevel(), skill.getHitTime(), 0L));
         ThreadPoolManager.getInstance().schedule(new RunnableImpl() {
           public void runImpl() throws Exception {
-            List<Creature> targets = new ArrayList(1);
+            List<Creature> targets = new ArrayList<>(1);
             targets.add(target);
-            player.broadcastPacket(new L2GameServerPacket[]{new MagicSkillLaunched(player, skill.getDisplayId(), skill.getDisplayLevel(), targets)});
+            player.broadcastPacket(new MagicSkillLaunched(player, skill.getDisplayId(), skill.getDisplayLevel(), targets));
             player.callSkill(skill, targets, false);
           }
-        }, (long)skill.getHitTime());
+        }, skill.getHitTime());
         return true;
       }
     }
@@ -214,10 +213,8 @@ public class EffectCubic extends Effect {
       return false;
     } else {
       boolean hasDebuff = false;
-      Iterator var3 = player.getEffectList().getAllEffects().iterator();
 
-      while(var3.hasNext()) {
-        Effect e = (Effect)var3.next();
+      for (Effect e : player.getEffectList().getAllEffects()) {
         if (e.isOffensive() && e.isCancelable() && !e.getTemplate()._applyOnCaster) {
           hasDebuff = true;
           break;
@@ -228,21 +225,21 @@ public class EffectCubic extends Effect {
         return false;
       } else {
         final Skill skill = info.getSkill();
-        player.broadcastPacket(new L2GameServerPacket[]{new MagicSkillUse(player, player, skill.getDisplayId(), skill.getDisplayLevel(), skill.getHitTime(), 0L)});
+        player.broadcastPacket(new MagicSkillUse(player, player, skill.getDisplayId(), skill.getDisplayLevel(), skill.getHitTime(), 0L));
         ThreadPoolManager.getInstance().schedule(new RunnableImpl() {
           public void runImpl() throws Exception {
             List<Creature> targets = new ArrayList(1);
             targets.add(player);
-            player.broadcastPacket(new L2GameServerPacket[]{new MagicSkillLaunched(player, skill.getDisplayId(), skill.getDisplayLevel(), targets)});
+            player.broadcastPacket(new MagicSkillLaunched(player, skill.getDisplayId(), skill.getDisplayLevel(), targets));
             player.callSkill(skill, targets, false);
           }
-        }, (long)skill.getHitTime());
+        }, skill.getHitTime());
         return true;
       }
     }
   }
 
-  private static final Creature getTarget(Player owner, SkillInfo info) {
+  private static Creature getTarget(Player owner, SkillInfo info) {
     if (!owner.isInCombat()) {
       return null;
     } else {
@@ -255,7 +252,7 @@ public class EffectCubic extends Effect {
           return null;
         } else if (target.isDoor() && !info.isCanAttackDoor()) {
           return null;
-        } else if (!owner.isInRangeZ(target, (long)info.getSkill().getCastRange())) {
+        } else if (!owner.isInRangeZ(target, info.getSkill().getCastRange())) {
           return null;
         } else {
           Player targetPlayer = target.getPlayer();

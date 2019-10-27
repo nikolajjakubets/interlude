@@ -93,8 +93,8 @@ public class Reflection {
 
   private Reflection(int id) {
     this._name = "";
-    this._spawns = new ArrayList();
-    this._objects = new ArrayList();
+    this._spawns = new ArrayList<>();
+    this._objects = new ArrayList<>();
     this._doors = Containers.emptyIntObjectMap();
     this._zones = Collections.emptyMap();
     this._spawners = Collections.emptyMap();
@@ -323,8 +323,8 @@ public class Reflection {
         }
 
         this._zones.clear();
-        List<Player> teleport = new ArrayList();
-        List<GameObject> delete = new ArrayList();
+        List<Player> teleport = new ArrayList<>();
+        List<GameObject> delete = new ArrayList<>();
         this.lock.lock();
 
         Iterator var3;
@@ -464,7 +464,7 @@ public class Reflection {
   }
 
   public List<Player> getPlayers() {
-    List<Player> result = new ArrayList();
+    List<Player> result = new ArrayList<>();
     this.lock.lock();
 
     try {
@@ -484,7 +484,7 @@ public class Reflection {
   }
 
   public List<NpcInstance> getNpcs() {
-    List<NpcInstance> result = new ArrayList();
+    List<NpcInstance> result = new ArrayList<>();
     this.lock.lock();
 
     try {
@@ -504,7 +504,7 @@ public class Reflection {
   }
 
   public List<NpcInstance> getAllByNpcId(int npcId, boolean onlyAlive) {
-    List<NpcInstance> result = new ArrayList();
+    List<NpcInstance> result = new ArrayList<>();
     this.lock.lock();
 
     try {
@@ -654,16 +654,16 @@ public class Reflection {
     var3 = zones.values().iterator();
 
     while(true) {
-      ZoneTemplate template;
+      ZoneTemplate zoneTemplate;
       do {
         if (!var3.hasNext()) {
           return;
         }
 
-        template = (ZoneTemplate)var3.next();
-      } while(this.isDefault() && !template.isDefault());
+        zoneTemplate = (ZoneTemplate)var3.next();
+      } while(this.isDefault() && !zoneTemplate.isDefault());
 
-      Zone zone = new Zone(template);
+      Zone zone = new Zone(zoneTemplate);
       zone.setReflection(this);
       switch(zone.getType()) {
         case no_landing:
@@ -674,11 +674,11 @@ public class Reflection {
           zone.addListener(ResidenceEnterLeaveListenerImpl.STATIC);
       }
 
-      if (template.isEnabled()) {
+      if (zoneTemplate.isEnabled()) {
         zone.setActive(true);
       }
 
-      this._zones.put(template.getName(), zone);
+      this._zones.put(zoneTemplate.getName(), zone);
     }
   }
 

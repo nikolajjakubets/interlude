@@ -16,7 +16,7 @@ import l2.gameserver.model.pledge.SubUnit;
 
 public class PledgeSkillList extends L2GameServerPacket {
   private List<PledgeSkillList.SkillInfo> _allSkills = Collections.emptyList();
-  private List<PledgeSkillList.UnitSkillInfo> _unitSkills = new ArrayList();
+  private List<PledgeSkillList.UnitSkillInfo> _unitSkills = new ArrayList<>();
 
   public PledgeSkillList(Clan clan) {
     Collection<Skill> skills = clan.getSkills();

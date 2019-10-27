@@ -42,7 +42,7 @@ public class AutoAnnounce implements Runnable {
   }
 
   public AutoAnnounce() {
-    _lists = new HashMap();
+    _lists = new HashMap<>();
     _log.info("AutoAnnounce: Initializing");
     this.load();
     _log.info("AutoAnnounce: Loaded " + (_lists.size() - 1) + " announce.");
@@ -65,7 +65,7 @@ public class AutoAnnounce implements Runnable {
       Document doc = factory.newDocumentBuilder().parse(file);
       int counterAnnounce = 0;
       if (counterAnnounce == 0) {
-        ArrayList<String> msg = new ArrayList();
+        ArrayList<String> msg = new ArrayList<>();
         GWAutoAnnounce aa = new GWAutoAnnounce(counterAnnounce);
         int revision = 0;
         msg.add("" + revision);
@@ -81,7 +81,7 @@ public class AutoAnnounce implements Runnable {
         if ("list".equalsIgnoreCase(n.getNodeName())) {
           for(Node d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
             if ("announce".equalsIgnoreCase(d.getNodeName())) {
-              ArrayList<String> msg = new ArrayList();
+              ArrayList<String> msg = new ArrayList<>();
               NamedNodeMap attrs = d.getAttributes();
               int delay = Integer.parseInt(attrs.getNamedItem("delay").getNodeValue());
               int repeat = Integer.parseInt(attrs.getNamedItem("repeat").getNodeValue());

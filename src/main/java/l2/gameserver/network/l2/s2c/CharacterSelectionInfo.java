@@ -5,11 +5,6 @@
 
 package l2.gameserver.network.l2.s2c;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.Config;
 import l2.gameserver.dao.CharacterDAO;
@@ -21,6 +16,12 @@ import l2.gameserver.templates.PlayerTemplate;
 import l2.gameserver.utils.AutoBan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CharacterSelectionInfo extends L2GameServerPacket {
   private static final Logger _log = LoggerFactory.getLogger(CharacterSelectionInfo.class);
@@ -46,14 +47,14 @@ public class CharacterSelectionInfo extends L2GameServerPacket {
     int lastUsed = -1;
 
     int i;
-    for(i = 0; i < size; ++i) {
+    for (i = 0; i < size; ++i) {
       if (lastAccess < this._characterPackages[i].getLastAccess()) {
         lastAccess = this._characterPackages[i].getLastAccess();
         lastUsed = i;
       }
     }
 
-    for(i = 0; i < size; ++i) {
+    for (i = 0; i < size; ++i) {
       CharSelectInfoPackage charInfoPackage = this._characterPackages[i];
       this.writeS(charInfoPackage.getName());
       this.writeD(charInfoPackage.getCharId());
@@ -89,7 +90,7 @@ public class CharacterSelectionInfo extends L2GameServerPacket {
 
       int var10;
       int PAPERDOLL_ID;
-      for(var10 = 0; var10 < var9; ++var10) {
+      for (var10 = 0; var10 < var9; ++var10) {
         PAPERDOLL_ID = var8[var10];
         this.writeD(charInfoPackage.getPaperdollObjectId(PAPERDOLL_ID));
       }
@@ -97,7 +98,7 @@ public class CharacterSelectionInfo extends L2GameServerPacket {
       var8 = Inventory.PAPERDOLL_ORDER;
       var9 = var8.length;
 
-      for(var10 = 0; var10 < var9; ++var10) {
+      for (var10 = 0; var10 < var9; ++var10) {
         PAPERDOLL_ID = var8[var10];
         this.writeD(charInfoPackage.getPaperdollItemId(PAPERDOLL_ID));
       }
@@ -105,8 +106,8 @@ public class CharacterSelectionInfo extends L2GameServerPacket {
       this.writeD(charInfoPackage.getHairStyle());
       this.writeD(charInfoPackage.getHairColor());
       this.writeD(charInfoPackage.getFace());
-      this.writeF((double)charInfoPackage.getMaxHp());
-      this.writeF((double)charInfoPackage.getMaxMp());
+      this.writeF(charInfoPackage.getMaxHp());
+      this.writeF(charInfoPackage.getMaxMp());
       this.writeD(charInfoPackage.getAccessLevel() > -100 ? charInfoPackage.getDeleteTimer() : -1);
       this.writeD(charInfoPackage.getClassId());
       this.writeD(i == lastUsed ? 1 : 0);
@@ -117,7 +118,7 @@ public class CharacterSelectionInfo extends L2GameServerPacket {
   }
 
   public static CharSelectInfoPackage[] loadCharacterSelectInfo(String loginName) {
-    List<CharSelectInfoPackage> characterList = new ArrayList();
+    List<CharSelectInfoPackage> characterList = new ArrayList<>();
     Connection con = null;
     PreparedStatement statement = null;
     ResultSet rset = null;
@@ -128,7 +129,7 @@ public class CharacterSelectionInfo extends L2GameServerPacket {
       statement.setString(1, loginName);
       rset = statement.executeQuery();
 
-      while(rset.next()) {
+      while (rset.next()) {
         CharSelectInfoPackage charInfopackage = restoreChar(rset);
         if (charInfopackage != null) {
           characterList.add(charInfopackage);
@@ -140,7 +141,7 @@ public class CharacterSelectionInfo extends L2GameServerPacket {
       DbUtils.closeQuietly(con, statement, rset);
     }
 
-    return (CharSelectInfoPackage[])characterList.toArray(new CharSelectInfoPackage[characterList.size()]);
+    return characterList.toArray(new CharSelectInfoPackage[0]);
   }
 
   private static int restoreBaseClassId(int objId) {
@@ -154,7 +155,7 @@ public class CharacterSelectionInfo extends L2GameServerPacket {
       statement = con.prepareStatement("SELECT class_id FROM character_subclasses WHERE char_obj_id=? AND isBase=1");
       statement.setInt(1, objId);
 
-      for(rset = statement.executeQuery(); rset.next(); classId = rset.getInt("class_id")) {
+      for (rset = statement.executeQuery(); rset.next(); classId = rset.getInt("class_id")) {
       }
     } catch (Exception var9) {
       _log.error("could not restore base class id:", var9);
@@ -208,26 +209,26 @@ public class CharacterSelectionInfo extends L2GameServerPacket {
       charInfopackage.setClassId(classid);
       charInfopackage.setBaseClassId(baseClassId);
       long deletetime = chardata.getLong("deletetime");
-      int deletedays = false;
+//      int deletedays = false;
       if (Config.DELETE_DAYS > 0) {
         if (deletetime > 0L) {
-          deletetime = (long)((int)(System.currentTimeMillis() / 1000L - deletetime));
-          int deletedays = (int)(deletetime / 3600L / 24L);
+          deletetime = (int) (System.currentTimeMillis() / 1000L - deletetime);
+          int deletedays = (int) (deletetime / 3600L / 24L);
           if (deletedays >= Config.DELETE_DAYS) {
             CharacterDAO.getInstance().deleteCharacterDataByObjId(objectId);
             return null;
           }
 
-          deletetime = (long)(Config.DELETE_DAYS * 3600 * 24) - deletetime;
+          deletetime = (long) (Config.DELETE_DAYS * 3600 * 24) - deletetime;
         } else {
           deletetime = 0L;
         }
       }
 
-      charInfopackage.setDeleteTimer((int)deletetime);
+      charInfopackage.setDeleteTimer((int) deletetime);
       charInfopackage.setLastAccess(chardata.getLong("lastAccess") * 1000L);
       charInfopackage.setAccessLevel(chardata.getInt("accesslevel"));
-      int points = chardata.getInt("vitality") + (int)((double)(System.currentTimeMillis() - charInfopackage.getLastAccess()) / 15.0D);
+      int points = chardata.getInt("vitality") + (int) ((double) (System.currentTimeMillis() - charInfopackage.getLastAccess()) / 15.0D);
       if (points > 20000) {
         points = 20000;
       } else if (points < 0) {

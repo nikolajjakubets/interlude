@@ -30,7 +30,7 @@ public final class ObservationInstance extends NpcInstance {
           String val = command.substring(13);
           StringTokenizer st = new StringTokenizer(val);
           st.nextToken();
-          List<Zone> zones = new ArrayList();
+          List<Zone> zones = new ArrayList<>();
           World.getZones(zones, new Location(Integer.parseInt(st.nextToken()), Integer.parseInt(st.nextToken()), Integer.parseInt(st.nextToken())), ReflectionManager.DEFAULT);
           Iterator var6 = zones.iterator();
 
