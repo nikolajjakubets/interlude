@@ -5,7 +5,6 @@
 
 package l2.gameserver.data.xml.holder;
 
-import java.util.Iterator;
 import l2.commons.data.xml.AbstractHolder;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.entity.events.EventType;
@@ -15,7 +14,7 @@ import org.napile.primitive.maps.impl.TreeIntObjectMap;
 
 public final class EventHolder extends AbstractHolder {
   private static final EventHolder _instance = new EventHolder();
-  private final IntObjectMap<GlobalEvent> _events = new TreeIntObjectMap();
+  private final IntObjectMap<GlobalEvent> _events = new TreeIntObjectMap<>();
 
   public EventHolder() {
   }
@@ -28,15 +27,13 @@ public final class EventHolder extends AbstractHolder {
     this._events.put(type.step() + event.getId(), event);
   }
 
-  public <E extends GlobalEvent> E getEvent(EventType type, int id) {
-    return (GlobalEvent)this._events.get(type.step() + id);
+  public GlobalEvent getEvent(EventType type, int id) {
+    return this._events.get(type.step() + id);
   }
 
   public void findEvent(Player player) {
-    Iterator var2 = this._events.values().iterator();
 
-    while(var2.hasNext()) {
-      GlobalEvent event = (GlobalEvent)var2.next();
+    for (GlobalEvent event : this._events.values()) {
       if (event.isParticle(player)) {
         player.addEvent(event);
       }
@@ -45,10 +42,8 @@ public final class EventHolder extends AbstractHolder {
   }
 
   public void callInit() {
-    Iterator var1 = this._events.values().iterator();
 
-    while(var1.hasNext()) {
-      GlobalEvent event = (GlobalEvent)var1.next();
+    for (GlobalEvent event : this._events.values()) {
       event.initEvent();
     }
 

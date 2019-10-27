@@ -15,6 +15,7 @@ import java.util.NavigableSet;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ScheduledFuture;
+
 import l2.commons.collections.CollectionUtils;
 import l2.commons.collections.LazyArrayList;
 import l2.commons.lang.reference.HardReference;
@@ -150,7 +151,7 @@ public class DefaultAI extends CharacterAI {
     this._healSkills = npc.getTemplate().getHealSkills();
     this._nearestTargetComparator = new DefaultAI.NearestTargetComparator(actor);
     this.MAX_PURSUE_RANGE = actor.getParameter("MaxPursueRange", actor.isRaid() ? Config.MAX_PURSUE_RANGE_RAID : (npc.isUnderground() ? Config.MAX_PURSUE_UNDERGROUND_RANGE : Config.MAX_PURSUE_RANGE));
-    this._minFactionNotifyInterval = (long)actor.getParameter("FactionNotifyInterval", 3000);
+    this._minFactionNotifyInterval = actor.getParameter("FactionNotifyInterval", 3000);
   }
 
   public void runImpl() throws Exception {
@@ -221,11 +222,11 @@ public class DefaultAI extends CharacterAI {
         return false;
       } else {
         if (target.isPlayable()) {
-          if (!this.canSeeInSilentMove((Playable)target)) {
+          if (!this.canSeeInSilentMove((Playable) target)) {
             return false;
           }
 
-          if (!this.canSeeInHide((Playable)target)) {
+          if (!this.canSeeInHide((Playable) target)) {
             return false;
           }
 
@@ -237,11 +238,11 @@ public class DefaultAI extends CharacterAI {
             return false;
           }
 
-          if (target.isPlayer() && ((Player)target).isGM() && target.isInvisible()) {
+          if (target.isPlayer() && ((Player) target).isGM() && target.isInvisible()) {
             return false;
           }
 
-          if (((Playable)target).getNonAggroTime() > System.currentTimeMillis()) {
+          if (((Playable) target).getNonAggroTime() > System.currentTimeMillis()) {
             return false;
           }
 
@@ -277,14 +278,9 @@ public class DefaultAI extends CharacterAI {
     NpcInstance actor = this.getActor();
     AggroInfo ai = actor.getAggroList().get(target);
     if (ai != null && ai.hate > 0) {
-      if (!target.isInRangeZ(this.getPursueBaseLoc(), (long)this.MAX_PURSUE_RANGE)) {
-        return false;
-      }
-    } else if (!this.isAggressive() || !target.isInRangeZ(this.getPursueBaseLoc(), (long)actor.getAggroRange())) {
-      return false;
-    }
+      return target.isInRangeZ(this.getPursueBaseLoc(), this.MAX_PURSUE_RANGE);
+    } else return this.isAggressive() && target.isInRangeZ(this.getPursueBaseLoc(), actor.getAggroRange());
 
-    return true;
   }
 
   protected void setIsInRandomAnimation(long time) {
@@ -309,8 +305,7 @@ public class DefaultAI extends CharacterAI {
     Creature nextTarget = null;
     long minDist = 9223372036854775807L;
 
-    for(int i = 0; i < targets.size(); ++i) {
-      Creature target = (Creature)targets.get(i);
+    for (Creature target : targets) {
       long dist = actor.getXYZDeltaSq(target.getX(), target.getY(), target.getZ());
       if (dist < minDist) {
         nextTarget = target;
@@ -343,7 +338,7 @@ public class DefaultAI extends CharacterAI {
       return true;
     } else {
       long now = System.currentTimeMillis();
-      if (now - this._checkAggroTimestamp > (long)Config.AGGRO_CHECK_INTERVAL) {
+      if (now - this._checkAggroTimestamp > (long) Config.AGGRO_CHECK_INTERVAL) {
         this._checkAggroTimestamp = now;
         boolean aggressive = Rnd.chance(actor.getParameter("SelfAggressive", actor.isAggressive() ? 100 : 0));
         if (!actor.getAggroList().isEmpty() || aggressive) {
@@ -352,15 +347,15 @@ public class DefaultAI extends CharacterAI {
           Iterator var6 = chars.iterator();
 
           label66:
-          while(true) {
+          while (true) {
             Creature target;
             do {
               if (!var6.hasNext()) {
                 break label66;
               }
 
-              target = (Creature)var6.next();
-            } while(!aggressive && actor.getAggroList().get(target) == null);
+              target = (Creature) var6.next();
+            } while (!aggressive && actor.getAggroList().get(target) == null);
 
             if (this.checkAggression(target)) {
               actor.getAggroList().addDamageHate(target, 0, 2);
@@ -377,7 +372,7 @@ public class DefaultAI extends CharacterAI {
       }
 
       if (actor.isMinion()) {
-        MonsterInstance leader = ((MinionInstance)actor).getLeader();
+        MonsterInstance leader = ((MinionInstance) actor).getLeader();
         if (leader != null) {
           double distance = actor.getDistance(leader.getX(), leader.getY());
           if (distance > 1000.0D) {
@@ -404,8 +399,8 @@ public class DefaultAI extends CharacterAI {
     actor.stopMove();
     actor.getAggroList().clear(true);
     this.setAttackTimeout(9223372036854775807L);
-    this.setAttackTarget((Creature)null);
-    this.changeIntention(CtrlIntention.AI_INTENTION_IDLE, (Object)null, (Object)null);
+    this.setAttackTarget(null);
+    this.changeIntention(CtrlIntention.AI_INTENTION_IDLE, null, null);
   }
 
   protected void onIntentionActive() {
@@ -414,7 +409,7 @@ public class DefaultAI extends CharacterAI {
     this.setAttackTimeout(9223372036854775807L);
     if (this.getIntention() != CtrlIntention.AI_INTENTION_ACTIVE) {
       this.switchAITask(this.AI_TASK_ACTIVE_DELAY);
-      this.changeIntention(CtrlIntention.AI_INTENTION_ACTIVE, (Object)null, (Object)null);
+      this.changeIntention(CtrlIntention.AI_INTENTION_ACTIVE, null, null);
     }
 
     this.onEvtThink();
@@ -425,10 +420,10 @@ public class DefaultAI extends CharacterAI {
     this.clearTasks();
     actor.stopMove();
     this.setAttackTarget(target);
-    this.setAttackTimeout((long)this.getMaxAttackTimeout() + System.currentTimeMillis());
+    this.setAttackTimeout((long) this.getMaxAttackTimeout() + System.currentTimeMillis());
     this.setGlobalAggro(0L);
     if (this.getIntention() != CtrlIntention.AI_INTENTION_ATTACK) {
-      this.changeIntention(CtrlIntention.AI_INTENTION_ATTACK, target, (Object)null);
+      this.changeIntention(CtrlIntention.AI_INTENTION_ATTACK, target, null);
       this.switchAITask(this.AI_TASK_ATTACK_DELAY);
     }
 
@@ -445,8 +440,8 @@ public class DefaultAI extends CharacterAI {
 
   protected boolean checkTarget(Creature target, int range) {
     NpcInstance actor = this.getActor();
-    if (target != null && !target.isAlikeDead() && actor.isInRangeZ(target, (long)range)) {
-      boolean hided = target.isPlayable() && !this.canSeeInHide((Playable)target);
+    if (target != null && !target.isAlikeDead() && actor.isInRangeZ(target, range)) {
+      boolean hided = target.isPlayable() && !this.canSeeInHide((Playable) target);
       if (!hided && actor.isConfused()) {
         return true;
       } else if (this.getIntention() == CtrlIntention.AI_INTENTION_ATTACK) {
@@ -481,7 +476,7 @@ public class DefaultAI extends CharacterAI {
     NpcInstance actor = this.getActor();
     if (!actor.isDead()) {
       Location loc = this.getPursueBaseLoc();
-      if (!actor.isInRange(loc, (long)this.MAX_PURSUE_RANGE)) {
+      if (!actor.isInRange(loc, this.MAX_PURSUE_RANGE)) {
         this.teleportHome();
       } else {
         if (this.doTask() && !actor.isAttackingNow() && !actor.isCastingNow() && !this.createNewTask() && System.currentTimeMillis() > this.getAttackTimeout()) {
@@ -523,7 +518,7 @@ public class DefaultAI extends CharacterAI {
       ++this._pathfindFails;
     }
 
-    if (this._pathfindFails >= this.getMaxPathfindFails() && System.currentTimeMillis() > this.getAttackTimeout() - (long)this.getMaxAttackTimeout() + (long)this.getTeleportTimeout() && actor.isInRange(target, (long)this.MAX_PURSUE_RANGE)) {
+    if (this._pathfindFails >= this.getMaxPathfindFails() && System.currentTimeMillis() > this.getAttackTimeout() - (long) this.getMaxAttackTimeout() + (long) this.getTeleportTimeout() && actor.isInRange(target, this.MAX_PURSUE_RANGE)) {
       this._pathfindFails = 0;
       if (target.isPlayable()) {
         AggroInfo hate = actor.getAggroList().get(target);
@@ -553,7 +548,7 @@ public class DefaultAI extends CharacterAI {
     if (!this._def_think) {
       return true;
     } else {
-      DefaultAI.Task currentTask = (DefaultAI.Task)this._tasks.pollFirst();
+      DefaultAI.Task currentTask = this._tasks.pollFirst();
       if (currentTask == null) {
         this.clearTasks();
         return true;
@@ -564,7 +559,7 @@ public class DefaultAI extends CharacterAI {
         int collisions;
         boolean incZ;
         int dist;
-        switch(currentTask.type) {
+        switch (currentTask.type) {
           case MOVE:
             if (!actor.isMovementDisabled() && this.getIsMobile()) {
               if (actor.isInRange(currentTask.loc, 100L)) {
@@ -586,7 +581,7 @@ public class DefaultAI extends CharacterAI {
 
             return true;
           case ATTACK:
-            target = (Creature)currentTask.target.get();
+            target = currentTask.target.get();
             if (!this.checkTarget(target, this.MAX_PURSUE_RANGE)) {
               return true;
             } else {
@@ -595,13 +590,13 @@ public class DefaultAI extends CharacterAI {
                 return Rnd.chance(25);
               } else {
                 int pAtkRng = actor.getPhysicalAttackRange();
-                castRange = (int)(actor.getCollisionRadius() + target.getColRadius());
+                castRange = (int) (actor.getCollisionRadius() + target.getColRadius());
                 boolean incZEls = actor.isFlying() || actor.isInWater() || target.isFlying() || target.isInWater();
-                int distEls = (int)(!incZEls ? actor.getDistance(target) : actor.getDistance3D(target)) - castRange;
+                int distEls = (int) (!incZEls ? actor.getDistance(target) : actor.getDistance3D(target)) - castRange;
                 if (distEls <= pAtkRng + 16 && GeoEngine.canSeeTarget(actor, target, incZEls)) {
                   this.clientStopMoving();
                   this._pathfindFails = 0;
-                  this.setAttackTimeout((long)this.getMaxAttackTimeout() + System.currentTimeMillis());
+                  this.setAttackTimeout((long) this.getMaxAttackTimeout() + System.currentTimeMillis());
                   actor.doAttack(target);
                   return this.maybeNextTask(currentTask);
                 } else if (!actor.isMovementDisabled() && this.getIsMobile()) {
@@ -612,7 +607,7 @@ public class DefaultAI extends CharacterAI {
               }
             }
           case CAST:
-            target = (Creature)currentTask.target.get();
+            target = currentTask.target.get();
             if (!actor.isMuted(currentTask.skill) && !actor.isSkillDisabled(currentTask.skill) && !actor.isUnActiveSkill(currentTask.skill.getId())) {
               isAoE = currentTask.skill.getTargetType() == SkillTargetType.TARGET_AURA;
               castRange = currentTask.skill.getAOECastRange();
@@ -621,14 +616,14 @@ public class DefaultAI extends CharacterAI {
               }
 
               this.setAttackTarget(target);
-              collisions = (int)(actor.getCollisionRadius() + target.getColRadius());
+              collisions = (int) (actor.getCollisionRadius() + target.getColRadius());
               incZ = actor.isFlying() || actor.isInWater() || target.isFlying() || target.isInWater();
-              dist = (int)(!incZ ? actor.getDistance(target) : actor.getDistance3D(target)) - collisions;
+              dist = (int) (!incZ ? actor.getDistance(target) : actor.getDistance3D(target)) - collisions;
               if (dist <= castRange && GeoEngine.canSeeTarget(actor, target, incZ)) {
                 this.clientStopMoving();
                 this._pathfindFails = 0;
-                this.setAttackTimeout((long)this.getMaxAttackTimeout() + System.currentTimeMillis());
-                actor.doCast(currentTask.skill, (Creature)(isAoE ? actor : target), !target.isPlayable());
+                this.setAttackTimeout((long) this.getMaxAttackTimeout() + System.currentTimeMillis());
+                actor.doCast(currentTask.skill, isAoE ? actor : target, !target.isPlayable());
                 return this.maybeNextTask(currentTask);
               }
 
@@ -645,7 +640,7 @@ public class DefaultAI extends CharacterAI {
 
             return true;
           case BUFF:
-            target = (Creature)currentTask.target.get();
+            target = currentTask.target.get();
             if (!actor.isMuted(currentTask.skill) && !actor.isSkillDisabled(currentTask.skill) && !actor.isUnActiveSkill(currentTask.skill.getId())) {
               if (target != null && !target.isAlikeDead() && actor.isInRange(target, 2000L)) {
                 isAoE = currentTask.skill.getTargetType() == SkillTargetType.TARGET_AURA;
@@ -654,13 +649,13 @@ public class DefaultAI extends CharacterAI {
                   return Rnd.chance(10);
                 }
 
-                collisions = (int)(actor.getCollisionRadius() + target.getColRadius());
+                collisions = (int) (actor.getCollisionRadius() + target.getColRadius());
                 incZ = actor.isFlying() || actor.isInWater() || target.isFlying() || target.isInWater();
-                dist = (int)(!incZ ? actor.getDistance(target) : actor.getDistance3D(target)) - collisions;
+                dist = (int) (!incZ ? actor.getDistance(target) : actor.getDistance3D(target)) - collisions;
                 if (dist <= castRange && GeoEngine.canSeeTarget(actor, target, incZ)) {
                   this.clientStopMoving();
                   this._pathfindFails = 0;
-                  actor.doCast(currentTask.skill, (Creature)(isAoE ? actor : target), !target.isPlayable());
+                  actor.doCast(currentTask.skill, isAoE ? actor : target, !target.isPlayable());
                   return this.maybeNextTask(currentTask);
                 }
 
@@ -694,7 +689,7 @@ public class DefaultAI extends CharacterAI {
     Creature target;
     if (actor != null && (target = this.prepareTarget()) != null) {
       double distance = actor.getDistance(target);
-      return this.chooseTaskAndTargets((Skill)null, target, distance);
+      return this.chooseTaskAndTargets(null, target, distance);
     } else {
       return false;
     }
@@ -733,7 +728,7 @@ public class DefaultAI extends CharacterAI {
     int rndRadius = actor.getParameter("transformSpawnRndRadius", 0);
     int chance = actor.getParameter("transformChance", 100);
     if (transformer > 0 && Rnd.chance(chance)) {
-      for(int cnt = 0; cnt < amount; ++cnt) {
+      for (int cnt = 0; cnt < amount; ++cnt) {
         Location loc = actor.getLoc();
         if (rndRadius > 0) {
           loc = Location.findPointToStay(loc, rndRadius, killer.getGeoIndex());
@@ -742,7 +737,7 @@ public class DefaultAI extends CharacterAI {
         NpcInstance npc = NpcUtils.spawnSingle(transformer, loc, actor.getReflection());
         if (killer != null && killer.isPlayable()) {
           npc.getAI().notifyEvent(CtrlEvent.EVT_AGGRESSION, killer, 100);
-          killer.sendPacket(npc.makeStatusUpdate(new int[]{9, 10}));
+          killer.sendPacket(npc.makeStatusUpdate(9, 10));
         }
       }
     }
@@ -762,17 +757,17 @@ public class DefaultAI extends CharacterAI {
       int transformer = actor.getParameter("transformOnUnderAttack", 0);
       if (transformer > 0) {
         int chance = actor.getParameter("transformChance", 5);
-        if (chance == 100 || ((MonsterInstance)actor).getChampion() == 0 && actor.getCurrentHpPercents() > 50.0D && Rnd.chance(chance)) {
-          MonsterInstance npc = (MonsterInstance)NpcHolder.getInstance().getTemplate(transformer).getNewInstance();
+        if (chance == 100 || ((MonsterInstance) actor).getChampion() == 0 && actor.getCurrentHpPercents() > 50.0D && Rnd.chance(chance)) {
+          MonsterInstance npc = (MonsterInstance) NpcHolder.getInstance().getTemplate(transformer).getNewInstance();
           npc.setSpawnedLoc(actor.getLoc());
           npc.setReflection(actor.getReflection());
-          npc.setChampion(((MonsterInstance)actor).getChampion());
-          npc.setCurrentHpMp((double)npc.getMaxHp(), (double)npc.getMaxMp(), true);
+          npc.setChampion(((MonsterInstance) actor).getChampion());
+          npc.setCurrentHpMp(npc.getMaxHp(), npc.getMaxMp(), true);
           npc.spawnMe(npc.getSpawnedLoc());
           npc.getAI().notifyEvent(CtrlEvent.EVT_AGGRESSION, attacker, 100);
           actor.decayOrDelete();
           attacker.setTarget(npc);
-          attacker.sendPacket(npc.makeStatusUpdate(new int[]{9, 10}));
+          attacker.sendPacket(npc.makeStatusUpdate(9, 10));
           return;
         }
       }
@@ -783,7 +778,7 @@ public class DefaultAI extends CharacterAI {
           int pcabal = SevenSigns.getInstance().getPlayerCabal(player);
           int wcabal = SevenSigns.getInstance().getCabalHighestScore();
           if (pcabal != wcabal && wcabal != 0) {
-            player.sendMessage(new CustomMessage("defaultAI.CabalTeleported", player, new Object[0]));
+            player.sendMessage(new CustomMessage("defaultAI.CabalTeleported", player));
             player.teleToClosestTown();
             return;
           }
@@ -793,8 +788,8 @@ public class DefaultAI extends CharacterAI {
         if (quests != null) {
           Iterator var12 = quests.iterator();
 
-          while(var12.hasNext()) {
-            QuestState qs = (QuestState)var12.next();
+          while (var12.hasNext()) {
+            QuestState qs = (QuestState) var12.next();
             qs.getQuest().notifyAttack(actor, qs);
           }
         }
@@ -847,7 +842,7 @@ public class DefaultAI extends CharacterAI {
       if (randomWalk && (!Config.RND_WALK || !Rnd.chance(Config.RND_WALK_RATE))) {
         return false;
       } else {
-        boolean isInRange = actor.isInRangeZ(sloc, (long)Config.MAX_DRIFT_RANGE);
+        boolean isInRange = actor.isInRangeZ(sloc, Config.MAX_DRIFT_RANGE);
         if (!randomWalk && isInRange) {
           return false;
         } else {
@@ -881,14 +876,14 @@ public class DefaultAI extends CharacterAI {
     }
 
     this.setAttackTimeout(9223372036854775807L);
-    this.setAttackTarget((Creature)null);
+    this.setAttackTarget(null);
     if (Config.RESTORE_HP_MP_ON_TELEPORT_HOME) {
-      actor.setCurrentHpMp((double)actor.getMaxHp(), (double)actor.getMaxMp(), true);
+      actor.setCurrentHpMp(actor.getMaxHp(), actor.getMaxMp(), true);
     }
 
-    this.changeIntention(CtrlIntention.AI_INTENTION_ACTIVE, (Object)null, (Object)null);
+    this.changeIntention(CtrlIntention.AI_INTENTION_ACTIVE, null, null);
     if (teleport) {
-      actor.broadcastPacketToOthers(new L2GameServerPacket[]{new MagicSkillUse(actor, actor, 2036, 1, 500, 0L)});
+      actor.broadcastPacketToOthers(new MagicSkillUse(actor, actor, 2036, 1, 500, 0L));
       actor.teleToLocation(sloc.x, sloc.y, GeoEngine.getHeight(sloc, actor.getGeoIndex()));
     } else {
       if (!clearAggro) {
@@ -924,8 +919,8 @@ public class DefaultAI extends CharacterAI {
       Creature hated = null;
       Iterator var4 = hateList.iterator();
 
-      while(var4.hasNext()) {
-        Creature cha = (Creature)var4.next();
+      while (var4.hasNext()) {
+        Creature cha = (Creature) var4.next();
         if (this.checkTarget(cha, this.MAX_PURSUE_RANGE)) {
           hated = cha;
           break;
@@ -985,7 +980,7 @@ public class DefaultAI extends CharacterAI {
       Skill[] var7 = skills;
       int var8 = skills.length;
 
-      for(int var9 = 0; var9 < var8; ++var9) {
+      for (int var9 = 0; var9 < var8; ++var9) {
         Skill skill = var7[var9];
         if (this.canUseSkill(skill, target, distance)) {
           if (ret == null) {
@@ -1000,7 +995,7 @@ public class DefaultAI extends CharacterAI {
         if (usable == 0) {
           return null;
         } else {
-          ret = (Skill[])Arrays.copyOf(ret, usable);
+          ret = Arrays.copyOf(ret, usable);
           return ret;
         }
       } else {
@@ -1020,17 +1015,17 @@ public class DefaultAI extends CharacterAI {
         Skill[] var8 = skills;
         int var9 = skills.length;
 
-        for(int var10 = 0; var10 < var9; ++var10) {
+        for (int var10 = 0; var10 < var9; ++var10) {
           Skill skill = var8[var10];
-          double weight = skill.getSimpleDamage(actor, target) * (double)skill.getAOECastRange() / distance;
+          double weight = skill.getSimpleDamage(actor, target) * (double) skill.getAOECastRange() / distance;
           if (weight < 1.0D) {
             weight = 1.0D;
           }
 
-          rnd.add(skill, (int)weight);
+          rnd.add(skill, (int) weight);
         }
 
-        return (Skill)rnd.select();
+        return rnd.select();
       }
     } else {
       return null;
@@ -1046,19 +1041,19 @@ public class DefaultAI extends CharacterAI {
         Skill[] var8 = skills;
         int var9 = skills.length;
 
-        for(int var10 = 0; var10 < var9; ++var10) {
+        for (int var10 = 0; var10 < var9; ++var10) {
           Skill skill = var8[var10];
           if (skill.getSameByStackType(target) == null) {
             double weight;
-            if ((weight = 100.0D * (double)skill.getAOECastRange() / distance) <= 0.0D) {
+            if ((weight = 100.0D * (double) skill.getAOECastRange() / distance) <= 0.0D) {
               weight = 1.0D;
             }
 
-            rnd.add(skill, (int)weight);
+            rnd.add(skill, (int) weight);
           }
         }
 
-        return (Skill)rnd.select();
+        return rnd.select();
       }
     } else {
       return null;
@@ -1074,7 +1069,7 @@ public class DefaultAI extends CharacterAI {
         Skill[] var5 = skills;
         int var6 = skills.length;
 
-        for(int var7 = 0; var7 < var6; ++var7) {
+        for (int var7 = 0; var7 < var6; ++var7) {
           Skill skill = var5[var7];
           if (skill.getSameByStackType(target) == null) {
             double weight;
@@ -1082,11 +1077,11 @@ public class DefaultAI extends CharacterAI {
               weight = 1.0D;
             }
 
-            rnd.add(skill, (int)weight);
+            rnd.add(skill, (int) weight);
           }
         }
 
-        return (Skill)rnd.select();
+        return rnd.select();
       }
     } else {
       return null;
@@ -1095,7 +1090,7 @@ public class DefaultAI extends CharacterAI {
 
   protected static Skill selectTopSkillByHeal(Creature target, Skill[] skills) {
     if (skills != null && skills.length != 0) {
-      double hpReduced = (double)target.getMaxHp() - target.getCurrentHp();
+      double hpReduced = (double) target.getMaxHp() - target.getCurrentHp();
       if (hpReduced < 1.0D) {
         return null;
       } else if (skills.length == 1) {
@@ -1105,17 +1100,17 @@ public class DefaultAI extends CharacterAI {
         Skill[] var7 = skills;
         int var8 = skills.length;
 
-        for(int var9 = 0; var9 < var8; ++var9) {
+        for (int var9 = 0; var9 < var8; ++var9) {
           Skill skill = var7[var9];
           double weight;
           if ((weight = Math.abs(skill.getPower() - hpReduced)) <= 0.0D) {
             weight = 1.0D;
           }
 
-          rnd.add(skill, (int)weight);
+          rnd.add(skill, (int) weight);
         }
 
-        return (Skill)rnd.select();
+        return rnd.select();
       }
     } else {
       return null;
@@ -1127,7 +1122,7 @@ public class DefaultAI extends CharacterAI {
       Skill[] var6 = skills;
       int var7 = skills.length;
 
-      for(int var8 = 0; var8 < var7; ++var8) {
+      for (int var8 = 0; var8 < var7; ++var8) {
         Skill sk = var6[var8];
         this.addDesiredSkill(skillMap, target, distance, sk);
       }
@@ -1137,8 +1132,8 @@ public class DefaultAI extends CharacterAI {
 
   protected void addDesiredSkill(Map<Skill, Integer> skillMap, Creature target, double distance, Skill skill) {
     if (skill != null && target != null && this.canUseSkill(skill, target)) {
-      int weight = (int)(-Math.abs((double)skill.getAOECastRange() - distance));
-      if ((double)skill.getAOECastRange() >= distance) {
+      int weight = (int) (-Math.abs((double) skill.getAOECastRange() - distance));
+      if ((double) skill.getAOECastRange() >= distance) {
         weight += 1000000;
       } else if (skill.isNotTargetAoE() && skill.getTargets(this.getActor(), target, false).size() == 0) {
         return;
@@ -1151,16 +1146,16 @@ public class DefaultAI extends CharacterAI {
   protected void addDesiredHeal(Map<Skill, Integer> skillMap, Skill[] skills) {
     if (skills != null && skills.length != 0) {
       NpcInstance actor = this.getActor();
-      double hpReduced = (double)actor.getMaxHp() - actor.getCurrentHp();
+      double hpReduced = (double) actor.getMaxHp() - actor.getCurrentHp();
       double hpPercent = actor.getCurrentHpPercents();
       if (hpReduced >= 1.0D) {
         Skill[] var9 = skills;
         int var10 = skills.length;
 
-        for(int var11 = 0; var11 < var10; ++var11) {
+        for (int var11 = 0; var11 < var10; ++var11) {
           Skill sk = var9[var11];
           if (this.canUseSkill(sk, actor) && sk.getPower() <= hpReduced) {
-            int weight = (int)sk.getPower();
+            int weight = (int) sk.getPower();
             if (hpPercent < 50.0D) {
               weight += 1000000;
             }
@@ -1179,7 +1174,7 @@ public class DefaultAI extends CharacterAI {
       Skill[] var4 = skills;
       int var5 = skills.length;
 
-      for(int var6 = 0; var6 < var5; ++var6) {
+      for (int var6 = 0; var6 < var5; ++var6) {
         Skill sk = var4[var6];
         if (this.canUseSkill(sk, actor)) {
           skillMap.put(sk, 1000000);
@@ -1195,9 +1190,9 @@ public class DefaultAI extends CharacterAI {
       Iterator var4 = skillMap.keySet().iterator();
 
       int nWeight;
-      while(var4.hasNext()) {
-        Skill next = (Skill)var4.next();
-        if ((nWeight = (Integer)skillMap.get(next)) > topWeight) {
+      while (var4.hasNext()) {
+        Skill next = (Skill) var4.next();
+        if ((nWeight = skillMap.get(next)) > topWeight) {
           topWeight = nWeight;
         }
       }
@@ -1209,10 +1204,10 @@ public class DefaultAI extends CharacterAI {
         nWeight = 0;
         Iterator var8 = skillMap.entrySet().iterator();
 
-        while(var8.hasNext()) {
-          Entry<Skill, Integer> e = (Entry)var8.next();
-          if ((Integer)e.getValue() >= topWeight) {
-            skills[nWeight++] = (Skill)e.getKey();
+        while (var8.hasNext()) {
+          Entry<Skill, Integer> e = (Entry) var8.next();
+          if (e.getValue() >= topWeight) {
+            skills[nWeight++] = e.getKey();
           }
         }
 
@@ -1229,21 +1224,21 @@ public class DefaultAI extends CharacterAI {
     Iterator var7;
     Creature cha;
     if (skill != null) {
-      if (actor.isMovementDisabled() && distance > (double)(skill.getAOECastRange() + 60)) {
+      if (actor.isMovementDisabled() && distance > (double) (skill.getAOECastRange() + 60)) {
         target = null;
         if (skill.isOffensive()) {
           targets = LazyArrayList.newInstance();
           var7 = actor.getAggroList().getHateList(this.MAX_PURSUE_RANGE).iterator();
 
-          while(var7.hasNext()) {
-            cha = (Creature)var7.next();
+          while (var7.hasNext()) {
+            cha = (Creature) var7.next();
             if (this.checkTarget(cha, skill.getAOECastRange() + 60) && this.canUseSkill(skill, cha)) {
               targets.add(cha);
             }
           }
 
           if (!targets.isEmpty()) {
-            target = (Creature)targets.get(Rnd.get(targets.size()));
+            target = (Creature) targets.get(Rnd.get(targets.size()));
           }
 
           LazyArrayList.recycle(targets);
@@ -1262,20 +1257,20 @@ public class DefaultAI extends CharacterAI {
         return true;
       }
     } else {
-      if (actor.isMovementDisabled() && distance > (double)(actor.getPhysicalAttackRange() + 40)) {
+      if (actor.isMovementDisabled() && distance > (double) (actor.getPhysicalAttackRange() + 40)) {
         target = null;
         targets = LazyArrayList.newInstance();
         var7 = actor.getAggroList().getHateList(this.MAX_PURSUE_RANGE).iterator();
 
-        while(var7.hasNext()) {
-          cha = (Creature)var7.next();
+        while (var7.hasNext()) {
+          cha = (Creature) var7.next();
           if (this.checkTarget(cha, actor.getPhysicalAttackRange() + 40)) {
             targets.add(cha);
           }
         }
 
         if (!targets.isEmpty()) {
-          target = (Creature)targets.get(Rnd.get(targets.size()));
+          target = (Creature) targets.get(Rnd.get(targets.size()));
         }
 
         LazyArrayList.recycle(targets);
@@ -1323,7 +1318,7 @@ public class DefaultAI extends CharacterAI {
   }
 
   public NpcInstance getActor() {
-    return (NpcInstance)super.getActor();
+    return (NpcInstance) super.getActor();
   }
 
   protected boolean defaultThinkBuff(int rateSelf) {
@@ -1335,7 +1330,7 @@ public class DefaultAI extends CharacterAI {
     if (System.currentTimeMillis() - this._lastFactionNotifyTime > this._minFactionNotifyInterval) {
       this._lastFactionNotifyTime = System.currentTimeMillis();
       if (actor.isMinion()) {
-        MonsterInstance master = ((MinionInstance)actor).getLeader();
+        MonsterInstance master = ((MinionInstance) actor).getLeader();
         if (master != null) {
           if (!master.isDead() && master.isVisible()) {
             master.getAI().notifyEvent(CtrlEvent.EVT_AGGRESSION, attacker, damage);
@@ -1345,8 +1340,8 @@ public class DefaultAI extends CharacterAI {
           if (minionList != null) {
             Iterator var6 = minionList.getAliveMinions().iterator();
 
-            while(var6.hasNext()) {
-              MinionInstance minion = (MinionInstance)var6.next();
+            while (var6.hasNext()) {
+              MinionInstance minion = (MinionInstance) var6.next();
               if (minion != actor) {
                 minion.getAI().notifyEvent(CtrlEvent.EVT_AGGRESSION, attacker, damage);
               }
@@ -1360,16 +1355,16 @@ public class DefaultAI extends CharacterAI {
       if (minionList != null && minionList.hasAliveMinions()) {
         var9 = minionList.getAliveMinions().iterator();
 
-        while(var9.hasNext()) {
-          MinionInstance minion = (MinionInstance)var9.next();
+        while (var9.hasNext()) {
+          MinionInstance minion = (MinionInstance) var9.next();
           minion.getAI().notifyEvent(CtrlEvent.EVT_AGGRESSION, attacker, damage);
         }
       }
 
       var9 = this.activeFactionTargets().iterator();
 
-      while(var9.hasNext()) {
-        NpcInstance npc = (NpcInstance)var9.next();
+      while (var9.hasNext()) {
+        NpcInstance npc = (NpcInstance) var9.next();
         npc.getAI().notifyEvent(CtrlEvent.EVT_CLAN_ATTACKED, new Object[]{actor, attacker, damage});
       }
     }
@@ -1382,8 +1377,8 @@ public class DefaultAI extends CharacterAI {
     if (minionList != null && minionList.hasAliveMinions()) {
       Iterator var5 = minionList.getAliveMinions().iterator();
 
-      while(var5.hasNext()) {
-        MinionInstance minion = (MinionInstance)var5.next();
+      while (var5.hasNext()) {
+        MinionInstance minion = (MinionInstance) var5.next();
         minion.getAI().notifyEvent(CtrlEvent.EVT_AGGRESSION, attacker, damage);
       }
     }
@@ -1398,9 +1393,9 @@ public class DefaultAI extends CharacterAI {
       List<NpcInstance> npcFriends = new LazyArrayList();
       Iterator var3 = World.getAroundNpc(actor).iterator();
 
-      while(var3.hasNext()) {
-        NpcInstance npc = (NpcInstance)var3.next();
-        if (!npc.isDead() && npc.isInFaction(actor) && npc.isInRangeZ(actor, (long)npc.getFaction().getRange()) && GeoEngine.canSeeTarget(npc, actor, false)) {
+      while (var3.hasNext()) {
+        NpcInstance npc = (NpcInstance) var3.next();
+        if (!npc.isDead() && npc.isInFaction(actor) && npc.isInRangeZ(actor, npc.getFaction().getRange()) && GeoEngine.canSeeTarget(npc, actor, false)) {
           npcFriends.add(npc);
         }
       }
@@ -1427,8 +1422,8 @@ public class DefaultAI extends CharacterAI {
       if (Rnd.chance(rateFriends)) {
         Iterator var4 = this.activeFactionTargets().iterator();
 
-        while(var4.hasNext()) {
-          NpcInstance npc = (NpcInstance)var4.next();
+        while (var4.hasNext()) {
+          NpcInstance npc = (NpcInstance) var4.next();
           double targetHp = npc.getCurrentHpPercents();
           Skill[] skills = targetHp < 50.0D ? this.selectUsableSkills(actor, 0.0D, this._healSkills) : this.selectUsableSkills(actor, 0.0D, this._buffSkills);
           if (skills != null && skills.length != 0) {
@@ -1462,7 +1457,7 @@ public class DefaultAI extends CharacterAI {
         Skill[] buff = Rnd.chance(this.getRateBUFF()) ? this.selectUsableSkills(actor, 0.0D, this._buffSkills) : null;
         RndSelector<Skill[]> rnd = new RndSelector();
         if (!actor.isAMuted()) {
-          rnd.add((Object)null, this.getRatePHYS());
+          rnd.add(null, this.getRatePHYS());
         }
 
         rnd.add(dam, this.getRateDAM());
@@ -1471,7 +1466,7 @@ public class DefaultAI extends CharacterAI {
         rnd.add(heal, this.getRateHEAL());
         rnd.add(buff, this.getRateBUFF());
         rnd.add(stun, this.getRateSTUN());
-        Skill[] selected = (Skill[])rnd.select();
+        Skill[] selected = rnd.select();
         if (selected != null) {
           if (selected == dam || selected == dot) {
             return this.chooseTaskAndTargets(selectTopSkillByDamage(actor, target, distance, selected), target, distance);
@@ -1490,7 +1485,7 @@ public class DefaultAI extends CharacterAI {
           }
         }
 
-        return this.chooseTaskAndTargets((Skill)null, target, distance);
+        return this.chooseTaskAndTargets(null, target, distance);
       }
     } else {
       return false;
@@ -1629,13 +1624,13 @@ public class DefaultAI extends CharacterAI {
     }
   }
 
-  public static enum TaskType {
+  public enum TaskType {
     MOVE,
     ATTACK,
     CAST,
     BUFF;
 
-    private TaskType() {
+    TaskType() {
     }
   }
 }

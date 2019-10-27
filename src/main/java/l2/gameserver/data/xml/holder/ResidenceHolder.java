@@ -5,12 +5,7 @@
 
 package l2.gameserver.data.xml.holder;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import l2.commons.data.xml.AbstractHolder;
 import l2.gameserver.model.GameObject;
@@ -21,8 +16,8 @@ import org.napile.primitive.maps.impl.TreeIntObjectMap;
 
 public final class ResidenceHolder extends AbstractHolder {
   private static ResidenceHolder _instance = new ResidenceHolder();
-  private IntObjectMap<Residence> _residences = new TreeIntObjectMap();
-  private Map<Class, List<Residence>> _fastResidencesByType = new HashMap(4);
+  private IntObjectMap<Residence> _residences = new TreeIntObjectMap<>();
+  private Map<Class, List<Residence>> _fastResidencesByType = new HashMap<>(4);
 
   public static ResidenceHolder getInstance() {
     return _instance;
@@ -35,28 +30,28 @@ public final class ResidenceHolder extends AbstractHolder {
     this._residences.put(r.getId(), r);
   }
 
-  public <R extends Residence> R getResidence(int id) {
-    return (Residence)this._residences.get(id);
+  public <R extends Residence> Residence getResidence(int id) {
+    return this._residences.get(id);
   }
 
-  public <R extends Residence> R getResidence(Class<R> type, int id) {
+  public <R extends Residence> Residence getResidence(Class<R> type, int id) {
     Residence residence = this.getResidence(id);
     return residence != null && residence.getClass() == type ? residence : null;
   }
 
-  public <R extends Residence> List<R> getResidenceList(Class<R> t) {
-    return (List)this._fastResidencesByType.get(t);
+  public <R extends Residence> List<Residence> getResidenceList(Class<R> t) {
+    return this._fastResidencesByType.get(t);
   }
 
   public Collection<Residence> getResidences() {
     return this._residences.values();
   }
 
-  public <R extends Residence> R getResidenceByObject(Class<? extends Residence> type, GameObject object) {
+  public <R extends Residence> Residence getResidenceByObject(Class<? extends Residence> type, GameObject object) {
     return this.getResidenceByCoord(type, object.getX(), object.getY(), object.getZ(), object.getReflection());
   }
 
-  public <R extends Residence> R getResidenceByCoord(Class<R> type, int x, int y, int z, Reflection ref) {
+  public <R extends Residence> Residence getResidenceByCoord(Class<R> type, int x, int y, int z, Reflection ref) {
     Collection<Residence> residences = type == null ? this.getResidences() : this.getResidenceList(type);
     Iterator var7 = ((Collection)residences).iterator();
 
@@ -72,17 +67,16 @@ public final class ResidenceHolder extends AbstractHolder {
     return residence;
   }
 
-  public <R extends Residence> R findNearestResidence(Class<R> clazz, int x, int y, int z, Reflection ref, int offset) {
+  public <R extends Residence> Residence findNearestResidence(Class<R> clazz, int x, int y, int z, Reflection ref, int offset) {
     Residence residence = this.getResidenceByCoord(clazz, x, y, z, ref);
     if (residence == null) {
       double closestDistance = offset;
 
-      for (R value : this.getResidenceList(clazz)) {
-        Residence r = (Residence) value;
-        double distance = r.getZone().findDistanceToZone(x, y, z, false);
+      for (Residence value : this.getResidenceList(clazz)) {
+        double distance = value.getZone().findDistanceToZone(x, y, z, false);
         if (closestDistance > distance) {
           closestDistance = distance;
-          residence = r;
+          residence = value;
         }
       }
     }
@@ -101,10 +95,12 @@ public final class ResidenceHolder extends AbstractHolder {
   private void buildFastLook() {
     Residence residence;
     Object list;
-    _log.error("buildFastLook: i put NULL in list");
     for(Iterator var1 = this._residences.values().iterator(); var1.hasNext(); ((List)list).add(residence)) {
       residence = (Residence)var1.next();
-      list = this._fastResidencesByType.computeIfAbsent(residence.getClass(), k ->null);
+      list = this._fastResidencesByType.get(residence.getClass());
+      if (list == null) {
+        this._fastResidencesByType.put(residence.getClass(),  new ArrayList<>());
+      }
     }
 
   }

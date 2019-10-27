@@ -39,10 +39,8 @@ public class DoorAI extends CharacterAI {
         SiegeEvent<?, ?> siegeEvent1 = (SiegeEvent)player.getEvent(SiegeEvent.class);
         SiegeEvent<?, ?> siegeEvent2 = (SiegeEvent)actor.getEvent(SiegeEvent.class);
         if (siegeEvent1 == null || siegeEvent1 == siegeEvent2 && siegeEvent1.getSiegeClan("attackers", player.getClan()) != null) {
-          Iterator var7 = actor.getAroundNpc(900, 200).iterator();
 
-          while(var7.hasNext()) {
-            NpcInstance npc = (NpcInstance)var7.next();
+          for (NpcInstance npc : actor.getAroundNpc(900, 200)) {
             if (npc.isSiegeGuard()) {
               if (Rnd.chance(20)) {
                 npc.getAI().notifyEvent(CtrlEvent.EVT_AGGRESSION, attacker, 10000);

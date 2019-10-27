@@ -30,17 +30,17 @@ public class CrestCache {
   private final TIntObjectHashMap<byte[]> _pledgeCrest = new TIntObjectHashMap();
   private final TIntObjectHashMap<byte[]> _pledgeCrestLarge = new TIntObjectHashMap();
   private final TIntObjectHashMap<byte[]> _allyCrest = new TIntObjectHashMap();
-  private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
   private final Lock readLock;
   private final Lock writeLock;
 
-  public static final CrestCache getInstance() {
+  public static CrestCache getInstance() {
     return _instance;
   }
 
   private CrestCache() {
-    this.readLock = this.lock.readLock();
-    this.writeLock = this.lock.writeLock();
+    ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    this.readLock = lock.readLock();
+    this.writeLock = lock.writeLock();
     this.load();
   }
 
@@ -106,12 +106,12 @@ public class CrestCache {
   }
 
   public byte[] getPledgeCrest(int crestId) {
-    byte[] crest = null;
+    byte[] crest;
     this.readLock.lock();
 
-    byte[] crest;
+//    byte[] crest;
     try {
-      crest = (byte[])this._pledgeCrest.get(crestId);
+      crest = this._pledgeCrest.get(crestId);
     } finally {
       this.readLock.unlock();
     }
@@ -120,12 +120,12 @@ public class CrestCache {
   }
 
   public byte[] getPledgeCrestLarge(int crestId) {
-    byte[] crest = null;
+//    byte[] crest = null;
     this.readLock.lock();
 
     byte[] crest;
     try {
-      crest = (byte[])this._pledgeCrestLarge.get(crestId);
+      crest = this._pledgeCrestLarge.get(crestId);
     } finally {
       this.readLock.unlock();
     }
@@ -137,9 +137,9 @@ public class CrestCache {
     byte[] crest = null;
     this.readLock.lock();
 
-    byte[] crest;
+//    byte[] crest;
     try {
-      crest = (byte[])this._allyCrest.get(crestId);
+      crest = this._allyCrest.get(crestId);
     } finally {
       this.readLock.unlock();
     }
@@ -148,7 +148,7 @@ public class CrestCache {
   }
 
   public int getPledgeCrestId(int pledgeId) {
-    int crestId = false;
+//    int crestId = false;
     this.readLock.lock();
 
     int crestId;
@@ -162,7 +162,7 @@ public class CrestCache {
   }
 
   public int getPledgeCrestLargeId(int pledgeId) {
-    int crestId = false;
+//    int crestId = false;
     this.readLock.lock();
 
     int crestId;
@@ -176,7 +176,7 @@ public class CrestCache {
   }
 
   public int getAllyCrestId(int pledgeId) {
-    int crestId = false;
+//    int crestId = false;
     this.readLock.lock();
 
     int crestId;
@@ -233,8 +233,8 @@ public class CrestCache {
       statement.setNull(1, -3);
       statement.setInt(2, pledgeId);
       statement.execute();
-    } catch (Exception var12) {
-      _log.error("", var12);
+    } catch (Exception e) {
+      _log.error("removePledgeCrestLarge: eMessage={}, eClause={}", e.getMessage(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -259,8 +259,8 @@ public class CrestCache {
       statement.setNull(1, -3);
       statement.setInt(2, pledgeId);
       statement.execute();
-    } catch (Exception var12) {
-      _log.error("", var12);
+    } catch (Exception e) {
+      _log.error("removeAllyCrest: eMessage={}, eClause={}", e.getMessage(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -287,8 +287,8 @@ public class CrestCache {
       statement.setBytes(1, crest);
       statement.setInt(2, pledgeId);
       statement.execute();
-    } catch (Exception var14) {
-      _log.error("", var14);
+    } catch (Exception e) {
+      _log.error("savePledgeCrest: eMessage={}, eClause={}", e.getMessage(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -316,8 +316,8 @@ public class CrestCache {
       statement.setBytes(1, crest);
       statement.setInt(2, pledgeId);
       statement.execute();
-    } catch (Exception var14) {
-      _log.error("", var14);
+    } catch (Exception e) {
+      _log.error("savePledgeCrestLarge: eMessage={}, eClause={}", e.getMessage(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -345,8 +345,8 @@ public class CrestCache {
       statement.setBytes(1, crest);
       statement.setInt(2, pledgeId);
       statement.execute();
-    } catch (Exception var14) {
-      _log.error("", var14);
+    } catch (Exception e) {
+      _log.error("saveAllyCrest: eMessage={}, eClause={}", e.getMessage(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
