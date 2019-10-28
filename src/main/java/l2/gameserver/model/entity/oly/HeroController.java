@@ -5,20 +5,6 @@
 
 package l2.gameserver.model.entity.oly;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.Config;
 import l2.gameserver.data.StringHolder;
@@ -45,6 +31,11 @@ import l2.gameserver.utils.Strings;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.*;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HeroController {
   private static final Logger _log = LoggerFactory.getLogger(HeroController.class);
@@ -416,12 +407,9 @@ public class HeroController {
   }
 
   public void showHistory(Player player, int targetClassId, int page) {
-    int perpage = true;
     HeroController.HeroRecord hr = null;
-    Iterator var6 = this.getCurrentHeroes().iterator();
 
-    while(var6.hasNext()) {
-      HeroController.HeroRecord hr2 = (HeroController.HeroRecord)var6.next();
+    for (HeroRecord hr2 : this.getCurrentHeroes()) {
       if (hr2.active && hr2.played && hr2.class_id == targetClassId) {
         hr = hr2;
       }
@@ -533,12 +521,9 @@ public class HeroController {
   }
 
   public void showHeroDiary(Player activeChar, int heroclass, int page) {
-    int perpage = true;
     HeroController.HeroRecord hr = null;
-    Iterator var6 = this.getCurrentHeroes().iterator();
 
-    while(var6.hasNext()) {
-      HeroController.HeroRecord hr2 = (HeroController.HeroRecord)var6.next();
+    for (HeroRecord hr2 : this.getCurrentHeroes()) {
       if (hr2.active && hr2.played && hr2.class_id == heroclass) {
         hr = hr2;
       }

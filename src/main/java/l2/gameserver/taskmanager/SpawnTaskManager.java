@@ -5,15 +5,16 @@
 
 package l2.gameserver.taskmanager;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import l2.commons.lang.reference.HardReference;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.ThreadPoolManager;
 import l2.gameserver.model.Spawner;
 import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.utils.Util;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class SpawnTaskManager {
   private SpawnTaskManager.SpawnTask[] _spawnTasks = new SpawnTaskManager.SpawnTask[500];
@@ -103,7 +104,7 @@ public class SpawnTaskManager {
     public long endtime;
 
     SpawnTask(NpcInstance cha, long delay) {
-      this._npcRef = cha.getRef();
+      this._npcRef = (HardReference<NpcInstance>) cha.getRef();
       this.endtime = delay;
     }
 

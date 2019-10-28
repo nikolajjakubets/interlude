@@ -5,36 +5,6 @@
 
 package l2.gameserver.model;
 
-import java.awt.Color;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import l2.commons.collections.LazyArrayList;
 import l2.commons.collections.MultiValueSet;
 import l2.commons.dbutils.DbUtils;
@@ -51,67 +21,28 @@ import l2.gameserver.ai.CtrlIntention;
 import l2.gameserver.ai.NextAction;
 import l2.gameserver.ai.PlayerAI;
 import l2.gameserver.cache.Msg;
-import l2.gameserver.dao.AccountBonusDAO;
-import l2.gameserver.dao.CharacterDAO;
-import l2.gameserver.dao.CharacterGroupReuseDAO;
-import l2.gameserver.dao.CharacterPostFriendDAO;
-import l2.gameserver.dao.CharacterVariablesDAO;
-import l2.gameserver.dao.EffectsDAO;
-import l2.gameserver.data.xml.holder.EventHolder;
-import l2.gameserver.data.xml.holder.HennaHolder;
-import l2.gameserver.data.xml.holder.InstantZoneHolder;
-import l2.gameserver.data.xml.holder.ItemHolder;
-import l2.gameserver.data.xml.holder.NpcHolder;
-import l2.gameserver.data.xml.holder.RecipeHolder;
-import l2.gameserver.data.xml.holder.ResidenceHolder;
-import l2.gameserver.data.xml.holder.SkillAcquireHolder;
+import l2.gameserver.dao.*;
+import l2.gameserver.data.xml.holder.*;
 import l2.gameserver.data.xml.holder.MultiSellHolder.MultiSellListContainer;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.database.mysql;
 import l2.gameserver.handler.items.IItemHandler;
 import l2.gameserver.handler.items.IRefineryHandler;
 import l2.gameserver.idfactory.IdFactory;
-import l2.gameserver.instancemanager.CursedWeaponsManager;
-import l2.gameserver.instancemanager.DimensionalRiftManager;
-import l2.gameserver.instancemanager.MatchingRoomManager;
-import l2.gameserver.instancemanager.QuestManager;
-import l2.gameserver.instancemanager.ReflectionManager;
+import l2.gameserver.instancemanager.*;
 import l2.gameserver.listener.actor.player.OnAnswerListener;
 import l2.gameserver.listener.actor.player.impl.ReviveAnswerListener;
-import l2.gameserver.listener.actor.player.impl.ScriptAnswerListener;
 import l2.gameserver.listener.actor.player.impl.SummonAnswerListener;
-import l2.gameserver.model.Creature.MoveActionBase;
-import l2.gameserver.model.Creature.MoveToLocationAction;
 import l2.gameserver.model.Effect.EEffectSlot;
-import l2.gameserver.model.GameObjectTasks.EndCustomHeroTask;
-import l2.gameserver.model.GameObjectTasks.EndSitDownTask;
-import l2.gameserver.model.GameObjectTasks.EndStandUpTask;
-import l2.gameserver.model.GameObjectTasks.HourlyTask;
-import l2.gameserver.model.GameObjectTasks.KickTask;
-import l2.gameserver.model.GameObjectTasks.PvPFlagTask;
-import l2.gameserver.model.GameObjectTasks.SoulConsumeTask;
-import l2.gameserver.model.GameObjectTasks.UnJailTask;
-import l2.gameserver.model.GameObjectTasks.WaterTask;
+import l2.gameserver.model.GameObjectTasks.*;
 import l2.gameserver.model.Request.L2RequestType;
 import l2.gameserver.model.Skill.AddedSkill;
 import l2.gameserver.model.Zone.ZoneType;
-import l2.gameserver.model.actor.instances.player.Bonus;
 import l2.gameserver.model.actor.instances.player.FriendList;
-import l2.gameserver.model.actor.instances.player.Macro;
-import l2.gameserver.model.actor.instances.player.MacroList;
-import l2.gameserver.model.actor.instances.player.ShortCut;
-import l2.gameserver.model.actor.instances.player.ShortCutList;
+import l2.gameserver.model.actor.instances.player.*;
 import l2.gameserver.model.actor.listener.PlayerListenerList;
 import l2.gameserver.model.actor.recorder.PlayerStatsChangeRecorder;
-import l2.gameserver.model.base.AcquireType;
-import l2.gameserver.model.base.ClassId;
-import l2.gameserver.model.base.Element;
-import l2.gameserver.model.base.Experience;
-import l2.gameserver.model.base.InvisibleType;
-import l2.gameserver.model.base.PlayerAccess;
-import l2.gameserver.model.base.Race;
-import l2.gameserver.model.base.RestartType;
-import l2.gameserver.model.base.TeamType;
+import l2.gameserver.model.base.*;
 import l2.gameserver.model.chat.chatfilter.ChatMsg;
 import l2.gameserver.model.entity.DimensionalRift;
 import l2.gameserver.model.entity.Reflection;
@@ -120,46 +51,17 @@ import l2.gameserver.model.entity.boat.Boat;
 import l2.gameserver.model.entity.events.GlobalEvent;
 import l2.gameserver.model.entity.events.impl.DuelEvent;
 import l2.gameserver.model.entity.events.impl.SiegeEvent;
-import l2.gameserver.model.entity.oly.CompetitionState;
-import l2.gameserver.model.entity.oly.HeroController;
-import l2.gameserver.model.entity.oly.NoblesController;
-import l2.gameserver.model.entity.oly.OlyController;
-import l2.gameserver.model.entity.oly.Participant;
-import l2.gameserver.model.entity.oly.ParticipantPool;
-import l2.gameserver.model.entity.oly.Stadium;
+import l2.gameserver.model.entity.oly.*;
 import l2.gameserver.model.entity.residence.Castle;
 import l2.gameserver.model.entity.residence.ClanHall;
 import l2.gameserver.model.entity.residence.Residence;
-import l2.gameserver.model.instances.FestivalMonsterInstance;
-import l2.gameserver.model.instances.GuardInstance;
-import l2.gameserver.model.instances.MonsterInstance;
-import l2.gameserver.model.instances.NpcInstance;
-import l2.gameserver.model.instances.PetBabyInstance;
-import l2.gameserver.model.instances.PetInstance;
-import l2.gameserver.model.instances.ReflectionBossInstance;
-import l2.gameserver.model.instances.StaticObjectInstance;
-import l2.gameserver.model.instances.TamedBeastInstance;
-import l2.gameserver.model.instances.TrapInstance;
-import l2.gameserver.model.items.ItemContainer;
-import l2.gameserver.model.items.ItemInstance;
-import l2.gameserver.model.items.LockType;
-import l2.gameserver.model.items.ManufactureItem;
-import l2.gameserver.model.items.PcFreight;
-import l2.gameserver.model.items.PcInventory;
-import l2.gameserver.model.items.PcRefund;
-import l2.gameserver.model.items.PcWarehouse;
-import l2.gameserver.model.items.TradeItem;
-import l2.gameserver.model.items.Warehouse;
+import l2.gameserver.model.instances.*;
+import l2.gameserver.model.items.*;
 import l2.gameserver.model.items.Warehouse.WarehouseType;
 import l2.gameserver.model.items.attachment.FlagItemAttachment;
 import l2.gameserver.model.items.attachment.PickableAttachment;
 import l2.gameserver.model.matching.MatchingRoom;
-import l2.gameserver.model.pledge.Alliance;
-import l2.gameserver.model.pledge.Clan;
-import l2.gameserver.model.pledge.Privilege;
-import l2.gameserver.model.pledge.RankPrivs;
-import l2.gameserver.model.pledge.SubUnit;
-import l2.gameserver.model.pledge.UnitMember;
+import l2.gameserver.model.pledge.*;
 import l2.gameserver.model.quest.Quest;
 import l2.gameserver.model.quest.QuestEventType;
 import l2.gameserver.model.quest.QuestState;
@@ -168,70 +70,7 @@ import l2.gameserver.network.l2.components.CustomMessage;
 import l2.gameserver.network.l2.components.IStaticPacket;
 import l2.gameserver.network.l2.components.SceneMovie;
 import l2.gameserver.network.l2.components.SystemMsg;
-import l2.gameserver.network.l2.s2c.AbnormalStatusUpdate;
-import l2.gameserver.network.l2.s2c.ActionFail;
-import l2.gameserver.network.l2.s2c.AutoAttackStart;
-import l2.gameserver.network.l2.s2c.CameraMode;
-import l2.gameserver.network.l2.s2c.ChairSit;
-import l2.gameserver.network.l2.s2c.ChangeWaitType;
-import l2.gameserver.network.l2.s2c.CharInfo;
-import l2.gameserver.network.l2.s2c.ConfirmDlg;
-import l2.gameserver.network.l2.s2c.EtcStatusUpdate;
-import l2.gameserver.network.l2.s2c.ExAutoSoulShot;
-import l2.gameserver.network.l2.s2c.ExBasicActionList;
-import l2.gameserver.network.l2.s2c.ExDuelUpdateUserInfo;
-import l2.gameserver.network.l2.s2c.ExOlympiadMode;
-import l2.gameserver.network.l2.s2c.ExOlympiadUserInfo;
-import l2.gameserver.network.l2.s2c.ExPCCafePointInfo;
-import l2.gameserver.network.l2.s2c.ExSetCompassZoneCode;
-import l2.gameserver.network.l2.s2c.ExStartScenePlayer;
-import l2.gameserver.network.l2.s2c.ExStorageMaxCount;
-import l2.gameserver.network.l2.s2c.GetItem;
-import l2.gameserver.network.l2.s2c.HennaInfo;
-import l2.gameserver.network.l2.s2c.InventoryUpdate;
-import l2.gameserver.network.l2.s2c.ItemList;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
-import l2.gameserver.network.l2.s2c.LeaveWorld;
-import l2.gameserver.network.l2.s2c.MagicSkillUse;
-import l2.gameserver.network.l2.s2c.MyTargetSelected;
-import l2.gameserver.network.l2.s2c.NpcInfoPoly;
-import l2.gameserver.network.l2.s2c.ObserverEnd;
-import l2.gameserver.network.l2.s2c.ObserverStart;
-import l2.gameserver.network.l2.s2c.PartySmallWindowUpdate;
-import l2.gameserver.network.l2.s2c.PartySpelled;
-import l2.gameserver.network.l2.s2c.PlaySound;
-import l2.gameserver.network.l2.s2c.PledgeShowMemberListDelete;
-import l2.gameserver.network.l2.s2c.PledgeShowMemberListDeleteAll;
-import l2.gameserver.network.l2.s2c.PledgeShowMemberListUpdate;
-import l2.gameserver.network.l2.s2c.PrivateStoreListBuy;
-import l2.gameserver.network.l2.s2c.PrivateStoreListSell;
-import l2.gameserver.network.l2.s2c.PrivateStoreMsgBuy;
-import l2.gameserver.network.l2.s2c.PrivateStoreMsgSell;
-import l2.gameserver.network.l2.s2c.QuestList;
-import l2.gameserver.network.l2.s2c.RadarControl;
-import l2.gameserver.network.l2.s2c.RecipeShopMsg;
-import l2.gameserver.network.l2.s2c.RecipeShopSellList;
-import l2.gameserver.network.l2.s2c.RelationChanged;
-import l2.gameserver.network.l2.s2c.Ride;
-import l2.gameserver.network.l2.s2c.SendTradeDone;
-import l2.gameserver.network.l2.s2c.ServerClose;
-import l2.gameserver.network.l2.s2c.SetupGauge;
-import l2.gameserver.network.l2.s2c.ShortBuffStatusUpdate;
-import l2.gameserver.network.l2.s2c.ShortCutInit;
-import l2.gameserver.network.l2.s2c.ShortCutRegister;
-import l2.gameserver.network.l2.s2c.SkillCoolTime;
-import l2.gameserver.network.l2.s2c.SkillList;
-import l2.gameserver.network.l2.s2c.SocialAction;
-import l2.gameserver.network.l2.s2c.SpawnEmitter;
-import l2.gameserver.network.l2.s2c.SpecialCamera;
-import l2.gameserver.network.l2.s2c.StatusUpdate;
-import l2.gameserver.network.l2.s2c.SystemMessage;
-import l2.gameserver.network.l2.s2c.SystemMessage2;
-import l2.gameserver.network.l2.s2c.TargetSelected;
-import l2.gameserver.network.l2.s2c.TargetUnselected;
-import l2.gameserver.network.l2.s2c.TeleportToLocation;
-import l2.gameserver.network.l2.s2c.UserInfo;
-import l2.gameserver.network.l2.s2c.ValidateLocation;
+import l2.gameserver.network.l2.s2c.*;
 import l2.gameserver.scripts.Events;
 import l2.gameserver.skills.AbnormalEffect;
 import l2.gameserver.skills.EffectType;
@@ -240,31 +79,19 @@ import l2.gameserver.skills.effects.EffectCubic;
 import l2.gameserver.skills.skillclasses.Transformation;
 import l2.gameserver.stats.Formulas;
 import l2.gameserver.stats.Stats;
-import l2.gameserver.tables.CharTemplateTable;
-import l2.gameserver.tables.ClanTable;
-import l2.gameserver.tables.PetDataTable;
-import l2.gameserver.tables.SkillTable;
-import l2.gameserver.tables.SkillTreeTable;
+import l2.gameserver.tables.*;
 import l2.gameserver.taskmanager.AutoSaveManager;
 import l2.gameserver.taskmanager.LazyPrecisionTaskManager;
 import l2.gameserver.templates.FishTemplate;
 import l2.gameserver.templates.Henna;
 import l2.gameserver.templates.InstantZone;
 import l2.gameserver.templates.PlayerTemplate;
+import l2.gameserver.templates.item.ArmorTemplate.ArmorType;
 import l2.gameserver.templates.item.ItemTemplate;
 import l2.gameserver.templates.item.WeaponTemplate;
-import l2.gameserver.templates.item.ArmorTemplate.ArmorType;
 import l2.gameserver.templates.item.WeaponTemplate.WeaponType;
 import l2.gameserver.templates.npc.NpcTemplate;
-import l2.gameserver.utils.GameStats;
-import l2.gameserver.utils.ItemFunctions;
-import l2.gameserver.utils.Language;
-import l2.gameserver.utils.Location;
-import l2.gameserver.utils.Log;
-import l2.gameserver.utils.SiegeUtils;
-import l2.gameserver.utils.SqlBatch;
-import l2.gameserver.utils.Strings;
-import l2.gameserver.utils.TeleportUtils;
+import l2.gameserver.utils.*;
 import l2.gameserver.utils.Log.ItemLog;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -278,6 +105,18 @@ import org.napile.primitive.sets.IntSet;
 import org.napile.primitive.sets.impl.HashIntSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.*;
+import java.sql.*;
+import java.util.List;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Player extends Playable implements PlayerGroup {
   public static final int DEFAULT_TITLE_COLOR = 16777079;
@@ -639,7 +478,7 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public HardReference<Player> getRef() {
-    return super.getRef();
+    return (HardReference<Player>) super.getRef();
   }
 
   public String getAccountName() {
@@ -689,7 +528,6 @@ public class Player extends Playable implements PlayerGroup {
   public void altUseSkill(Skill skill, Creature target) {
     super.altUseSkill(skill, target);
     if (Config.ALT_TELEPORT_PROTECTION && this.isPlayer()) {
-      Player player = this.getPlayer();
       if (this.getPlayer().getAfterTeleportPortectionTime() > System.currentTimeMillis()) {
         this.getPlayer().setAfterTeleportPortectionTime(0L);
         this.getPlayer().sendMessage(new CustomMessage("alt.teleport_protect_gonna", this.getPlayer()));
@@ -901,10 +739,8 @@ public class Player extends Playable implements PlayerGroup {
         int sponsor = member.getSponsor();
         int apprentice = this.getApprentice();
         PledgeShowMemberListUpdate memberUpdate = new PledgeShowMemberListUpdate(this);
-        Iterator var8 = this._clan.getOnlineMembers(this.getObjectId()).iterator();
 
-        while(var8.hasNext()) {
-          Player clanMember = (Player)var8.next();
+        for (Player clanMember : this._clan.getOnlineMembers(this.getObjectId())) {
           clanMember.sendPacket(memberUpdate);
           if (clanMember.getObjectId() == sponsor) {
             clanMember.sendPacket((new SystemMessage(1757)).addString(this._name));
@@ -1074,10 +910,8 @@ public class Player extends Playable implements PlayerGroup {
     this.questRead.lock();
 
     try {
-      Iterator var2 = this._quests.values().iterator();
 
-      while(var2.hasNext()) {
-        QuestState qs = (QuestState)var2.next();
+      for (QuestState qs : this._quests.values()) {
         if (qs.isStarted()) {
           quests.add(qs.getQuest());
         }
@@ -1086,7 +920,7 @@ public class Player extends Playable implements PlayerGroup {
       this.questRead.unlock();
     }
 
-    return quests.toArray(new Quest[quests.size()]);
+    return quests.toArray(new Quest[0]);
   }
 
   public QuestState[] getAllQuestsStates() {
@@ -1106,11 +940,10 @@ public class Player extends Playable implements PlayerGroup {
     List<QuestState> states = new ArrayList<>();
     Quest[] quests = npc.getTemplate().getEventQuests(event);
     if (quests != null) {
-      Quest[] var6 = quests;
       int var7 = quests.length;
 
       for(int var8 = 0; var8 < var7; ++var8) {
-        Quest quest = var6[var8];
+        Quest quest = quests[var8];
         QuestState qs = this.getQuestState(quest.getName());
         if (qs != null && !qs.isCompleted()) {
           states.add(this.getQuestState(quest.getName()));
@@ -1159,8 +992,7 @@ public class Player extends Playable implements PlayerGroup {
     QuestState[] var1 = this.getAllQuestsStates();
     int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      QuestState qs = var1[var3];
+    for (QuestState qs : var1) {
       if (qs.isStarted()) {
         qs.pauseQuestTimers();
       } else {
@@ -1174,8 +1006,7 @@ public class Player extends Playable implements PlayerGroup {
     QuestState[] var1 = this.getAllQuestsStates();
     int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      QuestState qs = var1[var3];
+    for (QuestState qs : var1) {
       qs.resumeQuestTimers();
     }
 
@@ -1422,13 +1253,11 @@ public class Player extends Playable implements PlayerGroup {
     EEffectSlot[] var4 = EEffectSlot.VALUES;
     int var5 = var4.length;
 
-    for(int var6 = 0; var6 < var5; ++var6) {
-      EEffectSlot ees = var4[var6];
-      Effect[] var8 = effects;
+    for (EEffectSlot ees : var4) {
       int var9 = effects.length;
 
-      for(int var10 = 0; var10 < var9; ++var10) {
-        Effect eff = var8[var10];
+      for (int var10 = 0; var10 < var9; ++var10) {
+        Effect eff = effects[var10];
         if (eff.isInUse() && eff.getEffectSlot() == ees) {
           if (eff.isStackTypeMatch("HpRecoverCast")) {
             this.sendPacket(new ShortBuffStatusUpdate(eff));
@@ -1521,8 +1350,7 @@ public class Player extends Playable implements PlayerGroup {
       ItemInstance[] items = this.getInventory().getPaperdollItems();
       int var7 = items.length;
 
-      for(int var8 = 0; var8 < var7; ++var8) {
-        ItemInstance item = items[var8];
+      for (ItemInstance item : items) {
         if (item != null) {
           int crystaltype = item.getTemplate().getCrystalType().ordinal();
           if ((item.getTemplate().getType2() == 0 || item.getTemplate().getType2() == 1 || item.getTemplate().getType2() == 2) && crystaltype > newGradePenalty) {
@@ -1877,10 +1705,8 @@ public class Player extends Playable implements PlayerGroup {
         Skill sk = SkillTable.getInstance().getInfo(skill.getId(), skill.getLevel());
         this.addSkill(sk, true);
         if (this.getAllShortCuts().size() > 0 && sk.getLevel() > 1) {
-          Iterator var12 = this.getAllShortCuts().iterator();
 
-          while(var12.hasNext()) {
-            ShortCut sc = (ShortCut)var12.next();
+          for (ShortCut sc : this.getAllShortCuts()) {
             if (sc.getId() == sk.getId() && sc.getType() == 2) {
               ShortCut newsc = new ShortCut(sc.getSlot(), sc.getPage(), sc.getType(), sc.getId(), sk.getLevel(), 1);
               this.sendPacket(new ShortCutRegister(this, newsc));
@@ -1977,7 +1803,7 @@ public class Player extends Playable implements PlayerGroup {
       return -1L;
     } else {
       long remained = this._NoChannel - System.currentTimeMillis() + this._NoChannelBegin;
-      return remained < 0L ? 0L : remained;
+      return Math.max(remained, 0L);
     }
   }
 
@@ -2304,10 +2130,8 @@ public class Player extends Playable implements PlayerGroup {
   private void broadcastCharInfoImpl() {
     if (this.isVisible() && !this.isInvisible()) {
       L2GameServerPacket ci = this.isPolymorphed() ? new NpcInfoPoly(this) : new CharInfo(this);
-      Iterator var2 = World.getAroundPlayers(this).iterator();
 
-      while(var2.hasNext()) {
-        Player player = (Player)var2.next();
+      for (Player player : World.getAroundPlayers(this)) {
         player.sendPacket(ci);
         player.sendPacket(RelationChanged.create(player, this, player));
       }
@@ -2325,10 +2149,8 @@ public class Player extends Playable implements PlayerGroup {
 
   public void broadcastRelationChanged() {
     if (this.isVisible() && !this.isInvisible()) {
-      Iterator var1 = World.getAroundPlayers(this).iterator();
 
-      while(var1.hasNext()) {
-        Player player = (Player)var1.next();
+      for (Player player : World.getAroundPlayers(this)) {
         player.sendPacket(RelationChanged.create(player, this, player));
       }
 
@@ -2368,11 +2190,10 @@ public class Player extends Playable implements PlayerGroup {
 
   public StatusUpdate makeStatusUpdate(int... fields) {
     StatusUpdate su = new StatusUpdate(this);
-    int[] var3 = fields;
     int var4 = fields.length;
 
     for(int var5 = 0; var5 < var4; ++var5) {
-      int field = var3[var5];
+      int field = fields[var5];
       switch(field) {
         case 9:
           su.addAttribute(field, (int)this.getCurrentHp());
@@ -2481,10 +2302,8 @@ public class Player extends Playable implements PlayerGroup {
 
   public void sendPacket(List<? extends IStaticPacket> packets) {
     if (this.isConnected()) {
-      Iterator var2 = packets.iterator();
 
-      while(var2.hasNext()) {
-        IStaticPacket p = (IStaticPacket)var2.next();
+      for (IStaticPacket p : packets) {
         this._connection.sendPacket(p.packet(this));
       }
 
@@ -2536,11 +2355,10 @@ public class Player extends Playable implements PlayerGroup {
       } else {
         Skill[] skills = item.getTemplate().getAttachedSkills();
         if (skills.length > 0) {
-          Skill[] var5 = skills;
           int var6 = skills.length;
 
           for(int var7 = 0; var7 < var6; ++var7) {
-            Skill skill = var5[var7];
+            Skill skill = skills[var7];
             this.altUseSkill(skill, this);
             if (this.getPet() != null && this.getPet().isSummon() && !this.getPet().isDead()) {
               this.getPet().altUseSkill(skill, this.getPet());
@@ -2589,11 +2407,10 @@ public class Player extends Playable implements PlayerGroup {
           } else if (item.isHerb()) {
             Skill[] skills = item.getTemplate().getAttachedSkills();
             if (skills.length > 0) {
-              Skill[] var5 = skills;
               int var6 = skills.length;
 
               for(int var7 = 0; var7 < var6; ++var7) {
-                Skill skill = var5[var7];
+                Skill skill = skills[var7];
                 this.altUseSkill(skill, this);
               }
             }
@@ -3010,10 +2827,7 @@ public class Player extends Playable implements PlayerGroup {
                       return;
                     }
 
-                    Iterator var28 = drop.iterator();
-
-                    while(var28.hasNext()) {
-                      ItemInstance item = (ItemInstance)var28.next();
+                    for (ItemInstance item : drop) {
                       if (item.isAugmented() && !Config.ALT_ALLOW_DROP_AUGMENTED) {
                         item.setVariationStat1(0);
                         item.setVariationStat2(0);
@@ -3306,8 +3120,7 @@ public class Player extends Playable implements PlayerGroup {
       Skill[] var1 = this.getAllSkillsArray();
       int var2 = var1.length;
 
-      for(int var3 = 0; var3 < var2; ++var3) {
-        Skill sk = var1[var3];
+      for (Skill sk : var1) {
         SkillTreeTable.checkSkill(this, sk);
       }
 
@@ -3489,7 +3302,7 @@ public class Player extends Playable implements PlayerGroup {
         }
 
         this.setVar("storemode", String.valueOf(newMode), -1L);
-      } else if (prevMode != 0) {
+      } else {
         this.unsetVar("storemode");
         if (!this.isDead()) {
           this.standUp();
@@ -3518,8 +3331,7 @@ public class Player extends Playable implements PlayerGroup {
       Skill[] var3 = oldClan.getAllSkills();
       int var4 = var3.length;
 
-      for(int var5 = 0; var5 < var4; ++var5) {
-        Skill skill = var3[var5];
+      for (Skill skill : var3) {
         this.removeSkill(skill, false);
       }
     }
@@ -3552,12 +3364,12 @@ public class Player extends Playable implements PlayerGroup {
 
   public ClanHall getClanHall() {
     int id = this._clan != null ? this._clan.getHasHideout() : 0;
-    return ResidenceHolder.getInstance().getResidence(ClanHall.class, id);
+    return (ClanHall) ResidenceHolder.getInstance().getResidence(ClanHall.class, id);
   }
 
   public Castle getCastle() {
     int id = this._clan != null ? this._clan.getCastle() : 0;
-    return ResidenceHolder.getInstance().getResidence(Castle.class, id);
+    return (Castle) ResidenceHolder.getInstance().getResidence(Castle.class, id);
   }
 
   public Alliance getAlliance() {
@@ -3987,17 +3799,15 @@ public class Player extends Playable implements PlayerGroup {
         LazyArrayList<Zone> zones = LazyArrayList.newInstance();
         World.getZones(zones, player.getLoc(), player.getReflection());
         if (!zones.isEmpty()) {
-          Iterator var41 = zones.iterator();
 
-          while(var41.hasNext()) {
-            Zone zone = (Zone)var41.next();
+          for (Zone zone : zones) {
             if (zone.getType() == ZoneType.no_restart) {
               if (System.currentTimeMillis() / 1000L - player.getLastAccess() > zone.getRestartTime()) {
                 player.sendMessage(new CustomMessage("l2p.gameserver.clientpackets.EnterWorld.TeleportedReasonNoRestart", player));
                 player.setLoc(TeleportUtils.getRestartLocation(player, RestartType.TO_VILLAGE));
               }
             } else if (zone.getType() == ZoneType.SIEGE) {
-              SiegeEvent<?, ?> siegeEvent = (SiegeEvent)player.getEvent(SiegeEvent.class);
+              SiegeEvent<?, ?> siegeEvent = (SiegeEvent) player.getEvent(SiegeEvent.class);
               if (siegeEvent != null) {
                 player.setLoc(siegeEvent.getEnterLoc(player));
               } else {
@@ -4302,8 +4112,7 @@ public class Player extends Playable implements PlayerGroup {
               ClassId[] var16 = ClassId.VALUES;
               int var17 = var16.length;
 
-              for(int var8 = 0; var8 < var17; ++var8) {
-                ClassId clsId = var16[var8];
+              for (ClassId clsId : var16) {
                 if (clsId.getId() == this.getActiveClassId()) {
                   activeClassId = clsId;
                 }
@@ -4378,10 +4187,7 @@ public class Player extends Playable implements PlayerGroup {
           skillReuses.putAll(this._skillReuses);
         }
 
-        Iterator var4 = skillReuses.values().iterator();
-
-        while(var4.hasNext()) {
-          TimeStamp timeStamp = (TimeStamp)var4.next();
+        for (TimeStamp timeStamp : skillReuses.values()) {
           Skill skill = SkillTable.getInstance().getInfo(timeStamp.getId(), timeStamp.getLevel());
           if (skill != null) {
             pstmt.setInt(1, this.getObjectId());
@@ -4491,11 +4297,7 @@ public class Player extends Playable implements PlayerGroup {
       }
     }
 
-    if (totalSlots <= 0) {
-      return 0;
-    } else {
-      return totalSlots;
-    }
+    return Math.max(totalSlots, 0);
   }
 
   public boolean removeHenna(int slot) {
@@ -4657,8 +4459,7 @@ public class Player extends Playable implements PlayerGroup {
     ItemInstance[] var3 = this.getInventory().getPaperdollItems();
     int var4 = var3.length;
 
-    for(int var5 = 0; var5 < var4; ++var5) {
-      ItemInstance item = var3[var5];
+    for (ItemInstance item : var3) {
       if (item != null && item.getItemId() == itemId) {
         int newMp = item.getDuration() - mp;
         if (newMp >= 0) {
@@ -4859,7 +4660,7 @@ public class Player extends Playable implements PlayerGroup {
     if (npc == null) {
       this._lastNpc = HardReferences.emptyRef();
     } else {
-      this._lastNpc = npc.getRef();
+      this._lastNpc = (HardReference<NpcInstance>) npc.getRef();
     }
 
   }
@@ -4908,10 +4709,8 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public void autoShot() {
-    Iterator var1 = this._activeSoulShots.iterator();
 
-    while(var1.hasNext()) {
-      Integer shotId = (Integer)var1.next();
+    for (Integer shotId : this._activeSoulShots) {
       ItemInstance item = this.getInventory().getItemByItemId(shotId);
       if (item == null) {
         this.removeAutoSoulShot(shotId);
@@ -5064,10 +4863,8 @@ public class Player extends Playable implements PlayerGroup {
 
       World.showObjectsToPlayer(this);
       if (this.isOlyObserver()) {
-        Iterator var3 = this.getOlyObservingStadium().getPlayers().iterator();
 
-        while(var3.hasNext()) {
-          Player p = (Player)var3.next();
+        for (Player p : this.getOlyObservingStadium().getPlayers()) {
           if (p.isOlyCompetitionStarted()) {
             this.sendPacket(new ExOlympiadUserInfo(p));
           }
@@ -5296,10 +5093,8 @@ public class Player extends Playable implements PlayerGroup {
 
   public void removeFromBlockList(String charName) {
     int charId = 0;
-    Iterator var3 = this._blockList.keySet().iterator();
 
-    while(var3.hasNext()) {
-      int blockId = (Integer)var3.next();
+    for (int blockId : this._blockList.keySet()) {
       if (charName.equalsIgnoreCase(this._blockList.get(blockId))) {
         charId = blockId;
         break;
@@ -5381,16 +5176,12 @@ public class Player extends Playable implements PlayerGroup {
         synchronized(this._blockList) {
           Iterator var6 = this._blockList.entrySet().iterator();
 
-          while(true) {
-            if (!var6.hasNext()) {
-              break;
-            }
+          while (var6.hasNext()) {
 
-            Entry<Integer, String> e = (Entry)var6.next();
-            StringBuilder sb = new StringBuilder("(");
-            sb.append(this.getObjectId()).append(",");
-            sb.append(e.getKey()).append(")");
-            b.write(sb.toString());
+            Entry<Integer, String> e = (Entry) var6.next();
+            String sb = "(" + this.getObjectId() + "," +
+              e.getKey() + ")";
+            b.write(sb);
           }
         }
 
@@ -5925,7 +5716,7 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public void scriptRequest(String text, String scriptName, Object[] args) {
-    this.ask((new ConfirmDlg(SystemMsg.S1, 30000)).addString(text), new ScriptAnswerListener(this, scriptName, args, 30000L));
+//    this.ask((new ConfirmDlg(SystemMsg.S1, 30000)).addString(text), new ScriptAnswerListener(this, scriptName, args, 30000L));
   }
 
   public void updateNoChannel(long time) {
@@ -6507,10 +6298,8 @@ public class Player extends Playable implements PlayerGroup {
       }
 
       if (target == null && this._party != null) {
-        Iterator var3 = this._party.getPartyMembers().iterator();
 
-        while(var3.hasNext()) {
-          Player p = (Player)var3.next();
+        for (Player p : this._party.getPartyMembers()) {
           if (p != null && p.getObjectId() == id) {
             target = p;
             break;
@@ -7329,10 +7118,8 @@ public class Player extends Playable implements PlayerGroup {
 
   private void preparateToTransform(Skill transSkill) {
     if (transSkill == null || !transSkill.isBaseTransformation()) {
-      Iterator var2 = this.getEffectList().getAllEffects().iterator();
 
-      while(var2.hasNext()) {
-        Effect effect = (Effect)var2.next();
+      for (Effect effect : this.getEffectList().getAllEffects()) {
         if (effect != null && effect.getSkill().isToggle()) {
           effect.exit();
         }
@@ -7382,10 +7169,8 @@ public class Player extends Playable implements PlayerGroup {
       return super.getAllSkills();
     } else {
       Map<Integer, Skill> tempSkills = new HashMap<>();
-      Iterator var2 = super.getAllSkills().iterator();
 
-      while(var2.hasNext()) {
-        Skill s = (Skill)var2.next();
+      for (Skill s : super.getAllSkills()) {
         if (s != null && !s.isActive() && !s.isToggle()) {
           tempSkills.put(s.getId(), s);
         }
@@ -8045,12 +7830,10 @@ public class Player extends Playable implements PlayerGroup {
       return null;
     } else {
       Collection<TrapInstance> result = new ArrayList(this.getTrapsCount());
-      Iterator var3 = this._traps.keySet().iterator();
 
-      while(var3.hasNext()) {
-        Integer trapId = (Integer)var3.next();
+      for (Integer trapId : this._traps.keySet()) {
         TrapInstance trap;
-        if ((trap = (TrapInstance)GameObjectsStorage.get(this._traps.get(trapId))) != null) {
+        if ((trap = (TrapInstance) GameObjectsStorage.get(this._traps.get(trapId))) != null) {
           result.add(trap);
         } else {
           this._traps.remove(trapId);
@@ -8375,10 +8158,8 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public void removeInstanceReusesByGroupId(int groupId) {
-    Iterator var2 = InstantZoneHolder.getInstance().getSharedReuseInstanceIdsByGroup(groupId).iterator();
 
-    while(var2.hasNext()) {
-      int i = (Integer)var2.next();
+    for (int i : InstantZoneHolder.getInstance().getSharedReuseInstanceIdsByGroup(groupId)) {
       if (this.getInstanceReuse(i) != null) {
         this.removeInstanceReuse(i);
       }
@@ -8422,8 +8203,7 @@ public class Player extends Playable implements PlayerGroup {
     Reflection[] var1 = ReflectionManager.getInstance().getAll();
     int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      Reflection r = var1[var3];
+    for (Reflection r : var1) {
       if (r != null && ArrayUtils.contains(r.getVisitors(), this.getObjectId())) {
         return r;
       }
@@ -8654,8 +8434,7 @@ public class Player extends Playable implements PlayerGroup {
       Player.EPledgeRank[] var1 = VALUES;
       int var2 = var1.length;
 
-      for(int var3 = 0; var3 < var2; ++var3) {
-        Player.EPledgeRank pledgeRank = var1[var3];
+      for (EPledgeRank pledgeRank : var1) {
         if (pledgeRank.getRankId() == pledgeRankId) {
           return pledgeRank;
         }

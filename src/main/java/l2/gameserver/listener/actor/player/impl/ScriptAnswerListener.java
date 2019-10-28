@@ -19,7 +19,7 @@ public class ScriptAnswerListener implements OnAnswerListener {
   public ScriptAnswerListener(Player player, String scriptName, Object[] arg, long time) {
     this._scriptName = scriptName;
     this._arg = arg;
-    this._playerRef = player.getRef();
+    this._playerRef = (HardReference<Player>) player.getRef();
     this._endTime = System.currentTimeMillis() + time;
   }
 

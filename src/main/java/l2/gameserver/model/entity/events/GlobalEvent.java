@@ -5,14 +5,6 @@
 
 package l2.gameserver.model.entity.events;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import l2.commons.collections.MultiValueSet;
 import l2.commons.listener.Listener;
 import l2.commons.listener.ListenerList;
@@ -20,12 +12,7 @@ import l2.commons.logging.LoggerObject;
 import l2.gameserver.dao.ItemsDAO;
 import l2.gameserver.instancemanager.ReflectionManager;
 import l2.gameserver.listener.event.OnStartStopListener;
-import l2.gameserver.model.Creature;
-import l2.gameserver.model.GameObject;
-import l2.gameserver.model.GameObjectsStorage;
-import l2.gameserver.model.Playable;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.Skill;
+import l2.gameserver.model.*;
 import l2.gameserver.model.base.RestartType;
 import l2.gameserver.model.entity.Reflection;
 import l2.gameserver.model.entity.events.objects.DoorObject;
@@ -46,6 +33,10 @@ import org.napile.primitive.maps.IntObjectMap;
 import org.napile.primitive.maps.IntObjectMap.Entry;
 import org.napile.primitive.maps.impl.CHashIntObjectMap;
 import org.napile.primitive.maps.impl.TreeIntObjectMap;
+
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class GlobalEvent extends LoggerObject {
   public static final String EVENT = "event";
@@ -180,7 +171,7 @@ public abstract class GlobalEvent extends LoggerObject {
 
   public <O extends Serializable> List<O> getObjects(String name) {
     List<Serializable> objects = this._objects.get(name);
-    return objects == null ? Collections.emptyList() : objects;
+    return objects == null ? Collections.emptyList() : (List<O>) objects;
   }
 
   public <O extends Serializable> O getFirstObject(String name) {
@@ -215,7 +206,7 @@ public abstract class GlobalEvent extends LoggerObject {
 
   public <O extends Serializable> List<O> removeObjects(String name) {
     List<Serializable> objects = this._objects.remove(name);
-    return objects == null ? Collections.emptyList() : objects;
+    return objects == null ? Collections.emptyList() : (List<O>) objects;
   }
 
   public void addObjects(String name, List<? extends Serializable> objects) {
@@ -224,7 +215,7 @@ public abstract class GlobalEvent extends LoggerObject {
       if (list != null) {
         list.addAll(objects);
       } else {
-        this._objects.put(name, objects);
+        this._objects.put(name, (List<Serializable>) objects);
       }
 
     }

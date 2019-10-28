@@ -5,11 +5,6 @@
 
 package l2.gameserver.data.xml.parser;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import l2.commons.data.xml.AbstractDirParser;
 import l2.gameserver.Config;
 import l2.gameserver.data.xml.holder.ItemHolder;
@@ -24,13 +19,19 @@ import l2.gameserver.model.reward.RewardType;
 import l2.gameserver.tables.SkillTable;
 import l2.gameserver.templates.StatsSet;
 import l2.gameserver.templates.npc.AbsorbInfo;
+import l2.gameserver.templates.npc.AbsorbInfo.AbsorbType;
 import l2.gameserver.templates.npc.Faction;
 import l2.gameserver.templates.npc.MinionData;
 import l2.gameserver.templates.npc.NpcTemplate;
-import l2.gameserver.templates.npc.AbsorbInfo.AbsorbType;
 import l2.gameserver.utils.Location;
 import org.apache.commons.lang3.ArrayUtils;
 import org.dom4j.Element;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public final class NpcParser extends AbstractDirParser<NpcHolder> {
   private static final NpcParser _instance = new NpcParser();
@@ -58,7 +59,7 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
   protected void readData(Element rootElement) throws Exception {
     NpcTemplate template;
     label302:
-    for(Iterator npcIterator = rootElement.elementIterator(); npcIterator.hasNext(); ((NpcHolder)this.getHolder()).addTemplate(template)) {
+    for (Iterator npcIterator = rootElement.elementIterator(); npcIterator.hasNext(); this.getHolder().addTemplate(template)) {
       Element npcElement = (Element)npcIterator.next();
       int npcId = Integer.parseInt(npcElement.attributeValue("id"));
       int templateId = npcElement.attributeValue("template_id") == null ? 0 : Integer.parseInt(npcElement.attributeValue("id"));
@@ -92,7 +93,7 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
               }
             } else if (firstElement.getName().equalsIgnoreCase("ai_params")) {
               StatsSet ai = new StatsSet();
-              Iterator eIterator = firstElement.elementIterator();
+              eIterator = firstElement.elementIterator();
 
               while(eIterator.hasNext()) {
                 Element eElement = (Element)eIterator.next();
@@ -103,7 +104,7 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
             } else if (firstElement.getName().equalsIgnoreCase("attributes")) {
               int[] attributeAttack = new int[6];
               int[] attributeDefence = new int[6];
-              Iterator eIterator = firstElement.elementIterator();
+              eIterator = firstElement.elementIterator();
 
               while(eIterator.hasNext()) {
                 Element eElement = (Element)eIterator.next();
@@ -278,18 +279,16 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
                   while(targetIterator.hasNext()) {
                     Element targetElement = (Element)targetIterator.next();
                     int itemId = Integer.parseInt(targetElement.attributeValue("item_id", "57"));
-                    long price = (long)Integer.parseInt(targetElement.attributeValue("price"));
+                    long price = Integer.parseInt(targetElement.attributeValue("price"));
                     int minLevel = Integer.parseInt(targetElement.attributeValue("min_level", "0"));
-                    int maxLevel = Integer.parseInt(targetElement.attributeValue("max_level", "0"));
+                    maxLevel = Integer.parseInt(targetElement.attributeValue("max_level", "0"));
                     String nameCustomStringAddr = targetElement.attributeValue("name").trim();
                     int castleId = Integer.parseInt(targetElement.attributeValue("castle_id", "0"));
                     TeleportLocation loc = new TeleportLocation(itemId, price, minLevel, maxLevel, nameCustomStringAddr, castleId);
                     loc.set(Location.parseLoc(targetElement.attributeValue("loc")));
                     if (minLevel > 0 || maxLevel > 0) {
-                      Iterator var28 = teleportLocations.iterator();
 
-                      while(var28.hasNext()) {
-                        Location minMaxCheckLoc = (Location)var28.next();
+                      for (Location minMaxCheckLoc : teleportLocations) {
                         if (minMaxCheckLoc.x == loc.x && minMaxCheckLoc.y == loc.y && minMaxCheckLoc.z == loc.z) {
                           this._log.warn("Teleport location may intersect for " + targetElement.asXML());
                         }
@@ -300,7 +299,7 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
                     list.add(loc);
                   }
 
-                  template.addTeleportList(id, (TeleportLocation[])list.toArray(new TeleportLocation[list.size()]));
+                  template.addTeleportList(id, list.toArray(new TeleportLocation[list.size()]));
                 }
               }
             }
@@ -328,11 +327,11 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
     if (data.getItem().isHerb()) {
       data.setChance((double)chance * Config.RATE_DROP_HERBS);
     } else {
-      data.setChance((double)chance);
+      data.setChance(chance);
     }
 
-    data.setMinDrop((long)min);
-    data.setMaxDrop((long)max);
+    data.setMinDrop(min);
+    data.setMaxDrop(max);
     return data;
   }
 }

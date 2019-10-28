@@ -5,18 +5,13 @@
 
 package l2.gameserver.model.instances;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledFuture;
 import l2.commons.lang.reference.HardReference;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.ThreadPoolManager;
 import l2.gameserver.model.Creature;
+import l2.gameserver.model.GameObjectTasks.DeleteTask;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.Skill;
-import l2.gameserver.model.GameObjectTasks.DeleteTask;
 import l2.gameserver.model.Skill.SkillTargetType;
 import l2.gameserver.network.l2.components.CustomMessage;
 import l2.gameserver.network.l2.s2c.L2GameServerPacket;
@@ -25,6 +20,12 @@ import l2.gameserver.network.l2.s2c.NpcInfo;
 import l2.gameserver.taskmanager.EffectTaskManager;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.utils.Location;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 
 public final class TrapInstance extends NpcInstance {
   private final HardReference<? extends Creature> _ownerRef;
@@ -160,7 +161,7 @@ public final class TrapInstance extends NpcInstance {
     private HardReference<NpcInstance> _trapRef;
 
     public CastTask(TrapInstance trap) {
-      this._trapRef = trap.getRef();
+      this._trapRef = (HardReference<NpcInstance>) trap.getRef();
     }
 
     public void runImpl() throws Exception {
@@ -168,20 +169,18 @@ public final class TrapInstance extends NpcInstance {
       if (trap != null) {
         Creature owner = trap.getOwner();
         if (owner != null) {
-          Iterator var3 = trap.getAroundCharacters(200, 200).iterator();
 
-          while(var3.hasNext()) {
-            Creature target = (Creature)var3.next();
-            if (target != owner && trap._skill.checkTarget(owner, target, (Creature)null, false, false) == null) {
+          for (Creature target : trap.getAroundCharacters(200, 200)) {
+            if (target != owner && trap._skill.checkTarget(owner, target, (Creature) null, false, false) == null) {
               List<Creature> targets = new ArrayList<>();
               if (trap._skill.getTargetType() != SkillTargetType.TARGET_AREA) {
                 targets.add(target);
               } else {
                 Iterator var6 = trap.getAroundCharacters(trap._skill.getSkillRadius(), 128).iterator();
 
-                while(var6.hasNext()) {
-                  Creature t = (Creature)var6.next();
-                  if (trap._skill.checkTarget(owner, t, (Creature)null, false, false) == null) {
+                while (var6.hasNext()) {
+                  Creature t = (Creature) var6.next();
+                  if (trap._skill.checkTarget(owner, t, (Creature) null, false, false) == null) {
                     targets.add(target);
                   }
                 }

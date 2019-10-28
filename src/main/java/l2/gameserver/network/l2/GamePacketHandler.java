@@ -5,220 +5,15 @@
 
 package l2.gameserver.network.l2;
 
-import java.nio.BufferUnderflowException;
-import java.nio.ByteBuffer;
-import l2.commons.net.nio.impl.IClientFactory;
-import l2.commons.net.nio.impl.IMMOExecutor;
-import l2.commons.net.nio.impl.IPacketHandler;
-import l2.commons.net.nio.impl.MMOConnection;
-import l2.commons.net.nio.impl.ReceivablePacket;
+import l2.commons.net.nio.impl.*;
 import l2.gameserver.Config;
 import l2.gameserver.ThreadPoolManager;
-import l2.gameserver.network.l2.c2s.Action;
-import l2.gameserver.network.l2.c2s.AddTradeItem;
-import l2.gameserver.network.l2.c2s.AnswerJoinPartyRoom;
-import l2.gameserver.network.l2.c2s.AnswerTradeRequest;
-import l2.gameserver.network.l2.c2s.Appearing;
-import l2.gameserver.network.l2.c2s.AttackRequest;
-import l2.gameserver.network.l2.c2s.AuthLogin;
-import l2.gameserver.network.l2.c2s.BypassUserCmd;
-import l2.gameserver.network.l2.c2s.CannotMoveAnymore;
-import l2.gameserver.network.l2.c2s.CannotMoveAnymoreInVehicle;
-import l2.gameserver.network.l2.c2s.CharacterCreate;
-import l2.gameserver.network.l2.c2s.CharacterDelete;
-import l2.gameserver.network.l2.c2s.CharacterRestore;
-import l2.gameserver.network.l2.c2s.CharacterSelected;
-import l2.gameserver.network.l2.c2s.ConfirmDlg;
-import l2.gameserver.network.l2.c2s.EnterWorld;
-import l2.gameserver.network.l2.c2s.FinishRotatingC;
-import l2.gameserver.network.l2.c2s.GotoLobby;
-import l2.gameserver.network.l2.c2s.Logout;
-import l2.gameserver.network.l2.c2s.MoveBackwardToLocation;
-import l2.gameserver.network.l2.c2s.MoveWithDelta;
-import l2.gameserver.network.l2.c2s.NetPing;
-import l2.gameserver.network.l2.c2s.NewCharacter;
-import l2.gameserver.network.l2.c2s.PetitionVote;
-import l2.gameserver.network.l2.c2s.ProtocolVersion;
-import l2.gameserver.network.l2.c2s.ReplyGameGuardQuery;
-import l2.gameserver.network.l2.c2s.RequestActionUse;
-import l2.gameserver.network.l2.c2s.RequestAllyCrest;
-import l2.gameserver.network.l2.c2s.RequestAllyInfo;
-import l2.gameserver.network.l2.c2s.RequestAnswerJoinAlly;
-import l2.gameserver.network.l2.c2s.RequestAnswerJoinParty;
-import l2.gameserver.network.l2.c2s.RequestAnswerJoinPledge;
-import l2.gameserver.network.l2.c2s.RequestAquireSkill;
-import l2.gameserver.network.l2.c2s.RequestAquireSkillInfo;
-import l2.gameserver.network.l2.c2s.RequestAskJoinPartyRoom;
-import l2.gameserver.network.l2.c2s.RequestAutoSoulShot;
-import l2.gameserver.network.l2.c2s.RequestBBSwrite;
-import l2.gameserver.network.l2.c2s.RequestBlock;
-import l2.gameserver.network.l2.c2s.RequestBuyItem;
-import l2.gameserver.network.l2.c2s.RequestBuySeed;
-import l2.gameserver.network.l2.c2s.RequestBypassToServer;
-import l2.gameserver.network.l2.c2s.RequestCastleSiegeAttackerList;
-import l2.gameserver.network.l2.c2s.RequestCastleSiegeDefenderList;
-import l2.gameserver.network.l2.c2s.RequestChangePetName;
-import l2.gameserver.network.l2.c2s.RequestConfirmCancelItem;
-import l2.gameserver.network.l2.c2s.RequestConfirmCastleSiegeWaitingList;
-import l2.gameserver.network.l2.c2s.RequestConfirmGemStone;
-import l2.gameserver.network.l2.c2s.RequestConfirmRefinerItem;
-import l2.gameserver.network.l2.c2s.RequestConfirmTargetItem;
-import l2.gameserver.network.l2.c2s.RequestCrystallizeItem;
-import l2.gameserver.network.l2.c2s.RequestCursedWeaponList;
-import l2.gameserver.network.l2.c2s.RequestCursedWeaponLocation;
-import l2.gameserver.network.l2.c2s.RequestDeleteMacro;
-import l2.gameserver.network.l2.c2s.RequestDestroyItem;
-import l2.gameserver.network.l2.c2s.RequestDismissAlly;
-import l2.gameserver.network.l2.c2s.RequestDismissPartyRoom;
-import l2.gameserver.network.l2.c2s.RequestDropItem;
-import l2.gameserver.network.l2.c2s.RequestDuelAnswerStart;
-import l2.gameserver.network.l2.c2s.RequestDuelStart;
-import l2.gameserver.network.l2.c2s.RequestDuelSurrender;
-import l2.gameserver.network.l2.c2s.RequestEnchantItem;
-import l2.gameserver.network.l2.c2s.RequestEx2ndPasswordCheck;
-import l2.gameserver.network.l2.c2s.RequestEx2ndPasswordReq;
-import l2.gameserver.network.l2.c2s.RequestEx2ndPasswordVerify;
-import l2.gameserver.network.l2.c2s.RequestExEnchantSkill;
-import l2.gameserver.network.l2.c2s.RequestExEnchantSkillInfo;
-import l2.gameserver.network.l2.c2s.RequestExFishRanking;
-import l2.gameserver.network.l2.c2s.RequestExMPCCAcceptJoin;
-import l2.gameserver.network.l2.c2s.RequestExMPCCAskJoin;
-import l2.gameserver.network.l2.c2s.RequestExMPCCShowPartyMembersInfo;
-import l2.gameserver.network.l2.c2s.RequestExMagicSkillUseGround;
-import l2.gameserver.network.l2.c2s.RequestExOustFromMPCC;
-import l2.gameserver.network.l2.c2s.RequestExitPartyMatchingWaitingRoom;
-import l2.gameserver.network.l2.c2s.RequestFriendAddReply;
-import l2.gameserver.network.l2.c2s.RequestFriendDel;
-import l2.gameserver.network.l2.c2s.RequestFriendInvite;
-import l2.gameserver.network.l2.c2s.RequestFriendList;
-import l2.gameserver.network.l2.c2s.RequestGMCommand;
-import l2.gameserver.network.l2.c2s.RequestGetBossRecord;
-import l2.gameserver.network.l2.c2s.RequestGetItemFromPet;
-import l2.gameserver.network.l2.c2s.RequestGetOffVehicle;
-import l2.gameserver.network.l2.c2s.RequestGetOnVehicle;
-import l2.gameserver.network.l2.c2s.RequestGiveItemToPet;
-import l2.gameserver.network.l2.c2s.RequestGiveNickName;
-import l2.gameserver.network.l2.c2s.RequestGmList;
-import l2.gameserver.network.l2.c2s.RequestHandOverPartyMaster;
-import l2.gameserver.network.l2.c2s.RequestHennaEquip;
-import l2.gameserver.network.l2.c2s.RequestHennaItemInfo;
-import l2.gameserver.network.l2.c2s.RequestHennaList;
-import l2.gameserver.network.l2.c2s.RequestHennaUnequip;
-import l2.gameserver.network.l2.c2s.RequestHennaUnequipInfo;
-import l2.gameserver.network.l2.c2s.RequestHennaUnequipList;
-import l2.gameserver.network.l2.c2s.RequestItemList;
-import l2.gameserver.network.l2.c2s.RequestJoinAlly;
-import l2.gameserver.network.l2.c2s.RequestJoinCastleSiege;
-import l2.gameserver.network.l2.c2s.RequestJoinParty;
-import l2.gameserver.network.l2.c2s.RequestJoinPledge;
-import l2.gameserver.network.l2.c2s.RequestLinkHtml;
-import l2.gameserver.network.l2.c2s.RequestListPartyMatchingWaitingRoom;
-import l2.gameserver.network.l2.c2s.RequestMagicSkillUse;
-import l2.gameserver.network.l2.c2s.RequestMakeMacro;
-import l2.gameserver.network.l2.c2s.RequestManorList;
-import l2.gameserver.network.l2.c2s.RequestMoveToLocationInVehicle;
-import l2.gameserver.network.l2.c2s.RequestMultiSellChoose;
-import l2.gameserver.network.l2.c2s.RequestObserverEnd;
-import l2.gameserver.network.l2.c2s.RequestOlympiadMatchList;
-import l2.gameserver.network.l2.c2s.RequestOlympiadObserverEnd;
-import l2.gameserver.network.l2.c2s.RequestOustAlly;
-import l2.gameserver.network.l2.c2s.RequestOustFromPartyRoom;
-import l2.gameserver.network.l2.c2s.RequestOustPartyMember;
-import l2.gameserver.network.l2.c2s.RequestOustPledgeMember;
-import l2.gameserver.network.l2.c2s.RequestPCCafeCouponUse;
-import l2.gameserver.network.l2.c2s.RequestPackageSend;
-import l2.gameserver.network.l2.c2s.RequestPackageSendableItemList;
-import l2.gameserver.network.l2.c2s.RequestPartyMatchConfig;
-import l2.gameserver.network.l2.c2s.RequestPartyMatchDetail;
-import l2.gameserver.network.l2.c2s.RequestPartyMatchList;
-import l2.gameserver.network.l2.c2s.RequestPetGetItem;
-import l2.gameserver.network.l2.c2s.RequestPetUseItem;
-import l2.gameserver.network.l2.c2s.RequestPetition;
-import l2.gameserver.network.l2.c2s.RequestPetitionCancel;
-import l2.gameserver.network.l2.c2s.RequestPledgeCrest;
-import l2.gameserver.network.l2.c2s.RequestPledgeCrestLarge;
-import l2.gameserver.network.l2.c2s.RequestPledgeExtendedInfo;
-import l2.gameserver.network.l2.c2s.RequestPledgeInfo;
-import l2.gameserver.network.l2.c2s.RequestPledgeMemberInfo;
-import l2.gameserver.network.l2.c2s.RequestPledgeMemberList;
-import l2.gameserver.network.l2.c2s.RequestPledgeMemberPowerInfo;
-import l2.gameserver.network.l2.c2s.RequestPledgePower;
-import l2.gameserver.network.l2.c2s.RequestPledgePowerGradeList;
-import l2.gameserver.network.l2.c2s.RequestPledgeReorganizeMember;
-import l2.gameserver.network.l2.c2s.RequestPledgeSetAcademyMaster;
-import l2.gameserver.network.l2.c2s.RequestPledgeSetMemberPowerGrade;
-import l2.gameserver.network.l2.c2s.RequestPledgeWarList;
-import l2.gameserver.network.l2.c2s.RequestPreviewItem;
-import l2.gameserver.network.l2.c2s.RequestPrivateStoreBuy;
-import l2.gameserver.network.l2.c2s.RequestPrivateStoreBuySellList;
-import l2.gameserver.network.l2.c2s.RequestPrivateStoreManageBuy;
-import l2.gameserver.network.l2.c2s.RequestPrivateStoreQuitBuy;
-import l2.gameserver.network.l2.c2s.RequestPrivateStoreQuitSell;
-import l2.gameserver.network.l2.c2s.RequestPrivateStoreSell;
-import l2.gameserver.network.l2.c2s.RequestProcureCropList;
-import l2.gameserver.network.l2.c2s.RequestQuestAbort;
-import l2.gameserver.network.l2.c2s.RequestQuestList;
-import l2.gameserver.network.l2.c2s.RequestRecipeBookOpen;
-import l2.gameserver.network.l2.c2s.RequestRecipeItemDelete;
-import l2.gameserver.network.l2.c2s.RequestRecipeItemMakeInfo;
-import l2.gameserver.network.l2.c2s.RequestRecipeItemMakeSelf;
-import l2.gameserver.network.l2.c2s.RequestRecipeShopListSet;
-import l2.gameserver.network.l2.c2s.RequestRecipeShopMakeDo;
-import l2.gameserver.network.l2.c2s.RequestRecipeShopMakeInfo;
-import l2.gameserver.network.l2.c2s.RequestRecipeShopManageQuit;
-import l2.gameserver.network.l2.c2s.RequestRecipeShopMessageSet;
-import l2.gameserver.network.l2.c2s.RequestRecipeShopSellList;
-import l2.gameserver.network.l2.c2s.RequestRefine;
-import l2.gameserver.network.l2.c2s.RequestRefineCancel;
-import l2.gameserver.network.l2.c2s.RequestReload;
-import l2.gameserver.network.l2.c2s.RequestRestart;
-import l2.gameserver.network.l2.c2s.RequestRestartPoint;
-import l2.gameserver.network.l2.c2s.RequestSSQStatus;
-import l2.gameserver.network.l2.c2s.RequestSellItem;
-import l2.gameserver.network.l2.c2s.RequestSendL2FriendSay;
-import l2.gameserver.network.l2.c2s.RequestSetAllyCrest;
-import l2.gameserver.network.l2.c2s.RequestSetCastleSiegeTime;
-import l2.gameserver.network.l2.c2s.RequestSetCrop;
-import l2.gameserver.network.l2.c2s.RequestSetPledgeCrest;
-import l2.gameserver.network.l2.c2s.RequestSetPledgeCrestLarge;
-import l2.gameserver.network.l2.c2s.RequestSetSeed;
-import l2.gameserver.network.l2.c2s.RequestShortCutDel;
-import l2.gameserver.network.l2.c2s.RequestShortCutReg;
-import l2.gameserver.network.l2.c2s.RequestShowBoard;
-import l2.gameserver.network.l2.c2s.RequestShowMiniMap;
-import l2.gameserver.network.l2.c2s.RequestSiegeInfo;
-import l2.gameserver.network.l2.c2s.RequestSkillList;
-import l2.gameserver.network.l2.c2s.RequestSocialAction;
-import l2.gameserver.network.l2.c2s.RequestStartPledgeWar;
-import l2.gameserver.network.l2.c2s.RequestStopPledgeWar;
-import l2.gameserver.network.l2.c2s.RequestTargetCanceld;
-import l2.gameserver.network.l2.c2s.RequestTutorialClientEvent;
-import l2.gameserver.network.l2.c2s.RequestTutorialLinkHtml;
-import l2.gameserver.network.l2.c2s.RequestTutorialPassCmdToServer;
-import l2.gameserver.network.l2.c2s.RequestTutorialQuestionMark;
-import l2.gameserver.network.l2.c2s.RequestUnEquipItem;
-import l2.gameserver.network.l2.c2s.RequestVoteNew;
-import l2.gameserver.network.l2.c2s.RequestWithDrawalParty;
-import l2.gameserver.network.l2.c2s.RequestWithdrawAlly;
-import l2.gameserver.network.l2.c2s.RequestWithdrawPartyRoom;
-import l2.gameserver.network.l2.c2s.RequestWithdrawalPledge;
-import l2.gameserver.network.l2.c2s.RequestWriteHeroWords;
-import l2.gameserver.network.l2.c2s.Say2C;
-import l2.gameserver.network.l2.c2s.SendBypassBuildCmd;
-import l2.gameserver.network.l2.c2s.SendWareHouseDepositList;
-import l2.gameserver.network.l2.c2s.SendWareHouseWithDrawList;
-import l2.gameserver.network.l2.c2s.SetPrivateStoreBuyList;
-import l2.gameserver.network.l2.c2s.SetPrivateStoreMsgBuy;
-import l2.gameserver.network.l2.c2s.SetPrivateStoreMsgSell;
-import l2.gameserver.network.l2.c2s.SetPrivateStoreSellList;
-import l2.gameserver.network.l2.c2s.SnoopQuit;
-import l2.gameserver.network.l2.c2s.StartRotatingC;
-import l2.gameserver.network.l2.c2s.TradeDone;
-import l2.gameserver.network.l2.c2s.TradeRequest;
-import l2.gameserver.network.l2.c2s.UseItem;
-import l2.gameserver.network.l2.c2s.ValidatePosition;
+import l2.gameserver.network.l2.c2s.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 
 public final class GamePacketHandler implements IPacketHandler<GameClient>, IClientFactory<GameClient>, IMMOExecutor<GameClient> {
   private static final Logger _log = LoggerFactory.getLogger(GamePacketHandler.class);
@@ -232,82 +27,81 @@ public final class GamePacketHandler implements IPacketHandler<GameClient>, ICli
     if (CGMHelper.isActive()) {
       msg = CGMHelper.getInstance().handle(client, id);
       if (msg != null) {
-        return (ReceivablePacket)msg;
+        return msg;
       }
     }
 
     try {
-      int id2 = false;
       switch(client.getState()) {
         case CONNECTED:
           switch(id) {
             case 0:
               msg = new ProtocolVersion();
-              return (ReceivablePacket)msg;
+              return msg;
             case 8:
               msg = new AuthLogin();
-              return (ReceivablePacket)msg;
+              return msg;
             case 168:
               msg = new NetPing();
-              return (ReceivablePacket)msg;
+              return msg;
             case 203:
               msg = new ReplyGameGuardQuery();
-              return (ReceivablePacket)msg;
+              return msg;
             default:
               client.onUnknownPacket();
-              return (ReceivablePacket)msg;
+              return msg;
           }
         case AUTHED:
           switch(id) {
             case 9:
               msg = new Logout();
-              return (ReceivablePacket)msg;
+              return msg;
             case 11:
               msg = new CharacterCreate();
-              return (ReceivablePacket)msg;
+              return msg;
             case 12:
               msg = new CharacterDelete();
-              return (ReceivablePacket)msg;
+              return msg;
             case 13:
               msg = new CharacterSelected();
-              return (ReceivablePacket)msg;
+              return msg;
             case 14:
               msg = new NewCharacter();
-              return (ReceivablePacket)msg;
+              return msg;
             case 33:
               msg = new RequestBypassToServer();
-              return (ReceivablePacket)msg;
+              return msg;
             case 98:
               msg = new CharacterRestore();
-              return (ReceivablePacket)msg;
+              return msg;
             case 168:
               msg = new NetPing();
-              return (ReceivablePacket)msg;
+              return msg;
             case 202:
               msg = new ReplyGameGuardQuery();
-              return (ReceivablePacket)msg;
+              return msg;
             case 208:
               int id3 = buf.getShort() & '\uffff';
               switch(id3) {
                 case 54:
                   msg = new GotoLobby();
-                  return (ReceivablePacket)msg;
+                  return msg;
                 case 147:
                   msg = new RequestEx2ndPasswordCheck();
-                  return (ReceivablePacket)msg;
+                  return msg;
                 case 148:
                   msg = new RequestEx2ndPasswordVerify();
-                  return (ReceivablePacket)msg;
+                  return msg;
                 case 149:
                   msg = new RequestEx2ndPasswordReq();
-                  return (ReceivablePacket)msg;
+                  return msg;
                 default:
                   client.onUnknownPacket();
-                  return (ReceivablePacket)msg;
+                  return msg;
               }
             default:
               client.onUnknownPacket();
-              return (ReceivablePacket)msg;
+              return msg;
           }
         case IN_GAME:
           switch(id) {
@@ -975,7 +769,7 @@ public final class GamePacketHandler implements IPacketHandler<GameClient>, ICli
       client.onPacketReadFail();
     }
 
-    return (ReceivablePacket)msg;
+    return msg;
   }
 
   public GameClient create(MMOConnection<GameClient> con) {

@@ -5,13 +5,6 @@
 
 package l2.gameserver.model.entity.oly;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import l2.gameserver.Config;
 import l2.gameserver.model.GameObjectsStorage;
 import l2.gameserver.model.Player;
@@ -19,6 +12,9 @@ import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public class ParticipantPool {
   private static final Logger _log = LoggerFactory.getLogger(ParticipantPool.class);
@@ -60,9 +56,9 @@ public class ParticipantPool {
   public boolean isEnough(CompetitionType type, int cls_id) {
     switch(type) {
       case CLASS_FREE:
-        return ((ArrayList)this._pools.get(type)).size() >= Config.OLY_MIN_CF_START;
+        return this._pools.get(type).size() >= Config.OLY_MIN_CF_START;
       case TEAM_CLASS_FREE:
-        return ((ArrayList)this._pools.get(type)).size() >= Config.OLY_MIN_TB_START;
+        return this._pools.get(type).size() >= Config.OLY_MIN_TB_START;
       case CLASS_INDIVIDUAL:
         int cnt = 0;
         Iterator var4 = ((ArrayList)this._pools.get(type)).iterator();
@@ -81,8 +77,8 @@ public class ParticipantPool {
   }
 
   public int getNearestIndex(CompetitionType type, int idx, int cls_id) {
-    ArrayList<ParticipantPool.EntryRec> pool = (ArrayList)this._pools.get(type);
-    ParticipantPool.EntryRec base_rec = (ParticipantPool.EntryRec)pool.get(idx);
+    ArrayList<ParticipantPool.EntryRec> pool = this._pools.get(type);
+    ParticipantPool.EntryRec base_rec = pool.get(idx);
     if (base_rec == null) {
       return -1;
     } else {
@@ -93,7 +89,7 @@ public class ParticipantPool {
       ParticipantPool.EntryRec pr;
       int delta;
       for(i = 0; i < idx; ++i) {
-        pr = (ParticipantPool.EntryRec)pool.get(i);
+        pr = pool.get(i);
         if (pr != null && (type != CompetitionType.CLASS_INDIVIDUAL || cls_id <= 0 || cls_id == pr.cls_id)) {
           delta = Math.abs(base_rec.average - pr.average);
           if (delta < ndelta) {
@@ -104,7 +100,7 @@ public class ParticipantPool {
       }
 
       for(i = idx + 1; i < pool.size(); ++i) {
-        pr = (ParticipantPool.EntryRec)pool.get(i);
+        pr = pool.get(i);
         if (pr != null && (type != CompetitionType.CLASS_INDIVIDUAL || cls_id <= 0 || cls_id == pr.cls_id)) {
           delta = Math.abs(base_rec.average - pr.average);
           if (delta < ndelta) {
@@ -120,23 +116,22 @@ public class ParticipantPool {
 
   public void createEntry(CompetitionType type, Player[] players) {
     if (players != null && players.length != 0) {
-      ArrayList<ParticipantPool.EntryRec> pool = (ArrayList)this._pools.get(type);
+      ArrayList<ParticipantPool.EntryRec> pool = this._pools.get(type);
       synchronized(pool) {
-        ((ArrayList)this._pools.get(type)).add(new ParticipantPool.EntryRec(players));
+        this._pools.get(type).add(new ParticipantPool.EntryRec(players));
       }
     }
   }
 
   public Player[][] retrieveEntrys(CompetitionType type, int cls_id) {
     this.cleadInvalidEntrys(type);
-    ArrayList<ParticipantPool.EntryRec> pool = (ArrayList)this._pools.get(type);
+    ArrayList<ParticipantPool.EntryRec> pool = this._pools.get(type);
     int oldest_idx = -1;
     long oldest_time = -9223372036854775808L;
-    int pair_idx = true;
-    Player[][] ret = (Player[][])null;
+    Player[][] ret = null;
     synchronized(pool) {
       for(int i = 0; i < pool.size(); ++i) {
-        ParticipantPool.EntryRec pr = (ParticipantPool.EntryRec)pool.get(i);
+        ParticipantPool.EntryRec pr = pool.get(i);
         if (pr != null && (type != CompetitionType.CLASS_INDIVIDUAL || cls_id <= 0 || cls_id == pr.cls_id) && pr.reg_time > oldest_time) {
           oldest_idx = i;
           oldest_time = pr.reg_time;
@@ -144,13 +139,13 @@ public class ParticipantPool {
       }
 
       if (oldest_idx < 0) {
-        return (Player[][])null;
+        return null;
       } else {
         int pair_idx = this.getNearestIndex(type, oldest_idx, cls_id);
         if (pair_idx < 0) {
-          return (Player[][])null;
+          return null;
         } else {
-          ret = new Player[][]{Util.GetPlayersFromStoredIds(((ParticipantPool.EntryRec)pool.remove(oldest_idx)).sids), Util.GetPlayersFromStoredIds(((ParticipantPool.EntryRec)pool.remove(pair_idx)).sids)};
+          ret = new Player[][]{Util.GetPlayersFromStoredIds(pool.remove(oldest_idx).sids), Util.GetPlayersFromStoredIds(pool.remove(pair_idx).sids)};
           pool.trimToSize();
           return ret;
         }
@@ -160,10 +155,10 @@ public class ParticipantPool {
 
   public boolean removeEntryByPlayer(CompetitionType type, Player player) {
     long psid = player.getStoredId();
-    ArrayList<ParticipantPool.EntryRec> pool = (ArrayList)this._pools.get(type);
+    ArrayList<ParticipantPool.EntryRec> pool = this._pools.get(type);
     synchronized(pool) {
       for(int i = 0; i < pool.size(); ++i) {
-        ParticipantPool.EntryRec pr = (ParticipantPool.EntryRec)pool.get(i);
+        ParticipantPool.EntryRec pr = pool.get(i);
         if (pr != null) {
           long[] var9 = pr.sids;
           int var10 = var9.length;
@@ -188,10 +183,10 @@ public class ParticipantPool {
 
     while(var4.hasNext()) {
       Entry<CompetitionType, ArrayList<ParticipantPool.EntryRec>> e = (Entry)var4.next();
-      ArrayList<ParticipantPool.EntryRec> pool = (ArrayList)e.getValue();
+      ArrayList<ParticipantPool.EntryRec> pool = e.getValue();
 
       for(int i = 0; i < pool.size(); ++i) {
-        ParticipantPool.EntryRec pr = (ParticipantPool.EntryRec)pool.get(i);
+        ParticipantPool.EntryRec pr = pool.get(i);
         if (pr != null) {
           long[] var9 = pr.sids;
           int var10 = var9.length;
@@ -199,7 +194,7 @@ public class ParticipantPool {
           for(int var11 = 0; var11 < var10; ++var11) {
             long sid = var9[var11];
             if (sid == psid) {
-              return (CompetitionType)e.getKey();
+              return e.getKey();
             }
           }
         }
@@ -237,7 +232,7 @@ public class ParticipantPool {
 
       while(var3.hasNext()) {
         Entry<CompetitionType, ArrayList<ParticipantPool.EntryRec>> e = (Entry)var3.next();
-        ArrayList<ParticipantPool.EntryRec> entryRecs = (ArrayList)e.getValue();
+        ArrayList<ParticipantPool.EntryRec> entryRecs = e.getValue();
         synchronized(entryRecs) {
           recs.addAll(entryRecs);
         }
@@ -269,7 +264,7 @@ public class ParticipantPool {
 
       while(var3.hasNext()) {
         Entry<CompetitionType, ArrayList<ParticipantPool.EntryRec>> e = (Entry)var3.next();
-        ArrayList<ParticipantPool.EntryRec> entryRecs = (ArrayList)e.getValue();
+        ArrayList<ParticipantPool.EntryRec> entryRecs = e.getValue();
         synchronized(entryRecs) {
           recs.addAll(entryRecs);
         }
@@ -297,7 +292,7 @@ public class ParticipantPool {
       return false;
     } else {
       long psid = player.getStoredId();
-      ArrayList<ParticipantPool.EntryRec> pool = (ArrayList)this._pools.get(type);
+      ArrayList<ParticipantPool.EntryRec> pool = this._pools.get(type);
       Iterator var6 = pool.iterator();
 
       while(true) {
@@ -324,7 +319,7 @@ public class ParticipantPool {
   }
 
   public void broadcastToEntrys(CompetitionType type, L2GameServerPacket gsp, int cls_id) {
-    ArrayList<ParticipantPool.EntryRec> pool = (ArrayList)this._pools.get(type);
+    ArrayList<ParticipantPool.EntryRec> pool = this._pools.get(type);
     Iterator var5 = pool.iterator();
 
     while(true) {
@@ -351,12 +346,12 @@ public class ParticipantPool {
   }
 
   private void cleadInvalidEntrys(CompetitionType type) {
-    ArrayList<ParticipantPool.EntryRec> pool = (ArrayList)this._pools.get(type);
+    ArrayList<ParticipantPool.EntryRec> pool = this._pools.get(type);
     synchronized(pool) {
       ArrayList<Integer> invalid_entrys = new ArrayList<>();
 
       for(int i = 0; i < pool.size(); ++i) {
-        if (!this.isValidEntry((ParticipantPool.EntryRec)pool.get(i))) {
+        if (!this.isValidEntry(pool.get(i))) {
           invalid_entrys.add(i);
         }
       }
@@ -391,10 +386,10 @@ public class ParticipantPool {
 
     while(var2.hasNext()) {
       Entry<CompetitionType, ArrayList<ParticipantPool.EntryRec>> e = (Entry)var2.next();
-      ArrayList<ParticipantPool.EntryRec> pool = (ArrayList)e.getValue();
+      ArrayList<ParticipantPool.EntryRec> pool = e.getValue();
 
       for(int i = 0; i < pool.size(); ++i) {
-        ParticipantPool.EntryRec pr = (ParticipantPool.EntryRec)pool.get(i);
+        ParticipantPool.EntryRec pr = pool.get(i);
         if (pr != null) {
           result += pr.sids.length;
         }

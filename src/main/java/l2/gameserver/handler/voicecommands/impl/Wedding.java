@@ -5,9 +5,6 @@
 
 package l2.gameserver.handler.voicecommands.impl;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import l2.commons.dbutils.DbUtils;
 import l2.commons.lang.reference.HardReference;
 import l2.commons.threading.RunnableImpl;
@@ -29,7 +26,6 @@ import l2.gameserver.model.entity.Couple;
 import l2.gameserver.network.l2.components.CustomMessage;
 import l2.gameserver.network.l2.components.SystemMsg;
 import l2.gameserver.network.l2.s2c.ConfirmDlg;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.MagicSkillUse;
 import l2.gameserver.network.l2.s2c.SetupGauge;
 import l2.gameserver.network.l2.s2c.SystemMessage;
@@ -39,6 +35,10 @@ import l2.gameserver.utils.Location;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class Wedding implements IVoicedCommandHandler {
   private static final Logger _log = LoggerFactory.getLogger(Wedding.class);
@@ -55,7 +55,7 @@ public class Wedding implements IVoicedCommandHandler {
     } else if (command.startsWith("divorce")) {
       return this.divorce(activeChar);
     } else {
-      return command.startsWith("gotolove") ? this.goToLove(activeChar) : false;
+      return command.startsWith("gotolove") && this.goToLove(activeChar);
     }
   }
 
@@ -66,25 +66,24 @@ public class Wedding implements IVoicedCommandHandler {
       int _partnerId = activeChar.getPartnerId();
       long AdenaAmount = 0L;
       if (activeChar.isMaried()) {
-        activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.Divorced", activeChar, new Object[0]));
+        activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.Divorced", activeChar));
         AdenaAmount = Math.abs(activeChar.getAdena() / 100L * (long)Config.WEDDING_DIVORCE_COSTS - 10L);
         activeChar.reduceAdena(AdenaAmount, true);
       } else {
-        activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.Disengaged", activeChar, new Object[0]));
+        activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.Disengaged", activeChar));
       }
 
       activeChar.setMaried(false);
       activeChar.setPartnerId(0);
       Couple couple = CoupleManager.getInstance().getCouple(activeChar.getCoupleId());
       couple.divorce();
-      couple = null;
       Player partner = GameObjectsStorage.getPlayer(_partnerId);
       if (partner != null) {
         partner.setPartnerId(0);
         if (partner.isMaried()) {
-          partner.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PartnerDivorce", partner, new Object[0]));
+          partner.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PartnerDivorce", partner));
         } else {
-          partner.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PartnerDisengage", partner, new Object[0]));
+          partner.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PartnerDisengage", partner));
         }
 
         partner.setMaried(false);
@@ -99,13 +98,13 @@ public class Wedding implements IVoicedCommandHandler {
 
   public boolean engage(Player activeChar) {
     if (activeChar.getTarget() == null) {
-      activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.NoneTargeted", activeChar, new Object[0]));
+      activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.NoneTargeted", activeChar));
       return false;
     } else if (!activeChar.getTarget().isPlayer()) {
-      activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.OnlyAnotherPlayer", activeChar, new Object[0]));
+      activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.OnlyAnotherPlayer", activeChar));
       return false;
     } else if (activeChar.getPartnerId() != 0) {
-      activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.AlreadyEngaged", activeChar, new Object[0]));
+      activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.AlreadyEngaged", activeChar));
       if (Config.WEDDING_PUNISH_INFIDELITY) {
         activeChar.startAbnormalEffect(AbnormalEffect.BIG_HEAD);
         int skillLevel = 1;
@@ -131,24 +130,24 @@ public class Wedding implements IVoicedCommandHandler {
     } else {
       Player ptarget = (Player)activeChar.getTarget();
       if (ptarget.getObjectId() == activeChar.getObjectId()) {
-        activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.EngagingYourself", activeChar, new Object[0]));
+        activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.EngagingYourself", activeChar));
         return false;
       } else if (ptarget.isMaried()) {
-        activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PlayerAlreadyMarried", activeChar, new Object[0]));
+        activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PlayerAlreadyMarried", activeChar));
         return false;
       } else if (ptarget.getPartnerId() != 0) {
-        activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PlayerAlreadyEngaged", activeChar, new Object[0]));
+        activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PlayerAlreadyEngaged", activeChar));
         return false;
       } else {
         Pair<Integer, OnAnswerListener> entry = ptarget.getAskListener(false);
         if (entry != null && entry.getValue() instanceof Wedding.CoupleAnswerListener) {
-          activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PlayerAlreadyAsked", activeChar, new Object[0]));
+          activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PlayerAlreadyAsked", activeChar));
           return false;
         } else if (ptarget.getPartnerId() != 0) {
-          activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PlayerAlreadyEngaged", activeChar, new Object[0]));
+          activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PlayerAlreadyEngaged", activeChar));
           return false;
         } else if (ptarget.getSex() == activeChar.getSex() && !Config.WEDDING_SAMESEX) {
-          activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.SameSex", activeChar, new Object[0]));
+          activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.SameSex", activeChar));
           return false;
         } else {
           boolean FoundOnFriendList = false;
@@ -176,7 +175,7 @@ public class Wedding implements IVoicedCommandHandler {
           }
 
           if (!FoundOnFriendList) {
-            activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.NotInFriendlist", activeChar, new Object[0]));
+            activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.NotInFriendlist", activeChar));
             return false;
           } else {
             ConfirmDlg packet = (ConfirmDlg)(new ConfirmDlg(SystemMsg.S1, 60000)).addString("Player " + activeChar.getName() + " asking you to engage. Do you want to start new relationship?");
@@ -190,23 +189,23 @@ public class Wedding implements IVoicedCommandHandler {
 
   public boolean goToLove(Player activeChar) {
     if (!activeChar.isMaried()) {
-      activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.YoureNotMarried", activeChar, new Object[0]));
+      activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.YoureNotMarried", activeChar));
       return false;
     } else if (activeChar.getPartnerId() == 0) {
-      activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PartnerNotInDB", activeChar, new Object[0]));
+      activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PartnerNotInDB", activeChar));
       return false;
     } else {
       Player partner = GameObjectsStorage.getPlayer(activeChar.getPartnerId());
       if (partner == null) {
-        activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PartnerOffline", activeChar, new Object[0]));
+        activeChar.sendMessage(new CustomMessage("voicedcommandhandlers.Wedding.PartnerOffline", activeChar));
         return false;
-      } else if (!partner.isOlyParticipant() && !partner.isFestivalParticipant() && !activeChar.isMovementDisabled() && !activeChar.isMuted((Skill)null) && !activeChar.isOlyParticipant() && !activeChar.isInDuel() && !activeChar.isFestivalParticipant() && !partner.isInZone(ZoneType.no_summon)) {
+      } else if (!partner.isOlyParticipant() && !partner.isFestivalParticipant() && !activeChar.isMovementDisabled() && !activeChar.isMuted(null) && !activeChar.isOlyParticipant() && !activeChar.isInDuel() && !activeChar.isFestivalParticipant() && !partner.isInZone(ZoneType.no_summon)) {
         if (activeChar.isInParty() && activeChar.getParty().isInDimensionalRift() || partner.isInParty() && partner.getParty().isInDimensionalRift()) {
-          activeChar.sendMessage(new CustomMessage("common.TryLater", activeChar, new Object[0]));
+          activeChar.sendMessage(new CustomMessage("common.TryLater", activeChar));
           return false;
         } else if (activeChar.getTeleMode() == 0 && activeChar.getReflection() == ReflectionManager.DEFAULT) {
           if (!partner.isInZoneBattle() && !partner.isInZone(ZoneType.SIEGE) && !partner.isInZone(ZoneType.no_restart) && !partner.isOlyParticipant() && !activeChar.isInZoneBattle() && !activeChar.isInZone(ZoneType.SIEGE) && !activeChar.isInZone(ZoneType.no_restart) && !activeChar.isOlyParticipant() && partner.getReflection() == ReflectionManager.DEFAULT && !partner.isInZone(ZoneType.no_summon) && !activeChar.isInObserverMode() && !partner.isInObserverMode() && !partner.isInZone(ZoneType.fun) && !activeChar.isInZone(ZoneType.fun)) {
-            if (!activeChar.reduceAdena((long)Config.WEDDING_TELEPORT_PRICE, true)) {
+            if (!activeChar.reduceAdena(Config.WEDDING_TELEPORT_PRICE, true)) {
               activeChar.sendPacket(Msg.YOU_DO_NOT_HAVE_ENOUGH_ADENA);
               return false;
             } else {
@@ -216,9 +215,9 @@ public class Wedding implements IVoicedCommandHandler {
               activeChar.sendActionFailed();
               activeChar.stopMove();
               activeChar.startParalyzed();
-              activeChar.sendMessage((new CustomMessage("voicedcommandhandlers.Wedding.Teleport", activeChar, new Object[0])).addNumber((long)(teleportTimer / 60)));
+              activeChar.sendMessage((new CustomMessage("voicedcommandhandlers.Wedding.Teleport", activeChar)).addNumber(teleportTimer / 60));
               activeChar.getAI().setIntention(CtrlIntention.AI_INTENTION_ACTIVE);
-              activeChar.broadcastPacket(new L2GameServerPacket[]{new MagicSkillUse(activeChar, activeChar, 1050, 1, teleportTimer, 0L)});
+              activeChar.broadcastPacket(new MagicSkillUse(activeChar, activeChar, 1050, 1, teleportTimer, 0L));
               activeChar.sendPacket(new SetupGauge(activeChar, 0, teleportTimer));
               ThreadPoolManager.getInstance().schedule(new Wedding.EscapeFinalizer(activeChar, partner.getLoc()), (long)teleportTimer * 1000L);
               return true;
@@ -228,11 +227,11 @@ public class Wedding implements IVoicedCommandHandler {
             return false;
           }
         } else {
-          activeChar.sendMessage(new CustomMessage("common.TryLater", activeChar, new Object[0]));
+          activeChar.sendMessage(new CustomMessage("common.TryLater", activeChar));
           return false;
         }
       } else {
-        activeChar.sendMessage(new CustomMessage("common.TryLater", activeChar, new Object[0]));
+        activeChar.sendMessage(new CustomMessage("common.TryLater", activeChar));
         return false;
       }
     }
@@ -273,25 +272,26 @@ public class Wedding implements IVoicedCommandHandler {
     private HardReference<Player> _playerRef1;
     private HardReference<Player> _playerRef2;
 
+    @SuppressWarnings("unchecked")
     public CoupleAnswerListener(Player player1, Player player2) {
-      this._playerRef1 = player1.getRef();
-      this._playerRef2 = player2.getRef();
+      this._playerRef1 = (HardReference<Player>) player1.getRef();
+      this._playerRef2 = (HardReference<Player>) player2.getRef();
     }
 
     public void sayYes() {
       Player player1;
       Player player2;
-      if ((player1 = (Player)this._playerRef1.get()) != null && (player2 = (Player)this._playerRef2.get()) != null) {
+      if ((player1 = this._playerRef1.get()) != null && (player2 = this._playerRef2.get()) != null) {
         CoupleManager.getInstance().createCouple(player1, player2);
-        player1.sendMessage(new CustomMessage("l2p.gameserver.model.L2Player.EngageAnswerYes", player2, new Object[0]));
+        player1.sendMessage(new CustomMessage("l2p.gameserver.model.L2Player.EngageAnswerYes", player2));
       }
     }
 
     public void sayNo() {
       Player player1;
       Player player2;
-      if ((player1 = (Player)this._playerRef1.get()) != null && (player2 = (Player)this._playerRef2.get()) != null) {
-        player1.sendMessage(new CustomMessage("l2p.gameserver.model.L2Player.EngageAnswerNo", player2, new Object[0]));
+      if ((player1 = this._playerRef1.get()) != null && (player2 = this._playerRef2.get()) != null) {
+        player1.sendMessage(new CustomMessage("l2p.gameserver.model.L2Player.EngageAnswerNo", player2));
       }
     }
   }

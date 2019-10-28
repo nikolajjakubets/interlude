@@ -6,16 +6,7 @@
 package l2.gameserver.model.instances;
 
 import gnu.trove.TIntObjectIterator;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.StringTokenizer;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledFuture;
 import l2.commons.collections.MultiValueSet;
-import l2.commons.lang.reference.HardReference;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.Config;
 import l2.gameserver.ThreadPoolManager;
@@ -34,17 +25,7 @@ import l2.gameserver.instancemanager.DimensionalRiftManager;
 import l2.gameserver.instancemanager.QuestManager;
 import l2.gameserver.instancemanager.ReflectionManager;
 import l2.gameserver.listener.NpcListener;
-import l2.gameserver.model.AggroList;
-import l2.gameserver.model.Creature;
-import l2.gameserver.model.GameObjectsStorage;
-import l2.gameserver.model.MinionList;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.Skill;
-import l2.gameserver.model.SkillLearn;
-import l2.gameserver.model.Spawner;
-import l2.gameserver.model.TeleportLocation;
-import l2.gameserver.model.Territory;
-import l2.gameserver.model.World;
+import l2.gameserver.model.*;
 import l2.gameserver.model.GameObjectTasks.NotifyAITask;
 import l2.gameserver.model.Zone.ZoneType;
 import l2.gameserver.model.actor.listener.NpcListenerList;
@@ -66,22 +47,7 @@ import l2.gameserver.model.quest.QuestState;
 import l2.gameserver.network.l2.components.CustomMessage;
 import l2.gameserver.network.l2.components.IStaticPacket;
 import l2.gameserver.network.l2.components.SystemMsg;
-import l2.gameserver.network.l2.s2c.AcquireSkillDone;
-import l2.gameserver.network.l2.s2c.AcquireSkillList;
-import l2.gameserver.network.l2.s2c.ActionFail;
-import l2.gameserver.network.l2.s2c.AutoAttackStart;
-import l2.gameserver.network.l2.s2c.ExChangeNpcState;
-import l2.gameserver.network.l2.s2c.ExEnchantSkillList;
-import l2.gameserver.network.l2.s2c.ExShowBaseAttributeCancelWindow;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
-import l2.gameserver.network.l2.s2c.MyTargetSelected;
-import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
-import l2.gameserver.network.l2.s2c.NpcInfo;
-import l2.gameserver.network.l2.s2c.RadarControl;
-import l2.gameserver.network.l2.s2c.SocialAction;
-import l2.gameserver.network.l2.s2c.SystemMessage;
-import l2.gameserver.network.l2.s2c.SystemMessage2;
-import l2.gameserver.network.l2.s2c.ValidateLocation;
+import l2.gameserver.network.l2.s2c.*;
 import l2.gameserver.scripts.Events;
 import l2.gameserver.stats.Stats;
 import l2.gameserver.tables.ClanTable;
@@ -94,13 +60,13 @@ import l2.gameserver.templates.item.WeaponTemplate;
 import l2.gameserver.templates.npc.Faction;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.templates.spawn.SpawnRange;
-import l2.gameserver.utils.HtmlUtils;
-import l2.gameserver.utils.ItemFunctions;
-import l2.gameserver.utils.Location;
-import l2.gameserver.utils.ReflectionUtils;
-import l2.gameserver.utils.Strings;
+import l2.gameserver.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
 
 public class NpcInstance extends Creature {
   public static final String NO_CHAT_WINDOW = "noChatWindow";
@@ -179,9 +145,9 @@ public class NpcInstance extends Creature {
     }
   }
 
-  public HardReference<NpcInstance> getRef() {
-    return super.getRef();
-  }
+//  public HardReference<NpcInstance> getRef() {
+//    return super.getRef();
+//  }
 
   public CharacterAI getAI() {
     if (this._ai == null) {
@@ -290,10 +256,8 @@ public class NpcInstance extends Creature {
     if (itemCount != 0L && lastAttacker != null) {
       for(long i = 0L; i < itemCount; ++i) {
         ItemInstance item = ItemFunctions.createItem(itemId);
-        Iterator var8 = this.getEvents().iterator();
 
-        while(var8.hasNext()) {
-          GlobalEvent e = (GlobalEvent)var8.next();
+        for (GlobalEvent e : this.getEvents()) {
           item.addEvent(e);
         }
 

@@ -5,7 +5,6 @@
 
 package l2.gameserver.model;
 
-import java.util.List;
 import l2.commons.lang.reference.HardReference;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.Config;
@@ -14,10 +13,10 @@ import l2.gameserver.ai.CtrlEvent;
 import l2.gameserver.ai.CtrlIntention;
 import l2.gameserver.instancemanager.ReflectionManager;
 import l2.gameserver.model.entity.oly.HeroController;
-import l2.gameserver.model.instances.NpcInstance;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.MagicSkillLaunched;
 import l2.gameserver.network.l2.s2c.SystemMessage;
+
+import java.util.List;
 
 public class GameObjectTasks {
   public GameObjectTasks() {
@@ -37,15 +36,15 @@ public class GameObjectTasks {
     }
 
     public NotifyAITask(Creature cha, CtrlEvent evt, Object arg0) {
-      this(cha, evt, arg0, (Object)null);
+      this(cha, evt, arg0, null);
     }
 
     public NotifyAITask(Creature cha, CtrlEvent evt) {
-      this(cha, evt, (Object)null, (Object)null);
+      this(cha, evt, null, null);
     }
 
     public void runImpl() {
-      Creature character = (Creature)this._charRef.get();
+      Creature character = this._charRef.get();
       if (character != null && character.hasAI()) {
         character.getAI().notifyEvent(this._evt, this._agr0, this._agr1);
       }
@@ -62,7 +61,7 @@ public class GameObjectTasks {
     }
 
     public void runImpl() {
-      Creature character = (Creature)this._charRef.get();
+      Creature character = this._charRef.get();
       if (character != null) {
         Skill castingSkill = character.getCastingSkill();
         Creature castingTarget = character.getCastingTarget();
@@ -71,7 +70,7 @@ public class GameObjectTasks {
             character.abortCast(true, false);
           } else {
             List<Creature> targets = castingSkill.getTargets(character, castingTarget, this._forceUse);
-            character.broadcastPacket(new L2GameServerPacket[]{new MagicSkillLaunched(character, castingSkill, targets)});
+            character.broadcastPacket(new MagicSkillLaunched(character, castingSkill, targets));
           }
         } else {
           character.clearCastVars();
@@ -90,7 +89,7 @@ public class GameObjectTasks {
     }
 
     public void runImpl() {
-      Creature character = (Creature)this._charRef.get();
+      Creature character = this._charRef.get();
       if (character != null) {
         Skill castingSkill = character.getCastingSkill();
         Creature castingTarget = character.getCastingTarget();
@@ -111,7 +110,7 @@ public class GameObjectTasks {
     }
 
     public void runImpl() throws Exception {
-      Creature character = (Creature)this._charRef.get();
+      Creature character = this._charRef.get();
       if (character != null) {
         character.getAI().notifyEvent(CtrlEvent.EVT_READY_TO_ACT);
       }
@@ -159,7 +158,7 @@ public class GameObjectTasks {
     public void runImpl() {
       Creature character;
       Creature target;
-      if ((character = (Creature)this._charRef.get()) != null && (target = (Creature)this._targetRef.get()) != null) {
+      if ((character = this._charRef.get()) != null && (target = this._targetRef.get()) != null) {
         if (!character.isAttackAborted()) {
           character.onHitTimer(target, this._damage, this._crit, this._miss, this._soulshot, this._shld, this._unchargeSS);
           if (this._notify) {
@@ -183,7 +182,7 @@ public class GameObjectTasks {
     }
 
     public void runImpl() {
-      Creature character = (Creature)this._charRef.get();
+      Creature character = this._charRef.get();
       if (character != null) {
         character.onCastEndTime();
       }
@@ -204,7 +203,7 @@ public class GameObjectTasks {
     public void runImpl() {
       Creature cha;
       Creature target;
-      if ((cha = (Creature)this._charRef.get()) != null && (target = (Creature)this._targetRef.get()) != null) {
+      if ((cha = this._charRef.get()) != null && (target = this._targetRef.get()) != null) {
         cha.altOnMagicUseTimer(target, this._skill);
       }
     }
@@ -214,11 +213,11 @@ public class GameObjectTasks {
     private final HardReference<Player> _playerRef;
 
     public EndCustomHeroTask(Player player) {
-      this._playerRef = player.getRef();
+      this._playerRef = (HardReference<Player>) player.getRef();
     }
 
     public void runImpl() {
-      Player player = (Player)this._playerRef.get();
+      Player player = this._playerRef.get();
       if (player != null) {
         if (player.getVar("CustomHeroEndTime") != null && !HeroController.getInstance().isCurrentHero(player)) {
           player.setHero(false);
@@ -233,11 +232,11 @@ public class GameObjectTasks {
     private final HardReference<Player> _playerRef;
 
     public EndStandUpTask(Player player) {
-      this._playerRef = player.getRef();
+      this._playerRef = (HardReference<Player>) player.getRef();
     }
 
     public void runImpl() {
-      Player player = (Player)this._playerRef.get();
+      Player player = this._playerRef.get();
       if (player != null) {
         player.sittingTaskLaunched = false;
         player.setSitting(false);
@@ -253,11 +252,11 @@ public class GameObjectTasks {
     private final HardReference<Player> _playerRef;
 
     public EndSitDownTask(Player player) {
-      this._playerRef = player.getRef();
+      this._playerRef = (HardReference<Player>) player.getRef();
     }
 
     public void runImpl() {
-      Player player = (Player)this._playerRef.get();
+      Player player = this._playerRef.get();
       if (player != null) {
         player.sittingTaskLaunched = false;
         player.getAI().clearNextAction();
@@ -269,11 +268,11 @@ public class GameObjectTasks {
     private final HardReference<Player> _playerRef;
 
     public UnJailTask(Player player) {
-      this._playerRef = player.getRef();
+      this._playerRef = (HardReference<Player>) player.getRef();
     }
 
     public void runImpl() {
-      Player player = (Player)this._playerRef.get();
+      Player player = this._playerRef.get();
       if (player != null) {
         player.unblock();
         player.standUp();
@@ -286,11 +285,11 @@ public class GameObjectTasks {
     private final HardReference<Player> _playerRef;
 
     public KickTask(Player player) {
-      this._playerRef = player.getRef();
+      this._playerRef = (HardReference<Player>) player.getRef();
     }
 
     public void runImpl() {
-      Player player = (Player)this._playerRef.get();
+      Player player = this._playerRef.get();
       if (player != null) {
         player.setOfflineMode(false);
         player.kick();
@@ -302,15 +301,15 @@ public class GameObjectTasks {
     private final HardReference<Player> _playerRef;
 
     public WaterTask(Player player) {
-      this._playerRef = player.getRef();
+      this._playerRef = (HardReference<Player>) player.getRef();
     }
 
     public void runImpl() {
-      Player player = (Player)this._playerRef.get();
+      Player player = this._playerRef.get();
       if (player != null) {
         if (!player.isDead() && player.isInWater()) {
           double reduceHp = player.getMaxHp() < 100 ? 1.0D : (double)(player.getMaxHp() / 100);
-          player.reduceCurrentHp(reduceHp, player, (Skill)null, false, false, true, false, false, false, false);
+          player.reduceCurrentHp(reduceHp, player, null, false, false, true, false, false, false, false);
           player.sendPacket((new SystemMessage(297)).addNumber((long)reduceHp));
         } else {
           player.stopWaterTask();
@@ -323,11 +322,11 @@ public class GameObjectTasks {
     private final HardReference<Player> _playerRef;
 
     public HourlyTask(Player player) {
-      this._playerRef = player.getRef();
+      this._playerRef = (HardReference<Player>) player.getRef();
     }
 
     public void runImpl() {
-      Player player = (Player)this._playerRef.get();
+      Player player = this._playerRef.get();
       if (player != null) {
         int hoursInGame = player.getHoursInGame();
         player.sendPacket((new SystemMessage(764)).addNumber(hoursInGame));
@@ -339,11 +338,11 @@ public class GameObjectTasks {
     private final HardReference<Player> _playerRef;
 
     public PvPFlagTask(Player player) {
-      this._playerRef = player.getRef();
+      this._playerRef = (HardReference<Player>) player.getRef();
     }
 
     public void runImpl() {
-      Player player = (Player)this._playerRef.get();
+      Player player = this._playerRef.get();
       if (player != null) {
         long diff = Math.abs(System.currentTimeMillis() - player.getlastPvpAttack());
         if (diff > (long)(Config.PVP_TIME + Config.PVP_BLINKING_UNFLAG_TIME)) {
@@ -362,13 +361,13 @@ public class GameObjectTasks {
     private final HardReference<Player> _playerRef;
 
     public SoulConsumeTask(Player player) {
-      this._playerRef = player.getRef();
+      this._playerRef = (HardReference<Player>) player.getRef();
     }
 
     public void runImpl() {
-      Player player = (Player)this._playerRef.get();
+      Player player = this._playerRef.get();
       if (player != null) {
-        player.setConsumedSouls(player.getConsumedSouls() + 1, (NpcInstance)null);
+        player.setConsumedSouls(player.getConsumedSouls() + 1, null);
       }
     }
   }
@@ -381,7 +380,7 @@ public class GameObjectTasks {
     }
 
     public void runImpl() {
-      Creature c = (Creature)this._ref.get();
+      Creature c = this._ref.get();
       if (c != null) {
         c.deleteMe();
       }

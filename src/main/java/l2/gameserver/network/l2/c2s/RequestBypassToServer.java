@@ -5,9 +5,6 @@
 
 package l2.gameserver.network.l2.c2s;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
 import l2.gameserver.Config;
 import l2.gameserver.data.xml.holder.MultiSellHolder;
 import l2.gameserver.handler.admincommands.AdminCommandHandler;
@@ -27,6 +24,10 @@ import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.scripts.Scripts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 public class RequestBypassToServer extends L2GameClientPacket {
   private static final Logger _log = LoggerFactory.getLogger(RequestBypassToServer.class);
@@ -119,17 +120,16 @@ public class RequestBypassToServer extends L2GameClientPacket {
                 id = this.bp.bypass.substring(4);
               }
 
-              GameObject object = activeChar.getVisibleObject(Integer.parseInt(id));
-              if (object != null && object.isNpc() && stadium_id > 0 && object.isInActingRange(activeChar)) {
-                activeChar.setLastNpc((NpcInstance)object);
-                ((NpcInstance)object).onBypassFeedback(activeChar, this.bp.bypass.substring(stadium_id + 1));
+              GameObject visibleObject = activeChar.getVisibleObject(Integer.parseInt(id));
+              if (visibleObject != null && visibleObject.isNpc() && stadium_id > 0 && visibleObject.isInActingRange(activeChar)) {
+                activeChar.setLastNpc((NpcInstance) visibleObject);
+                ((NpcInstance) visibleObject).onBypassFeedback(activeChar, this.bp.bypass.substring(stadium_id + 1));
               }
             } else if (this.bp.bypass.startsWith("_olympiad?command=move_op_field&field=")) {
               if (!Config.OLY_SPECTATION_ALLOWED) {
                 return;
               }
 
-              boolean var16 = true;
 
               try {
                 stadium_id = Integer.parseInt(this.bp.bypass.substring(38));

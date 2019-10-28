@@ -5,15 +5,6 @@
 
 package l2.gameserver.network.l2;
 
-import java.nio.ByteBuffer;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledFuture;
 import l2.commons.collections.LazyArrayList;
 import l2.commons.dbutils.DbUtils;
 import l2.commons.net.nio.impl.MMOClient;
@@ -41,6 +32,16 @@ import l2.gameserver.network.l2.s2c.RequestNetPing;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 
 public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
   private static final Logger _log = LoggerFactory.getLogger(GameClient.class);
@@ -217,7 +218,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
     List<Integer> charSlotMapping = this._charSlotMapping;
 
     for(int slotIdx = 0; slotIdx < charSlotMapping.size(); ++slotIdx) {
-      if (Integer.parseInt(objectId).equals(charSlotMapping.get(slotIdx))) {
+      if (objectId == charSlotMapping.get(slotIdx)) {
         return slotIdx;
       }
     }

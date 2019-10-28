@@ -5,11 +5,6 @@
 
 package l2.gameserver.model.entity.events.impl;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import l2.commons.collections.LazyArrayList;
 import l2.commons.collections.MultiValueSet;
 import l2.commons.dao.JdbcEntityState;
@@ -37,6 +32,8 @@ import l2.gameserver.tables.ClanTable;
 import l2.gameserver.templates.DoorTemplate.DoorType;
 import l2.gameserver.utils.Location;
 import l2.gameserver.utils.TimeUtils;
+
+import java.util.*;
 
 public abstract class SiegeEvent<R extends Residence, S extends SiegeClanObject> extends GlobalEvent {
   public static final String OWNER = "owner";
@@ -273,7 +270,7 @@ public abstract class SiegeEvent<R extends Residence, S extends SiegeClanObject>
 
   public S newSiegeClan(String type, int clanId, long param, long date) {
     Clan clan = ClanTable.getInstance().getClan(clanId);
-    return clan == null ? null : new SiegeClanObject(type, clan, param, date);
+    return clan == null ? null : (S) new SiegeClanObject(type, clan, param, date);
   }
 
   public void updateParticles(boolean start, String... arg) {
@@ -304,7 +301,7 @@ public abstract class SiegeEvent<R extends Residence, S extends SiegeClanObject>
     } else {
       for (SiegeClanObject siegeClan : siegeClanList) {
         if (siegeClan.getObjectId() == objectId) {
-          return siegeClan;
+          return (S) siegeClan;
         }
       }
 
@@ -347,7 +344,7 @@ public abstract class SiegeEvent<R extends Residence, S extends SiegeClanObject>
   }
 
   public void initEvent() {
-    this._residence = ResidenceHolder.getInstance().getResidence(this.getId());
+    this._residence = (R) ResidenceHolder.getInstance().getResidence(this.getId());
     this.loadSiegeClans();
     this.clearActions();
     super.initEvent();
@@ -536,7 +533,7 @@ public abstract class SiegeEvent<R extends Residence, S extends SiegeClanObject>
   }
 
   public void addSiegeSummon(SummonInstance summon) {
-    this._siegeSummons.add(summon.getRef());
+    this._siegeSummons.add((HardReference<SummonInstance>) summon.getRef());
   }
 
   public boolean containsSiegeSummon(SummonInstance cha) {

@@ -5,8 +5,6 @@
 
 package l2.gameserver.handler.admincommands.impl;
 
-import java.util.Iterator;
-import java.util.StringTokenizer;
 import l2.gameserver.Config;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.handler.admincommands.IAdminCommandHandler;
@@ -20,6 +18,9 @@ import l2.gameserver.network.l2.s2c.PledgeShowInfoUpdate;
 import l2.gameserver.network.l2.s2c.PledgeStatusChanged;
 import l2.gameserver.tables.ClanTable;
 import l2.gameserver.utils.Util;
+
+import java.util.Iterator;
+import java.util.StringTokenizer;
 
 public class AdminPledge implements IAdminCommandHandler {
   public AdminPledge() {
@@ -127,7 +128,7 @@ public class AdminPledge implements IAdminCommandHandler {
               activeChar.sendMessage("Please specify a number of clan points to add.");
             }
           } else if (action.equals("setleader")) {
-            Clan clan = target.getClan();
+            clan = target.getClan();
             if (target.getClan() == null) {
               activeChar.sendPacket(Msg.INVALID_TARGET);
               return false;

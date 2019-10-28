@@ -19,7 +19,7 @@ public class SummonAnswerListener implements OnAnswerListener {
   private final long _timeStamp;
 
   public SummonAnswerListener(Player player, Location loc, long count, int expiration) {
-    this._playerRef = player.getRef();
+    this._playerRef = (HardReference<Player>) player.getRef();
     this._location = loc;
     this._count = count;
     this._timeStamp = expiration > 0 ? System.currentTimeMillis() + (long)expiration : 9223372036854775807L;

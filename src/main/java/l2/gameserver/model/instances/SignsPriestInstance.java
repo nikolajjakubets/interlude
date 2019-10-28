@@ -5,8 +5,6 @@
 
 package l2.gameserver.model.instances;
 
-import java.util.Calendar;
-import java.util.StringTokenizer;
 import l2.gameserver.Config;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.data.htm.HtmCache;
@@ -25,6 +23,9 @@ import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.utils.ItemFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Calendar;
+import java.util.StringTokenizer;
 
 public class SignsPriestInstance extends NpcInstance {
   private static final Logger _log = LoggerFactory.getLogger(SignsPriestInstance.class);
@@ -74,7 +75,7 @@ public class SignsPriestInstance extends NpcInstance {
           this.showChatWindow(player, val, (String)null, true);
         } else if (command.startsWith("SevenSigns")) {
           int cabal = 0;
-          int stoneType = false;
+//          int stoneType = false;
           ItemInstance ancientAdena = player.getInventory().getItemByItemId(5575);
           long ancientAdenaAmount = ancientAdena == null ? 0L : ancientAdena.getCount();
           int val = Integer.parseInt(command.substring(11, 12).trim());
@@ -295,7 +296,7 @@ public class SignsPriestInstance extends NpcInstance {
               int playerCabal = SevenSigns.getInstance().getPlayerCabal(player);
               int winningCabal = SevenSigns.getInstance().getCabalHighestScore();
               if (SevenSigns.getInstance().isSealValidationPeriod() && playerCabal == winningCabal) {
-                int ancientAdenaReward = SevenSigns.getInstance().getAncientAdenaReward(player, true);
+                ancientAdenaReward = SevenSigns.getInstance().getAncientAdenaReward(player, true);
                 if (ancientAdenaReward < 3) {
                   this.showChatWindow(player, 9, "b", false);
                   return;
@@ -348,8 +349,8 @@ public class SignsPriestInstance extends NpcInstance {
                 long gcount = GreenStoneInstance != null ? GreenStoneInstance.getCount() : 0L;
                 ItemInstance RedStoneInstance = player.getInventory().getItemByItemId(6362);
                 ancientAdenaReward = RedStoneInstance != null ? RedStoneInstance.getCount() : 0L;
-                long ancientAdenaReward = SevenSigns.calcAncientAdenaReward(bcount, gcount, ancientAdenaReward);
-                if (ancientAdenaReward > 0L) {
+                long adenaReward = SevenSigns.calcAncientAdenaReward(bcount, gcount, ancientAdenaReward);
+                if (adenaReward > 0L) {
                   if (stoneInstance != null) {
                     player.getInventory().destroyItem(stoneInstance, bcount);
                     player.sendPacket(SystemMessage2.removeItems(6360, bcount));
@@ -361,14 +362,14 @@ public class SignsPriestInstance extends NpcInstance {
                   }
 
                   if (RedStoneInstance != null) {
-                    player.getInventory().destroyItem(RedStoneInstance, ancientAdenaReward);
-                    player.sendPacket(SystemMessage2.removeItems(6362, ancientAdenaReward));
+                    player.getInventory().destroyItem(RedStoneInstance, adenaReward);
+                    player.sendPacket(SystemMessage2.removeItems(6362, adenaReward));
                   }
 
                   ancientAdena = ItemFunctions.createItem(5575);
-                  ancientAdena.setCount(ancientAdenaReward);
+                  ancientAdena.setCount(adenaReward);
                   player.getInventory().addItem(ancientAdena);
-                  player.sendPacket(SystemMessage2.obtainItems(5575, ancientAdenaReward, 0));
+                  player.sendPacket(SystemMessage2.obtainItems(5575, adenaReward, 0));
                 } else {
                   player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.DontHaveAnySS", player, new Object[0]));
                 }

@@ -104,11 +104,10 @@ public class AdminEnchant implements IAdminCommandHandler {
       target = activeChar;
     }
 
-    if (!((GameObject)target).isPlayer()) {
+    if (!target.isPlayer()) {
       activeChar.sendMessage("Wrong target type.");
     } else {
       Player player = (Player)target;
-      int curEnchant = false;
       ItemInstance itemInstance = player.getInventory().getPaperdollItem(armorType);
       if (itemInstance != null) {
         int curEnchant = itemInstance.getEnchantLevel();
@@ -131,41 +130,40 @@ public class AdminEnchant implements IAdminCommandHandler {
     }
 
     Player player = activeChar;
-    if (((GameObject)target).isPlayer()) {
+    if (target.isPlayer()) {
       player = (Player)target;
     }
 
     NpcHtmlMessage adminReply = new NpcHtmlMessage(5);
-    StringBuilder replyMSG = new StringBuilder("<html><body>");
-    replyMSG.append("<center><table width=260><tr><td width=40>");
-    replyMSG.append("<button value=\"Main\" action=\"bypass -h admin_admin\" width=45 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\">");
-    replyMSG.append("</td><td width=180>");
-    replyMSG.append("<center>Enchant Equip for player: " + player.getName() + "</center>");
-    replyMSG.append("</td><td width=40>");
-    replyMSG.append("</td></tr></table></center><br>");
-    replyMSG.append("<center><table width=270><tr><td>");
-    replyMSG.append("<button value=\"Shirt\" action=\"bypass -h admin_setun $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>");
-    replyMSG.append("<button value=\"Helmet\" action=\"bypass -h admin_seteh $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>");
-    replyMSG.append("<button value=\"Mask\" action=\"bypass -h admin_setha $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>");
-    replyMSG.append("<button value=\"Necklace\" action=\"bypass -h admin_seten $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td></tr></table>");
-    replyMSG.append("</center><center><table width=270><tr><td>");
-    replyMSG.append("<button value=\"Weapon\" action=\"bypass -h admin_setew $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>");
-    replyMSG.append("<button value=\"Chest\" action=\"bypass -h admin_setec $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>");
-    replyMSG.append("<button value=\"Shield\" action=\"bypass -h admin_setes $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>");
-    replyMSG.append("<button value=\"Earring\" action=\"bypass -h admin_setre $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>");
-    replyMSG.append("<button value=\"Earring\" action=\"bypass -h admin_setle $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td></tr></table>");
-    replyMSG.append("</center><center><table width=270><tr><td>");
-    replyMSG.append("<button value=\"Gloves\" action=\"bypass -h admin_seteg $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>");
-    replyMSG.append("<button value=\"Leggings\" action=\"bypass -h admin_setel $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>");
-    replyMSG.append("<button value=\"Boots\" action=\"bypass -h admin_seteb $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>");
-    replyMSG.append("<button value=\"Ring\" action=\"bypass -h admin_setrf $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>");
-    replyMSG.append("<button value=\"Ring\" action=\"bypass -h admin_setlf $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td></tr></table>");
-    replyMSG.append("</center><center><table width=270><tr><td>");
-    replyMSG.append("</center><br>");
-    replyMSG.append("<center>[Enchant 0-65535]</center>");
-    replyMSG.append("<center><edit var=\"menu_command\" width=100 height=15></center><br>");
-    replyMSG.append("</body></html>");
-    adminReply.setHtml(replyMSG.toString());
+    String replyMSG = "<html><body>" + "<center><table width=260><tr><td width=40>" +
+      "<button value=\"Main\" action=\"bypass -h admin_admin\" width=45 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\">" +
+      "</td><td width=180>" +
+      "<center>Enchant Equip for player: " + player.getName() + "</center>" +
+      "</td><td width=40>" +
+      "</td></tr></table></center><br>" +
+      "<center><table width=270><tr><td>" +
+      "<button value=\"Shirt\" action=\"bypass -h admin_setun $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>" +
+      "<button value=\"Helmet\" action=\"bypass -h admin_seteh $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>" +
+      "<button value=\"Mask\" action=\"bypass -h admin_setha $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>" +
+      "<button value=\"Necklace\" action=\"bypass -h admin_seten $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td></tr></table>" +
+      "</center><center><table width=270><tr><td>" +
+      "<button value=\"Weapon\" action=\"bypass -h admin_setew $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>" +
+      "<button value=\"Chest\" action=\"bypass -h admin_setec $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>" +
+      "<button value=\"Shield\" action=\"bypass -h admin_setes $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>" +
+      "<button value=\"Earring\" action=\"bypass -h admin_setre $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>" +
+      "<button value=\"Earring\" action=\"bypass -h admin_setle $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td></tr></table>" +
+      "</center><center><table width=270><tr><td>" +
+      "<button value=\"Gloves\" action=\"bypass -h admin_seteg $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>" +
+      "<button value=\"Leggings\" action=\"bypass -h admin_setel $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>" +
+      "<button value=\"Boots\" action=\"bypass -h admin_seteb $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>" +
+      "<button value=\"Ring\" action=\"bypass -h admin_setrf $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td>" +
+      "<button value=\"Ring\" action=\"bypass -h admin_setlf $menu_command\" width=50 height=15 back=\"sek.cbui94\" fore=\"sek.cbui94\"></td></tr></table>" +
+      "</center><center><table width=270><tr><td>" +
+      "</center><br>" +
+      "<center>[Enchant 0-65535]</center>" +
+      "<center><edit var=\"menu_command\" width=100 height=15></center><br>" +
+      "</body></html>";
+    adminReply.setHtml(replyMSG);
     activeChar.sendPacket(adminReply);
   }
 
@@ -173,7 +171,7 @@ public class AdminEnchant implements IAdminCommandHandler {
     return AdminEnchant.Commands.values();
   }
 
-  private static enum Commands {
+  private enum Commands {
     admin_seteh,
     admin_setec,
     admin_seteg,
@@ -195,7 +193,7 @@ public class AdminEnchant implements IAdminCommandHandler {
     admin_setbelt,
     admin_enchant;
 
-    private Commands() {
+    Commands() {
     }
   }
 }

@@ -5,20 +5,17 @@
 
 package l2.gameserver.ai;
 
-import java.util.concurrent.ScheduledFuture;
 import l2.commons.lang.reference.HardReference;
 import l2.commons.lang.reference.HardReferences;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.Config;
 import l2.gameserver.ThreadPoolManager;
-import l2.gameserver.model.Creature;
-import l2.gameserver.model.Playable;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.Summon;
-import l2.gameserver.model.World;
+import l2.gameserver.model.*;
 import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.utils.Location;
 import l2.gameserver.utils.PositionUtils;
+
+import java.util.concurrent.ScheduledFuture;
 
 public class SummonAI extends PlayableAI {
   private HardReference<Playable> _runAwayTargetRef = HardReferences.emptyRef();
@@ -32,10 +29,10 @@ public class SummonAI extends PlayableAI {
     this.clearNextAction();
     if (actor.isDepressed()) {
       this.setAttackTarget(actor.getPlayer());
-      this.changeIntention(CtrlIntention.AI_INTENTION_ATTACK, actor.getPlayer(), (Object)null);
+      this.changeIntention(CtrlIntention.AI_INTENTION_ATTACK, actor.getPlayer(), null);
       this.thinkAttack(true);
     } else if (actor.isFollowMode()) {
-      this.changeIntention(CtrlIntention.AI_INTENTION_FOLLOW, actor.getPlayer(), (Object)null);
+      this.changeIntention(CtrlIntention.AI_INTENTION_FOLLOW, actor.getPlayer(), null);
       this.thinkFollow();
     }
 
@@ -55,7 +52,7 @@ public class SummonAI extends PlayableAI {
     Summon actor = this.getActor();
     if (!actor.isDead() && !actor.isDepressed()) {
       Player owner = actor.getPlayer();
-      Playable runAwayTarget = (Playable)this._runAwayTargetRef.get();
+      Playable runAwayTarget = this._runAwayTargetRef.get();
       if (owner != null && runAwayTarget != null && !owner.isDead() && !owner.isOutOfControl()) {
         if (runAwayTarget.isInCombat() && actor.getDistance(runAwayTarget) < (double)actor.getActingRange()) {
           int radius = getIndentRange(actor.getActingRange());
@@ -78,7 +75,7 @@ public class SummonAI extends PlayableAI {
   protected void onEvtArrived() {
     if (!this.setNextIntention()) {
       if (this.getIntention() != CtrlIntention.AI_INTENTION_INTERACT && this.getIntention() != CtrlIntention.AI_INTENTION_PICK_UP && this.getIntention() != CtrlIntention.AI_INTENTION_FOLLOW) {
-        this.changeIntention(CtrlIntention.AI_INTENTION_ACTIVE, (Object)null, (Object)null);
+        this.changeIntention(CtrlIntention.AI_INTENTION_ACTIVE, null, null);
       } else {
         this.onEvtThink();
       }
@@ -93,7 +90,7 @@ public class SummonAI extends PlayableAI {
     }
 
     if (attacker != null && attacker.isPlayable()) {
-      this._runAwayTargetRef = attacker.getRef();
+      this._runAwayTargetRef = (HardReference<Playable>) attacker.getRef();
     }
 
     super.onEvtAttacked(attacker, damage);
@@ -104,18 +101,18 @@ public class SummonAI extends PlayableAI {
   }
 
   protected ScheduledFuture<?> scheduleThinkFollowTask() {
-    return ThreadPoolManager.getInstance().schedule(new SummonAI.ThinkFollowForSummon(this.getActor()), (long)Config.MOVE_TASK_QUANTUM_NPC);
+    return ThreadPoolManager.getInstance().schedule(new SummonAI.ThinkFollowForSummon(this.getActor()), Config.MOVE_TASK_QUANTUM_NPC);
   }
 
   protected static class ThinkFollowForSummon extends RunnableImpl {
     private final HardReference<? extends Summon> _actorRef;
 
     public ThinkFollowForSummon(Summon actor) {
-      this._actorRef = actor.getRef();
+      this._actorRef = (HardReference<? extends Summon>) actor.getRef();
     }
 
     public void runImpl() throws Exception {
-      Summon actor = (Summon)this._actorRef.get();
+      Summon actor = this._actorRef.get();
       if (actor != null) {
         SummonAI actorAI = actor.getAI();
         if (actorAI.getIntention() != CtrlIntention.AI_INTENTION_FOLLOW) {

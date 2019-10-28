@@ -5,9 +5,6 @@
 
 package l2.gameserver.handler.admincommands.impl;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.StringTokenizer;
 import l2.gameserver.Announcements;
 import l2.gameserver.Config;
 import l2.gameserver.handler.admincommands.IAdminCommandHandler;
@@ -29,6 +26,10 @@ import l2.gameserver.utils.AdminFunctions;
 import l2.gameserver.utils.AutoBan;
 import l2.gameserver.utils.Location;
 import l2.gameserver.utils.Log;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class AdminBan implements IAdminCommandHandler {
   public AdminBan() {
@@ -74,10 +75,10 @@ public class AdminBan implements IAdminCommandHandler {
           AuthServerCommunication.getInstance().sendPacket(new ChangeAccessLevel(hwid2ban, level, banExpire));
           GameClient client = AuthServerCommunication.getInstance().getAuthedClient(hwid2ban);
           if (client != null) {
-            Player player = client.getActiveChar();
-            if (player != null) {
-              player.kick();
-              activeChar.sendMessage("Player " + player.getName() + " kicked.");
+            Player activeChar1 = client.getActiveChar();
+            if (activeChar1 != null) {
+              activeChar1.kick();
+              activeChar.sendMessage("Player " + activeChar1.getName() + " kicked.");
             }
           }
           break;
@@ -153,19 +154,19 @@ public class AdminBan implements IAdminCommandHandler {
             player = st.nextToken();
             period = st.nextToken();
             hwid2ban = st.nextToken();
-            Player target = World.getPlayer(player);
-            if (target != null) {
-              target.setVar("jailedFrom", target.getX() + ";" + target.getY() + ";" + target.getZ() + ";" + target.getReflectionId(), -1L);
-              target.setVar("jailed", period, -1L);
-              target.startUnjailTask(target, Integer.parseInt(period));
-              target.teleToLocation(Location.findPointToStay(target, AdminFunctions.JAIL_SPAWN, 50, 200), ReflectionManager.JAIL);
+            Player player1 = World.getPlayer(player);
+            if (player1 != null) {
+              player1.setVar("jailedFrom", player1.getX() + ";" + player1.getY() + ";" + player1.getZ() + ";" + player1.getReflectionId(), -1L);
+              player1.setVar("jailed", period, -1L);
+              player1.startUnjailTask(player1, Integer.parseInt(period));
+              player1.teleToLocation(Location.findPointToStay(player1, AdminFunctions.JAIL_SPAWN, 50, 200), ReflectionManager.JAIL);
               if (activeChar.isInStoreMode()) {
                 activeChar.setPrivateStoreType(0);
               }
 
-              target.sitDown((StaticObjectInstance)null);
-              target.block();
-              target.sendMessage("You moved to jail, time to escape - " + period + " minutes, reason - " + hwid2ban + " .");
+              player1.sitDown((StaticObjectInstance) null);
+              player1.block();
+              player1.sendMessage("You moved to jail, time to escape - " + period + " minutes, reason - " + hwid2ban + " .");
               activeChar.sendMessage("You jailed " + player + ".");
             } else {
               activeChar.sendMessage("Can't find char " + player + ".");
@@ -300,9 +301,9 @@ public class AdminBan implements IAdminCommandHandler {
         if (list != null && !list.isEmpty()) {
           ret = ":mf:";
 
-          ManufactureItem i;
-          for(var4 = list.iterator(); var4.hasNext(); ret = ret + i.getRecipeId() + ";" + i.getCost() + ":") {
-            i = (ManufactureItem)var4.next();
+          ManufactureItem manufactureItem;
+          for (var4 = list.iterator(); var4.hasNext(); ret = ret + manufactureItem.getRecipeId() + ";" + manufactureItem.getCost() + ":") {
+            manufactureItem = (ManufactureItem) var4.next();
           }
 
           return ret;

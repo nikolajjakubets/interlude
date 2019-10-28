@@ -7,14 +7,6 @@ package l2.gameserver.network.telnet.commands;
 
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntObjectIterator;
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 import l2.gameserver.model.GameObject;
 import l2.gameserver.model.GameObjectsStorage;
 import l2.gameserver.model.instances.NpcInstance;
@@ -23,11 +15,16 @@ import l2.gameserver.network.telnet.TelnetCommand;
 import l2.gameserver.network.telnet.TelnetCommandHolder;
 import org.apache.commons.io.FileUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
 public class TelnetDebug implements TelnetCommandHolder {
   private Set<TelnetCommand> _commands = new LinkedHashSet();
 
   public TelnetDebug() {
-    this._commands.add(new TelnetCommand("dumpnpc", new String[]{"dnpc"}) {
+    this._commands.add(new TelnetCommand("dumpnpc", "dnpc") {
       public String getUsage() {
         return "dumpnpc";
       }
@@ -45,15 +42,16 @@ public class TelnetDebug implements TelnetCommandHolder {
           if (obj.isCreature() && obj.isNpc()) {
             NpcInstance npcx = (NpcInstance)obj;
             int id = npcx.getNpcId();
-            Object listx;
-            if ((listx = (List)npcStats.get(id)) == null) {
-              npcStats.put(id, listx = new ArrayList<>());
+            List<NpcInstance> listx;
+            if ((listx = npcStats.get(id)) == null) {
+              listx = new ArrayList<>();
+              npcStats.put(id, listx);
             }
 
-            ((List)listx).add(npcx);
-            if (((List)listx).size() > maxCount) {
+            listx.add(npcx);
+            if (listx.size() > maxCount) {
               maxId = id;
-              maxCount = ((List)listx).size();
+              maxCount = listx.size();
             }
 
             ++total;

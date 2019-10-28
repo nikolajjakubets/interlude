@@ -6,26 +6,26 @@ import java.util.Iterator;
 import java.util.List;
 
 public class HardReferences {
-    private static HardReference<?> EMPTY_REF = new HardReferences.EmptyReferencedHolder((Object)null);
+  private static HardReference<?> EMPTY_REF = new HardReferences.EmptyReferencedHolder(null);
 
     private HardReferences() {
     }
 
-    public static <T> HardReference<T> emptyRef() {
-        return (HardReference<T>) EMPTY_REF;
-    }
+  @SuppressWarnings("unchecked")
+  public static <T> HardReference<T> emptyRef() {
+    return (HardReference<T>) EMPTY_REF;
+  }
 
     public static <T> Collection<T> unwrap(Collection<HardReference<T>> refs) {
         List<T> result = new ArrayList(refs.size());
-        Iterator var2 = refs.iterator();
 
-        while(var2.hasNext()) {
-            HardReference<T> ref = (HardReference)var2.next();
-            T obj = ref.get();
-            if (obj != null) {
-                result.add(obj);
-            }
+      for (HardReference<T> tHardReference : refs) {
+        HardReference<T> ref = tHardReference;
+        T obj = ref.get();
+        if (obj != null) {
+          result.add(obj);
         }
+      }
 
         return result;
     }

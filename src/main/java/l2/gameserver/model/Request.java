@@ -5,8 +5,6 @@
 
 package l2.gameserver.model;
 
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 import l2.commons.collections.MultiValueSet;
 import l2.commons.lang.reference.HardReference;
 import l2.commons.threading.RunnableImpl;
@@ -14,6 +12,9 @@ import l2.gameserver.ThreadPoolManager;
 import l2.gameserver.cache.Msg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Request extends MultiValueSet<String> {
   private static final long serialVersionUID = 1L;
@@ -62,12 +63,12 @@ public class Request extends MultiValueSet<String> {
     this._timeoutTask = null;
     Player player = this.getRequestor();
     if (player != null && player.getRequest() == this) {
-      player.setRequest((Request)null);
+      player.setRequest(null);
     }
 
     player = this.getReciever();
     if (player != null && player.getRequest() == this) {
-      player.setRequest((Request)null);
+      player.setRequest(null);
     }
 
   }
@@ -81,12 +82,12 @@ public class Request extends MultiValueSet<String> {
     this._timeoutTask = null;
     Player player = this.getRequestor();
     if (player != null && player.getRequest() == this) {
-      player.setRequest((Request)null);
+      player.setRequest(null);
     }
 
     player = this.getReciever();
     if (player != null && player.getRequest() == this) {
-      player.setRequest((Request)null);
+      player.setRequest(null);
     }
 
   }
@@ -109,11 +110,11 @@ public class Request extends MultiValueSet<String> {
   }
 
   public Player getRequestor() {
-    return (Player)this._requestor.get();
+    return this._requestor.get();
   }
 
   public Player getReciever() {
-    return (Player)this._reciever.get();
+    return this._reciever.get();
   }
 
   public boolean isInProgress() {
@@ -145,11 +146,11 @@ public class Request extends MultiValueSet<String> {
     if (player == this.getRequestor()) {
       return this._isRequestorConfirmed;
     } else {
-      return player == this.getReciever() ? this._isRecieverConfirmed : false;
+      return player == this.getReciever() && this._isRecieverConfirmed;
     }
   }
 
-  public static enum L2RequestType {
+  public enum L2RequestType {
     CUSTOM,
     PARTY,
     PARTY_ROOM,
@@ -161,7 +162,7 @@ public class Request extends MultiValueSet<String> {
     CHANNEL,
     DUEL;
 
-    private L2RequestType() {
+    L2RequestType() {
     }
   }
 }

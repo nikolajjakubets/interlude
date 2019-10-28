@@ -5,14 +5,6 @@
 
 package l2.gameserver.model.entity.events.impl;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Iterator;
-import java.util.List;
-import java.util.StringTokenizer;
-import java.util.TimeZone;
-import java.util.concurrent.Future;
 import l2.commons.collections.MultiValueSet;
 import l2.commons.dao.JdbcEntityState;
 import l2.commons.lang.ArrayUtils;
@@ -33,11 +25,7 @@ import l2.gameserver.model.Spawner;
 import l2.gameserver.model.World;
 import l2.gameserver.model.Zone.ZoneType;
 import l2.gameserver.model.base.RestartType;
-import l2.gameserver.model.entity.events.objects.DoorObject;
-import l2.gameserver.model.entity.events.objects.SiegeClanObject;
-import l2.gameserver.model.entity.events.objects.SiegeToggleNpcObject;
-import l2.gameserver.model.entity.events.objects.SpawnExObject;
-import l2.gameserver.model.entity.events.objects.SpawnSimpleObject;
+import l2.gameserver.model.entity.events.objects.*;
 import l2.gameserver.model.entity.oly.HeroController;
 import l2.gameserver.model.entity.residence.Castle;
 import l2.gameserver.model.instances.residences.SiegeToggleNpcInstance;
@@ -54,12 +42,15 @@ import l2.gameserver.templates.item.support.MerchantGuard;
 import l2.gameserver.utils.ItemFunctions;
 import l2.gameserver.utils.Location;
 import l2.gameserver.utils.Log;
-import l2.gameserver.utils.TeleportUtils;
 import l2.gameserver.utils.Log.ItemLog;
+import l2.gameserver.utils.TeleportUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.napile.primitive.Containers;
 import org.napile.primitive.sets.IntSet;
 import org.napile.primitive.sets.impl.TreeIntSet;
+
+import java.util.*;
+import java.util.concurrent.Future;
 
 public class CastleSiegeEvent extends SiegeEvent<Castle, SiegeClanObject> {
   public static final int MAX_SIEGE_CLANS = 20;
@@ -464,7 +455,7 @@ public class CastleSiegeEvent extends SiegeEvent<Castle, SiegeClanObject> {
       }
 
       long diff = ((Castle)this.getResidence()).getOwnDate().getTimeInMillis() + this._nextSiegeDateSetDelay - System.currentTimeMillis();
-      this._nextSiegeDateSetTask = ThreadPoolManager.getInstance().schedule(new CastleSiegeEvent.NextSiegeDateSet((SyntheticClass_1)null), diff);
+      this._nextSiegeDateSetTask = ThreadPoolManager.getInstance().schedule(new CastleSiegeEvent.NextSiegeDateSet(), diff);
     }
   }
 

@@ -5,19 +5,6 @@
 
 package l2.gameserver.skills;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
-import java.util.Map.Entry;
 import l2.gameserver.data.xml.holder.EnchantSkillHolder;
 import l2.gameserver.model.Skill;
 import l2.gameserver.model.Skill.SkillType;
@@ -29,6 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+
+import java.io.File;
+import java.util.*;
+import java.util.Map.Entry;
 
 /** @deprecated */
 @Deprecated
@@ -160,7 +151,6 @@ public final class DocumentSkill extends DocumentBase {
       Node skillNode;
       String skillNodeName;
       for(int skillChildNodesLen = skillRootNode.getChildNodes().getLength(); skillChildNodeIdx < skillChildNodesLen; ++skillChildNodeIdx) {
-        int skillEnchantLevels = false;
         skillNode = skillRootNode.getChildNodes().item(skillChildNodeIdx);
         skillNodeName = skillNode.getNodeName();
         if (skillNodeName.startsWith("enchant")) {

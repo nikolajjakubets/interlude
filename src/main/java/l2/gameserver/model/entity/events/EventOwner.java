@@ -7,31 +7,30 @@ package l2.gameserver.model.entity.events;
 
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 public abstract class EventOwner implements Serializable {
-  private Set<GlobalEvent> _events = new HashSet(2);
+  private Set<GlobalEvent> _events = new HashSet<>(2);
 
   public EventOwner() {
   }
 
+  @SuppressWarnings("unchecked")
   public <E extends GlobalEvent> E getEvent(Class<E> eventClass) {
-    Iterator var2 = this._events.iterator();
-
-    GlobalEvent e;
-    do {
-      if (!var2.hasNext()) {
-        return null;
+    for (GlobalEvent e : _events) {
+      if (e.getClass() == eventClass) // fast hack
+      {
+        return (E) e;
       }
-
-      e = (GlobalEvent)var2.next();
-      if (e.getClass() == eventClass) {
-        return e;
+      if (eventClass.isAssignableFrom(e.getClass())) // FIXME [VISTALL]
+      // какойто другой
+      // способ определить
+      {
+        return (E) e;
       }
-    } while(!eventClass.isAssignableFrom(e.getClass()));
+    }
 
-    return e;
+    return null;
   }
 
   public void addEvent(GlobalEvent event) {
@@ -43,10 +42,8 @@ public abstract class EventOwner implements Serializable {
   }
 
   public void removeEventsByClass(Class<? extends GlobalEvent> eventClass) {
-    Iterator var2 = this._events.iterator();
 
-    while(var2.hasNext()) {
-      GlobalEvent e = (GlobalEvent)var2.next();
+    for (GlobalEvent e : this._events) {
       if (e.getClass() == eventClass) {
         this._events.remove(e);
       } else if (eventClass.isAssignableFrom(e.getClass())) {

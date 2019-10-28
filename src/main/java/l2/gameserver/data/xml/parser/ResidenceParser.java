@@ -5,11 +5,6 @@
 
 package l2.gameserver.data.xml.parser;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import l2.commons.data.xml.AbstractDirParser;
 import l2.gameserver.Config;
 import l2.gameserver.data.xml.holder.ResidenceHolder;
@@ -26,6 +21,12 @@ import org.dom4j.Attribute;
 import org.dom4j.Element;
 import org.napile.primitive.sets.IntSet;
 import org.napile.primitive.sets.impl.HashIntSet;
+
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public final class ResidenceParser extends AbstractDirParser<ResidenceHolder> {
   private static ResidenceParser _instance = new ResidenceParser();
@@ -74,7 +75,7 @@ public final class ResidenceParser extends AbstractDirParser<ResidenceHolder> {
       return;
     }
 
-    Iterator iterator = rootElement.elementIterator();
+    iterator = rootElement.elementIterator();
 
     while(true) {
       int level;

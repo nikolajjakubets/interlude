@@ -5,8 +5,6 @@
 
 package l2.gameserver.data.xml.parser;
 
-import java.io.File;
-import java.util.Iterator;
 import l2.gameserver.Config;
 import l2.gameserver.data.xml.holder.ItemHolder;
 import l2.gameserver.data.xml.holder.OptionDataHolder;
@@ -16,13 +14,12 @@ import l2.gameserver.stats.conditions.Condition;
 import l2.gameserver.tables.SkillTable;
 import l2.gameserver.templates.OptionDataTemplate;
 import l2.gameserver.templates.StatsSet;
-import l2.gameserver.templates.item.ArmorTemplate;
-import l2.gameserver.templates.item.Bodypart;
-import l2.gameserver.templates.item.EtcItemTemplate;
-import l2.gameserver.templates.item.ItemTemplate;
-import l2.gameserver.templates.item.WeaponTemplate;
+import l2.gameserver.templates.item.*;
 import l2.gameserver.templates.item.ItemTemplate.ItemClass;
 import org.dom4j.Element;
+
+import java.io.File;
+import java.util.Iterator;
 
 public final class ItemParser extends StatParser<ItemHolder> {
   private static final ItemParser _instance = new ItemParser();
@@ -174,10 +171,10 @@ public final class ItemParser extends StatParser<ItemHolder> {
                 }
               } else if (subName.equalsIgnoreCase("attributes")) {
                 int[] attributes = new int[6];
-                Iterator nextIterator = subElement.elementIterator();
+                nextIterator = subElement.elementIterator();
 
                 while(nextIterator.hasNext()) {
-                  Element nextElement = (Element)nextIterator.next();
+                  nextElement = (Element) nextIterator.next();
                   if (nextElement.getName().equalsIgnoreCase("attribute")) {
                     l2.gameserver.model.base.Element element = l2.gameserver.model.base.Element.getElementByName(nextElement.attributeValue("element"));
                     attributes[element.getId()] = Integer.parseInt(nextElement.attributeValue("value"));

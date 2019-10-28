@@ -5,13 +5,10 @@
 
 package l2.gameserver.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 public class GameObjectArray<E extends GameObject> implements Iterable<E> {
   private static final Logger _log = LoggerFactory.getLogger(GameObjectArray.class);
@@ -32,8 +29,8 @@ public class GameObjectArray<E extends GameObject> implements Iterable<E> {
     } else if (this.resizeStep < 1) {
       throw new IllegalArgumentException("Illegal resize step (" + this.name + "): " + this.resizeStep);
     } else {
-      this.freeIndexes = new ArrayList(this.resizeStep);
-      this.elementData = (GameObject[])(new GameObject[initialCapacity]);
+      this.freeIndexes = new ArrayList<>(this.resizeStep);
+      this.elementData = (E[]) new GameObject[initialCapacity];
     }
   }
 
@@ -52,7 +49,7 @@ public class GameObjectArray<E extends GameObject> implements Iterable<E> {
   public synchronized int add(E e) {
     Integer freeIndex = null;
     if (this.freeIndexes.size() > 0) {
-      freeIndex = (Integer)this.freeIndexes.remove(this.freeIndexes.size() - 1);
+      freeIndex = this.freeIndexes.remove(this.freeIndexes.size() - 1);
     }
 
     if (freeIndex != null) {
@@ -63,7 +60,7 @@ public class GameObjectArray<E extends GameObject> implements Iterable<E> {
       if (this.elementData.length <= this.size) {
         int newCapacity = this.elementData.length + this.resizeStep;
         _log.warn("Object array [" + this.name + "] resized: " + this.elementData.length + " -> " + newCapacity);
-        this.elementData = (GameObject[])Arrays.copyOf(this.elementData, newCapacity);
+        this.elementData = Arrays.copyOf(this.elementData, newCapacity);
       }
 
       this.elementData[this.size++] = e;
@@ -178,7 +175,7 @@ public class GameObjectArray<E extends GameObject> implements Iterable<E> {
   }
 
   public synchronized void clear() {
-    this.elementData = (GameObject[])(new GameObject[0]);
+    this.elementData = (E[]) new GameObject[0];
     this.size = 0;
     this.real_size = 0;
   }

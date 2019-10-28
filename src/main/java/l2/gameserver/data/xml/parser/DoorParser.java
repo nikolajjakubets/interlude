@@ -5,8 +5,6 @@
 
 package l2.gameserver.data.xml.parser;
 
-import java.io.File;
-import java.util.Iterator;
 import l2.commons.data.xml.AbstractDirParser;
 import l2.commons.geometry.Polygon;
 import l2.gameserver.Config;
@@ -15,6 +13,9 @@ import l2.gameserver.templates.DoorTemplate;
 import l2.gameserver.templates.StatsSet;
 import l2.gameserver.utils.Location;
 import org.dom4j.Element;
+
+import java.io.File;
+import java.util.Iterator;
 
 public final class DoorParser extends AbstractDirParser<DoorHolder> {
   private static final DoorParser _instance = new DoorParser();
@@ -91,8 +92,6 @@ public final class DoorParser extends AbstractDirParser<DoorHolder> {
       Location doorPos;
       doorSet.set("pos", doorPos = new Location(x, y, z));
       Polygon shape = new Polygon();
-      int minz = false;
-      int maxz = false;
       Element shapeElement = doorElement.element("shape");
       int minz = Integer.parseInt(shapeElement.attributeValue("minz"));
       int maxz = Integer.parseInt(shapeElement.attributeValue("maxz"));

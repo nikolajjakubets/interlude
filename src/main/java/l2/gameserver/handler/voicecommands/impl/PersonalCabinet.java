@@ -5,23 +5,25 @@
 
 package l2.gameserver.handler.voicecommands.impl;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.handler.voicecommands.IVoicedCommandHandler;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.World;
-import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.network.authcomm.AuthServerCommunication;
 import l2.gameserver.network.authcomm.gs2as.IGPwdCng;
 import l2.gameserver.network.l2.components.CustomMessage;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
 import l2.gameserver.scripts.Functions;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@Slf4j
 public class PersonalCabinet extends Functions implements IVoicedCommandHandler {
   private static final Pattern PASSWORD_BYPASS_PATTERN = Pattern.compile("^([\\w\\d_-]{4,18})\\s+([\\w\\d_-]{4,16})$");
   private static final long PASSWORD_CHANGE_INTERVAL = 3600000L;
@@ -41,7 +43,7 @@ public class PersonalCabinet extends Functions implements IVoicedCommandHandler 
           if (lastChanged != null && !lastChanged.isEmpty()) {
             long lastChange = Long.parseLong(lastChanged) * 1000L;
             if (lastChange + 3600000L > System.currentTimeMillis()) {
-              activeChar.sendMessage(new CustomMessage("usercommandhandlers.CantChangePasswordSoFast", activeChar, new Object[0]));
+              activeChar.sendMessage(new CustomMessage("usercommandhandlers.CantChangePasswordSoFast", activeChar));
               return false;
             }
           }
@@ -55,22 +57,21 @@ public class PersonalCabinet extends Functions implements IVoicedCommandHandler 
               return true;
             }
 
-            activeChar.sendMessage(new CustomMessage("usercommandhandlers.PasswordChangeNotMet", activeChar, new Object[0]));
+            activeChar.sendMessage(new CustomMessage("usercommandhandlers.PasswordChangeNotMet", activeChar));
           } else {
-            activeChar.sendMessage(new CustomMessage("usercommandhandlers.PasswordCantBeEmpty", activeChar, new Object[0]));
+            activeChar.sendMessage(new CustomMessage("usercommandhandlers.PasswordCantBeEmpty", activeChar));
           }
 
           return true;
         } else if (!command.equalsIgnoreCase(_voicedCommands[4])) {
           return false;
         } else {
-          PreparedStatement fpstmt;
+          PreparedStatement fpstmt = null;
           if (target.isEmpty()) {
-            NpcHtmlMessage msg = new NpcHtmlMessage(activeChar, (NpcInstance)null);
+            NpcHtmlMessage msg = new NpcHtmlMessage(activeChar, null);
             msg.setFile("mods/pc/repair.html");
             StringBuilder cl = new StringBuilder();
             Connection con = null;
-            PreparedStatement fpstmt = null;
             ResultSet rset = null;
 
             try {
@@ -82,16 +83,16 @@ public class PersonalCabinet extends Functions implements IVoicedCommandHandler 
               while(rset.next()) {
                 String charName = rset.getString("char_name");
                 int charId = rset.getInt("obj_Id");
-                cl.append("<a action=\"bypass -h user_repair " + charId + "\">" + charName + "</a><br1>");
+                cl.append("<a action=\"bypass -h user_repair ").append(charId).append("\">").append(charName).append("</a><br1>");
               }
-            } catch (Exception var21) {
+            } catch (Exception e) {
+              log.error("useVoicedCommand: eMessage={}, eClause={}", e.getMessage(), e.getClass());
             } finally {
               DbUtils.closeQuietly(con, fpstmt, rset);
             }
 
             msg.replace("%repair%", cl.toString());
             activeChar.sendPacket(msg);
-            fpstmt = null;
             return true;
           } else {
             Connection con = null;
@@ -107,15 +108,13 @@ public class PersonalCabinet extends Functions implements IVoicedCommandHandler 
               rset = fpstmt.executeQuery();
               boolean var8;
               if (!rset.next()) {
-                activeChar.sendMessage(new CustomMessage("usercommandhandlers.CharNotFound", activeChar, new Object[0]));
-                var8 = true;
-                return var8;
+                activeChar.sendMessage(new CustomMessage("usercommandhandlers.CharNotFound", activeChar));
+                return true;
               }
 
               if (World.getPlayer(charId) != null) {
-                activeChar.sendMessage(new CustomMessage("usercommandhandlers.CharacterOnline", activeChar, new Object[0]));
-                var8 = true;
-                return var8;
+                activeChar.sendMessage(new CustomMessage("usercommandhandlers.CharacterOnline", activeChar));
+                return true;
               }
 
               DbUtils.close(fpstmt, rset);
@@ -135,8 +134,9 @@ public class PersonalCabinet extends Functions implements IVoicedCommandHandler 
               fpstmt.setInt(1, charId);
               fpstmt.executeUpdate();
               DbUtils.close(fpstmt);
-              activeChar.sendMessage(new CustomMessage("usercommandhandlers.CharacterRepaired", activeChar, new Object[0]));
-            } catch (Exception var23) {
+              activeChar.sendMessage(new CustomMessage("usercommandhandlers.CharacterRepaired", activeChar));
+            } catch (Exception e) {
+              log.error("useVoicedCommand: eMessage={}, eClause={}", e.getMessage(), e.getClass());
             } finally {
               DbUtils.closeQuietly(con, fpstmt, rset);
             }

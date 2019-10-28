@@ -5,13 +5,6 @@
 
 package l2.gameserver.model;
 
-import java.awt.Color;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import l2.commons.lang.reference.HardReference;
 import l2.commons.util.Rnd;
 import l2.commons.util.concurrent.atomic.AtomicState;
 import l2.gameserver.Config;
@@ -33,7 +26,6 @@ import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.network.l2.components.CustomMessage;
 import l2.gameserver.network.l2.components.SystemMsg;
 import l2.gameserver.network.l2.s2c.ExServerPrimitive;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.Revive;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.skills.EffectType;
@@ -44,6 +36,13 @@ import l2.gameserver.templates.item.EtcItemTemplate;
 import l2.gameserver.templates.item.WeaponTemplate;
 import l2.gameserver.templates.item.WeaponTemplate.WeaponType;
 import l2.gameserver.utils.Location;
+
+import java.awt.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class Playable extends Creature {
   private AtomicState _isSilentMoving = new AtomicState();
@@ -60,9 +59,9 @@ public abstract class Playable extends Creature {
     this._nonAggroTime = 0L;
   }
 
-  public HardReference<? extends Playable> getRef() {
-    return super.getRef();
-  }
+//  public HardReference<? extends Playable> getRef() {
+//    return super.getRef();
+//  }
 
   public abstract Inventory getInventory();
 
@@ -89,7 +88,7 @@ public abstract class Playable extends Creature {
         }
       }
 
-      DuelEvent duelEvent = (DuelEvent)this.getEvent(DuelEvent.class);
+      DuelEvent duelEvent = this.getEvent(DuelEvent.class);
       if (duelEvent != null && duelEvent == target.getEvent(DuelEvent.class)) {
         return false;
       } else if (this.isInZonePeace() && target.isInZonePeace()) {
@@ -102,20 +101,15 @@ public abstract class Playable extends Creature {
         return false;
       } else {
         if (skill != null && !skill.isOffensive()) {
-          if (target.getPvpFlag() > 0 || target.getKarma() > 0 || target.isMonster()) {
-            return true;
-          }
+          return target.getPvpFlag() > 0 || target.getKarma() > 0 || target.isMonster();
         } else {
           if (target.getKarma() > 0) {
             return false;
           }
 
-          if (target.isPlayable()) {
-            return true;
-          }
+          return target.isPlayable();
         }
 
-        return false;
       }
     } else {
       return false;
@@ -170,9 +164,7 @@ public abstract class Playable extends Creature {
                   return false;
                 }
 
-                if (player.isLooseOlyCompetition()) {
-                  return false;
-                }
+                return !player.isLooseOlyCompetition();
               }
             }
           }
@@ -207,7 +199,7 @@ public abstract class Playable extends Creature {
 
         player.sendPacket(tracePkt);
         if (dbgMove > 1) {
-          player.broadcastPacketToOthers(new L2GameServerPacket[]{tracePkt});
+          player.broadcastPacketToOthers(tracePkt);
         }
       }
     }
@@ -219,37 +211,37 @@ public abstract class Playable extends Creature {
     if (player != null) {
       if (!this.isAMuted() && !this.isAttackingNow()) {
         if (player.isInObserverMode()) {
-          player.sendMessage(new CustomMessage("l2p.gameserver.model.L2Playable.OutOfControl.ObserverNoAttack", player, new Object[0]));
+          player.sendMessage(new CustomMessage("l2p.gameserver.model.L2Playable.OutOfControl.ObserverNoAttack", player));
         } else if (!this.checkTarget(target)) {
-          this.getAI().setIntention(CtrlIntention.AI_INTENTION_ACTIVE, (Object)null, (Object)null);
+          this.getAI().setIntention(CtrlIntention.AI_INTENTION_ACTIVE, null, null);
           player.sendActionFailed();
         } else {
-          DuelEvent duelEvent = (DuelEvent)this.getEvent(DuelEvent.class);
+          DuelEvent duelEvent = this.getEvent(DuelEvent.class);
           if (duelEvent != null && target.getEvent(DuelEvent.class) != duelEvent) {
             duelEvent.abortDuel(this.getPlayer());
           }
 
           WeaponTemplate weaponItem = this.getActiveWeaponItem();
           if (weaponItem != null && weaponItem.getItemType() == WeaponType.BOW) {
-            double bowMpConsume = (double)weaponItem.getMpConsume();
+            double bowMpConsume = weaponItem.getMpConsume();
             if (bowMpConsume > 0.0D) {
-              double chance = this.calcStat(Stats.MP_USE_BOW_CHANCE, 0.0D, target, (Skill)null);
+              double chance = this.calcStat(Stats.MP_USE_BOW_CHANCE, 0.0D, target, null);
               if (chance > 0.0D && Rnd.chance(chance)) {
-                bowMpConsume = this.calcStat(Stats.MP_USE_BOW, bowMpConsume, target, (Skill)null);
+                bowMpConsume = this.calcStat(Stats.MP_USE_BOW, bowMpConsume, target, null);
               }
 
               if (this._currentMp < bowMpConsume) {
-                this.getAI().setIntention(CtrlIntention.AI_INTENTION_ACTIVE, (Object)null, (Object)null);
+                this.getAI().setIntention(CtrlIntention.AI_INTENTION_ACTIVE, null, null);
                 player.sendPacket(Msg.NOT_ENOUGH_MP);
                 player.sendActionFailed();
                 return;
               }
 
-              this.reduceCurrentMp(bowMpConsume, (Creature)null);
+              this.reduceCurrentMp(bowMpConsume, null);
             }
 
             if (!player.checkAndEquipArrows()) {
-              this.getAI().setIntention(CtrlIntention.AI_INTENTION_ACTIVE, (Object)null, (Object)null);
+              this.getAI().setIntention(CtrlIntention.AI_INTENTION_ACTIVE, null, null);
               player.sendPacket(Msg.YOU_HAVE_RUN_OUT_OF_ARROWS);
               player.sendActionFailed();
               return;
@@ -266,12 +258,12 @@ public abstract class Playable extends Creature {
 
   public void doPurePk(Player killer) {
     int pkCountMulti = Math.max(killer.getPkKills() / 2, 1);
-    killer.increaseKarma((long)(Config.KARMA_MIN_KARMA * pkCountMulti));
+    killer.increaseKarma(Config.KARMA_MIN_KARMA * pkCountMulti);
   }
 
   public void doCast(Skill skill, Creature target, boolean forceUse) {
     if (skill != null) {
-      DuelEvent duelEvent = (DuelEvent)this.getEvent(DuelEvent.class);
+      DuelEvent duelEvent = this.getEvent(DuelEvent.class);
       if (duelEvent != null && target.getEvent(DuelEvent.class) != duelEvent) {
         duelEvent.abortDuel(this.getPlayer());
       }
@@ -316,7 +308,7 @@ public abstract class Playable extends Creature {
               return;
             }
 
-            DuelEvent duelEvent = (DuelEvent)this.getEvent(DuelEvent.class);
+            DuelEvent duelEvent = this.getEvent(DuelEvent.class);
             if (duelEvent != null && attacker.getEvent(DuelEvent.class) != duelEvent) {
               duelEvent.abortDuel(player);
             }
@@ -329,12 +321,12 @@ public abstract class Playable extends Creature {
   }
 
   public int getPAtkSpd() {
-    return Math.max((int)this.calcStat(Stats.POWER_ATTACK_SPEED, this.calcStat(Stats.ATK_BASE, (double)this._template.basePAtkSpd, (Creature)null, (Skill)null), (Creature)null, (Skill)null), 1);
+    return Math.max((int) this.calcStat(Stats.POWER_ATTACK_SPEED, this.calcStat(Stats.ATK_BASE, this._template.basePAtkSpd, null, null), null, null), 1);
   }
 
   public int getPAtk(Creature target) {
     double init = this.getActiveWeaponInstance() == null ? (double)this._template.basePAtk : 0.0D;
-    return (int)this.calcStat(Stats.POWER_ATTACK, init, target, (Skill)null);
+    return (int) this.calcStat(Stats.POWER_ATTACK, init, target, null);
   }
 
   public int getMAtk(Creature target, Skill skill) {
@@ -368,7 +360,7 @@ public abstract class Playable extends Creature {
           GlobalEvent e;
           while(var5.hasNext()) {
             e = (GlobalEvent)var5.next();
-            if (e.checkForAttack(attacker, this, (Skill)null, force) != null) {
+            if (e.checkForAttack(attacker, this, null, force) != null) {
               return false;
             }
           }
@@ -377,7 +369,7 @@ public abstract class Playable extends Creature {
 
           while(var5.hasNext()) {
             e = (GlobalEvent)var5.next();
-            if (e.canAttack(this, attacker, (Skill)null, force)) {
+            if (e.canAttack(this, attacker, null, force)) {
               return true;
             }
           }
@@ -437,7 +429,7 @@ public abstract class Playable extends Creature {
                     if (witchCtrl && player.getPvpFlag() > 0) {
                       return true;
                     } else {
-                      return pcAttacker.isCursedWeaponEquipped() ? true : force;
+                      return pcAttacker.isCursedWeaponEquipped() || force;
                     }
                   } else {
                     return true;
@@ -468,10 +460,8 @@ public abstract class Playable extends Creature {
     Player player = this.getPlayer();
     if (player != null) {
       if (useActionSkills && !skill.altUse() && !skill.getSkillType().equals(SkillType.BEAST_FEED)) {
-        Iterator var5 = targets.iterator();
 
-        while(var5.hasNext()) {
-          Creature target = (Creature)var5.next();
+        for (Creature target : targets) {
           int aggro;
           if (target.isNpc()) {
             if (skill.isOffensive()) {
@@ -491,12 +481,10 @@ public abstract class Playable extends Creature {
 
             target.getAI().notifyEvent(CtrlEvent.EVT_SEE_SPELL, skill, this);
           } else if (target.isPlayable() && target != this.getPet() && (!this.isSummon() && !this.isPet() || target != player)) {
-            aggro = skill.getEffectPoint() != 0 ? skill.getEffectPoint() : Math.max(1, (int)skill.getPower());
+            aggro = skill.getEffectPoint() != 0 ? skill.getEffectPoint() : Math.max(1, (int) skill.getPower());
             List<NpcInstance> npcs = World.getAroundNpc(target);
-            Iterator var9 = npcs.iterator();
 
-            while(var9.hasNext()) {
-              NpcInstance npc = (NpcInstance)var9.next();
+            for (NpcInstance npc : npcs) {
               if (!npc.isDead() && npc.isInRangeZ(this, 2000L)) {
                 npc.getAI().notifyEvent(CtrlEvent.EVT_SEE_SPELL, skill, this);
                 AggroInfo ai = npc.getAggroList().get(target);
@@ -542,7 +530,7 @@ public abstract class Playable extends Creature {
           msg = (new SystemMessage(msg_id)).addString(player_name).addItemName(item.getItemId());
         }
 
-        player.broadcastPacket(new L2GameServerPacket[]{msg});
+        player.broadcastPacket(msg);
       }
 
     }
@@ -588,12 +576,12 @@ public abstract class Playable extends Creature {
           }
         }
 
-        this.setCurrentHp((double)this.getMaxHp(), true);
-        this.setCurrentMp((double)this.getMaxMp());
-        this.setCurrentCp((double)this.getMaxCp());
+        this.setCurrentHp(this.getMaxHp(), true);
+        this.setCurrentMp(this.getMaxMp());
+        this.setCurrentCp(this.getMaxCp());
       }
 
-      this.broadcastPacket(new L2GameServerPacket[]{new Revive(this)});
+      this.broadcastPacket(new Revive(this));
     } else {
       this.setPendingRevive(true);
     }

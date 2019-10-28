@@ -5,17 +5,6 @@
 
 package l2.gameserver.tables;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import l2.commons.data.xml.helpers.SimpleDTDEntityResolver;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.Config;
@@ -35,6 +24,13 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.*;
 
 public class CharTemplateTable {
   private static final Logger _log = LoggerFactory.getLogger(CharTemplateTable.class);
@@ -210,7 +206,6 @@ public class CharTemplateTable {
             int slot = Integer.parseInt(listElement.attributeValue("slot", "0"));
             int page = Integer.parseInt(listElement.attributeValue("page", "0"));
             String shortCutType = listElement.attributeValue("type");
-            int type = false;
             byte type;
             if (!"ITEM".equalsIgnoreCase(shortCutType) && !"TYPE_ITEM".equalsIgnoreCase(shortCutType)) {
               if (!"SKILL".equalsIgnoreCase(shortCutType) && !"TYPE_SKILL".equalsIgnoreCase(shortCutType)) {

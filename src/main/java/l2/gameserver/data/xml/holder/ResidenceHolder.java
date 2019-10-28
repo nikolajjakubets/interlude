@@ -5,14 +5,15 @@
 
 package l2.gameserver.data.xml.holder;
 
-import java.util.*;
-import java.util.Map.Entry;
 import l2.commons.data.xml.AbstractHolder;
 import l2.gameserver.model.GameObject;
 import l2.gameserver.model.entity.Reflection;
 import l2.gameserver.model.entity.residence.Residence;
 import org.napile.primitive.maps.IntObjectMap;
 import org.napile.primitive.maps.impl.TreeIntObjectMap;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public final class ResidenceHolder extends AbstractHolder {
   private static ResidenceHolder _instance = new ResidenceHolder();
@@ -39,8 +40,8 @@ public final class ResidenceHolder extends AbstractHolder {
     return residence != null && residence.getClass() == type ? residence : null;
   }
 
-  public <R extends Residence> List<Residence> getResidenceList(Class<R> t) {
-    return this._fastResidencesByType.get(t);
+  public <R extends Residence> List<R> getResidenceList(Class<R> t) {
+    return (List) this._fastResidencesByType.get(t);
   }
 
   public Collection<Residence> getResidences() {
@@ -52,7 +53,7 @@ public final class ResidenceHolder extends AbstractHolder {
   }
 
   public <R extends Residence> Residence getResidenceByCoord(Class<R> type, int x, int y, int z, Reflection ref) {
-    Collection<Residence> residences = type == null ? this.getResidences() : this.getResidenceList(type);
+    Collection<Residence> residences = type == null ? this.getResidences() : this.getResidenceList((Class<Residence>) type);
     Iterator var7 = ((Collection)residences).iterator();
 
     Residence residence;
@@ -108,11 +109,9 @@ public final class ResidenceHolder extends AbstractHolder {
   public void log() {
     this.buildFastLook();
     this.info("total size: " + this._residences.size());
-    Iterator var1 = this._fastResidencesByType.entrySet().iterator();
 
-    while(var1.hasNext()) {
-      Entry<Class, List<Residence>> entry = (Entry)var1.next();
-      this.info(" - load " + entry.getValue().size() + " " + entry.getKey().getSimpleName().toLowerCase() + "(s).");
+    for (Entry<Class, List<Residence>> classListEntry : this._fastResidencesByType.entrySet()) {
+      this.info(" - load " + classListEntry.getValue().size() + " " + classListEntry.getKey().getSimpleName().toLowerCase() + "(s).");
     }
 
   }

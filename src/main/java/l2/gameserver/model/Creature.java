@@ -6,24 +6,6 @@
 package l2.gameserver.model;
 
 import gnu.trove.TIntHashSet;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import l2.commons.collections.LazyArrayList;
 import l2.commons.lang.reference.HardReference;
 import l2.commons.lang.reference.HardReferences;
@@ -42,12 +24,7 @@ import l2.gameserver.geodata.GeoEngine;
 import l2.gameserver.geodata.GeoMove;
 import l2.gameserver.instancemanager.DimensionalRiftManager;
 import l2.gameserver.instancemanager.ReflectionManager;
-import l2.gameserver.model.GameObjectTasks.AltMagicUseTask;
-import l2.gameserver.model.GameObjectTasks.CastEndTimeTask;
-import l2.gameserver.model.GameObjectTasks.HitTask;
-import l2.gameserver.model.GameObjectTasks.MagicLaunchedTask;
-import l2.gameserver.model.GameObjectTasks.MagicUseTask;
-import l2.gameserver.model.GameObjectTasks.NotifyAITask;
+import l2.gameserver.model.GameObjectTasks.*;
 import l2.gameserver.model.Skill.SkillTargetType;
 import l2.gameserver.model.Skill.SkillType;
 import l2.gameserver.model.Zone.ZoneType;
@@ -68,34 +45,11 @@ import l2.gameserver.model.reference.L2Reference;
 import l2.gameserver.network.l2.components.CustomMessage;
 import l2.gameserver.network.l2.components.IStaticPacket;
 import l2.gameserver.network.l2.components.SystemMsg;
-import l2.gameserver.network.l2.s2c.ActionFail;
-import l2.gameserver.network.l2.s2c.Attack;
-import l2.gameserver.network.l2.s2c.AutoAttackStart;
-import l2.gameserver.network.l2.s2c.AutoAttackStop;
-import l2.gameserver.network.l2.s2c.ChangeMoveType;
-import l2.gameserver.network.l2.s2c.CharMoveToLocation;
-import l2.gameserver.network.l2.s2c.FlyToLocation;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
-import l2.gameserver.network.l2.s2c.MagicSkillCanceled;
-import l2.gameserver.network.l2.s2c.MagicSkillLaunched;
-import l2.gameserver.network.l2.s2c.MagicSkillUse;
-import l2.gameserver.network.l2.s2c.MoveToPawn;
-import l2.gameserver.network.l2.s2c.MyTargetSelected;
-import l2.gameserver.network.l2.s2c.SetupGauge;
-import l2.gameserver.network.l2.s2c.StatusUpdate;
-import l2.gameserver.network.l2.s2c.StopMove;
-import l2.gameserver.network.l2.s2c.SystemMessage;
-import l2.gameserver.network.l2.s2c.TeleportToLocation;
-import l2.gameserver.network.l2.s2c.ValidateLocation;
+import l2.gameserver.network.l2.s2c.*;
 import l2.gameserver.skills.AbnormalEffect;
 import l2.gameserver.skills.EffectType;
 import l2.gameserver.skills.TimeStamp;
-import l2.gameserver.stats.Calculator;
-import l2.gameserver.stats.Env;
-import l2.gameserver.stats.Formulas;
-import l2.gameserver.stats.StatFunctions;
-import l2.gameserver.stats.StatTemplate;
-import l2.gameserver.stats.Stats;
+import l2.gameserver.stats.*;
 import l2.gameserver.stats.Formulas.AttackInfo;
 import l2.gameserver.stats.funcs.Func;
 import l2.gameserver.stats.triggers.TriggerInfo;
@@ -113,6 +67,16 @@ import org.napile.primitive.maps.IntObjectMap;
 import org.napile.primitive.maps.impl.CHashIntObjectMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class Creature extends GameObject {
   private static final Logger _log = LoggerFactory.getLogger(Creature.class);
@@ -244,7 +208,7 @@ public abstract class Creature extends GameObject {
       this.getAI().setIntention(CtrlIntention.AI_INTENTION_ACTIVE);
       if (this.isPlayer() && message) {
         this.sendActionFailed();
-        this.sendPacket((IStaticPacket)(new SystemMessage(158)));
+        this.sendPacket(new SystemMessage(158));
       }
     }
 
@@ -279,7 +243,7 @@ public abstract class Creature extends GameObject {
       this.broadcastPacket(new MagicSkillCanceled(this));
       this.getAI().setIntention(CtrlIntention.AI_INTENTION_ACTIVE);
       if (this.isPlayer() && message) {
-        this.sendPacket((IStaticPacket)Msg.CASTING_HAS_BEEN_INTERRUPTED);
+        this.sendPacket(Msg.CASTING_HAS_BEEN_INTERRUPTED);
       }
     }
 
@@ -300,11 +264,11 @@ public abstract class Creature extends GameObject {
       } else if (skill != null && skill.getCastRange() <= 200) {
         value = target.calcStat(Stats.REFLECT_AND_BLOCK_PSKILL_DAMAGE_CHANCE, 0.0D, this, skill);
       } else if (skill == null && !bow) {
-        value = target.calcStat(Stats.REFLECT_AND_BLOCK_DAMAGE_CHANCE, 0.0D, this, (Skill)null);
+        value = target.calcStat(Stats.REFLECT_AND_BLOCK_DAMAGE_CHANCE, 0.0D, this, null);
       }
 
       if (value > 0.0D && Rnd.chance(value)) {
-        this.reduceCurrentHp(damage, target, (Skill)null, true, true, false, false, false, false, true);
+        this.reduceCurrentHp(damage, target, null, true, true, false, false, false, false, true);
         return true;
       } else {
         if (skill != null && skill.isMagic()) {
@@ -312,27 +276,27 @@ public abstract class Creature extends GameObject {
         } else if (skill != null && skill.getCastRange() <= 200) {
           value = target.calcStat(Stats.REFLECT_PSKILL_DAMAGE_PERCENT, 0.0D, this, skill);
         } else if (skill == null && !bow) {
-          value = target.calcStat(Stats.REFLECT_DAMAGE_PERCENT, 0.0D, this, (Skill)null);
+          value = target.calcStat(Stats.REFLECT_DAMAGE_PERCENT, 0.0D, this, null);
         }
 
         double poleMod;
         if (value > 0.0D && target.getCurrentHp() + target.getCurrentCp() > damage) {
           poleMod = value / 100.0D * damage;
-          this.reduceCurrentHp(poleMod, target, (Skill)null, true, true, false, false, false, false, sendMessage);
+          this.reduceCurrentHp(poleMod, target, null, true, true, false, false, false, false, sendMessage);
           if (sendMessage && target.isPlayable()) {
-            target.sendPacket((IStaticPacket)(new SystemMessage(35)).addNumber((int)poleMod));
+            target.sendPacket((new SystemMessage(35)).addNumber((int) poleMod));
           }
         }
 
         if (skill == null && !bow) {
-          damage = (double)((int)(damage - target.getCurrentCp()));
+          damage = (int) (damage - target.getCurrentCp());
           if (damage <= 0.0D) {
             return false;
           } else {
             poleMod = this._poleAttackCount < POLE_VAMPIRIC_MOD.length ? POLE_VAMPIRIC_MOD[this._poleAttackCount] : 0.0D;
-            double absorb = poleMod * this.calcStat(Stats.ABSORB_DAMAGE_PERCENT, 0.0D, target, (Skill)null);
+            double absorb = poleMod * this.calcStat(Stats.ABSORB_DAMAGE_PERCENT, 0.0D, target, null);
             if (absorb > 0.0D && !target.isDamageBlocked()) {
-              double limit = this.calcStat(Stats.HP_LIMIT, (Creature)null, (Skill)null) * (double)this.getMaxHp() / 100.0D;
+              double limit = this.calcStat(Stats.HP_LIMIT, null, null) * (double) this.getMaxHp() / 100.0D;
               if (this.getCurrentHp() < limit) {
                 this.setCurrentHp(Math.min(this._currentHp + damage * absorb * Config.ALT_ABSORB_DAMAGE_MODIFIER / 100.0D, limit), false);
               }
@@ -364,7 +328,7 @@ public abstract class Creature extends GameObject {
             } else {
               double transferDamage = damage * transferToEffectorDam * 0.01D;
               damage -= transferDamage;
-              effector.reduceCurrentHp(transferDamage, effector, (Skill)null, false, false, !attacker.isPlayable(), false, true, false, true);
+              effector.reduceCurrentHp(transferDamage, effector, null, false, false, !attacker.isPlayable(), false, true, false, true);
               return damage;
             }
           } else {
@@ -387,7 +351,7 @@ public abstract class Creature extends GameObject {
       if (summon != null && !summon.isDead() && summon.getCurrentHp() >= transferDamage) {
         if (summon.isSummon() && summon.isInRangeZ(this, 1200L)) {
           damage -= transferDamage;
-          summon.reduceCurrentHp(transferDamage, summon, (Skill)null, false, false, false, false, true, false, true);
+          summon.reduceCurrentHp(transferDamage, summon, null, false, false, false, false, true, false, true);
         }
       } else {
         this.getEffectList().stopEffects(EffectType.AbsorbDamageToSummon);
@@ -409,7 +373,7 @@ public abstract class Creature extends GameObject {
     if (newSkill == null) {
       return null;
     } else {
-      Skill oldSkill = (Skill)this._skills.get(newSkill.getId());
+      Skill oldSkill = this._skills.get(newSkill.getId());
       if (oldSkill != null && oldSkill.getLevel() == newSkill.getLevel()) {
         return newSkill;
       } else {
@@ -494,14 +458,14 @@ public abstract class Creature extends GameObject {
       double mpConsume2 = skill.getMpConsume2();
       if (mpConsume2 > 0.0D) {
         if (this._currentMp < mpConsume2) {
-          this.sendPacket((IStaticPacket)Msg.NOT_ENOUGH_MP);
+          this.sendPacket(Msg.NOT_ENOUGH_MP);
           return;
         }
 
         if (skill.isMagic()) {
-          this.reduceCurrentMp(this.calcStat(Stats.MP_MAGIC_SKILL_CONSUME, mpConsume2, aimingTarget, skill), (Creature)null);
+          this.reduceCurrentMp(this.calcStat(Stats.MP_MAGIC_SKILL_CONSUME, mpConsume2, aimingTarget, skill), null);
         } else {
-          this.reduceCurrentMp(this.calcStat(Stats.MP_PHYSICAL_SKILL_CONSUME, mpConsume2, aimingTarget, skill), (Creature)null);
+          this.reduceCurrentMp(this.calcStat(Stats.MP_PHYSICAL_SKILL_CONSUME, mpConsume2, aimingTarget, skill), null);
         }
       }
 
@@ -528,19 +492,19 @@ public abstract class Creature extends GameObject {
           double mpConsume1 = skill.getMpConsume1();
           if (mpConsume1 > 0.0D) {
             if (this._currentMp < mpConsume1) {
-              this.sendPacket((IStaticPacket)Msg.NOT_ENOUGH_MP);
+              this.sendPacket(Msg.NOT_ENOUGH_MP);
               return;
             }
 
-            this.reduceCurrentMp(mpConsume1, (Creature)null);
+            this.reduceCurrentMp(mpConsume1, null);
           }
 
           int[] itemConsume = skill.getItemConsume();
           int level;
           if (itemConsume[0] > 0) {
             for(level = 0; level < itemConsume.length; ++level) {
-              if (!this.consumeItem(skill.getItemConsumeId()[level], (long)itemConsume[level])) {
-                this.sendPacket((IStaticPacket)(skill.isHandler() ? SystemMsg.INCORRECT_ITEM_COUNT : (new SystemMessage(113)).addSkillName(skill.getDisplayId(), skill.getDisplayLevel())));
+              if (!this.consumeItem(skill.getItemConsumeId()[level], itemConsume[level])) {
+                this.sendPacket(skill.isHandler() ? SystemMsg.INCORRECT_ITEM_COUNT : (new SystemMessage(113)).addSkillName(skill.getDisplayId(), skill.getDisplayLevel()));
                 return;
               }
             }
@@ -548,12 +512,12 @@ public abstract class Creature extends GameObject {
 
           if (skill.getReferenceItemId() <= 0 || this.consumeItemMp(skill.getReferenceItemId(), skill.getReferenceItemMpConsume())) {
             if (skill.getSoulsConsume() > this.getConsumedSouls()) {
-              this.sendPacket((IStaticPacket)Msg.THERE_IS_NOT_ENOUGHT_SOUL);
+              this.sendPacket(Msg.THERE_IS_NOT_ENOUGHT_SOUL);
             } else if (skill.getEnergyConsume() > this.getAgathionEnergy()) {
-              this.sendPacket((IStaticPacket)SystemMsg.THE_SKILL_HAS_BEEN_CANCELED_BECAUSE_YOU_HAVE_INSUFFICIENT_ENERGY);
+              this.sendPacket(SystemMsg.THE_SKILL_HAS_BEEN_CANCELED_BECAUSE_YOU_HAVE_INSUFFICIENT_ENERGY);
             } else {
               if (skill.getSoulsConsume() > 0) {
-                this.setConsumedSouls(this.getConsumedSouls() - skill.getSoulsConsume(), (NpcInstance)null);
+                this.setConsumedSouls(this.getConsumedSouls() - skill.getSoulsConsume(), null);
               }
 
               if (skill.getEnergyConsume() > 0) {
@@ -569,11 +533,11 @@ public abstract class Creature extends GameObject {
 
               if (!skill.isHideUseMessage()) {
                 if (skill.getSkillType() == SkillType.PET_SUMMON) {
-                  this.sendPacket((IStaticPacket)(new SystemMessage(547)));
+                  this.sendPacket(new SystemMessage(547));
                 } else if (!skill.isHandler()) {
-                  this.sendPacket((IStaticPacket)(new SystemMessage(46)).addSkillName(magicId, level));
+                  this.sendPacket((new SystemMessage(46)).addSkillName(magicId, level));
                 } else {
-                  this.sendPacket((IStaticPacket)(new SystemMessage(46)).addItemName(skill.getItemConsumeId()[0]));
+                  this.sendPacket((new SystemMessage(46)).addItemName(skill.getItemConsumeId()[0]));
                 }
               }
 
@@ -581,7 +545,7 @@ public abstract class Creature extends GameObject {
                 this.disableSkill(skill, reuseDelay);
               }
 
-              ThreadPoolManager.getInstance().schedule(new AltMagicUseTask(this, target, skill), (long)skill.getHitTime());
+              ThreadPoolManager.getInstance().schedule(new AltMagicUseTask(this, target, skill), skill.getHitTime());
             }
           }
         }
@@ -593,7 +557,7 @@ public abstract class Creature extends GameObject {
   }
 
   public void broadcastPacket(L2GameServerPacket... packets) {
-    this.sendPacket((IStaticPacket[])packets);
+    this.sendPacket(packets);
     this.broadcastPacketToOthers(packets);
   }
 
@@ -607,7 +571,7 @@ public abstract class Creature extends GameObject {
       List<Player> players = World.getAroundPlayers(this);
 
       for(int i = 0; i < players.size(); ++i) {
-        Player target = (Player)players.get(i);
+        Player target = players.get(i);
         target.sendPacket(packets);
       }
 
@@ -619,7 +583,7 @@ public abstract class Creature extends GameObject {
       List<Player> players = World.getAroundPlayers(this);
 
       for(int i = 0; i < players.size(); ++i) {
-        Player target = (Player)players.get(i);
+        Player target = players.get(i);
         target.sendPacket(packets);
       }
 
@@ -633,7 +597,7 @@ public abstract class Creature extends GameObject {
       try {
         if (this._statusListeners != null && !this._statusListeners.isEmpty()) {
           for(int i = 0; i < this._statusListeners.size(); ++i) {
-            Player player = (Player)this._statusListeners.get(i);
+            Player player = this._statusListeners.get(i);
             player.sendPacket(packets);
           }
 
@@ -758,11 +722,11 @@ public abstract class Creature extends GameObject {
   }
 
   public int calcHeading(int x_dest, int y_dest) {
-    return (int)(Math.atan2((double)(this.getY() - y_dest), (double)(this.getX() - x_dest)) * 10430.378350470453D) + '耀';
+    return (int) (Math.atan2(this.getY() - y_dest, this.getX() - x_dest) * 10430.378350470453D) + '耀';
   }
 
   public final double calcStat(Stats stat, double init) {
-    return this.calcStat(stat, init, (Creature)null, (Skill)null);
+    return this.calcStat(stat, init, null, null);
   }
 
   public final double calcStat(Stats stat, double init, Creature target, Skill skill) {
@@ -794,7 +758,7 @@ public abstract class Creature extends GameObject {
   }
 
   public int calculateAttackDelay() {
-    return Formulas.calcPAtkSpd((double)this.getPAtkSpd());
+    return Formulas.calcPAtkSpd(this.getPAtkSpd());
   }
 
   public void callSkill(Skill skill, List<Creature> targets, boolean useActionSkills) {
@@ -802,13 +766,13 @@ public abstract class Creature extends GameObject {
       if (useActionSkills && !skill.isUsingWhileCasting() && this._triggers != null) {
         if (skill.isOffensive()) {
           if (skill.isMagic()) {
-            this.useTriggers(this.getTarget(), TriggerType.OFFENSIVE_MAGICAL_SKILL_USE, (Skill)null, skill, 0.0D);
+            this.useTriggers(this.getTarget(), TriggerType.OFFENSIVE_MAGICAL_SKILL_USE, null, skill, 0.0D);
           } else {
-            this.useTriggers(this.getTarget(), TriggerType.OFFENSIVE_PHYSICAL_SKILL_USE, (Skill)null, skill, 0.0D);
+            this.useTriggers(this.getTarget(), TriggerType.OFFENSIVE_PHYSICAL_SKILL_USE, null, skill, 0.0D);
           }
         } else if (Config.BUFF_STICK_FOR_ALL || skill.isMagic()) {
           boolean targetSelf = skill.isAoE() || skill.isNotTargetAoE() || skill.getTargetType() == SkillTargetType.TARGET_SELF;
-          this.useTriggers((GameObject)(targetSelf ? this : this.getTarget()), TriggerType.SUPPORT_MAGICAL_SKILL_USE, (Skill)null, skill, 0.0D);
+          this.useTriggers(targetSelf ? this : this.getTarget(), TriggerType.SUPPORT_MAGICAL_SKILL_USE, null, skill, 0.0D);
         }
       }
 
@@ -831,14 +795,12 @@ public abstract class Creature extends GameObject {
             itr.remove();
           } else {
             target.getListeners().onMagicHit(skill, this);
-            if (pl != null && target != null && target.isNpc()) {
+            if (pl != null && target.isNpc()) {
               NpcInstance npc = (NpcInstance)target;
               List<QuestState> ql = pl.getQuestsForEvent(npc, QuestEventType.MOB_TARGETED_BY_SKILL);
               if (ql != null) {
-                Iterator var10 = ql.iterator();
 
-                while(var10.hasNext()) {
-                  QuestState qs = (QuestState)var10.next();
+                for (QuestState qs : ql) {
                   qs.getQuest().notifySkillUse(npc, skill, qs);
                 }
               }
@@ -871,7 +833,7 @@ public abstract class Creature extends GameObject {
             if (skill.getCancelTarget() > 0 && Rnd.chance(skill.getCancelTarget()) && (target.getCastingSkill() == null || target.getCastingSkill().getSkillType() != SkillType.TAKECASTLE) && !target.isRaid()) {
               target.abortAttack(true, true);
               target.abortCast(true, true);
-              target.setTarget((GameObject)null);
+              target.setTarget(null);
             }
           }
         }
@@ -895,14 +857,14 @@ public abstract class Creature extends GameObject {
 
   public void useTriggers(GameObject target, TriggerType type, Skill ex, Skill owner, double damage) {
     if (this._triggers != null) {
-      Set<TriggerInfo> SkillsOnSkillAttack = (Set)this._triggers.get(type);
+      Set<TriggerInfo> SkillsOnSkillAttack = this._triggers.get(type);
       if (SkillsOnSkillAttack != null) {
         Iterator var8 = SkillsOnSkillAttack.iterator();
 
         while(var8.hasNext()) {
           TriggerInfo t = (TriggerInfo)var8.next();
           if (t.getSkill() != ex) {
-            this.useTriggerSkill(target == null ? this.getTarget() : target, (List)null, t, owner, damage);
+            this.useTriggerSkill(target == null ? this.getTarget() : target, null, t, owner, damage);
           }
         }
       }
@@ -962,8 +924,8 @@ public abstract class Creature extends GameObject {
       if (skill.isMagic() && skill.getSkillType() != SkillType.MDAM) {
         return false;
       } else if (Rnd.chance(this.calcStat(skill.isMagic() ? Stats.REFLECT_MAGIC_SKILL : Stats.REFLECT_PHYSIC_SKILL, 0.0D, attacker, skill))) {
-        this.sendPacket((IStaticPacket)(new SystemMessage(1998)).addName(attacker));
-        attacker.sendPacket((IStaticPacket)(new SystemMessage(1999)).addName(this));
+        this.sendPacket((new SystemMessage(1998)).addName(attacker));
+        attacker.sendPacket((new SystemMessage(1999)).addName(this));
         return true;
       } else {
         return false;
@@ -978,17 +940,17 @@ public abstract class Creature extends GameObject {
       if (!this.isDamageBlocked() && !attacker.isDamageBlocked()) {
         if (skill != null && !skill.hasEffects() && !skill.isMagic() && skill.isOffensive() && skill.getCastRange() <= 200) {
           if (Rnd.chance(this.calcStat(Stats.COUNTER_ATTACK, 0.0D, attacker, skill))) {
-            double damage = (double)(1189 * this.getPAtk(attacker) / Math.max(attacker.getPDef(this), 1));
-            attacker.sendPacket((IStaticPacket)(new SystemMessage(1997)).addName(this));
+            double damage = 1189 * this.getPAtk(attacker) / Math.max(attacker.getPDef(this), 1);
+            attacker.sendPacket((new SystemMessage(1997)).addName(this));
             if (blow) {
-              this.sendPacket((IStaticPacket)(new SystemMessage(1997)).addName(this));
-              this.sendPacket((IStaticPacket)(new SystemMessage(35)).addNumber((long)damage));
+              this.sendPacket((new SystemMessage(1997)).addName(this));
+              this.sendPacket((new SystemMessage(35)).addNumber((long) damage));
               attacker.reduceCurrentHp(damage, this, skill, true, true, false, false, false, false, true);
             } else {
-              this.sendPacket((IStaticPacket)(new SystemMessage(1997)).addName(this));
+              this.sendPacket((new SystemMessage(1997)).addName(this));
             }
 
-            this.sendPacket((IStaticPacket)(new SystemMessage(35)).addNumber((long)damage));
+            this.sendPacket((new SystemMessage(35)).addNumber((long) damage));
             attacker.reduceCurrentHp(damage, this, skill, true, true, false, false, false, false, true);
           }
 
@@ -1010,7 +972,7 @@ public abstract class Creature extends GameObject {
         Player player = this.getPlayer();
         if (player.getAfterTeleportPortectionTime() > System.currentTimeMillis()) {
           player.setAfterTeleportPortectionTime(0L);
-          player.sendMessage(new CustomMessage("alt.teleport_protect_gonna", player, new Object[0]));
+          player.sendMessage(new CustomMessage("alt.teleport_protect_gonna", player));
         }
       }
 
@@ -1023,7 +985,7 @@ public abstract class Creature extends GameObject {
       if (weaponItem != null) {
         reuse = sAtk + (int)((float)weaponItem.getAttackReuseDelay() / ((float)this.getPAtkSpd() / 333.0F));
         if (this.isPlayer() && weaponItem.getAttackReuseDelay() > 0 && reuse > 0) {
-          this.sendPacket((IStaticPacket)(new SetupGauge(this, 1, reuse)));
+          this.sendPacket(new SetupGauge(this, 1, reuse));
           this._attackReuseEndTime = (long)reuse + System.currentTimeMillis() - (long)Config.ATTACK_END_DELAY;
         }
 
@@ -1034,21 +996,21 @@ public abstract class Creature extends GameObject {
       this.setHeading(PositionUtils.calculateHeadingFrom(this, target));
       int hitDelay = reuse / 2;
       if (weaponItem == null) {
-        this.doAttackHitSimple(attack, target, 1.0D, !this.isPlayer(), (long)hitDelay, true);
+        this.doAttackHitSimple(attack, target, 1.0D, !this.isPlayer(), hitDelay, true);
       } else {
         switch(weaponItem.getItemType()) {
           case BOW:
-            this.doAttackHitByBow(attack, target, (long)hitDelay);
+            this.doAttackHitByBow(attack, target, hitDelay);
             break;
           case POLE:
-            this.doAttackHitByPole(attack, target, (long)hitDelay);
+            this.doAttackHitByPole(attack, target, hitDelay);
             break;
           case DUAL:
           case DUALFIST:
-            this.doAttackHitByDual(attack, target, (long)hitDelay);
+            this.doAttackHitByDual(attack, target, hitDelay);
             break;
           default:
-            this.doAttackHitSimple(attack, target, 1.0D, true, (long)hitDelay, true);
+            this.doAttackHitSimple(attack, target, 1.0D, true, hitDelay, true);
         }
       }
 
@@ -1065,7 +1027,7 @@ public abstract class Creature extends GameObject {
     boolean crit1 = false;
     boolean miss1 = Formulas.calcHitMiss(this, target);
     if (!miss1) {
-      AttackInfo info = Formulas.calcPhysDam(this, target, (Skill)null, false, false, attack._soulshot, false);
+      AttackInfo info = Formulas.calcPhysDam(this, target, null, false, false, attack._soulshot, false);
       damage1 = (int)(info.damage * multiplier);
       shld1 = info.shld;
       crit1 = info.crit;
@@ -1087,7 +1049,7 @@ public abstract class Creature extends GameObject {
       }
 
       if (!miss1) {
-        AttackInfo info = Formulas.calcPhysDam(this, target, (Skill)null, false, false, attack._soulshot, false);
+        AttackInfo info = Formulas.calcPhysDam(this, target, null, false, false, attack._soulshot, false);
         damage1 = (int)info.damage;
         shld1 = info.shld;
         crit1 = info.crit;
@@ -1109,14 +1071,14 @@ public abstract class Creature extends GameObject {
     boolean miss2 = Formulas.calcHitMiss(this, target);
     AttackInfo info;
     if (!miss1) {
-      info = Formulas.calcPhysDam(this, target, (Skill)null, true, false, attack._soulshot, false);
+      info = Formulas.calcPhysDam(this, target, null, true, false, attack._soulshot, false);
       damage1 = (int)info.damage;
       shld1 = info.shld;
       crit1 = info.crit;
     }
 
     if (!miss2) {
-      info = Formulas.calcPhysDam(this, target, (Skill)null, true, false, attack._soulshot, false);
+      info = Formulas.calcPhysDam(this, target, null, true, false, attack._soulshot, false);
       damage2 = (int)info.damage;
       shld2 = info.shld;
       crit2 = info.crit;
@@ -1129,9 +1091,9 @@ public abstract class Creature extends GameObject {
   }
 
   private void doAttackHitByPole(Attack attack, Creature target, long hitDelay) {
-    int angle = (int)this.calcStat(Stats.POLE_ATTACK_ANGLE, 90.0D, target, (Skill)null);
-    int range = (int)this.calcStat(Stats.POWER_ATTACK_RANGE, (double)this.getTemplate().baseAtkRange, target, (Skill)null);
-    int attackcountmax = (int)Math.round(this.calcStat(Stats.POLE_TARGET_COUNT, 0.0D, target, (Skill)null));
+    int angle = (int) this.calcStat(Stats.POLE_ATTACK_ANGLE, 90.0D, target, null);
+    int range = (int) this.calcStat(Stats.POWER_ATTACK_RANGE, this.getTemplate().baseAtkRange, target, null);
+    int attackcountmax = (int) Math.round(this.calcStat(Stats.POLE_TARGET_COUNT, 0.0D, target, null));
     if (this.isBoss()) {
       attackcountmax += 27;
     } else if (this.isRaid()) {
@@ -1173,8 +1135,8 @@ public abstract class Creature extends GameObject {
       int magicId;
       if (itemConsume[0] > 0) {
         for(magicId = 0; magicId < itemConsume.length; ++magicId) {
-          if (!this.consumeItem(skill.getItemConsumeId()[magicId], (long)itemConsume[magicId])) {
-            this.sendPacket((IStaticPacket)(skill.isHandler() ? SystemMsg.INCORRECT_ITEM_COUNT : (new SystemMessage(113)).addSkillName(skill.getId(), skill.getLevel())));
+          if (!this.consumeItem(skill.getItemConsumeId()[magicId], itemConsume[magicId])) {
+            this.sendPacket(skill.isHandler() ? SystemMsg.INCORRECT_ITEM_COUNT : (new SystemMessage(113)).addSkillName(skill.getId(), skill.getLevel()));
             return;
           }
         }
@@ -1193,7 +1155,7 @@ public abstract class Creature extends GameObject {
           }
 
           int level = Math.max(1, this.getSkillDisplayLevel(magicId));
-          int skillTime = skill.isSkillTimePermanent() ? skill.getHitTime() : Formulas.calcMAtkSpd(this, skill, (double)skill.getHitTime());
+          int skillTime = skill.isSkillTimePermanent() ? skill.getHitTime() : Formulas.calcMAtkSpd(this, skill, skill.getHitTime());
           int skillInterruptTime = skill.getSkillInterruptTime();
           int minCastTime = Math.min(Config.SKILLS_CAST_TIME_MIN, skill.getHitTime());
           if (skillTime < minCastTime) {
@@ -1216,11 +1178,11 @@ public abstract class Creature extends GameObject {
 
           if (this.isPlayer()) {
             if (skill.getSkillType() == SkillType.PET_SUMMON) {
-              this.sendPacket((IStaticPacket)Msg.SUMMON_A_PET);
+              this.sendPacket(Msg.SUMMON_A_PET);
             } else if (!skill.isHandler()) {
-              this.sendPacket((IStaticPacket)(new SystemMessage(46)).addSkillName(magicId, level));
+              this.sendPacket((new SystemMessage(46)).addSkillName(magicId, level));
             } else {
-              this.sendPacket((IStaticPacket)(new SystemMessage(46)).addItemName(skill.getItemConsumeId()[0]));
+              this.sendPacket((new SystemMessage(46)).addItemName(skill.getItemConsumeId()[0]));
             }
           }
 
@@ -1231,12 +1193,12 @@ public abstract class Creature extends GameObject {
           double mpConsume1 = skill.isUsingWhileCasting() ? skill.getMpConsume() : skill.getMpConsume1();
           if (mpConsume1 > 0.0D) {
             if (this._currentMp < mpConsume1) {
-              this.sendPacket((IStaticPacket)Msg.NOT_ENOUGH_MP);
+              this.sendPacket(Msg.NOT_ENOUGH_MP);
               this.onCastEndTime();
               return;
             }
 
-            this.reduceCurrentMp(mpConsume1, (Creature)null);
+            this.reduceCurrentMp(mpConsume1, null);
           }
 
           this._flyLoc = null;
@@ -1246,7 +1208,7 @@ public abstract class Creature extends GameObject {
               Location flyLoc = this.getFlyLocation(target, skill);
               if (flyLoc == null) {
                 this._animationEndTime = 0L;
-                this.sendPacket((IStaticPacket)SystemMsg.CANNOT_SEE_TARGET);
+                this.sendPacket(SystemMsg.CANNOT_SEE_TARGET);
                 return;
               } else {
                 this._flyLoc = flyLoc;
@@ -1263,7 +1225,7 @@ public abstract class Creature extends GameObject {
 
               this._scheduledCastInterval = skillTime;
               if (skillTime > 333 && this.isPlayer()) {
-                this.sendPacket((IStaticPacket)(new SetupGauge(this, 0, skillTime)));
+                this.sendPacket(new SetupGauge(this, 0, skillTime));
               }
 
               this.scheduleSkillLaunchedTask(forceUse, skillLaunchTime);
@@ -1275,11 +1237,11 @@ public abstract class Creature extends GameObject {
   }
 
   protected void scheduleSkillLaunchedTask(boolean forceUse, int skillLaunchTime) {
-    this._skillLaunchedTask = ThreadPoolManager.getInstance().schedule(new MagicLaunchedTask(this, forceUse), (long)skillLaunchTime);
+    this._skillLaunchedTask = ThreadPoolManager.getInstance().schedule(new MagicLaunchedTask(this, forceUse), skillLaunchTime);
   }
 
   protected void scheduleSkillUseTask(boolean forceUse, int skillTime) {
-    this._skillTask = ThreadPoolManager.getInstance().schedule(new MagicUseTask(this, forceUse), (long)skillTime);
+    this._skillTask = ThreadPoolManager.getInstance().schedule(new MagicUseTask(this, forceUse), skillTime);
   }
 
   public void clearCastVars() {
@@ -1299,7 +1261,7 @@ public abstract class Creature extends GameObject {
         radian = PositionUtils.convertHeadingToRadian(target.getHeading());
         loc = new Location(target.getX() + (int)(Math.sin(radian) * 40.0D), target.getY() - (int)(Math.cos(radian) * 40.0D), target.getZ());
       } else {
-        radian = Math.atan2((double)(this.getY() - target.getY()), (double)(this.getX() - target.getX()));
+        radian = Math.atan2(this.getY() - target.getY(), this.getX() - target.getX());
         loc = new Location(target.getX() + (int)Math.round(Math.cos(radian) * 40.0D), target.getY() + (int)Math.round(Math.sin(radian) * 40.0D), target.getZ());
       }
 
@@ -1349,7 +1311,7 @@ public abstract class Creature extends GameObject {
       }
     }
 
-    this.setTarget((GameObject)null);
+    this.setTarget(null);
     this.stopMove();
     this.stopAttackStanceTask();
     this.stopRegeneration();
@@ -1388,7 +1350,7 @@ public abstract class Creature extends GameObject {
       }
     }
 
-    ThreadPoolManager.getInstance().execute(new NotifyAITask(this, CtrlEvent.EVT_DEAD, killer, (Object)null));
+    ThreadPoolManager.getInstance().execute(new NotifyAITask(this, CtrlEvent.EVT_DEAD, killer, null));
     this.getListeners().onDeath(killer);
     this.updateEffectIcons();
     this.updateStats();
@@ -1415,7 +1377,7 @@ public abstract class Creature extends GameObject {
   }
 
   public int getAccuracy() {
-    return (int)this.calcStat(Stats.ACCURACY_COMBAT, 0.0D, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.ACCURACY_COMBAT, 0.0D, null, null);
   }
 
   public Collection<Skill> getAllSkills() {
@@ -1424,7 +1386,7 @@ public abstract class Creature extends GameObject {
 
   public final Skill[] getAllSkillsArray() {
     Collection<Skill> vals = this._skills.values();
-    return (Skill[])vals.toArray(new Skill[vals.size()]);
+    return vals.toArray(new Skill[vals.size()]);
   }
 
   public final double getAttackSpeedMultiplier() {
@@ -1432,7 +1394,7 @@ public abstract class Creature extends GameObject {
   }
 
   public int getBuffLimit() {
-    return (int)this.calcStat(Stats.BUFF_LIMIT, (double)Config.ALT_BUFF_LIMIT, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.BUFF_LIMIT, Config.ALT_BUFF_LIMIT, null, null);
   }
 
   public Skill getCastingSkill() {
@@ -1440,11 +1402,11 @@ public abstract class Creature extends GameObject {
   }
 
   public int getCON() {
-    return (int)this.calcStat(Stats.STAT_CON, (double)this._template.baseCON, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.STAT_CON, this._template.baseCON, null, null);
   }
 
   public int getCriticalHit(Creature target, Skill skill) {
-    return (int)this.calcStat(Stats.CRITICAL_BASE, (double)this._template.baseCritRate, target, skill);
+    return (int) this.calcStat(Stats.CRITICAL_BASE, this._template.baseCritRate, target, skill);
   }
 
   public double getMagicCriticalRate(Creature target, Skill skill) {
@@ -1512,15 +1474,15 @@ public abstract class Creature extends GameObject {
   }
 
   public int getDEX() {
-    return (int)this.calcStat(Stats.STAT_DEX, (double)this._template.baseDEX, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.STAT_DEX, this._template.baseDEX, null, null);
   }
 
   public int getEvasionRate(Creature target) {
-    return (int)this.calcStat(Stats.EVASION_RATE, 0.0D, target, (Skill)null);
+    return (int) this.calcStat(Stats.EVASION_RATE, 0.0D, target, null);
   }
 
   public int getINT() {
-    return (int)this.calcStat(Stats.STAT_INT, (double)this._template.baseINT, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.STAT_INT, this._template.baseINT, null, null);
   }
 
   public List<Creature> getAroundCharacters(int radius, int height) {
@@ -1536,43 +1498,43 @@ public abstract class Creature extends GameObject {
   }
 
   public final Skill getKnownSkill(int skillId) {
-    return (Skill)this._skills.get(skillId);
+    return this._skills.get(skillId);
   }
 
   public final int getMagicalAttackRange(Skill skill) {
-    return skill != null ? (int)this.calcStat(Stats.MAGIC_ATTACK_RANGE, (double)skill.getCastRange(), (Creature)null, skill) : this.getTemplate().baseAtkRange;
+    return skill != null ? (int) this.calcStat(Stats.MAGIC_ATTACK_RANGE, skill.getCastRange(), null, skill) : this.getTemplate().baseAtkRange;
   }
 
   public final int getMagicalAttackRange(double base, Skill skill) {
-    return skill != null ? (int)this.calcStat(Stats.MAGIC_ATTACK_RANGE, base, (Creature)null, skill) : this.getTemplate().baseAtkRange;
+    return skill != null ? (int) this.calcStat(Stats.MAGIC_ATTACK_RANGE, base, null, skill) : this.getTemplate().baseAtkRange;
   }
 
   public int getMAtk(Creature target, Skill skill) {
-    return skill != null && skill.getMatak() > 0 ? skill.getMatak() : (int)this.calcStat(Stats.MAGIC_ATTACK, (double)this._template.baseMAtk, target, skill);
+    return skill != null && skill.getMatak() > 0 ? skill.getMatak() : (int) this.calcStat(Stats.MAGIC_ATTACK, this._template.baseMAtk, target, skill);
   }
 
   public int getMAtkSpd() {
-    return (int)this.calcStat(Stats.MAGIC_ATTACK_SPEED, (double)this._template.baseMAtkSpd, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.MAGIC_ATTACK_SPEED, this._template.baseMAtkSpd, null, null);
   }
 
   public final int getMaxCp() {
-    return (int)this.calcStat(Stats.MAX_CP, this._template.baseCpMax, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.MAX_CP, this._template.baseCpMax, null, null);
   }
 
   public int getMaxHp() {
-    return (int)this.calcStat(Stats.MAX_HP, this._template.baseHpMax, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.MAX_HP, this._template.baseHpMax, null, null);
   }
 
   public int getMaxMp() {
-    return (int)this.calcStat(Stats.MAX_MP, this._template.baseMpMax, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.MAX_MP, this._template.baseMpMax, null, null);
   }
 
   public int getMDef(Creature target, Skill skill) {
-    return Math.max((int)this.calcStat(Stats.MAGIC_DEFENCE, (double)this._template.baseMDef, target, skill), 1);
+    return Math.max((int) this.calcStat(Stats.MAGIC_DEFENCE, this._template.baseMDef, target, skill), 1);
   }
 
   public int getMEN() {
-    return (int)this.calcStat(Stats.STAT_MEN, (double)this._template.baseMEN, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.STAT_MEN, this._template.baseMEN, null, null);
   }
 
   public double getMinDistance(GameObject obj) {
@@ -1597,31 +1559,31 @@ public abstract class Creature extends GameObject {
   }
 
   public int getPAtk(Creature target) {
-    return (int)this.calcStat(Stats.POWER_ATTACK, (double)this._template.basePAtk, target, (Skill)null);
+    return (int) this.calcStat(Stats.POWER_ATTACK, this._template.basePAtk, target, null);
   }
 
   public int getPAtkSpd() {
-    return (int)this.calcStat(Stats.POWER_ATTACK_SPEED, (double)this._template.basePAtkSpd, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.POWER_ATTACK_SPEED, this._template.basePAtkSpd, null, null);
   }
 
   public int getPDef(Creature target) {
-    return (int)this.calcStat(Stats.POWER_DEFENCE, (double)this._template.basePDef, target, (Skill)null);
+    return (int) this.calcStat(Stats.POWER_DEFENCE, this._template.basePDef, target, null);
   }
 
   public int getPhysicalAttackRange() {
     WeaponTemplate weaponItem = this.getActiveWeaponItem();
-    return weaponItem == null ? (int)this.calcStat(Stats.POWER_ATTACK_RANGE, (double)this.getTemplate().baseAtkRange, (Creature)null, (Skill)null) : (int)this.calcStat(Stats.POWER_ATTACK_RANGE, (double)weaponItem.getAttackRange(), (Creature)null, (Skill)null);
+    return weaponItem == null ? (int) this.calcStat(Stats.POWER_ATTACK_RANGE, this.getTemplate().baseAtkRange, null, null) : (int) this.calcStat(Stats.POWER_ATTACK_RANGE, weaponItem.getAttackRange(), null, null);
   }
 
   /** @deprecated */
   @Deprecated
   public final int getRandomDamage() {
     WeaponTemplate weaponItem = this.getActiveWeaponItem();
-    return weaponItem == null ? 5 + (int)Math.sqrt((double)this.getLevel()) : weaponItem.getRandomDamage();
+    return weaponItem == null ? 5 + (int) Math.sqrt(this.getLevel()) : weaponItem.getRandomDamage();
   }
 
   public double getReuseModifier(Creature target) {
-    return this.calcStat(Stats.ATK_REUSE, 1.0D, target, (Skill)null);
+    return this.calcStat(Stats.ATK_REUSE, 1.0D, target, null);
   }
 
   public int getRunSpeed() {
@@ -1629,11 +1591,11 @@ public abstract class Creature extends GameObject {
   }
 
   public final int getShldDef() {
-    return this.isPlayer() ? (int)this.calcStat(Stats.SHIELD_DEFENCE, 0.0D, (Creature)null, (Skill)null) : (int)this.calcStat(Stats.SHIELD_DEFENCE, (double)this._template.baseShldDef, (Creature)null, (Skill)null);
+    return this.isPlayer() ? (int) this.calcStat(Stats.SHIELD_DEFENCE, 0.0D, null, null) : (int) this.calcStat(Stats.SHIELD_DEFENCE, this._template.baseShldDef, null, null);
   }
 
   public final int getSkillDisplayLevel(Integer skillId) {
-    Skill skill = (Skill)this._skills.get(skillId);
+    Skill skill = this._skills.get(skillId);
     return skill == null ? -1 : skill.getDisplayLevel();
   }
 
@@ -1642,7 +1604,7 @@ public abstract class Creature extends GameObject {
   }
 
   public final int getSkillLevel(Integer skillId, int def) {
-    Skill skill = (Skill)this._skills.get(skillId);
+    Skill skill = this._skills.get(skillId);
     return skill == null ? def : skill.getLevel();
   }
 
@@ -1650,7 +1612,7 @@ public abstract class Creature extends GameObject {
     if (this._skillMastery == null) {
       return 0;
     } else {
-      Integer val = (Integer)this._skillMastery.get(skillId);
+      Integer val = this._skillMastery.get(skillId);
       return val == null ? 0 : val;
     }
   }
@@ -1663,19 +1625,19 @@ public abstract class Creature extends GameObject {
   }
 
   public int getSpeed(int baseSpeed) {
-    return this.isInWater() ? this.getSwimSpeed() : (int)this.calcStat(Stats.RUN_SPEED, (double)baseSpeed, (Creature)null, (Skill)null);
+    return this.isInWater() ? this.getSwimSpeed() : (int) this.calcStat(Stats.RUN_SPEED, baseSpeed, null, null);
   }
 
   public int getSTR() {
-    return (int)this.calcStat(Stats.STAT_STR, (double)this._template.baseSTR, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.STAT_STR, this._template.baseSTR, null, null);
   }
 
   public int getSwimSpeed() {
-    return (int)this.calcStat(Stats.RUN_SPEED, (double)Config.SWIMING_SPEED, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.RUN_SPEED, Config.SWIMING_SPEED, null, null);
   }
 
   public GameObject getTarget() {
-    return (GameObject)this.target.get();
+    return this.target.get();
   }
 
   public final int getTargetId() {
@@ -1700,7 +1662,7 @@ public abstract class Creature extends GameObject {
   }
 
   public int getWIT() {
-    return (int)this.calcStat(Stats.STAT_WIT, (double)this._template.baseWIT, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.STAT_WIT, this._template.baseWIT, null, null);
   }
 
   public double headingToRadians(int heading) {
@@ -1760,7 +1722,7 @@ public abstract class Creature extends GameObject {
   }
 
   public boolean isSkillDisabled(Skill skill) {
-    TimeStamp sts = (TimeStamp)this._skillReuses.get(skill.hashCode());
+    TimeStamp sts = this._skillReuses.get(skill.hashCode());
     if (sts == null) {
       return false;
     } else if (sts.hasNotPassed()) {
@@ -1776,7 +1738,7 @@ public abstract class Creature extends GameObject {
   }
 
   public Location getDestination() {
-    return this.moveAction != null && this.moveAction instanceof Creature.MoveToLocationAction ? ((Creature.MoveToLocationAction)this.moveAction).moveTo().clone() : null;
+    return this.moveAction != null && this.moveAction instanceof Creature.MoveToLocationAction ? this.moveAction.moveTo().clone() : null;
   }
 
   public boolean isMoving() {
@@ -1847,10 +1809,10 @@ public abstract class Creature extends GameObject {
         this.getAI().clearNextAction();
         if (this.isPlayer()) {
           Player player = this.getPlayer();
-          this.getAI().changeIntention(CtrlIntention.AI_INTENTION_ACTIVE, (Object)null, (Object)null);
+          this.getAI().changeIntention(CtrlIntention.AI_INTENTION_ACTIVE, null, null);
           if (Config.ALT_TELEPORT_PROTECTION && this.isPlayer() && player.getAfterTeleportPortectionTime() > System.currentTimeMillis()) {
             player.setAfterTeleportPortectionTime(0L);
-            player.sendMessage(new CustomMessage("alt.teleport_protect_gonna", player, new Object[0]));
+            player.sendMessage(new CustomMessage("alt.teleport_protect_gonna", player));
           }
         }
 
@@ -1907,7 +1869,7 @@ public abstract class Creature extends GameObject {
         Player player = this.getPlayer();
         if (Config.ALT_TELEPORT_PROTECTION && this.isPlayer() && player.getAfterTeleportPortectionTime() > System.currentTimeMillis()) {
           player.setAfterTeleportPortectionTime(0L);
-          player.sendMessage(new CustomMessage("alt.teleport_protect_gonna", player, new Object[0]));
+          player.sendMessage(new CustomMessage("alt.teleport_protect_gonna", player));
         }
       }
 
@@ -1985,7 +1947,7 @@ public abstract class Creature extends GameObject {
       return -2147483648;
     } else {
       int waterZ = -2147483648;
-      Zone[] zones = (Zone[])this._zonesRef.get();
+      Zone[] zones = this._zonesRef.get();
       Zone[] var3 = zones;
       int var4 = zones.length;
 
@@ -2006,7 +1968,7 @@ public abstract class Creature extends GameObject {
 
   public L2GameServerPacket movePacket() {
     Creature.MoveActionBase moveAction = this.moveAction;
-    return (L2GameServerPacket)(moveAction != null ? moveAction.movePacket() : new CharMoveToLocation(this));
+    return moveAction != null ? moveAction.movePacket() : new CharMoveToLocation(this);
   }
 
   public boolean updateZones() {
@@ -2014,7 +1976,7 @@ public abstract class Creature extends GameObject {
       return false;
     } else {
       Zone[] regionZones = this.isVisible() ? this.getCurrentRegion().getZones() : Zone.EMPTY_L2ZONE_ARRAY;
-      Zone[] currZones = (Zone[])this._zonesRef.get();
+      Zone[] currZones = this._zonesRef.get();
       Zone[] newZones = currZones;
       Zone zone;
       int newZoneIdx;
@@ -2022,7 +1984,7 @@ public abstract class Creature extends GameObject {
         for(newZoneIdx = 0; newZoneIdx < currZones.length; ++newZoneIdx) {
           zone = currZones[newZoneIdx];
           if (!ArrayUtils.contains(regionZones, zone) || !zone.checkIfInZone(this.getX(), this.getY(), this.getZ(), this.getReflection())) {
-            newZones = (Zone[])ArrayUtils.removeElement(newZones, zone);
+            newZones = ArrayUtils.removeElement(newZones, zone);
           }
         }
       }
@@ -2031,7 +1993,7 @@ public abstract class Creature extends GameObject {
         for(newZoneIdx = 0; newZoneIdx < regionZones.length; ++newZoneIdx) {
           zone = regionZones[newZoneIdx];
           if (!ArrayUtils.contains(currZones, zone) && zone.checkIfInZone(this.getX(), this.getY(), this.getZ(), this.getReflection())) {
-            newZones = (Zone[])ArrayUtils.add(newZones, zone);
+            newZones = ArrayUtils.add(newZones, zone);
           }
         }
       }
@@ -2071,7 +2033,7 @@ public abstract class Creature extends GameObject {
   }
 
   public boolean isInZone(ZoneType type) {
-    Zone[] zones = (Zone[])this._zonesRef.get();
+    Zone[] zones = this._zonesRef.get();
     Zone[] var3 = zones;
     int var4 = zones.length;
 
@@ -2086,7 +2048,7 @@ public abstract class Creature extends GameObject {
   }
 
   public boolean isInZone(String name) {
-    Zone[] zones = (Zone[])this._zonesRef.get();
+    Zone[] zones = this._zonesRef.get();
     Zone[] var3 = zones;
     int var4 = zones.length;
 
@@ -2101,12 +2063,12 @@ public abstract class Creature extends GameObject {
   }
 
   public boolean isInZone(Zone zone) {
-    Zone[] zones = (Zone[])this._zonesRef.get();
+    Zone[] zones = this._zonesRef.get();
     return ArrayUtils.contains(zones, zone);
   }
 
   public Zone getZone(ZoneType type) {
-    Zone[] zones = (Zone[])this._zonesRef.get();
+    Zone[] zones = this._zonesRef.get();
     Zone[] var3 = zones;
     int var4 = zones.length;
 
@@ -2121,7 +2083,7 @@ public abstract class Creature extends GameObject {
   }
 
   public Location getRestartPoint() {
-    Zone[] zones = (Zone[])this._zonesRef.get();
+    Zone[] zones = this._zonesRef.get();
     Zone[] var2 = zones;
     int var3 = zones.length;
 
@@ -2139,7 +2101,7 @@ public abstract class Creature extends GameObject {
   }
 
   public Location getPKRestartPoint() {
-    Zone[] zones = (Zone[])this._zonesRef.get();
+    Zone[] zones = this._zonesRef.get();
     Zone[] var2 = zones;
     int var3 = zones.length;
 
@@ -2221,15 +2183,15 @@ public abstract class Creature extends GameObject {
 
         this.displayGiveDamageMessage(target, damage, crit, miss, shld, false);
         ThreadPoolManager.getInstance().execute(new NotifyAITask(target, CtrlEvent.EVT_ATTACKED, this, damage));
-        boolean checkPvP = this.checkPvP(target, (Skill)null);
+        boolean checkPvP = this.checkPvP(target, null);
         if (!miss && damage > 0) {
-          target.reduceCurrentHp((double)damage, this, (Skill)null, true, true, false, true, false, false, true);
+          target.reduceCurrentHp(damage, this, null, true, true, false, true, false, false, true);
           if (!target.isDead()) {
             if (crit) {
-              this.useTriggers(target, TriggerType.CRIT, (Skill)null, (Skill)null, (double)damage);
+              this.useTriggers(target, TriggerType.CRIT, null, null, damage);
             }
 
-            this.useTriggers(target, TriggerType.ATTACK, (Skill)null, (Skill)null, (double)damage);
+            this.useTriggers(target, TriggerType.ATTACK, null, null, damage);
             if (Formulas.calcCastBreak(target, crit)) {
               target.abortCast(false, true);
             }
@@ -2241,7 +2203,7 @@ public abstract class Creature extends GameObject {
         }
 
         if (miss) {
-          target.useTriggers(this, TriggerType.UNDER_MISSED_ATTACK, (Skill)null, (Skill)null, (double)damage);
+          target.useTriggers(this, TriggerType.UNDER_MISSED_ATTACK, null, null, damage);
         }
 
         this.startAttackStanceTask();
@@ -2267,7 +2229,7 @@ public abstract class Creature extends GameObject {
 
       if (!skill.checkCondition(this, aimingTarget, forceUse, false, false)) {
         if (skill.getSkillType() == SkillType.PET_SUMMON && this.isPlayer()) {
-          this.getPlayer().setPetControlItem((ItemInstance)null);
+          this.getPlayer().setPetControlItem(null);
         }
 
         this.onCastEndTime();
@@ -2290,12 +2252,12 @@ public abstract class Creature extends GameObject {
           }
 
           if (this._currentMp < mpConsume2 && this.isPlayable()) {
-            this.sendPacket((IStaticPacket)Msg.NOT_ENOUGH_MP);
+            this.sendPacket(Msg.NOT_ENOUGH_MP);
             this.onCastEndTime();
             return;
           }
 
-          this.reduceCurrentMp(mpConsume2, (Creature)null);
+          this.reduceCurrentMp(mpConsume2, null);
         }
 
         this.callSkill(skill, targets, true);
@@ -2304,9 +2266,9 @@ public abstract class Creature extends GameObject {
         }
 
         if (skill.isSoulBoost()) {
-          this.setConsumedSouls(this.getConsumedSouls() - Math.min(this.getConsumedSouls(), 5), (NpcInstance)null);
+          this.setConsumedSouls(this.getConsumedSouls() - Math.min(this.getConsumedSouls(), 5), null);
         } else if (skill.getSoulsConsume() > 0) {
-          this.setConsumedSouls(this.getConsumedSouls() - skill.getSoulsConsume(), (NpcInstance)null);
+          this.setConsumedSouls(this.getConsumedSouls() - skill.getSoulsConsume(), null);
         }
 
         switch(skill.getFlyType()) {
@@ -2316,14 +2278,14 @@ public abstract class Creature extends GameObject {
 
             while(var9.hasNext()) {
               Creature target = (Creature)var9.next();
-              Location flyLoc = this.getFlyLocation((GameObject)null, skill);
+              Location flyLoc = this.getFlyLocation(null, skill);
               target.setLoc(flyLoc);
               this.broadcastPacket(new FlyToLocation(target, flyLoc, skill.getFlyType()));
             }
           default:
-            int skillCoolTime = Formulas.calcMAtkSpd(this, skill, (double)skill.getCoolTime());
+            int skillCoolTime = Formulas.calcMAtkSpd(this, skill, skill.getCoolTime());
             if (skillCoolTime > 0) {
-              ThreadPoolManager.getInstance().schedule(new CastEndTimeTask(this), (long)skillCoolTime);
+              ThreadPoolManager.getInstance().schedule(new CastEndTimeTask(this), skillCoolTime);
             } else {
               this.onCastEndTime();
             }
@@ -2356,7 +2318,7 @@ public abstract class Creature extends GameObject {
       if (!this.isDamageBlocked() || !transferDamage) {
         if (this.isDamageBlocked() && attacker != this) {
           if (sendMessage) {
-            attacker.sendPacket((IStaticPacket)Msg.THE_ATTACK_HAS_BEEN_BLOCKED);
+            attacker.sendPacket(Msg.THE_ATTACK_HAS_BEEN_BLOCKED);
           }
 
         } else {
@@ -2376,7 +2338,7 @@ public abstract class Creature extends GameObject {
             }
 
             if (!isDot) {
-              this.useTriggers(attacker, TriggerType.RECEIVE_DAMAGE, (Skill)null, (Skill)null, damage);
+              this.useTriggers(attacker, TriggerType.RECEIVE_DAMAGE, null, null, damage);
             }
           }
 
@@ -2402,7 +2364,7 @@ public abstract class Creature extends GameObject {
       this.startAttackStanceTask();
       this.checkAndRemoveInvisible();
       if (this.getCurrentHp() - damage < 0.5D) {
-        this.useTriggers(attacker, TriggerType.DIE, (Skill)null, (Skill)null, damage);
+        this.useTriggers(attacker, TriggerType.DIE, null, null, damage);
       }
     }
 
@@ -2434,7 +2396,7 @@ public abstract class Creature extends GameObject {
     }
 
     if (this.isDamageBlocked() && attacker != null && attacker != this) {
-      attacker.sendPacket((IStaticPacket)Msg.THE_ATTACK_HAS_BEEN_BLOCKED);
+      attacker.sendPacket(Msg.THE_ATTACK_HAS_BEEN_BLOCKED);
     } else {
       if (attacker != null && attacker.isPlayer() && Math.abs(attacker.getLevel() - this.getLevel()) > 10) {
         if (attacker.getKarma() > 0 && this.getEffectList().getEffectsBySkillId(5182) != null && !this.isInZone(ZoneType.SIEGE)) {
@@ -2449,9 +2411,9 @@ public abstract class Creature extends GameObject {
       this.getListeners().onCurrentMpReduce(i, attacker);
       if (sendMessage) {
         int msgMp = (int)Math.min(this._currentMp, i);
-        this.sendPacket((IStaticPacket)(new SystemMessage(1866)).addNumber(msgMp));
+        this.sendPacket((new SystemMessage(1866)).addNumber(msgMp));
         if (attacker != null && attacker.isPlayer()) {
-          attacker.sendPacket((IStaticPacket)(new SystemMessage(1867)).addNumber(msgMp));
+          attacker.sendPacket((new SystemMessage(1867)).addNumber(msgMp));
         }
       }
 
@@ -2494,7 +2456,7 @@ public abstract class Creature extends GameObject {
   }
 
   public Skill removeSkillById(Integer id) {
-    Skill oldSkill = (Skill)this._skills.remove(id);
+    Skill oldSkill = this._skills.remove(id);
     if (oldSkill != null) {
       this.removeTriggers(oldSkill);
       this.removeStatsOwner(oldSkill);
@@ -2544,15 +2506,15 @@ public abstract class Creature extends GameObject {
       this._triggers = new ConcurrentHashMap();
     }
 
-    Set<TriggerInfo> hs = (Set)this._triggers.get(t.getType());
+    Set<TriggerInfo> hs = this._triggers.get(t.getType());
     if (hs == null) {
       hs = new CopyOnWriteArraySet();
       this._triggers.put(t.getType(), hs);
     }
 
-    ((Set)hs).add(t);
+    hs.add(t);
     if (t.getType() == TriggerType.ADD) {
-      this.useTriggerSkill(this, (List)null, t, (Skill)null, 0.0D);
+      this.useTriggerSkill(this, null, t, null, 0.0D);
     }
 
   }
@@ -2571,7 +2533,7 @@ public abstract class Creature extends GameObject {
 
   public void removeTrigger(TriggerInfo t) {
     if (this._triggers != null) {
-      Set<TriggerInfo> hs = (Set)this._triggers.get(t.getType());
+      Set<TriggerInfo> hs = this._triggers.get(t.getType());
       if (hs != null) {
         hs.remove(t);
       }
@@ -2579,7 +2541,7 @@ public abstract class Creature extends GameObject {
   }
 
   public void sendActionFailed() {
-    this.sendPacket((IStaticPacket)ActionFail.STATIC);
+    this.sendPacket(ActionFail.STATIC);
   }
 
   public boolean hasAI() {
@@ -2616,7 +2578,7 @@ public abstract class Creature extends GameObject {
 
   public final void setCurrentHp(double newHp, boolean canRessurect, boolean sendInfo) {
     int maxHp = this.getMaxHp();
-    newHp = Math.min((double)maxHp, Math.max(0.0D, newHp));
+    newHp = Math.min(maxHp, Math.max(0.0D, newHp));
     if (this._currentHp != newHp) {
       if (newHp < 0.5D || !this.isDead() || canRessurect) {
         double hpStart = this._currentHp;
@@ -2645,7 +2607,7 @@ public abstract class Creature extends GameObject {
 
   public final void setCurrentMp(double newMp, boolean sendInfo) {
     int maxMp = this.getMaxMp();
-    newMp = Math.min((double)maxMp, Math.max(0.0D, newMp));
+    newMp = Math.min(maxMp, Math.max(0.0D, newMp));
     if (this._currentMp != newMp) {
       if (newMp < 0.5D || !this.isDead()) {
         this._currentMp = newMp;
@@ -2669,7 +2631,7 @@ public abstract class Creature extends GameObject {
   public final void setCurrentCp(double newCp, boolean sendInfo) {
     if (this.isPlayer()) {
       int maxCp = this.getMaxCp();
-      newCp = Math.min((double)maxCp, Math.max(0.0D, newCp));
+      newCp = Math.min(maxCp, Math.max(0.0D, newCp));
       if (this._currentCp != newCp) {
         if (newCp < 0.5D || !this.isDead()) {
           this._currentCp = newCp;
@@ -2694,8 +2656,8 @@ public abstract class Creature extends GameObject {
   public void setCurrentHpMp(double newHp, double newMp, boolean canRessurect) {
     int maxHp = this.getMaxHp();
     int maxMp = this.getMaxMp();
-    newHp = Math.min((double)maxHp, Math.max(0.0D, newHp));
-    newMp = Math.min((double)maxMp, Math.max(0.0D, newMp));
+    newHp = Math.min(maxHp, Math.max(0.0D, newHp));
+    newMp = Math.min(maxMp, Math.max(0.0D, newMp));
     if (this._currentHp != newHp || this._currentMp != newMp) {
       if (newHp < 0.5D || !this.isDead() || canRessurect) {
         double hpStart = this._currentHp;
@@ -2741,7 +2703,7 @@ public abstract class Creature extends GameObject {
   }
 
   public Creature getCastingTarget() {
-    return (Creature)this.castingTarget.get();
+    return this.castingTarget.get();
   }
 
   public void setCastingTarget(Creature target) {
@@ -2779,7 +2741,7 @@ public abstract class Creature extends GameObject {
   }
 
   public Creature getAggressionTarget() {
-    return (Creature)this._aggressionTarget.get();
+    return this._aggressionTarget.get();
   }
 
   public void setTarget(GameObject object) {
@@ -3205,7 +3167,7 @@ public abstract class Creature extends GameObject {
     if (this.isTeleporting.compareAndSet(false, true)) {
       this.abortCast(true, false);
       if (!this.isLockedTarget()) {
-        this.setTarget((GameObject)null);
+        this.setTarget(null);
       }
 
       this.stopMove(true, true, false);
@@ -3231,8 +3193,8 @@ public abstract class Creature extends GameObject {
         this.decayMe();
         this.setXYZ(x, y, z);
         this.setReflection(r);
-        player.setLastClientPosition((Location)null);
-        player.setLastServerPosition((Location)null);
+        player.setLastClientPosition(null);
+        player.setLastServerPosition(null);
         player.sendPacket(new TeleportToLocation(player, x, y, z));
       } else {
         this.setXYZ(x, y, z);
@@ -3425,15 +3387,15 @@ public abstract class Creature extends GameObject {
     int maxMp = this.getMaxMp();
     int maxCp = this.isPlayer() ? this.getMaxCp() : 0;
     if (this._currentHp > (double)maxHp) {
-      this.setCurrentHp((double)maxHp, false);
+      this.setCurrentHp(maxHp, false);
     }
 
     if (this._currentMp > (double)maxMp) {
-      this.setCurrentMp((double)maxMp, false);
+      this.setCurrentMp(maxMp, false);
     }
 
     if (this._currentCp > (double)maxCp) {
-      this.setCurrentCp((double)maxCp, false);
+      this.setCurrentCp(maxCp, false);
     }
 
     if (this._currentHp < (double)maxHp || this._currentMp < (double)maxMp || this._currentCp < (double)maxCp) {
@@ -3546,7 +3508,7 @@ public abstract class Creature extends GameObject {
 
   protected void onDespawn() {
     if (!this.isLockedTarget()) {
-      this.setTarget((GameObject)null);
+      this.setTarget(null);
     }
 
     this.stopMove();
@@ -3570,7 +3532,7 @@ public abstract class Creature extends GameObject {
   public void validateLocation(int broadcast) {
     L2GameServerPacket sp = new ValidateLocation(this);
     if (broadcast == 0) {
-      this.sendPacket((IStaticPacket)sp);
+      this.sendPacket(sp);
     } else if (broadcast == 1) {
       this.broadcastPacket(sp);
     } else {
@@ -3647,7 +3609,7 @@ public abstract class Creature extends GameObject {
 
   public void displayGiveDamageMessage(Creature target, int damage, boolean crit, boolean miss, boolean shld, boolean magic) {
     if (miss && target.isPlayer() && !target.isDamageBlocked()) {
-      target.sendPacket((IStaticPacket)(new SystemMessage(42)).addName(this));
+      target.sendPacket((new SystemMessage(42)).addName(this));
     }
 
   }
@@ -3660,7 +3622,7 @@ public abstract class Creature extends GameObject {
   }
 
   public TimeStamp getSkillReuse(Skill skill) {
-    return (TimeStamp)this._skillReuses.get(skill.hashCode());
+    return this._skillReuses.get(skill.hashCode());
   }
 
   private class RegenTask implements Runnable {
@@ -3691,8 +3653,8 @@ public abstract class Creature extends GameObject {
             if (pl.isSitting()) {
               pl.updateWaitSitTime();
               if (pl.getWaitSitTime() > 5) {
-                addHp += (double)pl.getWaitSitTime();
-                addMp += (double)pl.getWaitSitTime();
+                addHp += pl.getWaitSitTime();
+                addMp += pl.getWaitSitTime();
               }
             }
           } else if (Creature.this.isRaid() && Creature.this.getLevel() >= Config.RATE_MOD_MIN_LEVEL_LIMIT && Creature.this.getLevel() <= Config.RATE_MOD_MAX_LEVEL_LIMIT) {
@@ -3701,15 +3663,15 @@ public abstract class Creature extends GameObject {
           }
 
           Creature var10000 = Creature.this;
-          var10000._currentHp += Math.max(0.0D, Math.min(addHp, Creature.this.calcStat(Stats.HP_LIMIT, (Creature)null, (Skill)null) * (double)maxHp / 100.0D - Creature.this._currentHp));
+          var10000._currentHp += Math.max(0.0D, Math.min(addHp, Creature.this.calcStat(Stats.HP_LIMIT, null, null) * (double) maxHp / 100.0D - Creature.this._currentHp));
           var10000 = Creature.this;
-          var10000._currentMp += Math.max(0.0D, Math.min(addMp, Creature.this.calcStat(Stats.MP_LIMIT, (Creature)null, (Skill)null) * (double)maxMp / 100.0D - Creature.this._currentMp));
-          Creature.this._currentHp = Math.min((double)maxHp, Creature.this._currentHp);
-          Creature.this._currentMp = Math.min((double)maxMp, Creature.this._currentMp);
+          var10000._currentMp += Math.max(0.0D, Math.min(addMp, Creature.this.calcStat(Stats.MP_LIMIT, null, null) * (double) maxMp / 100.0D - Creature.this._currentMp));
+          Creature.this._currentHp = Math.min(maxHp, Creature.this._currentHp);
+          Creature.this._currentMp = Math.min(maxMp, Creature.this._currentMp);
           if (Creature.this.isPlayer()) {
             var10000 = Creature.this;
-            var10000._currentCp += Math.max(0.0D, Math.min(Formulas.calcCpRegen(Creature.this), Creature.this.calcStat(Stats.CP_LIMIT, (Creature)null, (Skill)null) * (double)maxCp / 100.0D - Creature.this._currentCp));
-            Creature.this._currentCp = Math.min((double)maxCp, Creature.this._currentCp);
+            var10000._currentCp += Math.max(0.0D, Math.min(Formulas.calcCpRegen(Creature.this), Creature.this.calcStat(Stats.CP_LIMIT, null, null) * (double) maxCp / 100.0D - Creature.this._currentCp));
+            Creature.this._currentCp = Math.min(maxCp, Creature.this._currentCp);
           }
 
           if (Creature.this._currentHp == (double)maxHp && Creature.this._currentMp == (double)maxMp && Creature.this._currentCp == (double)maxCp) {
@@ -3753,7 +3715,7 @@ public abstract class Creature extends GameObject {
     }
 
     private GameObject getTarget() {
-      return (GameObject)this.targetRef.get();
+      return this.targetRef.get();
     }
 
     public boolean isSameTarget(GameObject target) {
@@ -3851,9 +3813,9 @@ public abstract class Creature extends GameObject {
       if (actor != null && target != null) {
         if (target.isCreature() && ((Creature)target).isMoving()) {
           int threshold = this.indent + 16;
-          return this.includeMoveZ() ? target.isInRangeZ(actor, (long)threshold) : target.isInRange(actor, (long)threshold);
+          return this.includeMoveZ() ? target.isInRangeZ(actor, threshold) : target.isInRange(actor, threshold);
         } else {
-          return this.includeMoveZ() ? target.isInRangeZ(actor, (long)(this.indent + 16)) : target.isInRange(actor, (long)(this.indent + 16));
+          return this.includeMoveZ() ? target.isInRangeZ(actor, this.indent + 16) : target.isInRange(actor, this.indent + 16);
         }
       } else {
         return false;
@@ -4072,10 +4034,10 @@ public abstract class Creature extends GameObject {
     }
 
     protected boolean pollPathLine() {
-      if ((this.currentGeoPathLine = (List)this.geoPathLines.poll()) != null) {
+      if ((this.currentGeoPathLine = this.geoPathLines.poll()) != null) {
         Creature actor = this.getActor();
-        this.moveFrom = ((Location)this.currentGeoPathLine.get(0)).clone().geo2world();
-        this.moveTo = ((Location)this.currentGeoPathLine.get(this.currentGeoPathLine.size() - 1)).clone().geo2world();
+        this.moveFrom = this.currentGeoPathLine.get(0).clone().geo2world();
+        this.moveTo = this.currentGeoPathLine.get(this.currentGeoPathLine.size() - 1).clone().geo2world();
         this.prevIncZ = this.includeMoveZ();
         this.prevMoveLen = PositionUtils.calculateDistance(this.moveFrom, this.moveTo, this.prevIncZ);
         this.setPassDist(0.0D);
@@ -4103,9 +4065,9 @@ public abstract class Creature extends GameObject {
         Location currLoc = creature.getLoc();
         if (len >= 16.0D && done != 0.0D && pass != 0.0D && !this.currentGeoPathLine.isEmpty()) {
           int lastIdx = this.currentGeoPathLine.size() - 1;
-          result.set(this.moveFrom).indent(this.moveTo, (int)(pass + 0.5D), includeZ).setZ(((Location)this.currentGeoPathLine.get(Math.min(lastIdx, (int)((double)lastIdx * done + 0.5D)))).getZ());
+          result.set(this.moveFrom).indent(this.moveTo, (int) (pass + 0.5D), includeZ).setZ(this.currentGeoPathLine.get(Math.min(lastIdx, (int) ((double) lastIdx * done + 0.5D))).getZ());
           if (!result.equalsGeo(currLoc) && !this.ignoreGeo && Config.ALLOW_GEODATA) {
-            return includeZ ? true : GeoEngine.canMoveToCoord(currLoc.getX(), currLoc.getY(), currLoc.getZ(), result.getX(), result.getY(), result.getZ(), creature.getGeoIndex());
+            return includeZ || GeoEngine.canMoveToCoord(currLoc.getX(), currLoc.getY(), currLoc.getZ(), result.getX(), result.getY(), result.getZ(), creature.getGeoIndex());
           } else {
             return true;
           }
@@ -4157,7 +4119,7 @@ public abstract class Creature extends GameObject {
     }
 
     protected Creature getActor() {
-      return (Creature)this.actorRef.get();
+      return this.actorRef.get();
     }
 
     protected void setIsFinished(boolean isFinished) {
@@ -4253,7 +4215,7 @@ public abstract class Creature extends GameObject {
         Runnable r = actor._moveTaskRunnable;
         Creature.CreatureMoveActionTask creatureMoveActionTask;
         actor._moveTaskRunnable = creatureMoveActionTask = new Creature.CreatureMoveActionTask(actor);
-        actor._moveTask = ThreadPoolManager.getInstance().schedule(creatureMoveActionTask, (long)this.getNextTickInterval());
+        actor._moveTask = ThreadPoolManager.getInstance().schedule(creatureMoveActionTask, this.getNextTickInterval());
         return true;
       }
     }
@@ -4328,7 +4290,7 @@ public abstract class Creature extends GameObject {
       if (!creature.isPlayer()) {
         return true;
       } else if (creature.getPlayer().getCurrentLoad() >= 2 * creature.getPlayer().getMaxLoad()) {
-        creature.sendPacket((IStaticPacket)(new SystemMessage(555)));
+        creature.sendPacket(new SystemMessage(555));
         return false;
       } else {
         return true;
@@ -4351,7 +4313,7 @@ public abstract class Creature extends GameObject {
     }
 
     public void runImpl() throws Exception {
-      Creature actor = (Creature)this._creatureRef.get();
+      Creature actor = this._creatureRef.get();
       if (actor != null) {
         actor.moveLock.lock();
 

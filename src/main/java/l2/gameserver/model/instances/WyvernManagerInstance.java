@@ -5,7 +5,6 @@
 
 package l2.gameserver.model.instances;
 
-import java.util.StringTokenizer;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.entity.SevenSigns;
 import l2.gameserver.model.entity.residence.Residence;
@@ -14,6 +13,8 @@ import l2.gameserver.tables.PetDataTable;
 import l2.gameserver.templates.npc.NpcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.StringTokenizer;
 
 public final class WyvernManagerInstance extends NpcInstance {
   private static final Logger _log = LoggerFactory.getLogger(WyvernManagerInstance.class);
@@ -95,7 +96,7 @@ public final class WyvernManagerInstance extends NpcInstance {
     if (residence != null && residence.getId() > 0 && player.getClan() != null && residence.getOwnerId() == player.getClanId() && player.isClanLeader()) {
       return true;
     } else {
-      Residence residence = this.getClanHall();
+      residence = this.getClanHall();
       return residence != null && residence.getId() > 0 && player.getClan() != null && residence.getOwnerId() == player.getClanId() && player.isClanLeader();
     }
   }

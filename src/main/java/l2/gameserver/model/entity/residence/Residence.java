@@ -5,15 +5,6 @@
 
 package l2.gameserver.model.entity.residence;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import l2.commons.dao.JdbcEntity;
 import l2.commons.dao.JdbcEntityState;
 import l2.commons.dbutils.DbUtils;
@@ -37,6 +28,16 @@ import l2.gameserver.utils.Location;
 import l2.gameserver.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public abstract class Residence implements JdbcEntity {
   private static final Logger _log = LoggerFactory.getLogger(Residence.class);
@@ -92,7 +93,7 @@ public abstract class Residence implements JdbcEntity {
   }
 
   public <E extends SiegeEvent> E getSiegeEvent() {
-    return this._siegeEvent;
+    return (E) this._siegeEvent;
   }
 
   public int getId() {

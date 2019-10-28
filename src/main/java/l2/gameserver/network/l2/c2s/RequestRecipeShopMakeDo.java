@@ -5,8 +5,6 @@
 
 package l2.gameserver.network.l2.c2s;
 
-import java.util.Iterator;
-import java.util.List;
 import l2.commons.util.Rnd;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.data.xml.holder.RecipeHolder;
@@ -25,6 +23,9 @@ import l2.gameserver.templates.item.ItemTemplate;
 import l2.gameserver.utils.ItemFunctions;
 import l2.gameserver.utils.TradeHelper;
 import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.Iterator;
+import java.util.List;
 
 public class RequestRecipeShopMakeDo extends L2GameClientPacket {
   private int _manufacturerId;
@@ -173,14 +174,14 @@ public class RequestRecipeShopMakeDo extends L2GameClientPacket {
 
                 SystemMessage sm;
                 Iterator var24;
-                Pair product;
+                Pair pair;
                 int itemId;
                 if (success == 0) {
                   var24 = products.iterator();
 
                   while(var24.hasNext()) {
-                    product = (Pair)var24.next();
-                    itemId = ((ItemTemplate)product.getKey()).getItemId();
+                    pair = (Pair) var24.next();
+                    itemId = ((ItemTemplate) pair.getKey()).getItemId();
                     sm = new SystemMessage(1150);
                     sm.addString(manufacturer.getName());
                     sm.addItemName(itemId);
@@ -196,9 +197,9 @@ public class RequestRecipeShopMakeDo extends L2GameClientPacket {
                   var24 = products.iterator();
 
                   while(var24.hasNext()) {
-                    product = (Pair)var24.next();
-                    itemId = ((ItemTemplate)product.getKey()).getItemId();
-                    long count = (Long)product.getValue();
+                    pair = (Pair) var24.next();
+                    itemId = ((ItemTemplate) pair.getKey()).getItemId();
+                    long count = (Long) pair.getValue();
                     if (count > 1L) {
                       sm = new SystemMessage(1148);
                       sm.addString(manufacturer.getName());

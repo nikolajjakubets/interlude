@@ -5,6 +5,18 @@
 
 package l2.gameserver.geodata;
 
+import l2.commons.geometry.Shape;
+import l2.commons.util.NaturalOrderComparator;
+import l2.gameserver.Config;
+import l2.gameserver.geodata.GeoOptimizer.BlockLink;
+import l2.gameserver.geodata.GeoOptimizer.CheckSumLoader;
+import l2.gameserver.geodata.GeoOptimizer.GeoBlocksMatchFinder;
+import l2.gameserver.model.GameObject;
+import l2.gameserver.model.World;
+import l2.gameserver.utils.Location;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -20,17 +32,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import l2.commons.geometry.Shape;
-import l2.commons.util.NaturalOrderComparator;
-import l2.gameserver.Config;
-import l2.gameserver.geodata.GeoOptimizer.BlockLink;
-import l2.gameserver.geodata.GeoOptimizer.CheckSumLoader;
-import l2.gameserver.geodata.GeoOptimizer.GeoBlocksMatchFinder;
-import l2.gameserver.model.GameObject;
-import l2.gameserver.model.World;
-import l2.gameserver.utils.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GeoEngine {
   private static final Logger _log = LoggerFactory.getLogger(GeoEngine.class);
@@ -638,18 +639,18 @@ public class GeoEngine {
       diff_y = -diff_y;
     }
 
-    byte pdx;
-    byte pdy;
+    byte pdx = 0;
+    byte pdy = 0;
     int es;
     int el;
     if (diff_x > diff_y) {
-      pdx = incx;
+//      pdx = incx;
       pdy = 0;
       es = diff_y;
       el = diff_x;
     } else {
       pdx = 0;
-      pdy = incy;
+//      pdy = incy;
       es = diff_x;
       el = diff_y;
     }
@@ -908,7 +909,7 @@ public class GeoEngine {
     if (block != null) {
       int index = 0;
       byte type = block[index];
-      int index = index + 1;
+      index = index + 1;
       int cellX;
       int cellY;
       short height;
@@ -967,7 +968,7 @@ public class GeoEngine {
     } else {
       int index = 0;
       byte type = block[index];
-      int index = index + 1;
+      index = index + 1;
       int cellX;
       int cellY;
       short height;
@@ -1027,7 +1028,7 @@ public class GeoEngine {
     } else {
       int index = 0;
       byte type = block[index];
-      int index = index + 1;
+      index = index + 1;
       int cellX;
       int cellY;
       short height;
@@ -1099,7 +1100,7 @@ public class GeoEngine {
       int index = 0;
       short NSWE = 15;
       byte type = block[index];
-      int index = index + 1;
+      index = index + 1;
       int cellX;
       int cellY;
       short height;
@@ -1324,7 +1325,6 @@ public class GeoEngine {
     int iy = ry - Config.GEO_Y_FIRST;
     ByteBuffer geo = rawgeo[ix][iy];
     int index = 0;
-    int block = false;
     int floor = 0;
     byte[][] blocks;
     synchronized(geodata) {
@@ -1446,7 +1446,7 @@ public class GeoEngine {
             int cellY = getCell(geoY);
             int index = 0;
             byte blockType = block[index];
-            int index = index + 1;
+            index = index + 1;
             short height;
             byte old_nswe;
             switch(blockType) {
@@ -1543,8 +1543,6 @@ public class GeoEngine {
         isFirstTime = true;
         byte[][] cells = new byte[maxX - minX + 1][maxY - minY + 1];
 
-        int gX;
-        int gY;
         for(gX = minX; gX <= maxX; ++gX) {
           label187:
           for(gY = minY; gY <= maxY; ++gY) {
@@ -1609,7 +1607,7 @@ public class GeoEngine {
             int cellY = getCell(ay);
             int index = 0;
             byte blockType = block[index];
-            int index = index + 1;
+            index = index + 1;
             short height;
             byte old_nswe;
             byte close_nswe;

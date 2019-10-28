@@ -17,7 +17,7 @@ public class ReviveAnswerListener implements OnAnswerListener {
   private final long _timeStamp;
 
   public ReviveAnswerListener(Player player, double power, boolean forPet, int expireResurrectTime) {
-    this._playerRef = player.getRef();
+    this._playerRef = (HardReference<Player>) player.getRef();
     this._forPet = forPet;
     this._power = power;
     this._timeStamp = expireResurrectTime > 0 ? System.currentTimeMillis() + (long)expireResurrectTime : 9223372036854775807L;

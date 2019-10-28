@@ -5,28 +5,22 @@
 
 package l2.gameserver.ai;
 
-import java.util.concurrent.ScheduledFuture;
 import l2.commons.lang.reference.HardReference;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.Config;
 import l2.gameserver.ThreadPoolManager;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.geodata.GeoEngine;
-import l2.gameserver.model.Creature;
-import l2.gameserver.model.GameObject;
-import l2.gameserver.model.Playable;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.Skill;
-import l2.gameserver.model.Summon;
-import l2.gameserver.model.World;
+import l2.gameserver.model.*;
 import l2.gameserver.model.Skill.SkillNextAction;
 import l2.gameserver.model.Skill.SkillType;
-import l2.gameserver.model.instances.StaticObjectInstance;
 import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.components.SystemMsg;
 import l2.gameserver.network.l2.s2c.MyTargetSelected;
 import l2.gameserver.utils.Location;
+
+import java.util.concurrent.ScheduledFuture;
 
 public class PlayableAI extends CharacterAI {
   private volatile int thinking = 0;
@@ -89,13 +83,13 @@ public class PlayableAI extends CharacterAI {
     if (nextAction != null && !actor.isActionsDisabled()) {
       Creature target;
       GameObject object;
-      switch(nextAction) {
+      switch (nextAction) {
         case ATTACK:
           if (nextAction_arg0 == null) {
             return false;
           }
 
-          target = (Creature)nextAction_arg0;
+          target = (Creature) nextAction_arg0;
           this._forceUse = nextAction_arg2;
           this._dontMove = nextAction_arg3;
           this.clearNextAction();
@@ -103,14 +97,14 @@ public class PlayableAI extends CharacterAI {
           break;
         case CAST:
           if (nextAction_arg0 != null && nextAction_arg1 != null) {
-            Skill skill = (Skill)nextAction_arg0;
-            target = (Creature)nextAction_arg1;
+            Skill skill = (Skill) nextAction_arg0;
+            target = (Creature) nextAction_arg1;
             this._forceUse = nextAction_arg2;
             this._dontMove = nextAction_arg3;
             this.clearNextAction();
             if (!skill.checkCondition(actor, target, this._forceUse, this._dontMove, true)) {
               if (skill.getSkillNextAction() == SkillNextAction.ATTACK && !actor.equals(target) && !this._forceUse) {
-                this.setNextAction(NextAction.ATTACK, target, (Object)null, false, false);
+                this.setNextAction(NextAction.ATTACK, target, null, false, false);
                 return this.setNextIntention();
               }
 
@@ -124,8 +118,8 @@ public class PlayableAI extends CharacterAI {
           return false;
         case MOVE:
           if (nextAction_arg0 != null && nextAction_arg1 != null) {
-            Location loc = (Location)nextAction_arg0;
-            Integer offset = (Integer)nextAction_arg1;
+            Location loc = (Location) nextAction_arg0;
+            Integer offset = (Integer) nextAction_arg1;
             this.clearNextAction();
             actor.moveToLocation(loc, offset, nextAction_arg2);
             break;
@@ -133,14 +127,14 @@ public class PlayableAI extends CharacterAI {
 
           return false;
         case REST:
-          actor.sitDown((StaticObjectInstance)null);
+          actor.sitDown(null);
           break;
         case INTERACT:
           if (nextAction_arg0 == null) {
             return false;
           }
 
-          object = (GameObject)nextAction_arg0;
+          object = (GameObject) nextAction_arg0;
           this.clearNextAction();
           this.onIntentionInteract(object);
           break;
@@ -149,7 +143,7 @@ public class PlayableAI extends CharacterAI {
             return false;
           }
 
-          ItemInstance item = (ItemInstance)nextAction_arg0;
+          ItemInstance item = (ItemInstance) nextAction_arg0;
           item.getTemplate().getHandler().useItem(this.getActor(), item, nextAction_arg2);
           this.clearNextAction();
           break;
@@ -158,7 +152,7 @@ public class PlayableAI extends CharacterAI {
             return false;
           }
 
-          object = (GameObject)nextAction_arg0;
+          object = (GameObject) nextAction_arg0;
           this.clearNextAction();
           this.onIntentionPickUp(object);
           break;
@@ -197,7 +191,7 @@ public class PlayableAI extends CharacterAI {
   protected void onEvtArrived() {
     if (!this.setNextIntention()) {
       if (this.getIntention() != CtrlIntention.AI_INTENTION_INTERACT && this.getIntention() != CtrlIntention.AI_INTENTION_PICK_UP) {
-        this.changeIntention(CtrlIntention.AI_INTENTION_ACTIVE, (Object)null, (Object)null);
+        this.changeIntention(CtrlIntention.AI_INTENTION_ACTIVE, null, null);
       } else {
         this.onEvtThink();
       }
@@ -206,7 +200,7 @@ public class PlayableAI extends CharacterAI {
   }
 
   protected void onEvtArrivedTarget() {
-    switch(this.getIntention()) {
+    switch (this.getIntention()) {
       case AI_INTENTION_ATTACK:
         this.thinkAttack(false);
         break;
@@ -227,7 +221,7 @@ public class PlayableAI extends CharacterAI {
     if (!actor.isActionsDisabled()) {
       try {
         if (this.thinking++ <= 1) {
-          switch(this.getIntention()) {
+          switch (this.getIntention()) {
             case AI_INTENTION_ATTACK:
               this.thinkAttack(true);
               return;
@@ -271,10 +265,8 @@ public class PlayableAI extends CharacterAI {
         }
 
         if (target.isCreature()) {
-          Creature creature = (Creature)target;
-          if (creature.isInWater() || creature.isFlying()) {
-            return true;
-          }
+          Creature creature = (Creature) target;
+          return creature.isInWater() || creature.isFlying();
         }
       }
 
@@ -290,10 +282,11 @@ public class PlayableAI extends CharacterAI {
     if (player == null) {
       this.setIntention(CtrlIntention.AI_INTENTION_ACTIVE);
     } else if (!actor.isActionsDisabled() && !actor.isAttackingDisabled()) {
-      boolean isPosessed = actor instanceof Summon && ((Summon)actor).isDepressed();
+      boolean isPosessed = actor instanceof Summon && ((Summon) actor).isDepressed();
       final Creature attack_target = this.getAttackTarget();
       if (attack_target != null && !attack_target.isDead()) {
-        label132: {
+        label132:
+        {
           if (!isPosessed) {
             if (this._forceUse) {
               if (!attack_target.isAttackable(actor)) {
@@ -311,9 +304,9 @@ public class PlayableAI extends CharacterAI {
           }
 
           int clientClipRange = player.getNetConnection() != null ? player.getNetConnection().getPawnClippingRange() : GameClient.DEFAULT_PAWN_CLIPPING_RANGE;
-          int collisions = (int)(actor.getColRadius() + attack_target.getColRadius());
+          int collisions = (int) (actor.getColRadius() + attack_target.getColRadius());
           boolean incZ = isThinkImplyZ(actor, attack_target);
-          int dist = (int)(!incZ ? actor.getDistance(attack_target) : actor.getDistance3D(attack_target)) - collisions;
+          int dist = (int) (!incZ ? actor.getDistance(attack_target) : actor.getDistance3D(attack_target)) - collisions;
           boolean useActAsAtkRange = attack_target.isDoor();
           int atkRange = !useActAsAtkRange ? actor.getPhysicalAttackRange() : attack_target.getActingRange();
           boolean canSee = dist < clientClipRange && GeoEngine.canSeeTarget(actor, attack_target, incZ);
@@ -364,7 +357,7 @@ public class PlayableAI extends CharacterAI {
       if (target != null && (target.isDead() == this._skill.getCorpse() || this._skill.isNotTargetAoE())) {
         if (!checkRange) {
           if (this._skill.getSkillNextAction() == SkillNextAction.ATTACK && !actor.equals(target) && !this._forceUse) {
-            this.setNextAction(NextAction.ATTACK, target, (Object)null, false, false);
+            this.setNextAction(NextAction.ATTACK, target, null, false, false);
           } else {
             this.clearNextAction();
           }
@@ -380,13 +373,13 @@ public class PlayableAI extends CharacterAI {
           }
 
         } else {
-          int collisions = (int)(actor.getColRadius() + target.getColRadius());
+          int collisions = (int) (actor.getColRadius() + target.getColRadius());
           boolean incZ = isThinkImplyZ(actor, target);
-          int dist = (int)(!incZ ? actor.getDistance(target) : actor.getDistance3D(target)) - collisions;
+          int dist = (int) (!incZ ? actor.getDistance(target) : actor.getDistance3D(target)) - collisions;
           boolean useActAsCastRange = target.isDoor();
           int castRange = Math.max(16, actor.getMagicalAttackRange(this._skill));
           boolean canSee = false;
-          switch(this._skill.getSkillType()) {
+          switch (this._skill.getSkillType()) {
             case TAKECASTLE:
               canSee = true;
               break;
@@ -423,7 +416,7 @@ public class PlayableAI extends CharacterAI {
               }
 
               if (this._skill.getSkillNextAction() == SkillNextAction.ATTACK && !actor.equals(target) && !this._forceUse) {
-                this.setNextAction(NextAction.ATTACK, target, (Object)null, false, false);
+                this.setNextAction(NextAction.ATTACK, target, null, false, false);
               } else {
                 this.clearNextAction();
               }
@@ -453,11 +446,11 @@ public class PlayableAI extends CharacterAI {
 
   protected void thinkPickUp() {
     final Playable actor = this.getActor();
-    final GameObject target = (GameObject)this._intention_arg0;
+    final GameObject target = (GameObject) this._intention_arg0;
     if (target == null) {
       this.setIntention(CtrlIntention.AI_INTENTION_ACTIVE);
     } else {
-      if (actor.isInRange(target, (long)(target.getActingRange() + 16)) && Math.abs(actor.getZ() - target.getZ()) < 64) {
+      if (actor.isInRange(target, target.getActingRange() + 16) && Math.abs(actor.getZ() - target.getZ()) < 64) {
         if (actor.isPlayer() || actor.isPet()) {
           actor.doPickupItem(target);
         }
@@ -468,7 +461,7 @@ public class PlayableAI extends CharacterAI {
         ThreadPoolManager.getInstance().execute(new RunnableImpl() {
           public void runImpl() {
             actor.moveToLocation(moveToLoc, 0, true);
-            PlayableAI.this.setNextAction(NextAction.PICKUP, target, (Object)null, false, false);
+            PlayableAI.this.setNextAction(NextAction.PICKUP, target, null, false, false);
           }
         });
       }
@@ -478,16 +471,16 @@ public class PlayableAI extends CharacterAI {
 
   protected void thinkInteract() {
     final Playable actor = this.getActor();
-    final GameObject target = (GameObject)this._intention_arg0;
+    final GameObject target = (GameObject) this._intention_arg0;
     if (target == null) {
       this.setIntention(CtrlIntention.AI_INTENTION_ACTIVE);
     } else {
       boolean incZ = isThinkImplyZ(actor, target);
-      int dist = (int)(!incZ ? actor.getDistance(target) : actor.getDistance3D(target));
+      int dist = (int) (!incZ ? actor.getDistance(target) : actor.getDistance3D(target));
       final int actRange = target.getActingRange();
       if (dist <= actRange) {
         if (actor.isPlayer()) {
-          ((Player)actor).doInteract(target);
+          ((Player) actor).doInteract(target);
         }
 
         this.setIntention(CtrlIntention.AI_INTENTION_ACTIVE);
@@ -498,7 +491,7 @@ public class PlayableAI extends CharacterAI {
             actor.moveToRelative(target, moveIndent, actRange);
           }
         });
-        this.setNextAction(NextAction.INTERACT, target, (Object)null, false, false);
+        this.setNextAction(NextAction.INTERACT, target, null, false, false);
       }
 
     }
@@ -506,15 +499,15 @@ public class PlayableAI extends CharacterAI {
 
   protected void thinkFollow() {
     Playable actor = this.getActor();
-    Creature target = (Creature)this._intention_arg0;
+    Creature target = (Creature) this._intention_arg0;
     if (target != null && !target.isAlikeDead()) {
       if (actor.isFollowing() && actor.getFollowTarget() == target) {
         this.clientActionFailed();
       } else {
         int clientClipRange = actor.getPlayer() != null && actor.getPlayer().getNetConnection() != null ? actor.getPlayer().getNetConnection().getPawnClippingRange() : GameClient.DEFAULT_PAWN_CLIPPING_RANGE;
-        int collisions = (int)(actor.getColRadius() + target.getColRadius());
+        int collisions = (int) (actor.getColRadius() + target.getColRadius());
         boolean incZ = isThinkImplyZ(actor, target);
-        int dist = (int)(!incZ ? actor.getDistance(target) : actor.getDistance3D(target)) - collisions;
+        int dist = (int) (!incZ ? actor.getDistance(target) : actor.getDistance3D(target)) - collisions;
         int followRange = Config.FOLLOW_ARRIVE_DISTANCE;
         if (dist > clientClipRange) {
           this.setIntention(CtrlIntention.AI_INTENTION_ACTIVE);
@@ -539,17 +532,17 @@ public class PlayableAI extends CharacterAI {
   }
 
   protected ScheduledFuture<?> scheduleThinkFollowTask() {
-    return ThreadPoolManager.getInstance().schedule(new PlayableAI.ThinkFollow(this.getActor()), (long)Config.MOVE_TASK_QUANTUM_PC);
+    return ThreadPoolManager.getInstance().schedule(new PlayableAI.ThinkFollow(this.getActor()), Config.MOVE_TASK_QUANTUM_PC);
   }
 
   protected void onIntentionInteract(GameObject target) {
     Playable actor = this.getActor();
     if (actor.isActionsDisabled()) {
-      this.setNextAction(NextAction.INTERACT, target, (Object)null, false, false);
+      this.setNextAction(NextAction.INTERACT, target, null, false, false);
       this.clientActionFailed();
     } else {
       this.clearNextAction();
-      this.changeIntention(CtrlIntention.AI_INTENTION_INTERACT, target, (Object)null);
+      this.changeIntention(CtrlIntention.AI_INTENTION_INTERACT, target, null);
       this.onEvtThink();
     }
   }
@@ -557,11 +550,11 @@ public class PlayableAI extends CharacterAI {
   protected void onIntentionPickUp(GameObject object) {
     Playable actor = this.getActor();
     if (actor.isActionsDisabled()) {
-      this.setNextAction(NextAction.PICKUP, object, (Object)null, false, false);
+      this.setNextAction(NextAction.PICKUP, object, null, false, false);
       this.clientActionFailed();
     } else {
       this.clearNextAction();
-      this.changeIntention(CtrlIntention.AI_INTENTION_PICK_UP, object, (Object)null);
+      this.changeIntention(CtrlIntention.AI_INTENTION_PICK_UP, object, null);
       this.onEvtThink();
     }
   }
@@ -589,7 +582,7 @@ public class PlayableAI extends CharacterAI {
         }
       }
     } else {
-      actor.setAggressionTarget((Creature)null);
+      actor.setAggressionTarget(null);
     }
 
   }
@@ -602,7 +595,7 @@ public class PlayableAI extends CharacterAI {
       this.clearNextAction();
       this.setIntention(CtrlIntention.AI_INTENTION_ATTACK, target);
     } else {
-      this.setNextAction(NextAction.ATTACK, target, (Object)null, forceUse, false);
+      this.setNextAction(NextAction.ATTACK, target, null, forceUse, false);
       actor.sendActionFailed();
     }
   }
@@ -630,7 +623,7 @@ public class PlayableAI extends CharacterAI {
   }
 
   public Playable getActor() {
-    return (Playable)super.getActor();
+    return (Playable) super.getActor();
   }
 
   protected void onEvtForgetObject(GameObject object) {
@@ -645,20 +638,20 @@ public class PlayableAI extends CharacterAI {
     private final HardReference<? extends Playable> _actorRef;
 
     public ThinkFollow(Playable actor) {
-      this._actorRef = actor.getRef();
+      this._actorRef = (HardReference<? extends Playable>) actor.getRef();
     }
 
     public void runImpl() throws Exception {
-      Playable actor = (Playable)this._actorRef.get();
+      Playable actor = this._actorRef.get();
       if (actor != null) {
-        PlayableAI actorAI = (PlayableAI)actor.getAI();
+        PlayableAI actorAI = (PlayableAI) actor.getAI();
         if (actorAI.getIntention() == CtrlIntention.AI_INTENTION_FOLLOW) {
-          Creature target = (Creature)actorAI._intention_arg0;
+          Creature target = (Creature) actorAI._intention_arg0;
           if (target != null && !target.isAlikeDead()) {
             int clientClipRange = actor.getPlayer() != null && actor.getPlayer().getNetConnection() != null ? actor.getPlayer().getNetConnection().getPawnClippingRange() : GameClient.DEFAULT_PAWN_CLIPPING_RANGE;
-            int collisions = (int)(actor.getColRadius() + target.getColRadius());
+            int collisions = (int) (actor.getColRadius() + target.getColRadius());
             boolean incZ = PlayableAI.isThinkImplyZ(actor, target);
-            int dist = (int)(!incZ ? actor.getDistance(target) : actor.getDistance3D(target)) - collisions;
+            int dist = (int) (!incZ ? actor.getDistance(target) : actor.getDistance3D(target)) - collisions;
             int followIndent = Math.min(clientClipRange, target.getActingRange());
             int followRange = Config.FOLLOW_ARRIVE_DISTANCE;
             if (dist <= clientClipRange && dist <= 2 << World.SHIFT_BY) {

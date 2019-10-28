@@ -5,8 +5,6 @@
 
 package l2.gameserver.model.instances;
 
-import java.util.concurrent.Future;
-import l2.commons.lang.reference.HardReference;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.ThreadPoolManager;
 import l2.gameserver.cache.Msg;
@@ -19,6 +17,8 @@ import l2.gameserver.network.l2.s2c.SetSummonRemainTime;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.templates.item.WeaponTemplate.WeaponType;
 import l2.gameserver.templates.npc.NpcTemplate;
+
+import java.util.concurrent.Future;
 
 public class SummonInstance extends Summon {
   public final int CYCLE = 5000;
@@ -43,9 +43,9 @@ public class SummonInstance extends Summon {
     this._disappearTask = ThreadPoolManager.getInstance().schedule(new SummonInstance.Lifetime(), 5000L);
   }
 
-  public HardReference<SummonInstance> getRef() {
-    return super.getRef();
-  }
+//  public HardReference<SummonInstance> getRef() {
+//    return super.getRef();
+//  }
 
   public final int getLevel() {
     return this.getTemplate() != null ? this.getTemplate().level : 0;

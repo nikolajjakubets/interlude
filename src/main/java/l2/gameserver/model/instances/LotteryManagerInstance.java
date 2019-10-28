@@ -5,7 +5,6 @@
 
 package l2.gameserver.model.instances;
 
-import java.text.DateFormat;
 import l2.gameserver.Config;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.instancemanager.games.LotteryManager;
@@ -18,6 +17,8 @@ import l2.gameserver.network.l2.s2c.SystemMessage2;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.utils.ItemFunctions;
 import l2.gameserver.utils.Log;
+
+import java.text.DateFormat;
 
 public class LotteryManagerInstance extends NpcInstance {
   public LotteryManagerInstance(int objectID, NpcTemplate template) {
@@ -58,7 +59,6 @@ public class LotteryManagerInstance extends NpcInstance {
     int count;
     int type2;
     int i;
-    int i;
     switch(val) {
       case 0:
         filename = this.getHtmlPath(npcId, 1, player);
@@ -98,7 +98,7 @@ public class LotteryManagerInstance extends NpcInstance {
         filename = this.getHtmlPath(npcId, 5, player);
         html.setFile(filename);
         count = 0;
-        int found = false;
+        boolean found = false;
 
         for(i = 0; i < 5; ++i) {
           if (player.getLoto(i) == val) {
@@ -130,8 +130,8 @@ public class LotteryManagerInstance extends NpcInstance {
             }
 
             String search = "fore=\"L2UI.lottoNum" + replace + "\" back=\"L2UI.lottoNum" + replace + "a_check\"";
-            String replace = "fore=\"L2UI.lottoNum" + replace + "a_check\" back=\"L2UI.lottoNum" + replace + "\"";
-            html.replace(search, replace);
+            String secondReplace = "fore=\"L2UI.lottoNum" + replace + "a_check\" back=\"L2UI.lottoNum" + replace + "\"";
+            html.replace(search, secondReplace);
           }
         }
 
@@ -208,17 +208,17 @@ public class LotteryManagerInstance extends NpcInstance {
         type2 = var9.length;
 
         for(i = 0; i < type2; ++i) {
-          ItemInstance item = var9[i];
-          if (item != null && item.getItemId() == 4442 && item.getBlessed() < count) {
-            message = message + "<a action=\"bypass -h npc_%objectId%_Loto " + item.getObjectId() + "\">" + item.getBlessed();
+          ItemInstance itemInstance = var9[i];
+          if (itemInstance != null && itemInstance.getItemId() == 4442 && itemInstance.getBlessed() < count) {
+            message = message + "<a action=\"bypass -h npc_%objectId%_Loto " + itemInstance.getObjectId() + "\">" + itemInstance.getBlessed();
             message = message + " " + (new CustomMessage("LotteryManagerInstance.NpcString.EVENT_NUMBER", player, new Object[0])).toString() + " ";
-            int[] numbers = LotteryManager.getInstance().decodeNumbers(item.getEnchantLevel(), item.getDamaged());
+            int[] numbers = LotteryManager.getInstance().decodeNumbers(itemInstance.getEnchantLevel(), itemInstance.getDamaged());
 
-            for(int i = 0; i < 5; ++i) {
-              message = message + numbers[i] + " ";
+            for (int counter = 0; counter < 5; ++counter) {
+              message = message + numbers[counter] + " ";
             }
 
-            int[] check = LotteryManager.getInstance().checkTicket(item);
+            int[] check = LotteryManager.getInstance().checkTicket(itemInstance);
             if (check[0] > 0) {
               message = message + "- ";
               switch(check[0]) {
@@ -255,10 +255,10 @@ public class LotteryManagerInstance extends NpcInstance {
       default:
         if (val > 25) {
           count = LotteryManager.getInstance().getId();
-          ItemInstance item = player.getInventory().getItemByObjectId(val);
-          if (item != null && item.getItemId() == 4442 && item.getBlessed() < count) {
-            int[] check = LotteryManager.getInstance().checkTicket(item);
-            if (player.getInventory().destroyItem(item, 1L)) {
+          ItemInstance itemByObjectId = player.getInventory().getItemByObjectId(val);
+          if (itemByObjectId != null && itemByObjectId.getItemId() == 4442 && itemByObjectId.getBlessed() < count) {
+            int[] check = LotteryManager.getInstance().checkTicket(itemByObjectId);
+            if (player.getInventory().destroyItem(itemByObjectId, 1L)) {
               player.sendPacket(SystemMessage2.removeItems(4442, 1L));
               type2 = check[1];
               if (type2 > 0) {

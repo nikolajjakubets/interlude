@@ -5,12 +5,6 @@
 
 package l2.gameserver.utils;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.dao.CharacterDAO;
 import l2.gameserver.database.DatabaseFactory;
@@ -19,6 +13,13 @@ import l2.gameserver.model.World;
 import l2.gameserver.network.l2.components.CustomMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public final class AutoBan {
   private static final Logger _log = LoggerFactory.getLogger(AutoBan.class);
@@ -51,7 +52,6 @@ public final class AutoBan {
   }
 
   public static void Banned(Player actor, int period, String msg, String GM) {
-    int endban = false;
     int endban;
     if (period == -1) {
       endban = 2147483647;
@@ -111,7 +111,6 @@ public final class AutoBan {
         statement.executeUpdate();
         DbUtils.close(statement);
         if (acc_level < 0) {
-          int endban = false;
           int endban;
           if (period == -1) {
             endban = 2147483647;

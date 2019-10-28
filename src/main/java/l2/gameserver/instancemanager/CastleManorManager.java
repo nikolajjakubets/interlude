@@ -5,13 +5,6 @@
 
 package l2.gameserver.instancemanager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
 import l2.commons.dbutils.DbUtils;
 import l2.commons.threading.RunnableImpl;
 import l2.commons.util.Rnd;
@@ -30,6 +23,14 @@ import l2.gameserver.templates.manor.SeedProduction;
 import l2.gameserver.utils.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
 
 public class CastleManorManager {
   private static final Logger _log = LoggerFactory.getLogger(CastleManorManager.class);
@@ -62,10 +63,8 @@ public class CastleManorManager {
     this._underMaintenance = false;
     this._disabled = !Config.ALLOW_MANOR;
     List<Castle> castleList = ResidenceHolder.getInstance().getResidenceList(Castle.class);
-    Iterator var2 = castleList.iterator();
 
-    while(var2.hasNext()) {
-      Castle c = (Castle)var2.next();
+    for (Castle c : castleList) {
       c.setNextPeriodApproved(ServerVariables.getBool("ManorApproved"));
     }
 

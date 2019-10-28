@@ -6,13 +6,6 @@
 package l2.gameserver.model;
 
 import gnu.trove.TIntObjectIterator;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledFuture;
-import l2.commons.lang.reference.HardReference;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.Config;
 import l2.gameserver.ThreadPoolManager;
@@ -30,26 +23,20 @@ import l2.gameserver.model.instances.PetInstance;
 import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.model.items.PetInventory;
 import l2.gameserver.network.l2.components.IStaticPacket;
-import l2.gameserver.network.l2.s2c.ActionFail;
-import l2.gameserver.network.l2.s2c.AutoAttackStart;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
-import l2.gameserver.network.l2.s2c.MyTargetSelected;
-import l2.gameserver.network.l2.s2c.NpcInfo;
-import l2.gameserver.network.l2.s2c.PartySpelled;
-import l2.gameserver.network.l2.s2c.PetDelete;
-import l2.gameserver.network.l2.s2c.PetInfo;
-import l2.gameserver.network.l2.s2c.PetItemList;
-import l2.gameserver.network.l2.s2c.PetStatusShow;
-import l2.gameserver.network.l2.s2c.PetStatusUpdate;
-import l2.gameserver.network.l2.s2c.RelationChanged;
-import l2.gameserver.network.l2.s2c.StatusUpdate;
-import l2.gameserver.network.l2.s2c.SystemMessage;
+import l2.gameserver.network.l2.s2c.*;
 import l2.gameserver.scripts.Events;
 import l2.gameserver.stats.Stats;
 import l2.gameserver.taskmanager.DecayTaskManager;
 import l2.gameserver.templates.item.WeaponTemplate;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.utils.Location;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
 
 public abstract class Summon extends Playable {
   private static final int SUMMON_DISAPPEAR_RANGE = 2500;
@@ -82,9 +69,9 @@ public abstract class Summon extends Playable {
     this.setLoc(Location.findPointToStay(owner, (int)owner.getColRadius(), 100));
   }
 
-  public HardReference<? extends Summon> getRef() {
-    return super.getRef();
-  }
+//  public HardReference<? extends Summon> getRef() {
+//    return super.getRef();
+//  }
 
   protected void onSpawn() {
     super.onSpawn();

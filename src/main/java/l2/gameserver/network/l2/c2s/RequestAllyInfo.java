@@ -5,16 +5,16 @@
 
 package l2.gameserver.network.l2.c2s;
 
-import java.util.ArrayList;
-import java.util.List;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.pledge.Alliance;
 import l2.gameserver.model.pledge.Clan;
-import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.tables.ClanTable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RequestAllyInfo extends L2GameClientPacket {
   public RequestAllyInfo() {
@@ -24,11 +24,10 @@ public class RequestAllyInfo extends L2GameClientPacket {
   }
 
   protected void runImpl() {
-    Player player = ((GameClient)this.getClient()).getActiveChar();
+    Player player = this.getClient().getActiveChar();
     if (player != null) {
       Alliance ally = player.getAlliance();
       if (ally != null) {
-        int clancount = false;
         Clan leaderclan = player.getAlliance().getLeader();
         int clancount = ClanTable.getInstance().getAlliance(leaderclan.getAllyId()).getMembers().length;
         int[] online = new int[clancount + 1];
