@@ -5,16 +5,6 @@
 
 package l2.gameserver.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import l2.commons.dao.JdbcDAO;
 import l2.commons.dao.JdbcEntityState;
 import l2.commons.dao.JdbcEntityStats;
@@ -23,12 +13,24 @@ import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.model.mail.Mail;
 import l2.gameserver.model.mail.Mail.SenderType;
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
+import org.ehcache.Cache;
+import org.ehcache.config.builders.CacheConfigurationBuilder;
+import org.ehcache.config.builders.CacheManagerBuilder;
+import org.ehcache.config.builders.ResourcePoolsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+
+/**
+ * Запрос на удаление полученных сообщений. Удалить можно только письмо без вложения.
+ * Отсылается при нажатии на "delete" в списке полученных писем.
+ */
 public class MailDAO implements JdbcDAO<Integer, Mail> {
   private static final Logger _log = LoggerFactory.getLogger(MailDAO.class);
   private static final String RESTORE_MAIL = "SELECT sender_id, sender_name, receiver_id, receiver_name, expire_time, topic, body, price, type, unread FROM mail WHERE message_id = ?";
@@ -47,7 +49,16 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
   private AtomicLong insert = new AtomicLong();
   private AtomicLong update = new AtomicLong();
   private AtomicLong delete = new AtomicLong();
-  private final Cache cache = CacheManager.getInstance().getCache(Mail.class.getName());
+  private Cache<Integer, Mail> cache = CacheManagerBuilder.newCacheManagerBuilder()
+    .withCache("preConfigured",
+      CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer.class, Mail.class,
+        ResourcePoolsBuilder.heap(100))
+        .build())
+    .build(true)
+    .createCache(Mail.class.getName(), CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer.class, Mail.class,
+      ResourcePoolsBuilder.heap(100))
+      .build());
+  //  private final Cache cache = CacheManager.getInstance().getCache(Mail.class.getName());
   private final JdbcEntityStats stats = new JdbcEntityStats() {
     public long getLoadCount() {
       return MailDAO.this.load.get();
@@ -106,10 +117,8 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
       if (!mail.getAttachments().isEmpty()) {
         DbUtils.close(statement);
         statement = con.prepareStatement("REPLACE INTO mail_attachments(message_id, item_id) VALUES (?,?)");
-        Iterator var5 = mail.getAttachments().iterator();
 
-        while(var5.hasNext()) {
-          ItemInstance item = (ItemInstance)var5.next();
+        for (ItemInstance item : mail.getAttachments()) {
           statement.setInt(1, mail.getMessageId());
           statement.setInt(2, item.getObjectId());
           statement.addBatch();
@@ -169,7 +178,7 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
         statement.setInt(1, messageId);
         rset = statement.executeQuery();
 
-        while(rset.next()) {
+        while (rset.next()) {
           int objectId = rset.getInt(1);
           ItemInstance item = ItemsDAO.getInstance().load(objectId);
           if (item != null) {
@@ -247,17 +256,17 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
       rset = statement.executeQuery();
       messageIds = new ArrayList<>();
 
-      while(rset.next()) {
-        ((List)messageIds).add(rset.getInt(1));
+      while (rset.next()) {
+        messageIds.add(rset.getInt(1));
       }
     } catch (SQLException var11) {
       _log.error("Error while restore mail of owner : " + ownerId, var11);
-      ((List)messageIds).clear();
+      messageIds.clear();
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
 
-    return this.load((Collection)messageIds);
+    return this.load((Collection) messageIds);
   }
 
   private boolean deleteMailByOwnerIdAndMailId(int ownerId, int messageId, boolean sent) {
@@ -271,16 +280,14 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
       statement.setInt(1, ownerId);
       statement.setInt(2, messageId);
       statement.setBoolean(3, sent);
-      boolean var6 = statement.execute();
-      return var6;
+      return statement.execute();
     } catch (SQLException var11) {
       _log.error("Error while deleting mail of owner : " + ownerId, var11);
-      var7 = false;
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
 
-    return var7;
+    return false;
   }
 
   public List<Mail> getReceivedMailByOwnerId(int receiverId) {
@@ -301,8 +308,8 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
         return null;
       }
 
-      mail = (Mail)var4.next();
-    } while(mail.getMessageId() != messageId);
+      mail = (Mail) var4.next();
+    } while (mail.getMessageId() != messageId);
 
     return mail;
   }
@@ -317,8 +324,8 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
         return null;
       }
 
-      mail = (Mail)var4.next();
-    } while(mail.getMessageId() != messageId);
+      mail = (Mail) var4.next();
+    } while (mail.getMessageId() != messageId);
 
     return mail;
   }
@@ -344,33 +351,30 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
       rset = statement.executeQuery();
       messageIds = new ArrayList<>();
 
-      while(rset.next()) {
-        ((List)messageIds).add(rset.getInt(1));
+      while (rset.next()) {
+        messageIds.add(rset.getInt(1));
       }
     } catch (SQLException var10) {
       _log.error("Error while restore expired mail!", var10);
-      ((List)messageIds).clear();
+      messageIds.clear();
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
 
-    return this.load((Collection)messageIds);
+    return this.load((Collection) messageIds);
   }
 
   public Mail load(Integer id) {
-    Element ce = this.cache.get(id);
-    Mail mail;
+    Mail ce = this.cache.get(id);
     if (ce != null) {
-      mail = (Mail)ce.getObjectValue();
-      return mail;
+      return ce;
     } else {
       try {
-        mail = this.load0(id);
+        Mail mail = this.load0(id);
         if (mail != null) {
           mail.setJdbcState(JdbcEntityState.STORED);
-          this.cache.put(new Element(mail.getMessageId(), mail));
+          this.cache.put(mail.getMessageId(), mail);
         }
-
         return mail;
       } catch (SQLException var5) {
         _log.error("Error while restoring mail : " + id, var5);
@@ -384,10 +388,8 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
       return Collections.emptyList();
     } else {
       List<Mail> list = new ArrayList(messageIds.size());
-      Iterator var4 = messageIds.iterator();
 
-      while(var4.hasNext()) {
-        Integer messageId = (Integer)var4.next();
+      for (Integer messageId : messageIds) {
         Mail mail = this.load(messageId);
         if (mail != null) {
           list.add(mail);
@@ -408,7 +410,7 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
         return;
       }
 
-      this.cache.put(new Element(mail.getMessageId(), mail));
+      this.cache.put(mail.getMessageId(), mail);
     }
   }
 
@@ -421,8 +423,7 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
         _log.error("Error while updating mail : " + mail.getMessageId(), var3);
         return;
       }
-
-      this.cache.putIfAbsent(new Element(mail.getMessageId(), mail));
+      this.cache.putIfAbsent(mail.getMessageId(), mail);
     }
   }
 

@@ -54,7 +54,7 @@ public final class ResidenceHolder extends AbstractHolder {
 
   public <R extends Residence> Residence getResidenceByCoord(Class<R> type, int x, int y, int z, Reflection ref) {
     Collection<Residence> residences = type == null ? this.getResidences() : this.getResidenceList((Class<Residence>) type);
-    Iterator var7 = ((Collection)residences).iterator();
+    Iterator var7 = ((Collection) residences).iterator();
 
     Residence residence;
     do {
@@ -62,8 +62,8 @@ public final class ResidenceHolder extends AbstractHolder {
         return null;
       }
 
-      residence = (Residence)var7.next();
-    } while(!residence.checkIfInZone(x, y, z, ref));
+      residence = (Residence) var7.next();
+    } while (!residence.checkIfInZone(x, y, z, ref));
 
     return residence;
   }
@@ -94,14 +94,8 @@ public final class ResidenceHolder extends AbstractHolder {
   }
 
   private void buildFastLook() {
-    Residence residence;
-    Object list;
-    for(Iterator var1 = this._residences.values().iterator(); var1.hasNext(); ((List)list).add(residence)) {
-      residence = (Residence)var1.next();
-      list = this._fastResidencesByType.get(residence.getClass());
-      if (list == null) {
-        this._fastResidencesByType.put(residence.getClass(),  new ArrayList<>());
-      }
+    for (Residence residence : _residences.values()) {
+      _fastResidencesByType.computeIfAbsent(residence.getClass(), k -> new ArrayList<>());
     }
 
   }

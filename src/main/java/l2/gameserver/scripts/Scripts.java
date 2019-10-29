@@ -5,24 +5,6 @@
 
 package l2.gameserver.scripts;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.Map.Entry;
-import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
 import l2.commons.compiler.Compiler;
 import l2.commons.compiler.MemoryClassLoader;
 import l2.gameserver.Config;
@@ -38,6 +20,17 @@ import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+
 public class Scripts {
   private static final Logger _log = LoggerFactory.getLogger(Scripts.class);
   private static final Scripts _instance = new Scripts();
@@ -47,7 +40,7 @@ public class Scripts {
   private final Compiler compiler = new Compiler();
   private final Map<String, Class<?>> _classes = new TreeMap<>();
 
-  public static final Scripts getInstance() {
+  public static Scripts getInstance() {
     return _instance;
   }
 
@@ -72,9 +65,10 @@ public class Scripts {
         while((entry = stream.getNextJarEntry()) != null) {
           if (!entry.getName().contains(ClassUtils.INNER_CLASS_SEPARATOR) && entry.getName().endsWith(".class")) {
             String name = entry.getName().replace(".class", "").replace("/", ".");
-            Class<?> clazz = classLoader.loadClass(name);
-            if (!Modifier.isAbstract(clazz.getModifiers())) {
-              classes.add(clazz);
+            Class<?> aClass = getClass().getClassLoader().loadClass(name);
+//            Class<?> clazz = classLoader.loadClass(name);
+            if (!Modifier.isAbstract(aClass.getModifiers())) {
+              classes.add(aClass);
             }
           }
         }
@@ -289,25 +283,20 @@ public class Scripts {
       Method[] var2 = clazz.getMethods();
       int var3 = var2.length;
 
-      for(int var4 = 0; var4 < var3; ++var4) {
-        Method method = var2[var4];
+      for (Method method : var2) {
         if (method.getName().contains("DialogAppend_")) {
           Integer id = Integer.parseInt(method.getName().substring(13));
-          List<Scripts.ScriptClassAndMethod> handlers = dialogAppends.get(id);
-          if (handlers == null) {
-            handlers = new ArrayList<>();
-            dialogAppends.put(id, handlers);
-          }
+          List<ScriptClassAndMethod> handlers = dialogAppends.computeIfAbsent(id, k -> new ArrayList<>());
 
-          handlers.add(new Scripts.ScriptClassAndMethod(clazz.getName(), method.getName()));
+          handlers.add(new ScriptClassAndMethod(clazz.getName(), method.getName()));
         } else {
           String name;
           if (method.getName().contains("OnAction_")) {
             name = method.getName().substring(9);
-            onAction.put(name, new Scripts.ScriptClassAndMethod(clazz.getName(), method.getName()));
+            onAction.put(name, new ScriptClassAndMethod(clazz.getName(), method.getName()));
           } else if (method.getName().contains("OnActionShift_")) {
             name = method.getName().substring(14);
-            onActionShift.put(name, new Scripts.ScriptClassAndMethod(clazz.getName(), method.getName()));
+            onActionShift.put(name, new ScriptClassAndMethod(clazz.getName(), method.getName()));
           }
         }
       }

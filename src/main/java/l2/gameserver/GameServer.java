@@ -5,11 +5,6 @@
 
 package l2.gameserver;
 
-import java.io.File;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.util.Arrays;
-import java.util.Iterator;
 import l2.commons.lang.StatsUtils;
 import l2.commons.listener.Listener;
 import l2.commons.listener.ListenerList;
@@ -31,15 +26,7 @@ import l2.gameserver.handler.items.ItemHandler;
 import l2.gameserver.handler.usercommands.UserCommandHandler;
 import l2.gameserver.handler.voicecommands.VoicedCommandHandler;
 import l2.gameserver.idfactory.IdFactory;
-import l2.gameserver.instancemanager.AutoAnnounce;
-import l2.gameserver.instancemanager.CastleManorManager;
-import l2.gameserver.instancemanager.CoupleManager;
-import l2.gameserver.instancemanager.CursedWeaponsManager;
-import l2.gameserver.instancemanager.DimensionalRiftManager;
-import l2.gameserver.instancemanager.PetitionManager;
-import l2.gameserver.instancemanager.PlayerMessageStack;
-import l2.gameserver.instancemanager.RaidBossSpawnManager;
-import l2.gameserver.instancemanager.SpawnManager;
+import l2.gameserver.instancemanager.*;
 import l2.gameserver.instancemanager.games.FishingChampionShipManager;
 import l2.gameserver.instancemanager.games.LotteryManager;
 import l2.gameserver.listener.GameListener;
@@ -58,19 +45,20 @@ import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.GamePacketHandler;
 import l2.gameserver.network.telnet.TelnetServer;
 import l2.gameserver.scripts.Scripts;
-import l2.gameserver.tables.CharTemplateTable;
-import l2.gameserver.tables.ClanTable;
-import l2.gameserver.tables.LevelUpTable;
-import l2.gameserver.tables.PetSkillsTable;
-import l2.gameserver.tables.SkillTreeTable;
+import l2.gameserver.tables.*;
 import l2.gameserver.taskmanager.ItemsAutoDestroy;
 import l2.gameserver.taskmanager.L2TopRuManager;
 import l2.gameserver.taskmanager.TaskManager;
 import l2.gameserver.taskmanager.tasks.RestoreOfflineTraders;
 import l2.gameserver.utils.Strings;
-import net.sf.ehcache.CacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.util.Arrays;
+import java.util.Iterator;
 
 public class GameServer {
   public static final int AUTH_SERVER_PROTOCOL = 2;
@@ -96,11 +84,11 @@ public class GameServer {
     this._serverStartTimeMillis = System.currentTimeMillis();
     this._listeners = new GameServer.GameServerListenerList();
     (new File("./log/")).mkdir();
-    this.version = new Version(GameServer.class);
+//    this.version = new Version(GameServer.class);
     _log.info("=================================================");
-    _log.info("Revision: ................ " + this.version.getRevisionNumber());
-    _log.info("Build date: .............. " + this.version.getBuildDate());
-    _log.info("Compiler version: ........ " + this.version.getBuildJdk());
+//    _log.info("Revision: ................ " + this.version.getRevisionNumber());
+//    _log.info("Build date: .............. " + this.version.getBuildDate());
+//    _log.info("Compiler version: ........ " + this.version.getBuildJdk());
     _log.info("=================================================");
     Config.load();
     checkFreePorts();
@@ -110,7 +98,6 @@ public class GameServer {
       _log.error("Could not read object IDs from DB. Please Check Your Data.");
       throw new Exception("Could not initialize the ID factory");
     } else {
-      CacheManager.getInstance();
       ThreadPoolManager.getInstance();
       Scripts.getInstance();
       GeoEngine.load();
@@ -187,8 +174,8 @@ public class GameServer {
       this._selectorThreads = new SelectorThread[Config.PORTS_GAME.length];
 
       int var7;
-      for(int i = 0; i < Config.PORTS_GAME.length; ++i) {
-        this._selectorThreads[i] = new SelectorThread(Config.SELECTOR_CONFIG, gph, gph, gph, (IAcceptFilter)null);
+      for (int i = 0; i < Config.PORTS_GAME.length; ++i) {
+        this._selectorThreads[i] = new SelectorThread(Config.SELECTOR_CONFIG, gph, gph, gph, (IAcceptFilter) null);
 
         SelectorThread var10000;
         try {
@@ -198,7 +185,7 @@ public class GameServer {
           int var8 = 0;
 
           label83:
-          while(true) {
+          while (true) {
             if (var8 >= var7) {
               var10000 = this._selectorThreads[i];
               SelectorThread.MAX_CONNECTIONS = 10L;
@@ -209,7 +196,7 @@ public class GameServer {
             int[] var10 = VALUES;
             int var11 = var10.length;
 
-            for(int var12 = 0; var12 < var11; ++var12) {
+            for (int var12 = 0; var12 < var11; ++var12) {
               Integer a = var10[var12];
               if (a == Arrays.hashCode(addr.getAddress())) {
                 break label83;
@@ -245,7 +232,7 @@ public class GameServer {
       String[] var16 = memUsage.split("\n");
       int var17 = var16.length;
 
-      for(var7 = 0; var7 < var17; ++var7) {
+      for (var7 = 0; var7 < var17; ++var7) {
         String line = var16[var7];
         _log.info(line);
       }
@@ -273,13 +260,11 @@ public class GameServer {
   public static void checkFreePorts() {
     boolean binded = false;
 
-    while(!binded) {
+    while (!binded) {
       int[] var1 = Config.PORTS_GAME;
       int var2 = var1.length;
 
-      for(int var3 = 0; var3 < var2; ++var3) {
-        int PORT_GAME = var1[var3];
-
+      for (int PORT_GAME : var1) {
         try {
           ServerSocket ss;
           if (Config.GAMESERVER_HOSTNAME.equalsIgnoreCase("*")) {
@@ -296,7 +281,8 @@ public class GameServer {
 
           try {
             Thread.sleep(1000L);
-          } catch (InterruptedException var7) {
+          } catch (InterruptedException e) {
+            _log.error("checkFreePorts: eMessage={}, eClause={}", e.getMessage(), e.getClass());
           }
         }
       }
@@ -323,10 +309,10 @@ public class GameServer {
     public void onStart() {
       Iterator var1 = this.getListeners().iterator();
 
-      while(var1.hasNext()) {
-        Listener<GameServer> listener = (Listener)var1.next();
+      while (var1.hasNext()) {
+        Listener<GameServer> listener = (Listener) var1.next();
         if (OnStartListener.class.isInstance(listener)) {
-          ((OnStartListener)listener).onStart();
+          ((OnStartListener) listener).onStart();
         }
       }
 
@@ -335,10 +321,10 @@ public class GameServer {
     public void onShutdown() {
       Iterator var1 = this.getListeners().iterator();
 
-      while(var1.hasNext()) {
-        Listener<GameServer> listener = (Listener)var1.next();
+      while (var1.hasNext()) {
+        Listener<GameServer> listener = (Listener) var1.next();
         if (OnShutdownListener.class.isInstance(listener)) {
-          ((OnShutdownListener)listener).onShutdown();
+          ((OnShutdownListener) listener).onShutdown();
         }
       }
 

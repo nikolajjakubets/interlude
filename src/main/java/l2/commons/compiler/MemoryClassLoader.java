@@ -11,9 +11,9 @@ public class MemoryClassLoader extends ClassLoader {
     }
 
     protected Class<?> findClass(String name) throws ClassNotFoundException {
-        MemoryByteCode mbc = (MemoryByteCode)this.classes.get(name);
+      MemoryByteCode mbc = this.classes.get(name);
         if (mbc == null) {
-            mbc = (MemoryByteCode)this.classes.get(name);
+          mbc = this.classes.get(name);
             if (mbc == null) {
                 return super.findClass(name);
             }
@@ -28,11 +28,11 @@ public class MemoryClassLoader extends ClassLoader {
     }
 
     public MemoryByteCode getClass(String name) {
-        return (MemoryByteCode)this.classes.get(name);
+      return this.classes.get(name);
     }
 
     public String[] getLoadedClasses() {
-        return (String[])this.loaded.keySet().toArray(new String[this.loaded.size()]);
+      return this.loaded.keySet().toArray(new String[this.loaded.size()]);
     }
 
     public void clear() {

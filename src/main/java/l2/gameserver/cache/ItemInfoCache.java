@@ -9,15 +9,23 @@ import l2.gameserver.model.Player;
 import l2.gameserver.model.World;
 import l2.gameserver.model.items.ItemInfo;
 import l2.gameserver.model.items.ItemInstance;
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
+import org.ehcache.Cache;
+import org.ehcache.config.builders.CacheConfigurationBuilder;
+import org.ehcache.config.builders.CacheManagerBuilder;
+import org.ehcache.config.builders.ResourcePoolsBuilder;
 
 public class ItemInfoCache {
   private static final ItemInfoCache _instance = new ItemInfoCache();
-  private Cache cache = CacheManager.getInstance().getCache(this.getClass().getName());
+  private Cache<Integer, ItemInfo> cache = CacheManagerBuilder.newCacheManagerBuilder()
+    .withCache("preConfigured",
+      CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer.class, ItemInfo.class,
+        ResourcePoolsBuilder.heap(100000))
+        .build())
+    .build(true)
+    .createCache(this.getClass().getName(), CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer.class, ItemInfo.class,
+      ResourcePoolsBuilder.heap(100000)).build());
 
-  public static final ItemInfoCache getInstance() {
+  public static ItemInfoCache getInstance() {
     return _instance;
   }
 
@@ -25,17 +33,12 @@ public class ItemInfoCache {
   }
 
   public void put(ItemInstance item) {
-    this.cache.put(new Element(item.getObjectId(), new ItemInfo(item)));
+    this.cache.put(item.getObjectId(), new ItemInfo(item));
   }
 
   public ItemInfo get(int objectId) {
-    Element element = this.cache.get(objectId);
-    ItemInfo info = null;
-    if (element != null) {
-      info = (ItemInfo)element.getObjectValue();
-    }
-
-    Player player = null;
+    ItemInfo info = this.cache.get(objectId);
+    Player player;
     if (info != null) {
       player = World.getPlayer(info.getOwnerId());
       ItemInstance item = null;
@@ -44,7 +47,7 @@ public class ItemInfoCache {
       }
 
       if (item != null && item.getItemId() == info.getItemId()) {
-        this.cache.put(new Element(item.getObjectId(), info = new ItemInfo(item)));
+        this.cache.put(item.getObjectId(), info = new ItemInfo(item));
       }
     }
 
