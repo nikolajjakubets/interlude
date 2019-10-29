@@ -8,7 +8,6 @@ package l2.gameserver;
 import l2.commons.lang.StatsUtils;
 import l2.commons.listener.Listener;
 import l2.commons.listener.ListenerList;
-import l2.commons.net.nio.impl.IAcceptFilter;
 import l2.commons.net.nio.impl.SelectorThread;
 import l2.commons.versioning.Version;
 import l2.gameserver.cache.CrestCache;
@@ -58,7 +57,6 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.Arrays;
-import java.util.Iterator;
 
 public class GameServer {
   public static final int AUTH_SERVER_PROTOCOL = 2;
@@ -175,7 +173,7 @@ public class GameServer {
 
       int var7;
       for (int i = 0; i < Config.PORTS_GAME.length; ++i) {
-        this._selectorThreads[i] = new SelectorThread(Config.SELECTOR_CONFIG, gph, gph, gph, (IAcceptFilter) null);
+        this._selectorThreads[i] = new SelectorThread(Config.SELECTOR_CONFIG, gph, gph, gph, null);
 
         SelectorThread var10000;
         try {
@@ -196,8 +194,7 @@ public class GameServer {
             int[] var10 = VALUES;
             int var11 = var10.length;
 
-            for (int var12 = 0; var12 < var11; ++var12) {
-              Integer a = var10[var12];
+            for (Integer a : var10) {
               if (a == Arrays.hashCode(addr.getAddress())) {
                 break label83;
               }
@@ -206,7 +203,6 @@ public class GameServer {
             ++var8;
           }
         } catch (Exception var14) {
-          var10000 = this._selectorThreads[i];
           SelectorThread.MAX_CONNECTIONS = 10L;
         }
 
@@ -307,24 +303,20 @@ public class GameServer {
     }
 
     public void onStart() {
-      Iterator var1 = this.getListeners().iterator();
 
-      while (var1.hasNext()) {
-        Listener<GameServer> listener = (Listener) var1.next();
-        if (OnStartListener.class.isInstance(listener)) {
-          ((OnStartListener) listener).onStart();
+      for (Listener<GameServer> gameServerListener : this.getListeners()) {
+        if (gameServerListener instanceof OnStartListener) {
+          ((OnStartListener) gameServerListener).onStart();
         }
       }
 
     }
 
     public void onShutdown() {
-      Iterator var1 = this.getListeners().iterator();
 
-      while (var1.hasNext()) {
-        Listener<GameServer> listener = (Listener) var1.next();
-        if (OnShutdownListener.class.isInstance(listener)) {
-          ((OnShutdownListener) listener).onShutdown();
+      for (Listener<GameServer> gameServerListener : this.getListeners()) {
+        if (gameServerListener instanceof OnShutdownListener) {
+          ((OnShutdownListener) gameServerListener).onShutdown();
         }
       }
 

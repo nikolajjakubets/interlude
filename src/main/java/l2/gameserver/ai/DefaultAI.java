@@ -5,18 +5,6 @@
 
 package l2.gameserver.ai;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.ScheduledFuture;
-
-import l2.commons.collections.CollectionUtils;
 import l2.commons.collections.LazyArrayList;
 import l2.commons.lang.reference.HardReference;
 import l2.commons.math.random.RndSelector;
@@ -26,14 +14,8 @@ import l2.gameserver.Config;
 import l2.gameserver.ThreadPoolManager;
 import l2.gameserver.data.xml.holder.NpcHolder;
 import l2.gameserver.geodata.GeoEngine;
-import l2.gameserver.model.Creature;
-import l2.gameserver.model.MinionList;
-import l2.gameserver.model.Playable;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.Skill;
-import l2.gameserver.model.World;
-import l2.gameserver.model.WorldRegion;
 import l2.gameserver.model.AggroList.AggroInfo;
+import l2.gameserver.model.*;
 import l2.gameserver.model.Skill.SkillTargetType;
 import l2.gameserver.model.Zone.ZoneType;
 import l2.gameserver.model.entity.SevenSigns;
@@ -43,7 +25,6 @@ import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.model.quest.QuestEventType;
 import l2.gameserver.model.quest.QuestState;
 import l2.gameserver.network.l2.components.CustomMessage;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.MagicSkillUse;
 import l2.gameserver.stats.Stats;
 import l2.gameserver.taskmanager.AiTaskManager;
@@ -51,6 +32,11 @@ import l2.gameserver.utils.Location;
 import l2.gameserver.utils.NpcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ScheduledFuture;
 
 public class DefaultAI extends CharacterAI {
   protected static final Logger _log = LoggerFactory.getLogger(DefaultAI.class);
@@ -324,73 +310,62 @@ public class DefaultAI extends CharacterAI {
     }
   }
 
+  /**
+   * @return true если действие выполнено, false если нет
+   */
   protected boolean thinkActive() {
-    NpcInstance actor = this.getActor();
+    NpcInstance actor = getActor();
     if (actor.isActionsDisabled()) {
       return true;
-    } else if (this._randomAnimationEnd > System.currentTimeMillis()) {
+    }
+
+    if (_randomAnimationEnd > System.currentTimeMillis()) {
       return true;
-    } else if (this._def_think) {
-      if (this.doTask()) {
-        this.clearTasks();
+    }
+
+    if (_def_think) {
+      if (doTask()) {
+        clearTasks();
       }
-
       return true;
-    } else {
-      long now = System.currentTimeMillis();
-      if (now - this._checkAggroTimestamp > (long) Config.AGGRO_CHECK_INTERVAL) {
-        this._checkAggroTimestamp = now;
-        boolean aggressive = Rnd.chance(actor.getParameter("SelfAggressive", actor.isAggressive() ? 100 : 0));
-        if (!actor.getAggroList().isEmpty() || aggressive) {
-          List<Creature> chars = World.getAroundCharacters(actor);
-          chars.sort(this._nearestTargetComparator);
-          Iterator var6 = chars.iterator();
+    }
 
-          label66:
-          while (true) {
-            Creature target;
-            do {
-              if (!var6.hasNext()) {
-                break label66;
-              }
+    long now = System.currentTimeMillis();
+    if (now - _checkAggroTimestamp > Config.AGGRO_CHECK_INTERVAL) {
+      _checkAggroTimestamp = now;
 
-              target = (Creature) var6.next();
-            } while (!aggressive && actor.getAggroList().get(target) == null);
-
-            if (this.checkAggression(target)) {
-              actor.getAggroList().addDamageHate(target, 0, 2);
-              if (target.isSummon()) {
-                actor.getAggroList().addDamageHate(target.getPlayer(), 0, 1);
-              }
-
-              this.startRunningTask(this.AI_TASK_ATTACK_DELAY);
-              this.setIntention(CtrlIntention.AI_INTENTION_ATTACK, target);
+      boolean aggressive = Rnd.chance(actor.getParameter("SelfAggressive", actor.isAggressive() ? 100 : 0));
+      if (!actor.getAggroList().isEmpty() || aggressive) {
+        List<Creature> chars = World.getAroundCharacters(actor);
+        chars.sort(_nearestTargetComparator);
+        for (Creature cha : chars) {
+          if (aggressive || actor.getAggroList().get(cha) != null) {
+            if (checkAggression(cha)) {
               return true;
             }
           }
         }
       }
+    }
 
-      if (actor.isMinion()) {
-        MonsterInstance leader = ((MinionInstance) actor).getLeader();
-        if (leader != null) {
-          double distance = actor.getDistance(leader.getX(), leader.getY());
-          if (distance > 1000.0D) {
-            actor.teleToLocation(leader.getMinionPosition());
-          } else if (distance > 200.0D) {
-            this.addTaskMove(leader.getMinionPosition(), false);
-          }
-
-          return true;
+    if (actor.isMinion()) {
+      MonsterInstance leader = ((MinionInstance) actor).getLeader();
+      if (leader != null) {
+        double distance = actor.getDistance(leader.getX(), leader.getY());
+        if (distance > 1000) {
+          actor.teleToLocation(leader.getMinionPosition());
+        } else if (distance > 200) {
+          addTaskMove(leader.getMinionPosition(), false);
         }
-      }
-
-      if (this.randomAnimation()) {
         return true;
-      } else {
-        return this.randomWalk();
       }
     }
+
+    if (randomAnimation()) {
+      return true;
+    }
+
+    return randomWalk();
   }
 
   protected void onIntentionIdle() {
@@ -696,28 +671,29 @@ public class DefaultAI extends CharacterAI {
   }
 
   protected void onEvtThink() {
-    NpcInstance actor = this.getActor();
-    if (!this._thinking && actor != null && !actor.isActionsDisabled() && !actor.isAfraid()) {
-      if (this._randomAnimationEnd <= System.currentTimeMillis()) {
-        if (Config.RAID_TELE_TO_HOME_FROM_PVP_ZONES && actor.isRaid() && (actor.isInZoneBattle() || actor.isInZone(ZoneType.SIEGE) || actor.isInZone(ZoneType.fun))) {
-          this.teleportHome();
-        } else if (Config.RAID_TELE_TO_HOME_FROM_TOWN_ZONES && actor.isRaid() && actor.isInZonePeace()) {
-          this.teleportHome();
-        } else {
-          this._thinking = true;
+    NpcInstance actor = getActor();
+    if (_thinking || actor == null || actor.isActionsDisabled() || actor.isAfraid()) {
+      return;
+    }
 
-          try {
-            if (!Config.BLOCK_ACTIVE_TASKS && this.getIntention() == CtrlIntention.AI_INTENTION_ACTIVE) {
-              this.thinkActive();
-            } else if (this.getIntention() == CtrlIntention.AI_INTENTION_ATTACK) {
-              this.thinkAttack();
-            }
-          } finally {
-            this._thinking = false;
-          }
+    if (_randomAnimationEnd > System.currentTimeMillis()) {
+      return;
+    }
 
-        }
+    if (actor.isRaid() && (actor.isInZonePeace() || actor.isInZoneBattle() || actor.isInZone(ZoneType.SIEGE))) {
+      teleportHome();
+      return;
+    }
+
+    _thinking = true;
+    try {
+      if (!Config.BLOCK_ACTIVE_TASKS && getIntention() == CtrlIntention.AI_INTENTION_ACTIVE) {
+        thinkActive();
+      } else if (getIntention() == CtrlIntention.AI_INTENTION_ATTACK) {
+        thinkAttack();
       }
+    } finally {
+      _thinking = false;
     }
   }
 

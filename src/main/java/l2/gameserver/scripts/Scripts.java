@@ -154,27 +154,23 @@ public class Scripts {
 
   }
 
+  /**
+   * Вызывается при загрузке сервера. Инициализирует объекты и обработчики.
+   */
   public void init() {
-    Iterator var1 = this._classes.values().iterator();
+    for (Class<?> clazz : _classes.values()) {
+      addHandlers(clazz);
 
-    while(true) {
-      Class clazz;
-      do {
-        if (!var1.hasNext()) {
-          return;
-        }
+      if (Config.DONTLOADQUEST)
+        if (ClassUtils.isAssignable(clazz, Quest.class))
+          continue;
 
-        clazz = (Class)var1.next();
-        this.addHandlers(clazz);
-      } while(Config.DONTLOADQUEST && ClassUtils.isAssignable(clazz, Quest.class));
-
-      if (ClassUtils.isAssignable(clazz, ScriptFile.class)) {
+      if (ClassUtils.isAssignable(clazz, ScriptFile.class))
         try {
-          ((ScriptFile)clazz.newInstance()).onLoad();
-        } catch (Exception var4) {
-          _log.error("Scripts: Failed running " + clazz.getName() + ".onLoad()", var4);
+          ((ScriptFile) clazz.newInstance()).onLoad();
+        } catch (Exception e) {
+          _log.error("Scripts: Failed running " + clazz.getName() + ".onLoad()", e);
         }
-      }
     }
   }
 

@@ -5,12 +5,14 @@
 
 package l2.commons.text;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+@Slf4j
 public class PrintfFormat {
   private List<PrintfFormat.ConversionSpecification> vFmt;
   private int cPos;
@@ -46,11 +48,9 @@ public class PrintfFormat {
       sFmt = new PrintfFormat.ConversionSpecification(fmtArg.substring(this.cPos, ePos));
       this.vFmt.add(sFmt);
       unCS = this.nonControl(fmtArg, ePos);
-      if (unCS != null) {
-        sFmt = new PrintfFormat.ConversionSpecification();
-        sFmt.setLiteral(unCS);
-        this.vFmt.add(sFmt);
-      }
+      sFmt = new ConversionSpecification();
+      sFmt.setLiteral(unCS);
+      this.vFmt.add(sFmt);
     }
 
   }
@@ -68,10 +68,8 @@ public class PrintfFormat {
 //        char c = false;
     int i = 0;
     StringBuilder sb = new StringBuilder();
-    Iterator var5 = this.vFmt.iterator();
 
-    while (var5.hasNext()) {
-      PrintfFormat.ConversionSpecification cs = (PrintfFormat.ConversionSpecification) var5.next();
+    for (ConversionSpecification cs : this.vFmt) {
       char c = cs.getConversionCharacter();
       if (c == 0) {
         sb.append(cs.getLiteral());
@@ -532,7 +530,9 @@ public class PrintfFormat {
     String internalsprintf(Object s) {
       String s2 = "";
       if (this.conversionCharacter != 's' && this.conversionCharacter != 'S') {
-        throw new IllegalArgumentException("Cannot format a String with a format using a " + this.conversionCharacter + " conversion character.");
+        log.error("internalsprintf: WE HAVE A PROBLEM!");
+        return s2;
+//        throw new IllegalArgumentException("Cannot format a String with a format using a " + this.conversionCharacter + " conversion character.");
       } else {
         s2 = this.printSFormat(s.toString());
         return s2;
@@ -861,7 +861,7 @@ public class PrintfFormat {
         ca6 = this.fFormatDigits(x);
       }
 
-      char[] ca7 = this.applyFloatPadding(ca6, false);
+      char[] ca7 = this.applyFloatPadding(ca6);
       return new String(ca7);
     }
 
@@ -1323,11 +1323,11 @@ public class PrintfFormat {
         ca4 = this.eFormatDigits(x, eChar);
       }
 
-      char[] ca5 = this.applyFloatPadding(ca4, false);
+      char[] ca5 = this.applyFloatPadding(ca4);
       return new String(ca5);
     }
 
-    private char[] applyFloatPadding(char[] ca4, boolean noDigits) {
+    private char[] applyFloatPadding(char[] ca4) {
       char[] ca5 = ca4;
       if (this.fieldWidthSet) {
         int i;
@@ -1347,29 +1347,27 @@ public class PrintfFormat {
               ++j;
             }
           }
-        } else if (this.leadingZeros && !noDigits) {
-          if (this.leadingZeros) {
-            nBlanks = this.fieldWidth - ca4.length;
-            if (nBlanks > 0) {
-              ca5 = new char[ca4.length + nBlanks];
-              i = 0;
-              j = 0;
-              if (ca4[0] == '-') {
-                ca5[0] = '-';
-                ++i;
-                ++j;
-              }
+        } else if (this.leadingZeros && !false) {
+          nBlanks = this.fieldWidth - ca4.length;
+          if (nBlanks > 0) {
+            ca5 = new char[ca4.length + nBlanks];
+            i = 0;
+            j = 0;
+            if (ca4[0] == '-') {
+              ca5[0] = '-';
+              ++i;
+              ++j;
+            }
 
-              for (int k = 0; k < nBlanks; ++k) {
-                ca5[i] = '0';
-                ++i;
-              }
+            for (int k = 0; k < nBlanks; ++k) {
+              ca5[i] = '0';
+              ++i;
+            }
 
-              while (j < ca4.length) {
-                ca5[i] = ca4[j];
-                ++i;
-                ++j;
-              }
+            while (j < ca4.length) {
+              ca5[i] = ca4[j];
+              ++i;
+              ++j;
             }
           }
         } else {
@@ -1514,7 +1512,7 @@ public class PrintfFormat {
         ca4 = ret.toCharArray();
       }
 
-      char[] ca5 = this.applyFloatPadding(ca4, false);
+      char[] ca5 = this.applyFloatPadding(ca4);
       this.precision = savePrecision;
       return new String(ca5);
     }
@@ -1656,13 +1654,9 @@ public class PrintfFormat {
         sx = "8000";
       } else if (x < 0) {
         String t;
-        if (x == -32768) {
-          t = "0";
-        } else {
-          t = Integer.toString(~(-x - 1) ^ -32768, 16);
-          if (t.charAt(0) == 'F' || t.charAt(0) == 'f') {
-            t = t.substring(16, 32);
-          }
+        t = Integer.toString(--x ^ -32768, 16);
+        if (t.charAt(0) == 'F' || t.charAt(0) == 'f') {
+          t = t.substring(16, 32);
         }
 
         switch (t.length()) {
@@ -1711,7 +1705,7 @@ public class PrintfFormat {
       if (x == -9223372036854775808L) {
         sx = "8000000000000000";
       } else if (x < 0L) {
-        String t = Long.toString(~(-x - 1L) ^ -9223372036854775808L, 16);
+        String t = Long.toString(--x ^ -9223372036854775808L, 16);
         switch (t.length()) {
           case 1:
             sx = "800000000000000" + t;
@@ -1794,7 +1788,7 @@ public class PrintfFormat {
       if (x == -2147483648) {
         sx = "80000000";
       } else if (x < 0) {
-        String t = Integer.toString(~(-x - 1) ^ -2147483648, 16);
+        String t = Integer.toString(--x ^ -2147483648, 16);
         switch (t.length()) {
           case 1:
             sx = "8000000" + t;
@@ -1955,7 +1949,7 @@ public class PrintfFormat {
       if (x == -32768) {
         sx = "100000";
       } else if (x < 0) {
-        String t = Integer.toString(~(-x - 1) ^ -32768, 8);
+        String t = Integer.toString(--x ^ -32768, 8);
         switch (t.length()) {
           case 1:
             sx = "10000" + t;
@@ -1984,7 +1978,7 @@ public class PrintfFormat {
       if (x == -9223372036854775808L) {
         sx = "1000000000000000000000";
       } else if (x < 0L) {
-        String t = Long.toString(~(-x - 1L) ^ -9223372036854775808L, 8);
+        String t = Long.toString(--x ^ -9223372036854775808L, 8);
         switch (t.length()) {
           case 1:
             sx = "100000000000000000000" + t;
@@ -2061,7 +2055,7 @@ public class PrintfFormat {
       if (x == -2147483648) {
         sx = "20000000000";
       } else if (x < 0) {
-        String t = Integer.toString(~(-x - 1) ^ -2147483648, 8);
+        String t = Integer.toString(--x ^ -2147483648, 8);
         switch (t.length()) {
           case 1:
             sx = "2000000000" + t;
