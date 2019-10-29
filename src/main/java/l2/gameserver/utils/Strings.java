@@ -5,13 +5,14 @@
 
 package l2.gameserver.utils;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.regex.Pattern;
 import l2.gameserver.Config;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.regex.Pattern;
 
 public class Strings {
   private static final Logger _log = LoggerFactory.getLogger(Strings.class);
@@ -74,8 +75,9 @@ public class Strings {
         trcode[i * 2] = ss[0];
         trcode[i * 2 + 1] = ss[1];
       }
-    } catch (IOException var3) {
-      _log.error("", var3);
+    } catch (IOException e) {
+      _log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), null, e.getCause());
+
     }
 
     _log.info("Loaded " + (tr.length + tr.length + trcode.length) + " translit entries.");

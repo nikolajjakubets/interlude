@@ -5,11 +5,6 @@
 
 package l2.gameserver.network.l2.c2s;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import l2.commons.math.SafeMath;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.data.xml.holder.ItemHolder;
@@ -22,7 +17,15 @@ import l2.gameserver.network.l2.s2c.PrivateStoreManageListBuy;
 import l2.gameserver.network.l2.s2c.PrivateStoreMsgBuy;
 import l2.gameserver.templates.item.ItemTemplate;
 import l2.gameserver.utils.TradeHelper;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+@Slf4j
 public class SetPrivateStoreBuyList extends L2GameClientPacket {
   private int _count;
   private List<SetPrivateStoreBuyList.SetPrivateStoreBuyListEntry> privateBuyItemsList = Collections.emptyList();
@@ -95,7 +98,8 @@ public class SetPrivateStoreBuyList extends L2GameClientPacket {
                 }
               }
             }
-          } catch (ArithmeticException var19) {
+          } catch (ArithmeticException e) {
+            log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
             buyList.clear();
             this.sendPacket(Msg.YOU_HAVE_EXCEEDED_THE_QUANTITY_THAT_CAN_BE_INPUTTED);
           } finally {

@@ -5,45 +5,27 @@
 
 package l2.gameserver.data.xml.parser;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.StringTokenizer;
 import l2.commons.data.xml.AbstractDirParser;
 import l2.commons.data.xml.AbstractHolder;
 import l2.gameserver.model.entity.residence.ResidenceType;
 import l2.gameserver.stats.StatTemplate;
 import l2.gameserver.stats.Stats;
-import l2.gameserver.stats.conditions.Condition;
-import l2.gameserver.stats.conditions.ConditionClanPlayerMinPledgeRank;
-import l2.gameserver.stats.conditions.ConditionLogicAnd;
-import l2.gameserver.stats.conditions.ConditionLogicNot;
-import l2.gameserver.stats.conditions.ConditionLogicOr;
-import l2.gameserver.stats.conditions.ConditionPlayerClassId;
-import l2.gameserver.stats.conditions.ConditionPlayerClassIsMage;
-import l2.gameserver.stats.conditions.ConditionPlayerGender;
-import l2.gameserver.stats.conditions.ConditionPlayerInTeam;
-import l2.gameserver.stats.conditions.ConditionPlayerInstanceZone;
-import l2.gameserver.stats.conditions.ConditionPlayerIsHero;
-import l2.gameserver.stats.conditions.ConditionPlayerMaxLevel;
-import l2.gameserver.stats.conditions.ConditionPlayerMinLevel;
-import l2.gameserver.stats.conditions.ConditionPlayerMinMaxDamage;
-import l2.gameserver.stats.conditions.ConditionPlayerOlympiad;
-import l2.gameserver.stats.conditions.ConditionPlayerRace;
-import l2.gameserver.stats.conditions.ConditionPlayerResidence;
-import l2.gameserver.stats.conditions.ConditionSlotItemId;
-import l2.gameserver.stats.conditions.ConditionTargetPlayable;
-import l2.gameserver.stats.conditions.ConditionUsingItemType;
-import l2.gameserver.stats.conditions.ConditionUsingSkill;
-import l2.gameserver.stats.conditions.ConditionZoneType;
+import l2.gameserver.stats.conditions.*;
 import l2.gameserver.stats.funcs.EFunction;
 import l2.gameserver.stats.funcs.FuncTemplate;
 import l2.gameserver.stats.triggers.TriggerInfo;
 import l2.gameserver.stats.triggers.TriggerType;
 import l2.gameserver.templates.item.ArmorTemplate.ArmorType;
 import l2.gameserver.templates.item.WeaponTemplate.WeaponType;
+import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Attribute;
 import org.dom4j.Element;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
+
+@Slf4j
 public abstract class StatParser<H extends AbstractHolder> extends AbstractDirParser<H> {
   protected StatParser(H holder) {
     super(holder);
@@ -362,7 +344,8 @@ public abstract class StatParser<H extends AbstractHolder> extends AbstractDirPa
       } else {
         return Double.valueOf(value);
       }
-    } catch (NumberFormatException var3) {
+    } catch (NumberFormatException e) {
+      log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
       return null;
     }
   }

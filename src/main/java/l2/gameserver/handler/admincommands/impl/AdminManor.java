@@ -5,9 +5,6 @@
 
 package l2.gameserver.handler.admincommands.impl;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.StringTokenizer;
 import l2.gameserver.data.xml.holder.ResidenceHolder;
 import l2.gameserver.handler.admincommands.IAdminCommandHandler;
 import l2.gameserver.instancemanager.CastleManorManager;
@@ -15,7 +12,13 @@ import l2.gameserver.instancemanager.ServerVariables;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.entity.residence.Castle;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.StringTokenizer;
+
+@Slf4j
 public class AdminManor implements IAdminCommandHandler {
   public AdminManor() {
   }
@@ -34,7 +37,8 @@ public class AdminManor implements IAdminCommandHandler {
 
         try {
           castleId = Integer.parseInt(st.nextToken());
-        } catch (Exception var10) {
+        } catch (Exception e) {
+          log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
         }
 
         if (castleId > 0) {

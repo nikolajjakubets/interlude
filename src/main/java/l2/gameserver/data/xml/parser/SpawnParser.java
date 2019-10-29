@@ -5,9 +5,6 @@
 
 package l2.gameserver.data.xml.parser;
 
-import java.io.File;
-import java.util.Iterator;
-import java.util.LinkedList;
 import l2.commons.collections.MultiValueSet;
 import l2.commons.data.xml.AbstractDirParser;
 import l2.commons.geometry.Point2D;
@@ -22,14 +19,19 @@ import l2.gameserver.model.Territory;
 import l2.gameserver.templates.StatsSet;
 import l2.gameserver.templates.spawn.PeriodOfDay;
 import l2.gameserver.templates.spawn.SpawnNpcInfo;
-import l2.gameserver.templates.spawn.SpawnRange;
 import l2.gameserver.templates.spawn.SpawnTemplate;
 import l2.gameserver.utils.Location;
 import l2.gameserver.utils.SpawnMesh;
+import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.util.Iterator;
+import java.util.LinkedList;
+
+@Slf4j
 public final class SpawnParser extends AbstractDirParser<SpawnHolder> {
   private static final Logger LOG = LoggerFactory.getLogger(SpawnParser.class);
   private static final SpawnParser _instance = new SpawnParser();
@@ -97,16 +99,15 @@ public final class SpawnParser extends AbstractDirParser<SpawnHolder> {
             if (respawnCronPattern != null) {
               try {
                 respawnCron = new SchedulingPattern(respawnCronPattern);
-              } catch (InvalidPatternException var26) {
+              } catch (InvalidPatternException e) {
+                log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
                 try {
                   respawnCron = new AddPattern(respawnCronPattern);
-                } catch (Exception var25) {
-                  throw new RuntimeException("Invalid respawn data of " + spawnListElement.asXML(), var25);
+                } catch (Exception e1) {
+                  log.error("Exception: eMessage={}, eClass={}, eCause={}", e1.getMessage(), this.getClass().getSimpleName(), e1.getCause());
+                  throw new RuntimeException("Invalid respawn data of " + spawnListElement.asXML(), e1);
                 }
 
-                if (respawnCron == null) {
-                  throw new RuntimeException("Invalid respawn data of " + spawnListElement.asXML(), var26);
-                }
               }
             }
 
@@ -126,13 +127,14 @@ public final class SpawnParser extends AbstractDirParser<SpawnHolder> {
               do {
                 if (!npcIterator.hasNext()) {
                   try {
-                    SpawnTemplate spawnTemplate = new SpawnTemplate(makerName, eventName, pod, count, respawn, respawnRand, (NextTime)respawnCron);
-                    SpawnNpcInfo sni = new SpawnNpcInfo(npcTemplateId, count, (MultiValueSet)aiParams);
+                    SpawnTemplate spawnTemplate = new SpawnTemplate(makerName, eventName, pod, count, respawn, respawnRand, respawnCron);
+                    SpawnNpcInfo sni = new SpawnNpcInfo(npcTemplateId, count, aiParams);
                     spawnTemplate.addNpc(sni);
-                    spawnTemplate.addSpawnRange((SpawnRange)(spawnPos != null ? spawnPos : spawnMesh));
-                    ((SpawnHolder)this.getHolder()).addSpawn(eventName != null ? eventName : PeriodOfDay.ALL.name(), spawnTemplate);
-                  } catch (Exception var24) {
-                    var24.printStackTrace();
+                    spawnTemplate.addSpawnRange(spawnPos != null ? spawnPos : spawnMesh);
+                    this.getHolder().addSpawn(eventName != null ? eventName : PeriodOfDay.ALL.name(), spawnTemplate);
+                  } catch (Exception e) {
+                    log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
+
                   }
                   continue label101;
                 }
@@ -149,7 +151,7 @@ public final class SpawnParser extends AbstractDirParser<SpawnHolder> {
                     aiParams = new MultiValueSet();
                   }
 
-                  ((MultiValueSet)aiParams).set(npcAiParamsElement.attributeValue("name"), npcAiParamsElement.attributeValue("val"));
+                  aiParams.set(npcAiParamsElement.attributeValue("name"), npcAiParamsElement.attributeValue("val"));
                 }
               }
             }
@@ -198,7 +200,7 @@ public final class SpawnParser extends AbstractDirParser<SpawnHolder> {
     LinkedList vertexes = new LinkedList();
 
     while(vertexesIt.hasNext()) {
-      Element vertexElement = (Element)vertexesIt.next();
+      Element vertexElement = vertexesIt.next();
       int vertexX = Integer.parseInt(vertexElement.attributeValue("x"));
       int vertexY = Integer.parseInt(vertexElement.attributeValue("y"));
       meshZMin = (short)Math.min(meshZMin, Short.parseShort(vertexElement.attributeValue("minz")));

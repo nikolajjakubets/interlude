@@ -5,26 +5,23 @@
 
 package l2.gameserver.handler.admincommands.impl;
 
-import java.util.Iterator;
-import java.util.List;
 import l2.commons.util.Rnd;
 import l2.gameserver.Config;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.handler.admincommands.IAdminCommandHandler;
-import l2.gameserver.model.Creature;
-import l2.gameserver.model.Effect;
-import l2.gameserver.model.GameObject;
-import l2.gameserver.model.GameObjectsStorage;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.World;
+import l2.gameserver.model.*;
 import l2.gameserver.model.base.InvisibleType;
 import l2.gameserver.network.l2.s2c.Earthquake;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.SocialAction;
 import l2.gameserver.skills.AbnormalEffect;
 import l2.gameserver.tables.SkillTable;
 import l2.gameserver.utils.Util;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Iterator;
+import java.util.List;
+
+@Slf4j
 public class AdminEffects implements IAdminCommandHandler {
   public AdminEffects() {
   }
@@ -62,14 +59,15 @@ public class AdminEffects implements IAdminCommandHandler {
           } else {
             try {
               val = Integer.parseInt(wordList[1]);
-            } catch (Exception var18) {
+            } catch (Exception e) {
+              log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
               activeChar.sendMessage("USAGE: //gmspeed value=[0~4]");
               return false;
             }
           }
 
           List<Effect> superhaste = activeChar.getEffectList().getEffectsBySkillId(7029);
-          sh_level = superhaste == null ? 0 : (superhaste.isEmpty() ? 0 : ((Effect)superhaste.get(0)).getSkill().getLevel());
+          sh_level = superhaste == null ? 0 : (superhaste.isEmpty() ? 0 : superhaste.get(0).getSkill().getLevel());
           if (val == 0) {
             if (sh_level != 0) {
               activeChar.doCast(SkillTable.getInstance().getInfo(7029, sh_level), activeChar, true);
@@ -138,14 +136,15 @@ public class AdminEffects implements IAdminCommandHandler {
             try {
               int intensity = Integer.parseInt(wordList[1]);
               sh_level = Integer.parseInt(wordList[2]);
-              activeChar.broadcastPacket(new L2GameServerPacket[]{new Earthquake(activeChar.getLoc(), intensity, sh_level)});
+              activeChar.broadcastPacket(new Earthquake(activeChar.getLoc(), intensity, sh_level));
               break;
-            } catch (Exception var17) {
+            } catch (Exception e) {
+              log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
               activeChar.sendMessage("USAGE: //earthquake intensity duration");
               return false;
             }
           case admin_block:
-            if (target != null && ((GameObject)target).isCreature()) {
+            if (target != null && target.isCreature()) {
               if (((Creature)target).isBlocked()) {
                 return false;
               }
@@ -161,7 +160,7 @@ public class AdminEffects implements IAdminCommandHandler {
             activeChar.sendPacket(Msg.INVALID_TARGET);
             return false;
           case admin_unblock:
-            if (target == null || !((GameObject)target).isCreature()) {
+            if (target == null || !target.isCreature()) {
               activeChar.sendPacket(Msg.INVALID_TARGET);
               return false;
             }
@@ -184,19 +183,19 @@ public class AdminEffects implements IAdminCommandHandler {
               target = activeChar;
             }
 
-            if (!((GameObject)target).isCreature()) {
+            if (!target.isCreature()) {
               activeChar.sendPacket(Msg.INVALID_TARGET);
               return false;
             }
 
-            String oldName = ((Creature)target).getName();
+            String oldName = target.getName();
             String newName = Util.joinStrings(" ", wordList, 1);
             ((Creature)target).setName(newName);
             ((Creature)target).broadcastCharInfo();
             activeChar.sendMessage("Changed name from " + oldName + " to " + newName + ".");
             break;
           case admin_setinvul:
-            if (target != null && ((GameObject)target).isPlayer()) {
+            if (target != null && target.isPlayer()) {
               this.handleInvul(activeChar, (Player)target);
               break;
             }
@@ -204,8 +203,8 @@ public class AdminEffects implements IAdminCommandHandler {
             activeChar.sendPacket(Msg.INVALID_TARGET);
             return false;
           case admin_getinvul:
-            if (target != null && ((GameObject)target).isCreature()) {
-              activeChar.sendMessage("Target " + ((GameObject)target).getName() + "(object ID: " + ((GameObject)target).getObjectId() + ") is " + (!((Creature)target).isInvul() ? "NOT " : "") + "invul");
+            if (target != null && target.isCreature()) {
+              activeChar.sendMessage("Target " + target.getName() + "(object ID: " + target.getObjectId() + ") is " + (!((Creature) target).isInvul() ? "NOT " : "") + "invul");
             }
             break;
           case admin_social:
@@ -214,18 +213,19 @@ public class AdminEffects implements IAdminCommandHandler {
             } else {
               try {
                 val = Integer.parseInt(wordList[1]);
-              } catch (NumberFormatException var16) {
+              } catch (NumberFormatException e) {
+                log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
                 activeChar.sendMessage("USAGE: //social value");
                 return false;
               }
             }
 
             if (target != null && target != activeChar) {
-              if (((GameObject)target).isCreature()) {
-                ((Creature)target).broadcastPacket(new L2GameServerPacket[]{new SocialAction(((GameObject)target).getObjectId(), val)});
+              if (target.isCreature()) {
+                ((Creature) target).broadcastPacket(new SocialAction(target.getObjectId(), val));
               }
             } else {
-              activeChar.broadcastPacket(new L2GameServerPacket[]{new SocialAction(activeChar.getObjectId(), val)});
+              activeChar.broadcastPacket(new SocialAction(activeChar.getObjectId(), val));
             }
             break;
           case admin_abnormal:
@@ -233,7 +233,8 @@ public class AdminEffects implements IAdminCommandHandler {
               if (wordList.length > 1) {
                 ae = AbnormalEffect.getByName(wordList[1]);
               }
-            } catch (Exception var19) {
+            } catch (Exception e) {
+              log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
               activeChar.sendMessage("USAGE: //abnormal name");
               activeChar.sendMessage("//abnormal - Clears all abnormal effects");
               return false;
@@ -241,23 +242,24 @@ public class AdminEffects implements IAdminCommandHandler {
 
             Creature effectTarget = target == null ? activeChar : (Creature)target;
             if (ae == AbnormalEffect.NULL) {
-              ((Creature)effectTarget).startAbnormalEffect(AbnormalEffect.NULL);
-              ((Creature)effectTarget).sendMessage("Abnormal effects clearned by admin.");
+              effectTarget.startAbnormalEffect(AbnormalEffect.NULL);
+              effectTarget.sendMessage("Abnormal effects clearned by admin.");
               if (effectTarget != activeChar) {
-                ((Creature)effectTarget).sendMessage("Abnormal effects clearned.");
+                effectTarget.sendMessage("Abnormal effects clearned.");
               }
             } else {
-              ((Creature)effectTarget).startAbnormalEffect(ae);
-              ((Creature)effectTarget).sendMessage("Admin added abnormal effect: " + ae.getName());
+              effectTarget.startAbnormalEffect(ae);
+              effectTarget.sendMessage("Admin added abnormal effect: " + ae.getName());
               if (effectTarget != activeChar) {
-                ((Creature)effectTarget).sendMessage("Added abnormal effect: " + ae.getName());
+                effectTarget.sendMessage("Added abnormal effect: " + ae.getName());
               }
             }
             break;
           case admin_transform:
             try {
               val = Integer.parseInt(wordList[1]);
-            } catch (Exception var15) {
+            } catch (Exception e) {
+              log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
               activeChar.sendMessage("USAGE: //transform transform_id");
               return false;
             }
@@ -313,7 +315,7 @@ public class AdminEffects implements IAdminCommandHandler {
     return AdminEffects.Commands.values();
   }
 
-  private static enum Commands {
+  private enum Commands {
     admin_invis,
     admin_vis,
     admin_offline_vis,
@@ -331,7 +333,7 @@ public class AdminEffects implements IAdminCommandHandler {
     admin_transform,
     admin_showmovie;
 
-    private Commands() {
+    Commands() {
     }
   }
 }

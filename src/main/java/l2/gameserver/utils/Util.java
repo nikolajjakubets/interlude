@@ -5,6 +5,12 @@
 
 package l2.gameserver.utils;
 
+import l2.commons.util.Rnd;
+import l2.gameserver.Config;
+import l2.gameserver.model.GameObjectsStorage;
+import l2.gameserver.model.Player;
+import lombok.extern.slf4j.Slf4j;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.InetAddress;
@@ -12,19 +18,12 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import l2.commons.util.Rnd;
-import l2.gameserver.Config;
-import l2.gameserver.model.GameObjectsStorage;
-import l2.gameserver.model.Player;
 
+@Slf4j
 public class Util {
   static final String PATTERN = "0.0000000000E00";
   static final DecimalFormat df;
@@ -39,8 +38,9 @@ public class Util {
 
     try {
       pattern = Pattern.compile(template);
-    } catch (PatternSyntaxException var4) {
-      var4.printStackTrace();
+    } catch (PatternSyntaxException e) {
+      log.error("Exception: eMessage={}, eClass={},", e.getMessage(), e.getClass());
+      e.printStackTrace();
     }
 
     if (pattern == null) {
@@ -118,7 +118,8 @@ public class Util {
           }
         }
       }
-    } catch (SocketException var6) {
+    } catch (SocketException e) {
+      log.error("Exception: eMessage={}, eClass={}", e.getMessage(), e.getClass());
       return "none";
     }
 
@@ -241,7 +242,8 @@ public class Util {
     try {
       Double.parseDouble(s);
       return true;
-    } catch (NumberFormatException var2) {
+    } catch (NumberFormatException e) {
+      log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), null, e.getCause());
       return false;
     }
   }
@@ -282,8 +284,9 @@ public class Util {
         } else {
           val = fldObj.toString();
         }
-      } catch (Throwable var14) {
-        var14.printStackTrace();
+      } catch (Throwable e) {
+        log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), "this.getClass().getSimpleName()", e.getCause());
+        e.printStackTrace();
         val = "<ERROR>";
       }
 

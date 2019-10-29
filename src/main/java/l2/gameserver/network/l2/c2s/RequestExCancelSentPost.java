@@ -5,20 +5,22 @@
 
 package l2.gameserver.network.l2.c2s;
 
-import java.util.Iterator;
-import java.util.Set;
 import l2.commons.math.SafeMath;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.dao.MailDAO;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.model.mail.Mail;
-import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.s2c.ExShowSentPostList;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.utils.Log;
 import l2.gameserver.utils.Log.ItemLog;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Iterator;
+import java.util.Set;
+
+@Slf4j
 public class RequestExCancelSentPost extends L2GameClientPacket {
   private int postId;
 
@@ -105,7 +107,8 @@ public class RequestExCancelSentPost extends L2GameClientPacket {
 
               ++slots;
             }
-          } catch (ArithmeticException var17) {
+          } catch (ArithmeticException e) {
+            log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
           } finally {
             activeChar.getInventory().writeUnlock();
           }

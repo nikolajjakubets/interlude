@@ -11,7 +11,6 @@ import l2.gameserver.handler.admincommands.IAdminCommandHandler;
 import l2.gameserver.instancemanager.ReflectionManager;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.World;
-import l2.gameserver.model.instances.StaticObjectInstance;
 import l2.gameserver.model.items.ManufactureItem;
 import l2.gameserver.model.items.TradeItem;
 import l2.gameserver.network.authcomm.AuthServerCommunication;
@@ -26,11 +25,13 @@ import l2.gameserver.utils.AdminFunctions;
 import l2.gameserver.utils.AutoBan;
 import l2.gameserver.utils.Location;
 import l2.gameserver.utils.Log;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+@Slf4j
 public class AdminBan implements IAdminCommandHandler {
   public AdminBan() {
   }
@@ -115,7 +116,8 @@ public class AdminBan implements IAdminCommandHandler {
             } else {
               activeChar.sendMessage("Such HWID or player not found.");
             }
-          } catch (Exception var17) {
+          } catch (Exception e) {
+            log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
             activeChar.sendMessage("Command syntax: //hwidban [char_name|hwid] comment");
           }
           break;
@@ -125,13 +127,14 @@ public class AdminBan implements IAdminCommandHandler {
             player = st.nextToken();
             period = st.nextToken();
             hwid2ban = "admin_chatban " + player + " " + period + " ";
-            ip = fullString.substring(hwid2ban.length(), fullString.length());
+            ip = fullString.substring(hwid2ban.length());
             if (AutoBan.ChatBan(player, Integer.parseInt(period), ip, activeChar.getName())) {
               activeChar.sendMessage("You ban chat for " + player + ".");
             } else {
               activeChar.sendMessage("Can't find char " + player + ".");
             }
-          } catch (Exception var15) {
+          } catch (Exception e) {
+            log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
             activeChar.sendMessage("Command syntax: //chatban char_name period reason");
           }
           break;
@@ -144,7 +147,8 @@ public class AdminBan implements IAdminCommandHandler {
             } else {
               activeChar.sendMessage("Can't find char " + player + ".");
             }
-          } catch (Exception var14) {
+          } catch (Exception e) {
+            log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
             activeChar.sendMessage("Command syntax: //chatunban char_name");
           }
           break;
@@ -164,14 +168,15 @@ public class AdminBan implements IAdminCommandHandler {
                 activeChar.setPrivateStoreType(0);
               }
 
-              player1.sitDown((StaticObjectInstance) null);
+              player1.sitDown(null);
               player1.block();
               player1.sendMessage("You moved to jail, time to escape - " + period + " minutes, reason - " + hwid2ban + " .");
               activeChar.sendMessage("You jailed " + player + ".");
             } else {
               activeChar.sendMessage("Can't find char " + player + ".");
             }
-          } catch (Exception var13) {
+          } catch (Exception e) {
+            log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
             activeChar.sendMessage("Command syntax: //jail char_name period reason");
           }
           break;
@@ -193,7 +198,8 @@ public class AdminBan implements IAdminCommandHandler {
             } else {
               activeChar.sendMessage("Can't find char " + player + ".");
             }
-          } catch (Exception var16) {
+          } catch (Exception e) {
+            log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
             activeChar.sendMessage("Command syntax: //unjail char_name");
           }
           break;
@@ -349,7 +355,7 @@ public class AdminBan implements IAdminCommandHandler {
 
       Player plyr = World.getPlayer(player);
       if (plyr != null) {
-        plyr.sendMessage(new CustomMessage("admincommandhandlers.YoureBannedByGM", plyr, new Object[0]));
+        plyr.sendMessage(new CustomMessage("admincommandhandlers.YoureBannedByGM", plyr));
         plyr.setAccessLevel(-100);
         AutoBan.Banned(plyr, time, msg, activeChar.getName());
         plyr.kick();
@@ -370,7 +376,7 @@ public class AdminBan implements IAdminCommandHandler {
     return AdminBan.Commands.values();
   }
 
-  private static enum Commands {
+  private enum Commands {
     admin_ban,
     admin_unban,
     admin_hwidban,
@@ -385,7 +391,7 @@ public class AdminBan implements IAdminCommandHandler {
     admin_unjail,
     admin_permaban;
 
-    private Commands() {
+    Commands() {
     }
   }
 }

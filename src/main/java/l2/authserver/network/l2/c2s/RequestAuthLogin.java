@@ -13,11 +13,13 @@ import l2.authserver.network.l2.s2c.LoginOk;
 import l2.authserver.utils.Log;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.Cipher;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
+@Slf4j
 public class RequestAuthLogin extends L2LoginClientPacket {
     private byte[] _raw = new byte[128];
 
@@ -41,8 +43,9 @@ public class RequestAuthLogin extends L2LoginClientPacket {
             Cipher rsaCipher = Cipher.getInstance("RSA/ECB/nopadding");
             rsaCipher.init(2, client.getRSAPrivateKey());
             decrypted = rsaCipher.doFinal(this._raw, 0, 128);
-        } catch (Exception var14) {
-            client.closeNow(true);
+        } catch (Exception e) {
+          log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
+          client.closeNow(true);
             return;
         }
 

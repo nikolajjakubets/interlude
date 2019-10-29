@@ -15,8 +15,8 @@ public abstract class L2LoginServerPacket extends SendablePacket<L2LoginClient> 
             this.writeImpl();
             return true;
         } catch (Exception e) {
-            log.error("read: eMessage={}, eClass={}", e.getMessage(), e.getClass());
-            log.error("read: Client: " + this.getClient() + " - Failed writing: " + this.getClass().getSimpleName() + "!", e);
+          log.error("write: eMessage={}, eClass={}", e.getMessage(), e.getClass());
+          log.error("write: Client: " + this.getClient() + " - Failed writing: " + this.getClass().getSimpleName() + "!", e);
             return false;
         }
     }

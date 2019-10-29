@@ -11,7 +11,9 @@ import l2.gameserver.model.Player;
 import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.network.l2.s2c.InventoryUpdate;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AdminEnchant implements IAdminCommandHandler {
   public AdminEnchant() {
   }
@@ -83,9 +85,11 @@ public class AdminEnchant implements IAdminCommandHandler {
           } else {
             activeChar.sendMessage("You must set the enchant level to be between 0-65535.");
           }
-        } catch (StringIndexOutOfBoundsException var8) {
+        } catch (StringIndexOutOfBoundsException e) {
+          log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
           activeChar.sendMessage("Please specify a new enchant value.");
-        } catch (NumberFormatException var9) {
+        } catch (NumberFormatException e) {
+          log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
           activeChar.sendMessage("Please specify a valid new enchant value.");
         }
 

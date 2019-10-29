@@ -5,12 +5,15 @@
 
 package l2.gameserver.utils;
 
-import java.io.File;
-import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+
+@Slf4j
 public class Files {
   private static final Logger _log = LoggerFactory.getLogger(Files.class);
 

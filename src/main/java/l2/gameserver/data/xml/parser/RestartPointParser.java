@@ -5,13 +5,6 @@
 
 package l2.gameserver.data.xml.parser;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import l2.commons.data.xml.AbstractFileParser;
 import l2.commons.geometry.Polygon;
 import l2.commons.geometry.Rectangle;
@@ -23,11 +16,17 @@ import l2.gameserver.model.base.Race;
 import l2.gameserver.templates.mapregion.RestartArea;
 import l2.gameserver.templates.mapregion.RestartPoint;
 import l2.gameserver.utils.Location;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.dom4j.Attribute;
 import org.dom4j.Element;
 
+import java.io.File;
+import java.util.*;
+import java.util.Map.Entry;
+
+@Slf4j
 public class RestartPointParser extends AbstractFileParser<MapRegionManager> {
   private static final RestartPointParser _instance = new RestartPointParser();
 
@@ -168,18 +167,19 @@ public class RestartPointParser extends AbstractFileParser<MapRegionManager> {
 
         while(var24.hasNext()) {
           Entry<Race, String> e = (Entry)var24.next();
-          RestartPoint rp = (RestartPoint)restartPoint.get(e.getValue());
+          RestartPoint rp = restartPoint.get(e.getValue());
           if (rp == null) {
-            throw new RuntimeException("RestartPointParser: restart_loc not found : " + (String)e.getValue() + "!");
+            throw new RuntimeException("RestartPointParser: restart_loc not found : " + e.getValue() + "!");
           }
 
           restarts.put(e.getKey(), rp);
 
           try {
-            ((MapRegionManager)this.getHolder()).addRegionData(new RestartArea((Territory)ra.getKey(), restarts));
-          } catch (Exception var20) {
-            System.out.println("Cant add restart area \"" + (String)e.getValue() + "\"");
-            var20.printStackTrace();
+            this.getHolder().addRegionData(new RestartArea(ra.getKey(), restarts));
+          } catch (Exception e1) {
+            log.error("Exception: eMessage={}, eClass={}, eCause={}", e1.getMessage(), this.getClass().getSimpleName(), e1.getCause());
+            System.out.println("Cant add restart area \"" + e.getValue() + "\"");
+            e1.printStackTrace();
           }
         }
       }

@@ -5,16 +5,14 @@
 
 package l2.gameserver.network.l2.c2s;
 
-import java.util.Iterator;
-import java.util.List;
 import l2.commons.math.SafeMath;
 import l2.gameserver.Config;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.data.xml.holder.OptionDataHolder;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.Request;
-import l2.gameserver.model.Skill;
 import l2.gameserver.model.Request.L2RequestType;
+import l2.gameserver.model.Skill;
 import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.model.items.TradeItem;
 import l2.gameserver.network.l2.GameClient;
@@ -26,7 +24,11 @@ import l2.gameserver.network.l2.s2c.TradeOtherAdd;
 import l2.gameserver.network.l2.s2c.TradeOwnAdd;
 import l2.gameserver.network.l2.s2c.TradeUpdate;
 import l2.gameserver.templates.OptionDataTemplate;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
+@Slf4j
 public class AddTradeItem extends L2GameClientPacket {
   private int _tradeId;
   private int _objectId;
@@ -74,10 +76,8 @@ public class AddTradeItem extends L2GameClientPacket {
               TradeItem tradeItem = null;
 
               try {
-                Iterator var11 = parthner1.getTradeList().iterator();
 
-                while(var11.hasNext()) {
-                  TradeItem ti = (TradeItem)var11.next();
+                for (TradeItem ti : parthner1.getTradeList()) {
                   if (ti.getObjectId() == this._objectId) {
                     long currAmount = ti.getCount();
                     count = SafeMath.addAndCheck(count, currAmount);
@@ -88,7 +88,8 @@ public class AddTradeItem extends L2GameClientPacket {
                     break;
                   }
                 }
-              } catch (ArithmeticException var15) {
+              } catch (ArithmeticException e) {
+                log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
                 parthner1.sendPacket(SystemMsg.INCORRECT_ITEM_COUNT);
                 return;
               }

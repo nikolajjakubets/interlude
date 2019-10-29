@@ -10,7 +10,9 @@ import l2.gameserver.data.xml.holder.NpcHolder;
 import l2.gameserver.handler.admincommands.IAdminCommandHandler;
 import l2.gameserver.model.GameObject;
 import l2.gameserver.model.Player;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AdminPolymorph implements IAdminCommandHandler {
   public AdminPolymorph() {
   }
@@ -34,7 +36,9 @@ public class AdminPolymorph implements IAdminCommandHandler {
                 ((Player)target).broadcastCharInfo();
               }
               break;
-            } catch (Exception var8) {
+            } catch (Exception e) {
+              log.error("addTestTask: eMessage={}, eClass={}, eCause={}", e.getMessage(), e.getClass(), this.getClass().getSimpleName());
+
               activeChar.sendMessage("USAGE: //poly id [type:npc|item]");
               return false;
             }

@@ -5,16 +5,19 @@
 
 package l2.gameserver.templates;
 
-import java.lang.reflect.Constructor;
 import l2.commons.geometry.Polygon;
 import l2.gameserver.ai.CharacterAI;
 import l2.gameserver.ai.DoorAI;
 import l2.gameserver.model.instances.DoorInstance;
 import l2.gameserver.scripts.Scripts;
 import l2.gameserver.utils.Location;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
+
+@Slf4j
 public class DoorTemplate extends CharTemplate {
   private static final Logger _log = LoggerFactory.getLogger(DoorTemplate.class);
   public static final Constructor<?> DEFAULT_AI_CONSTRUCTOR = CharacterAI.class.getConstructors()[0];
@@ -62,7 +65,8 @@ public class DoorTemplate extends CharTemplate {
 
     try {
       classAI = Class.forName("l2.gameserver.ai." + ai);
-    } catch (ClassNotFoundException var4) {
+    } catch (ClassNotFoundException e) {
+      log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
       classAI = Scripts.getInstance().getClasses().get("ai.door." + ai);
     }
 

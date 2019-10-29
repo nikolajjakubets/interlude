@@ -14,7 +14,9 @@ import l2.gameserver.model.World;
 import l2.gameserver.model.entity.oly.HeroController;
 import l2.gameserver.model.entity.oly.NoblesController;
 import l2.gameserver.model.entity.oly.OlyController;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AdminOlympiad implements IAdminCommandHandler {
   public AdminOlympiad() {
   }
@@ -30,7 +32,8 @@ public class AdminOlympiad implements IAdminCommandHandler {
 
         try {
           OlyController.getInstance().save();
-        } catch (Exception var12) {
+        } catch (Exception e) {
+          log.error("addTestTask: eMessage={}, eClass={}, eCause={}", e.getMessage(), e.getClass(), this.getClass().getSimpleName());
         }
 
         activeChar.sendMessage("olympaid data saved.");
@@ -51,7 +54,8 @@ public class AdminOlympiad implements IAdminCommandHandler {
         int pointToAdd;
         try {
           pointToAdd = Integer.parseInt(wordList[2]);
-        } catch (NumberFormatException var11) {
+        } catch (NumberFormatException e) {
+          log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), e.getClass(), this.getClass().getSimpleName());
           activeChar.sendMessage("Please specify integer value for olympiad points.");
           return false;
         }
@@ -70,7 +74,8 @@ public class AdminOlympiad implements IAdminCommandHandler {
 
         try {
           OlyController.getInstance().save();
-        } catch (Exception var10) {
+        } catch (Exception e) {
+          log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), e.getClass(), this.getClass().getSimpleName());
         }
         break;
       case admin_add_hero:

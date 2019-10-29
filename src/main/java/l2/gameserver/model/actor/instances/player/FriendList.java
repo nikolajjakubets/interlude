@@ -5,10 +5,6 @@
 
 package l2.gameserver.model.actor.instances.player;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 import l2.gameserver.dao.CharacterFriendDAO;
 import l2.gameserver.model.GameObjectsStorage;
 import l2.gameserver.model.Player;
@@ -17,8 +13,15 @@ import l2.gameserver.network.l2.components.IStaticPacket;
 import l2.gameserver.network.l2.s2c.L2Friend;
 import l2.gameserver.network.l2.s2c.L2FriendStatus;
 import l2.gameserver.network.l2.s2c.SystemMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
+@Slf4j
 public class FriendList {
   private Map<Integer, Friend> _friendList = Collections.emptyMap();
   private final Player _owner;
@@ -49,13 +52,11 @@ public class FriendList {
 
   public void notifyFriends(boolean login) {
     try {
-      Iterator var2 = this._friendList.values().iterator();
 
-      while(var2.hasNext()) {
-        Friend friend = (Friend)var2.next();
+      for (Friend friend : this._friendList.values()) {
         Player friendPlayer = GameObjectsStorage.getPlayer(friend.getObjectId());
         if (friendPlayer != null) {
-          Friend thisFriend = (Friend)friendPlayer.getFriendList().getList().get(this._owner.getObjectId());
+          Friend thisFriend = (Friend) friendPlayer.getFriendList().getList().get(this._owner.getObjectId());
           if (thisFriend != null) {
             thisFriend.update(this._owner, login);
             if (login) {
@@ -67,8 +68,9 @@ public class FriendList {
           }
         }
       }
-    } catch (Exception var6) {
-      var6.printStackTrace();
+    } catch (Exception e) {
+      log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
+      e.printStackTrace();
     }
 
   }

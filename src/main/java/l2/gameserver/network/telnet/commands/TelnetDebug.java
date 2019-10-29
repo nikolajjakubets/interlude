@@ -13,13 +13,18 @@ import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.network.authcomm.AuthServerCommunication;
 import l2.gameserver.network.telnet.TelnetCommand;
 import l2.gameserver.network.telnet.TelnetCommandHolder;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
+@Slf4j
 public class TelnetDebug implements TelnetCommandHolder {
   private Set<TelnetCommand> _commands = new LinkedHashSet();
 
@@ -35,12 +40,10 @@ public class TelnetDebug implements TelnetCommandHolder {
         int maxId = 0;
         int maxCount = 0;
         TIntObjectHashMap<List<NpcInstance>> npcStats = new TIntObjectHashMap();
-        Iterator var7 = GameObjectsStorage.getAllObjects().iterator();
 
-        while(var7.hasNext()) {
-          GameObject obj = (GameObject)var7.next();
+        for (GameObject obj : GameObjectsStorage.getAllObjects()) {
           if (obj.isCreature() && obj.isNpc()) {
-            NpcInstance npcx = (NpcInstance)obj;
+            NpcInstance npcx = (NpcInstance) obj;
             int id = npcx.getNpcId();
             List<NpcInstance> listx;
             if ((listx = npcStats.get(id)) == null) {
@@ -62,16 +65,13 @@ public class TelnetDebug implements TelnetCommandHolder {
         sb.append("Maximum NPC ID: ").append(maxId).append(" count : ").append(maxCount).append("\n");
         TIntObjectIterator itr = npcStats.iterator();
 
-        while(itr.hasNext()) {
+        while (itr.hasNext()) {
           itr.advance();
           int idx = itr.key();
-          List<NpcInstance> list = (List)itr.value();
+          List<NpcInstance> list = (List) itr.value();
           sb.append("=== ID: ").append(idx).append(" ").append(" Count: ").append(list.size()).append(" ===").append("\n");
-          Iterator var18 = list.iterator();
 
-          while(var18.hasNext()) {
-            NpcInstance npc = (NpcInstance)var18.next();
-
+          for (NpcInstance npc : list) {
             try {
               sb.append("AI: ");
               if (npc.hasAI()) {
@@ -91,8 +91,9 @@ public class TelnetDebug implements TelnetCommandHolder {
               sb.append("spawned: ");
               sb.append(npc.isVisible());
               sb.append("\n");
-            } catch (Exception var14) {
-              var14.printStackTrace();
+            } catch (Exception e) {
+              log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), e.getClass(), this.getClass().getSimpleName());
+              e.printStackTrace();
             }
           }
         }
@@ -100,8 +101,8 @@ public class TelnetDebug implements TelnetCommandHolder {
         try {
           (new File("stats")).mkdir();
           FileUtils.writeStringToFile(new File("stats/NpcStats-" + (new SimpleDateFormat("MMddHHmmss")).format(System.currentTimeMillis()) + ".txt"), sb.toString());
-        } catch (IOException var13) {
-          var13.printStackTrace();
+        } catch (IOException e) {
+          log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
         }
 
         return "NPC stats saved.\n";

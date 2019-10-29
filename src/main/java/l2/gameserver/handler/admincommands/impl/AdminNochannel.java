@@ -12,7 +12,9 @@ import l2.gameserver.templates.item.ItemTemplate;
 import l2.gameserver.utils.AdminFunctions;
 import l2.gameserver.utils.ItemFunctions;
 import l2.gameserver.utils.Util;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AdminNochannel implements IAdminCommandHandler {
   public AdminNochannel() {
   }
@@ -88,7 +90,8 @@ public class AdminNochannel implements IAdminCommandHandler {
             if (wordList.length > 2) {
               try {
                 timeval = Integer.parseInt(wordList[2]);
-              } catch (Exception var17) {
+              } catch (Exception e) {
+                log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
                 timeval = 30;
               }
             }

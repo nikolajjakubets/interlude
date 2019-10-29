@@ -39,7 +39,7 @@ public final class AutoBan {
       statement.setInt(1, ObjectId);
       rset = statement.executeQuery();
       if (rset.next()) {
-        Long endban = rset.getLong("endban") * 1000L;
+        long endban = rset.getLong("endban") * 1000L;
         res = endban > System.currentTimeMillis();
       }
     } catch (Exception var9) {

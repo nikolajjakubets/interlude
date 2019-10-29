@@ -10,8 +10,10 @@ import l2.gameserver.instancemanager.PetitionManager;
 import l2.gameserver.model.GameObject;
 import l2.gameserver.model.Player;
 import l2.gameserver.network.l2.s2c.SystemMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 
+@Slf4j
 public class AdminPetition implements IAdminCommandHandler {
   public AdminPetition() {
   }
@@ -78,7 +80,7 @@ public class AdminPetition implements IAdminCommandHandler {
 
           try {
             GameObject targetChar = activeChar.getTarget();
-            if (targetChar == null || !(targetChar instanceof Player)) {
+            if (!(targetChar instanceof Player)) {
               activeChar.sendPacket(new SystemMessage(109));
               return false;
             }
@@ -86,7 +88,8 @@ public class AdminPetition implements IAdminCommandHandler {
             Player targetPlayer = (Player)targetChar;
             petitionId = PetitionManager.getInstance().submitPetition(targetPlayer, fullString.substring(10), 9);
             PetitionManager.getInstance().acceptPetition(activeChar, petitionId);
-          } catch (StringIndexOutOfBoundsException var9) {
+          } catch (StringIndexOutOfBoundsException e) {
+            log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), e.getClass(), this.getClass().getSimpleName());
             activeChar.sendMessage("Usage: //force_peti text");
             return false;
           }

@@ -78,8 +78,9 @@ public class GameServerCommunication extends Thread {
             } catch (IOException e) {
                 log.error("run: Gameserver I/O error={} " + e.getMessage());
                 this.close(key);
-            } catch (Exception var8) {
-                log.error("", var8);
+            } catch (Exception e) {
+              log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), e.getClass(), this.getClass().getSimpleName());
+
             }
         }
 
@@ -223,7 +224,7 @@ public class GameServerCommunication extends Thread {
                     key.cancel();
                 }
             } catch (IOException e) {
-                log.error("restore: eMessage={}, eClass={}", e.getMessage(), e.getClass());
+              log.error("close: restore: eMessage={}, eClass={}", e.getMessage(), e.getClass());
             }
 
         }

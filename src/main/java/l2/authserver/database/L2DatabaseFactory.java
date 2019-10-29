@@ -5,12 +5,14 @@ import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 import l2.authserver.Config;
 import l2.authserver.ThreadPoolManager;
 import l2.commons.db.BaseDataConnectionFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.ConnectionPoolDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+@Slf4j
 public class L2DatabaseFactory extends BaseDataConnectionFactory {
     private static L2DatabaseFactory l2DatabaseFactory;
 
@@ -56,8 +58,8 @@ public class L2DatabaseFactory extends BaseDataConnectionFactory {
             public void run() {
                 try {
                     L2DatabaseFactory.this.testDB();
-                } catch (SQLException var2) {
-                    var2.printStackTrace();
+                } catch (SQLException e) {
+                  log.error("addTestTask: eMessage={}, eClass={}, eCause={}", e.getMessage(), e.getClass(), this.getClass().getSimpleName());
                 }
 
             }

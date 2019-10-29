@@ -7,7 +7,9 @@ package l2.gameserver.network.l2.c2s;
 
 import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.s2c.CharacterSelectionInfo;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class CharacterRestore extends L2GameClientPacket {
   private int _charSlot;
 
@@ -23,7 +25,8 @@ public class CharacterRestore extends L2GameClientPacket {
 
     try {
       client.markRestoredChar(this._charSlot);
-    } catch (Exception var3) {
+    } catch (Exception e) {
+      log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
     }
 
     CharacterSelectionInfo cl = new CharacterSelectionInfo(client.getLogin(), client.getSessionKey().playOkID1);

@@ -134,7 +134,7 @@ public class Account {
             cstmt.setString(2, this.getPasswordHash());
             cstmt.execute();
         } catch (Exception e) {
-            log.error("restore: eMessage={}, eClass={}", e.getMessage(), e.getClass());
+          log.error("save: eMessage={}, eClass={}", e.getMessage(), e.getClass());
         } finally {
             DbUtils.closeQuietly(con, cstmt);
         }
@@ -157,7 +157,7 @@ public class Account {
             cstmt.setString(7, this.getEmail());
             cstmt.execute();
         } catch (Exception e) {
-            log.error("restore: eMessage={}, eClass={}", e.getMessage(), e.getClass());
+          log.error("update: eMessage={}, eClass={}", e.getMessage(), e.getClass());
         } finally {
             DbUtils.closeQuietly(con, cstmt);
         }

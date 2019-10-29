@@ -36,7 +36,7 @@ public abstract class SendablePacket extends l2.commons.net.nio.SendablePacket<G
         try {
             this.writeImpl();
         } catch (Exception e) {
-            log.error("restore: eMessage={}, eClass={}", e.getMessage(), e.getClass());
+          log.error("write: eMessage={}, eClass={}", e.getMessage(), e.getClass());
         }
 
         return true;

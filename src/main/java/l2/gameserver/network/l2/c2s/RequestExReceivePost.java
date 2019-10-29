@@ -5,7 +5,6 @@
 
 package l2.gameserver.network.l2.c2s;
 
-import java.util.Set;
 import l2.commons.dao.JdbcEntityState;
 import l2.commons.math.SafeMath;
 import l2.gameserver.cache.Msg;
@@ -21,7 +20,11 @@ import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.utils.ItemFunctions;
 import l2.gameserver.utils.Log;
 import l2.gameserver.utils.Log.ItemLog;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Set;
+
+@Slf4j
 public class RequestExReceivePost extends L2GameClientPacket {
   private int postId;
 
@@ -136,7 +139,8 @@ public class RequestExReceivePost extends L2GameClientPacket {
             }
 
             activeChar.sendPacket(Msg.MAIL_SUCCESSFULLY_RECEIVED);
-          } catch (ArithmeticException var19) {
+          } catch (ArithmeticException e) {
+            log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
           } finally {
             activeChar.getInventory().writeUnlock();
           }

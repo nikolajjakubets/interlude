@@ -5,8 +5,6 @@
 
 package l2.gameserver.network.l2.c2s;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import l2.commons.math.SafeMath;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.model.Player;
@@ -18,8 +16,13 @@ import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.PrivateStoreManageListSell;
 import l2.gameserver.network.l2.s2c.PrivateStoreMsgSell;
 import l2.gameserver.utils.TradeHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+@Slf4j
 public class SetPrivateStoreSellList extends L2GameClientPacket {
   private int _count;
   private boolean _package;
@@ -86,7 +89,8 @@ public class SetPrivateStoreSellList extends L2GameClientPacket {
 
               ++i;
             }
-          } catch (ArithmeticException var13) {
+          } catch (ArithmeticException e) {
+            log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), this.getClass().getSimpleName(), e.getCause());
             sellList.clear();
             this.sendPacket(Msg.YOU_HAVE_EXCEEDED_THE_QUANTITY_THAT_CAN_BE_INPUTTED);
           } finally {

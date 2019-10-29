@@ -5,15 +5,18 @@
 
 package l2.gameserver.handler.admincommands.impl;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import l2.gameserver.handler.admincommands.IAdminCommandHandler;
 import l2.gameserver.model.GameObjectsStorage;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.network.l2.s2c.SystemMessage;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+@Slf4j
 public class AdminMammon implements IAdminCommandHandler {
   List<Integer> npcIds = new ArrayList<>();
 
@@ -34,10 +37,9 @@ public class AdminMammon implements IAdminCommandHandler {
         npcId = -1;
 
         try {
-          if (fullString.length() > 16) {
-            npcId = Integer.parseInt(fullString.substring(18));
-          }
-        } catch (Exception var9) {
+          npcId = Integer.parseInt(fullString.substring(18));
+        } catch (Exception e) {
+          log.error("addTestTask: eMessage={}, eClass={}, eCause={}", e.getMessage(), e.getClass(), this.getClass().getSimpleName());
         }
 
         this.findAdminNPCs(activeChar, this.npcIds, npcId, -1);
@@ -54,7 +56,8 @@ public class AdminMammon implements IAdminCommandHandler {
 
         try {
           npcId = Integer.parseInt(fullString.substring(18).trim());
-        } catch (Exception var8) {
+        } catch (Exception e) {
+          log.error("addTestTask: eMessage={}, eClass={}, eCause={}", e.getMessage(), e.getClass(), this.getClass().getSimpleName());
           activeChar.sendMessage("Command format is //list_spawns <NPC_ID>");
         }
 

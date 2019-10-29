@@ -5,20 +5,17 @@ import l2.authserver.accounts.Account;
 import l2.authserver.network.gamecomm.GameServer;
 import l2.authserver.network.gamecomm.ProxyServer;
 import l2.commons.net.utils.NetUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+@Slf4j
 public final class ServerList extends L2LoginServerPacket {
-    private static final Comparator<ServerData> SERVER_DATA_COMPARATOR = new Comparator<ServerData>() {
-        public int compare(ServerData o1, ServerData o2) {
-            return o1.serverId - o2.serverId;
-        }
-    };
+  private static final Comparator<ServerData> SERVER_DATA_COMPARATOR = Comparator.comparingInt(o -> o.serverId);
 
     private List<ServerData> _servers = new ArrayList<ServerData>();
     private int _lastServer;
@@ -26,13 +23,14 @@ public final class ServerList extends L2LoginServerPacket {
     public ServerList(Account account) {
         this._lastServer = account.getLastServer();
         GameServer[] var2 = GameServerManager.getInstance().getGameServers();
-        int var3 = var2.length;
 
-        for (GameServer gs : var2) {
+      for (GameServer gs : var2) {
             InetAddress ip;
             try {
                 ip = NetUtils.isInternalIP(account.getLastIP()) ? gs.getInternalHost() : gs.getExternalHost();
-            } catch (UnknownHostException var10) {
+            } catch (UnknownHostException e) {
+              log.error("ServerList: eMessage={}, eClass={}", e.getMessage(), e.getClass());
+              log.error("ServerList: Client: " + this.getClient() + " - Failed writing: " + this.getClass().getSimpleName() + "!", e);
                 continue;
             }
 
@@ -44,7 +42,7 @@ public final class ServerList extends L2LoginServerPacket {
             }
         }
 
-        Collections.sort(this._servers, SERVER_DATA_COMPARATOR);
+      this._servers.sort(SERVER_DATA_COMPARATOR);
     }
 
     protected void writeImpl() {

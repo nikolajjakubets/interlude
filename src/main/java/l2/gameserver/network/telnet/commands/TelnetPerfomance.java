@@ -6,13 +6,6 @@
 package l2.gameserver.network.telnet.commands;
 
 import com.sun.management.HotSpotDiagnosticMXBean;
-import java.io.File;
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.text.SimpleDateFormat;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import javax.management.MBeanServer;
 import l2.commons.lang.StatsUtils;
 import l2.commons.net.nio.impl.SelectorThread;
 import l2.commons.threading.RunnableStatsManager;
@@ -23,8 +16,18 @@ import l2.gameserver.network.telnet.TelnetCommand;
 import l2.gameserver.network.telnet.TelnetCommandHolder;
 import l2.gameserver.taskmanager.AiTaskManager;
 import l2.gameserver.taskmanager.EffectTaskManager;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
+import javax.management.MBeanServer;
+import java.io.File;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.text.SimpleDateFormat;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+@Slf4j
 public class TelnetPerfomance implements TelnetCommandHolder {
   private Set<TelnetCommand> _commands = new LinkedHashSet();
 
@@ -45,8 +48,9 @@ public class TelnetPerfomance implements TelnetCommandHolder {
             (new File("stats")).mkdir();
             FileUtils.writeStringToFile(new File("stats/RunnableStats-" + (new SimpleDateFormat("MMddHHmmss")).format(System.currentTimeMillis()) + ".txt"), RunnableStatsManager.getInstance().getStats().toString());
             sb.append("Runnable stats saved.\n");
-          } catch (IOException var4) {
-            sb.append("Exception: " + var4.getMessage() + "!\n");
+          } catch (IOException e) {
+            log.error("addTestTask: eMessage={}, eClass={}, eCause={}", e.getMessage(), e.getClass(), this.getClass().getSimpleName());
+            sb.append("Exception: ").append(e.getMessage()).append("!\n");
           }
         } else {
           sb.append(ThreadPoolManager.getInstance().getStats());
@@ -85,8 +89,9 @@ public class TelnetPerfomance implements TelnetCommandHolder {
               HotSpotDiagnosticMXBean bean = (HotSpotDiagnosticMXBean)ManagementFactory.newPlatformMXBeanProxy(server, "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
               bean.dumpHeap(filename, live);
               sb.append("Heap dumped.\n");
-            } catch (IOException var7) {
-              sb.append("Exception: " + var7.getMessage() + "!\n");
+            } catch (IOException e) {
+              log.error("addTestTask: eMessage={}, eClass={}, eCause={}", e.getMessage(), e.getClass(), this.getClass().getSimpleName());
+              sb.append("Exception: " + e.getMessage() + "!\n");
             }
 
             return sb.toString();
@@ -112,8 +117,10 @@ public class TelnetPerfomance implements TelnetCommandHolder {
             (new File("stats")).mkdir();
             FileUtils.writeStringToFile(new File("stats/ThreadsDump-" + (new SimpleDateFormat("MMddHHmmss")).format(System.currentTimeMillis()) + ".txt"), StatsUtils.getThreadStats(true, true, true).toString());
             sb.append("Threads stats saved.\n");
-          } catch (IOException var4) {
-            sb.append("Exception: " + var4.getMessage() + "!\n");
+          } catch (IOException e) {
+            log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), e.getClass(), this.getClass().getSimpleName());
+
+            sb.append("Exception: ").append(e.getMessage()).append("!\n");
           }
         } else {
           sb.append(StatsUtils.getThreadStats());
