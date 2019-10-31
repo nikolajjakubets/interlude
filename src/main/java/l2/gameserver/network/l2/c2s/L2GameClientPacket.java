@@ -5,14 +5,15 @@
 
 package l2.gameserver.network.l2.c2s;
 
-import java.nio.BufferUnderflowException;
-import java.util.List;
 import l2.commons.net.nio.impl.ReceivablePacket;
 import l2.gameserver.GameServer;
 import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.BufferUnderflowException;
+import java.util.List;
 
 public abstract class L2GameClientPacket extends ReceivablePacket<GameClient> {
   private static final Logger _log = LoggerFactory.getLogger(L2GameClientPacket.class);
@@ -25,7 +26,7 @@ public abstract class L2GameClientPacket extends ReceivablePacket<GameClient> {
       this.readImpl();
       return true;
     } catch (BufferUnderflowException var2) {
-      ((GameClient)this._client).onPacketReadFail();
+      this._client.onPacketReadFail();
       _log.error("Client: " + this._client + " - Failed reading: " + this.getType() + " - Server Version: " + GameServer.getInstance().getVersion().getRevisionNumber(), var2);
     } catch (Exception var3) {
       _log.error("Client: " + this._client + " - Failed reading: " + this.getType() + " - Server Version: " + GameServer.getInstance().getVersion().getRevisionNumber(), var3);
@@ -37,7 +38,7 @@ public abstract class L2GameClientPacket extends ReceivablePacket<GameClient> {
   protected abstract void readImpl() throws Exception;
 
   public final void run() {
-    GameClient client = (GameClient)this.getClient();
+    GameClient client = this.getClient();
 
     try {
       this.runImpl();
@@ -55,15 +56,15 @@ public abstract class L2GameClientPacket extends ReceivablePacket<GameClient> {
   }
 
   protected void sendPacket(L2GameServerPacket packet) {
-    ((GameClient)this.getClient()).sendPacket(packet);
+    this.getClient().sendPacket(packet);
   }
 
   protected void sendPacket(L2GameServerPacket... packets) {
-    ((GameClient)this.getClient()).sendPacket(packets);
+    this.getClient().sendPacket(packets);
   }
 
   protected void sendPackets(List<L2GameServerPacket> packets) {
-    ((GameClient)this.getClient()).sendPackets(packets);
+    this.getClient().sendPackets(packets);
   }
 
   public String getType() {

@@ -5,15 +5,16 @@
 
 package l2.gameserver.instancemanager;
 
+import l2.gameserver.model.quest.Quest;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import l2.gameserver.model.quest.Quest;
 
 public class QuestManager {
   public static final int TUTORIAL_QUEST = 255;
-  private static Map<String, Quest> _questsByName = new ConcurrentHashMap();
-  private static Map<Integer, Quest> _questsById = new ConcurrentHashMap();
+  private static Map<String, Quest> _questsByName = new ConcurrentHashMap<>();
+  private static Map<Integer, Quest> _questsById = new ConcurrentHashMap<>();
 
   public QuestManager() {
   }

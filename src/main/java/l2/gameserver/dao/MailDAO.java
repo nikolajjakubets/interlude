@@ -52,11 +52,11 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
   private Cache<Integer, Mail> cache = CacheManagerBuilder.newCacheManagerBuilder()
     .withCache("preConfigured",
       CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer.class, Mail.class,
-        ResourcePoolsBuilder.heap(100))
+        ResourcePoolsBuilder.heap(1000000))
         .build())
     .build(true)
     .createCache(Mail.class.getName(), CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer.class, Mail.class,
-      ResourcePoolsBuilder.heap(100))
+      ResourcePoolsBuilder.heap(1000000))
       .build());
   //  private final Cache cache = CacheManager.getInstance().getCache(Mail.class.getName());
   private final JdbcEntityStats stats = new JdbcEntityStats() {

@@ -7,15 +7,6 @@ package l2.gameserver.model.quest;
 
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntObjectHashMap;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import l2.commons.dbutils.DbUtils;
 import l2.commons.logging.LogUtils;
 import l2.commons.threading.RunnableImpl;
@@ -43,6 +34,12 @@ import l2.gameserver.utils.Location;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Quest {
   private static final Logger _log = LoggerFactory.getLogger(Quest.class);
@@ -106,11 +103,9 @@ public class Quest {
   public static final int DELAYED = 4;
 
   public void addQuestItem(int... ids) {
-    int[] var2 = ids;
     int var3 = ids.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
-      int id = var2[var4];
+    for (int id : ids) {
       if (id != 0) {
         ItemTemplate i = null;
         i = ItemHolder.getInstance().getTemplate(id);

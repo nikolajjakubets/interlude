@@ -52,7 +52,7 @@ public class HtmCache {
       String cacheName = this.getClass().getName() + "." + Language.VALUES[i].name();
       Cache<String, String> cache = cacheManager.createCache(cacheName,
         CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, String.class,
-          ResourcePoolsBuilder.heap(1000)).build());
+          ResourcePoolsBuilder.heap(50000)).build());
       _cache.add(cache);
     }
   }

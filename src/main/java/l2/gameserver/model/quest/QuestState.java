@@ -5,14 +5,6 @@
 
 package l2.gameserver.model.quest;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import l2.commons.util.Rnd;
 import l2.gameserver.Config;
 import l2.gameserver.data.htm.HtmCache;
@@ -20,29 +12,20 @@ import l2.gameserver.data.xml.holder.ItemHolder;
 import l2.gameserver.instancemanager.SpawnManager;
 import l2.gameserver.listener.actor.OnDeathListener;
 import l2.gameserver.listener.actor.OnKillListener;
-import l2.gameserver.model.Creature;
-import l2.gameserver.model.GameObject;
-import l2.gameserver.model.GameObjectsStorage;
-import l2.gameserver.model.Party;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.Spawner;
-import l2.gameserver.model.Summon;
+import l2.gameserver.model.*;
 import l2.gameserver.model.base.Element;
 import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.model.items.ItemInstance;
-import l2.gameserver.network.l2.s2c.ExShowQuestMark;
-import l2.gameserver.network.l2.s2c.PlaySound;
-import l2.gameserver.network.l2.s2c.QuestList;
-import l2.gameserver.network.l2.s2c.SystemMessage2;
-import l2.gameserver.network.l2.s2c.TutorialEnableClientEvent;
-import l2.gameserver.network.l2.s2c.TutorialShowHtml;
-import l2.gameserver.network.l2.s2c.TutorialShowQuestionMark;
+import l2.gameserver.network.l2.s2c.*;
 import l2.gameserver.network.l2.s2c.PlaySound.Type;
 import l2.gameserver.templates.item.ItemTemplate;
 import l2.gameserver.templates.spawn.PeriodOfDay;
 import l2.gameserver.utils.ItemFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class QuestState {
   private static final Logger _log = LoggerFactory.getLogger(QuestState.class);
@@ -54,8 +37,8 @@ public final class QuestState {
   private Quest _quest;
   private int _state;
   private Integer _cond = null;
-  private Map<String, String> _vars = new ConcurrentHashMap();
-  private Map<String, QuestTimer> _timers = new ConcurrentHashMap();
+  private Map<String, String> _vars = new ConcurrentHashMap<>();
+  private Map<String, QuestTimer> _timers = new ConcurrentHashMap<>();
   private OnKillListener _onKillListener = null;
 
   public QuestState(Quest quest, Player player, int state) {
@@ -147,8 +130,7 @@ public final class QuestState {
       int[] var3 = this._quest.getItems();
       int var4 = var3.length;
 
-      for(int var5 = 0; var5 < var4; ++var5) {
-        int itemId = var3[var5];
+      for (int itemId : var3) {
         ItemInstance item = player.getInventory().getItemByItemId(itemId);
         if (item != null && itemId != 57) {
           long count = item.getCount();
@@ -162,10 +144,8 @@ public final class QuestState {
         Quest.deleteQuestInDb(this);
         this._vars.clear();
       } else {
-        Iterator var10 = this._vars.keySet().iterator();
 
-        while(var10.hasNext()) {
-          String var = (String)var10.next();
+        for (String var : this._vars.keySet()) {
           if (var != null) {
             this.unset(var);
           }

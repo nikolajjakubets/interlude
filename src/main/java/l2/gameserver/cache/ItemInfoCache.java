@@ -19,11 +19,11 @@ public class ItemInfoCache {
   private Cache<Integer, ItemInfo> cache = CacheManagerBuilder.newCacheManagerBuilder()
     .withCache("preConfigured",
       CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer.class, ItemInfo.class,
-        ResourcePoolsBuilder.heap(100000))
+        ResourcePoolsBuilder.heap(1000000))
         .build())
     .build(true)
     .createCache(this.getClass().getName(), CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer.class, ItemInfo.class,
-      ResourcePoolsBuilder.heap(100000)).build());
+      ResourcePoolsBuilder.heap(1000000)).build());
 
   public static ItemInfoCache getInstance() {
     return _instance;
