@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1aeeaf08-8e60-4d7e-a35b-0eada0df16ed" name="Default Changelist" comment="configure logback">
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+    <list default="true" id="1aeeaf08-8e60-4d7e-a35b-0eada0df16ed" name="Default Changelist" comment="add config">
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/l2/authserver/Config.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/l2/authserver/Config.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -48,12 +46,23 @@
         <item name="l2_interlude: schema" type="76f4a085:MysqlImplModel$Schema" />
         <item name="tables" type="d4e8921:DatabaseStructure$FamilyGroup" />
       </path>
+      <path>
+        <item name="Database" type="3277223f:DatabaseStructure$DbRootGroup" />
+        <item name="@localhost" type="feb32156:DbDataSourceImpl" />
+        <item name="schemas" type="d4e8921:DatabaseStructure$FamilyGroup" />
+        <item name="l2_interlude: schema" type="76f4a085:MysqlImplModel$Schema" />
+        <item name="tables" type="d4e8921:DatabaseStructure$FamilyGroup" />
+        <item name="character_post_friends: table" type="285a2a93:MysqlImplModel$Table" />
+      </path>
     </expand>
     <select />
   </component>
   <component name="DefaultGradleProjectSettings">
     <option name="testRunner" value="GRADLE" />
     <option name="delegatedBuild" value="true" />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="interlude" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -86,10 +95,14 @@
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2954023" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="preferences.editor" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\User\IdeaProjects\interlude\src\main\java\l2" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\User\IdeaProjects\interlude" />
       <recent name="C:\Users\User\IdeaProjects\interlude\src\main\resources\config" />
       <recent name="C:\Users\User\IdeaProjects\interlude\src\main\java\com\lineage2\interlude" />
     </key>
@@ -133,6 +146,19 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="GameServer" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="l2.gameserver.GameServer" />
+      <module name="interlude" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="l2.gameserver.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="PasswordHash" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="l2.authserver.crypt.PasswordHash" />
       <module name="interlude" />
@@ -149,10 +175,21 @@
     <recent_temporary>
       <list>
         <item itemvalue="Application.AuthServer" />
+        <item itemvalue="Application.GameServer" />
         <item itemvalue="Application.PasswordHash" />
         <item itemvalue="Application.AccountManager" />
       </list>
     </recent_temporary>
+  </component>
+  <component name="ServiceViewManager">
+    <option name="allServicesViewState">
+      <serviceView>
+        <treeState>
+          <expand />
+          <select />
+        </treeState>
+      </serviceView>
+    </option>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -166,6 +203,10 @@
       <updated>1570839229617</updated>
       <workItem from="1570839231306" duration="10767000" />
       <workItem from="1570851077260" duration="23653000" />
+      <workItem from="1572294143228" duration="17970000" />
+      <workItem from="1572389970555" duration="183000" />
+      <workItem from="1572471407645" duration="11407000" />
+      <workItem from="1572650525354" duration="549000" />
     </task>
     <task id="LOCAL-00001" summary="add 2 libs">
       <created>1570847277013</created>
@@ -209,7 +250,42 @@
       <option name="project" value="LOCAL" />
       <updated>1570907192849</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="finished refactoring, add GENERIC!!">
+      <created>1572223365339</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1572223365339</updated>
+    </task>
+    <task id="LOCAL-00008" summary="add config">
+      <created>1572223932368</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1572223932368</updated>
+    </task>
+    <task id="LOCAL-00009" summary="change cache">
+      <created>1572307265726</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1572307265727</updated>
+    </task>
+    <task id="LOCAL-00010" summary="configure start">
+      <created>1572311939543</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1572311939543</updated>
+    </task>
+    <task id="LOCAL-00011" summary="change cache size">
+      <created>1572482455518</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1572482455518</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -229,13 +305,20 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CHECK_NEW_TODO" value="false" />
     <MESSAGE value="add 2 libs" />
     <MESSAGE value="add client" />
     <MESSAGE value="configure logback" />
     <MESSAGE value="add editorconfig" />
     <MESSAGE value="refactoring dependency" />
     <MESSAGE value="add hash" />
-    <option name="LAST_COMMIT_MESSAGE" value="add hash" />
+    <MESSAGE value="finished refactoring, add GENERIC!!" />
+    <MESSAGE value="add config" />
+    <MESSAGE value="change cache" />
+    <MESSAGE value="configure start" />
+    <MESSAGE value="change cache size" />
+    <option name="LAST_COMMIT_MESSAGE" value="change cache size" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
@@ -254,37 +337,37 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/c2s/RequestAuthLogin.java</url>
-          <line>59</line>
+          <line>62</line>
           <option name="timeStamp" value="20" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/c2s/RequestAuthLogin.java</url>
-          <line>60</line>
+          <line>63</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/c2s/RequestAuthLogin.java</url>
-          <line>68</line>
+          <line>71</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/c2s/RequestAuthLogin.java</url>
-          <line>61</line>
+          <line>64</line>
           <option name="timeStamp" value="33" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/c2s/RequestAuthLogin.java</url>
-          <line>64</line>
+          <line>67</line>
           <option name="timeStamp" value="34" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/c2s/RequestAuthLogin.java</url>
-          <line>69</line>
+          <line>72</line>
           <option name="timeStamp" value="35" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/l2/c2s/RequestAuthLogin.java</url>
-          <line>81</line>
+          <line>84</line>
           <option name="timeStamp" value="36" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -312,7 +395,62 @@
           <line>122</line>
           <option name="timeStamp" value="46" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/commons/versioning/Version.java</url>
+          <line>26</line>
+          <option name="timeStamp" value="48" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/commons/compiler/MemoryClassLoader.java</url>
+          <line>25</line>
+          <option name="timeStamp" value="68" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/commons/compiler/MemoryClassLoader.java</url>
+          <line>34</line>
+          <option name="timeStamp" value="69" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/commons/compiler/MemoryClassLoader.java</url>
+          <line>13</line>
+          <option name="timeStamp" value="70" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/commons/compiler/MemoryClassLoader.java</url>
+          <line>14</line>
+          <option name="timeStamp" value="71" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/commons/compiler/MemoryClassLoader.java</url>
+          <line>15</line>
+          <option name="timeStamp" value="72" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/commons/compiler/MemoryClassLoader.java</url>
+          <line>17</line>
+          <option name="timeStamp" value="73" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/gameserver/handler/voicecommands/impl/PersonalCabinet.java</url>
+          <line>159</line>
+          <option name="timeStamp" value="74" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/authserver/network/gamecomm/ReceivablePacket.java</url>
+          <line>38</line>
+          <option name="timeStamp" value="89" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/l2/gameserver/instancemanager/QuestManager.java</url>
+          <line>34</line>
+          <option name="timeStamp" value="91" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/interlude$AuthServer.ic" NAME="AuthServer Coverage Results" MODIFIED="1572208355679" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>l2.authserver.*</FILTER>
+    </SUITE>
   </component>
 </project>
