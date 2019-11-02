@@ -1,16 +1,17 @@
 package l2.commons.db;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.PooledConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayDeque;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import javax.sql.ConnectionEvent;
-import javax.sql.ConnectionEventListener;
-import javax.sql.ConnectionPoolDataSource;
-import javax.sql.PooledConnection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class BaseDataConnectionFactory {
     private static final Logger LOG = LoggerFactory.getLogger(BaseDataConnectionFactory.class);
@@ -27,7 +28,7 @@ public abstract class BaseDataConnectionFactory {
     protected BaseDataConnectionFactory(ConnectionPoolDataSource connectionPoolDataSource, int maxConnections, int timeout) {
         this._connectionPoolDataSource = connectionPoolDataSource;
         this._maxConnections = maxConnections;
-        this._timeout = (long)timeout;
+      this._timeout = timeout;
         if (maxConnections < 1) {
             throw new IllegalArgumentException("Invalid maxConnections value.");
         } else {
@@ -52,7 +53,7 @@ public abstract class BaseDataConnectionFactory {
 
     protected abstract void testDB() throws SQLException;
 
-    protected Connection getConnectionImpl() throws SQLException {
+  private Connection getConnectionImpl() throws SQLException {
         synchronized(this) {
             if (this._isDisposed) {
                 throw new IllegalStateException("Connection pool has been disposed.");
@@ -100,7 +101,7 @@ public abstract class BaseDataConnectionFactory {
         } else {
             PooledConnection pconn;
             if (!this._recycledConnections.isEmpty()) {
-                pconn = (PooledConnection)this._recycledConnections.remove();
+              pconn = this._recycledConnections.remove();
             } else {
                 pconn = this._connectionPoolDataSource.getPooledConnection();
                 pconn.addConnectionEventListener(this._poolConnectionEventListener);
@@ -173,7 +174,7 @@ public abstract class BaseDataConnectionFactory {
             SQLException e = null;
 
             while(!this._recycledConnections.isEmpty()) {
-                PooledConnection pconn = (PooledConnection)this._recycledConnections.remove();
+              PooledConnection pconn = this._recycledConnections.remove();
 
                 try {
                     pconn.close();
