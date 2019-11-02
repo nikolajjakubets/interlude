@@ -5,7 +5,6 @@
 
 package l2.gameserver.database;
 
-//import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import l2.commons.db.BaseDataConnectionFactory;
