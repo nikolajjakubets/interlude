@@ -59,8 +59,10 @@ CREATE PROCEDURE ` lip_AccountCreate `(IN ` sAccountName ` VARCHAR (32),
 BEGIN
 INSERT LOW_PRIORITY INTO ` accounts ` (` login `,
                                        ` password `)
-VALUES (sAccountName,
-        sAccountPasswordHash);
+VALUES (
+    sAccountName,
+    sAccountPasswordHash
+    );
 END $$
 
 DROP PROCEDURE IF EXISTS `lip_AccountLoad` $$
