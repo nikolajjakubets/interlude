@@ -37,7 +37,7 @@ public class AuthServer {
         L2LoginPacketHandler loginPacketHandler = new L2LoginPacketHandler();
         SelectorHelper sh = new SelectorHelper();
         SelectorConfig sc = new SelectorConfig();
-        this.selectorThread = new SelectorThread<L2LoginClient>(sc, loginPacketHandler, sh, sh, sh);
+        this.selectorThread = new SelectorThread<>(sc, loginPacketHandler, sh, sh, sh);
         this.gameServerListener = GameServerCommunication.getInstance();
         this.gameServerListener.openServerSocket(Config.GAME_SERVER_LOGIN_HOST.equals("*") ? null : InetAddress.getByName(Config.GAME_SERVER_LOGIN_HOST), Config.GAME_SERVER_LOGIN_PORT);
         this.gameServerListener.start();

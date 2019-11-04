@@ -5,10 +5,6 @@
 
 package l2.gameserver.model.items;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledFuture;
 import l2.commons.collections.LazyArrayList;
 import l2.commons.util.concurrent.atomic.AtomicEnumBitFlag;
 import l2.gameserver.Config;
@@ -18,11 +14,7 @@ import l2.gameserver.data.xml.holder.ItemHolder;
 import l2.gameserver.geodata.GeoEngine;
 import l2.gameserver.instancemanager.CursedWeaponsManager;
 import l2.gameserver.instancemanager.ReflectionManager;
-import l2.gameserver.model.Creature;
-import l2.gameserver.model.GameObject;
-import l2.gameserver.model.GameObjectsStorage;
-import l2.gameserver.model.Playable;
-import l2.gameserver.model.Player;
+import l2.gameserver.model.*;
 import l2.gameserver.model.base.Element;
 import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.model.items.attachment.ItemAttachment;
@@ -38,14 +30,19 @@ import l2.gameserver.tables.PetDataTable;
 import l2.gameserver.taskmanager.ItemsAutoDestroy;
 import l2.gameserver.taskmanager.LazyPrecisionTaskManager;
 import l2.gameserver.templates.item.ItemTemplate;
-import l2.gameserver.templates.item.ItemType;
 import l2.gameserver.templates.item.ItemTemplate.Grade;
 import l2.gameserver.templates.item.ItemTemplate.ItemClass;
+import l2.gameserver.templates.item.ItemType;
 import l2.gameserver.utils.ItemFunctions;
 import l2.gameserver.utils.Location;
 import org.napile.primitive.Containers;
 import org.napile.primitive.sets.IntSet;
 import org.napile.primitive.sets.impl.HashIntSet;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 
 public final class ItemInstance extends GameObject {
   public static final int[] EMPTY_ENCHANT_OPTIONS = new int[3];
@@ -95,7 +92,7 @@ public final class ItemInstance extends GameObject {
     this._enchantOptions = EMPTY_ENCHANT_OPTIONS;
     this._duaration = -1;
     this._period = -9999;
-    this._stateFlags = new AtomicEnumBitFlag();
+    this._stateFlags = new AtomicEnumBitFlag<>();
     this._dropPlayers = Containers.EMPTY_INT_SET;
     this._chargedSoulshot = 0;
     this._chargedSpiritshot = 0;
@@ -114,7 +111,7 @@ public final class ItemInstance extends GameObject {
     this._chargedFishtshot = false;
     this.setItemId(itemId);
     this.setDuration(this.getTemplate().getDurability());
-    this.setPeriodBegin(this.getTemplate().isTemporal() ? (int)(System.currentTimeMillis() / 1000L) + this.getTemplate().getDurability() * 60 : -9999);
+    this.setPeriodBegin(this.getTemplate().isTemporal() ? (int) (System.currentTimeMillis() / 1000L) + this.getTemplate().getDurability() * 60 : -9999);
     this.setLocData(-1);
     this.setEnchantLevel(0);
   }
@@ -186,7 +183,7 @@ public final class ItemInstance extends GameObject {
         ItemEnchantOptionsListener.getInstance().onUnequip(this.getEquipSlot(), this, player);
       }
 
-      int[] enchantOptions = (int[])this.getTemplate().getEnchantOptions().get(this._enchant);
+      int[] enchantOptions = this.getTemplate().getEnchantOptions().get(this._enchant);
       this._enchantOptions = enchantOptions == null ? EMPTY_ENCHANT_OPTIONS : enchantOptions;
       if (this.isEquipped() && player != null) {
         ItemEnchantOptionsListener.getInstance().onEquip(this.getEquipSlot(), this, player);
@@ -274,7 +271,7 @@ public final class ItemInstance extends GameObject {
   }
 
   public int getPeriod() {
-    return !this.isTemporalItem() ? -9999 : this._period - (int)(System.currentTimeMillis() / 1000L);
+    return !this.isTemporalItem() ? -9999 : this._period - (int) (System.currentTimeMillis() / 1000L);
   }
 
   public int getPeriodBegin() {
@@ -361,7 +358,7 @@ public final class ItemInstance extends GameObject {
   public void onAction(Player player, boolean shift) {
     if (!Events.onAction(player, this, shift)) {
       if (!player.isCursedWeaponEquipped() || !CursedWeaponsManager.getInstance().isCursed(this.getItemId())) {
-        player.getAI().setIntention(CtrlIntention.AI_INTENTION_PICK_UP, this, (Object)null);
+        player.getAI().setIntention(CtrlIntention.AI_INTENTION_PICK_UP, this, null);
       }
     }
   }
@@ -425,7 +422,7 @@ public final class ItemInstance extends GameObject {
       FuncTemplate[] var3 = this.template.getAttachedFuncs();
       var4 = var3.length;
 
-      for(var5 = 0; var5 < var4; ++var5) {
+      for (var5 = 0; var5 < var4; ++var5) {
         FuncTemplate t = var3[var5];
         Func f = t.getFunc(this);
         if (f != null) {
@@ -437,7 +434,7 @@ public final class ItemInstance extends GameObject {
     Element[] var8 = Element.VALUES;
     var4 = var8.length;
 
-    for(var5 = 0; var5 < var4; ++var5) {
+    for (var5 = 0; var5 < var4; ++var5) {
       Element e = var8[var5];
       if (this.isWeapon()) {
         funcs.add(new ItemInstance.FuncAttack(e, 64, this));
@@ -449,7 +446,7 @@ public final class ItemInstance extends GameObject {
     }
 
     if (!funcs.isEmpty()) {
-      result = (Func[])funcs.toArray(new Func[funcs.size()]);
+      result = funcs.toArray(new Func[funcs.size()]);
     }
 
     LazyArrayList.recycle(funcs);
@@ -472,7 +469,7 @@ public final class ItemInstance extends GameObject {
     } else if (player.getEnchantScroll() == this) {
       return false;
     } else {
-      return this.isCursed() ? false : this.template.isDestroyable();
+      return !this.isCursed() && this.template.isDestroyable();
     }
   }
 
@@ -488,7 +485,7 @@ public final class ItemInstance extends GameObject {
     } else if (this.isAugmented() && (!pk || !Config.DROP_ITEMS_AUGMENTED) && !Config.ALT_ALLOW_DROP_AUGMENTED) {
       return false;
     } else {
-      return !ItemFunctions.checkIfCanDiscard(player, this) ? false : this.template.isDropable();
+      return ItemFunctions.checkIfCanDiscard(player, this) && this.template.isDropable();
     }
   }
 
@@ -506,7 +503,7 @@ public final class ItemInstance extends GameObject {
     } else if (this.isAugmented() && !Config.ALT_ALLOW_DROP_AUGMENTED) {
       return false;
     } else {
-      return !ItemFunctions.checkIfCanDiscard(player, this) ? false : this.template.isTradeable();
+      return ItemFunctions.checkIfCanDiscard(player, this) && this.template.isTradeable();
     }
   }
 
@@ -526,7 +523,7 @@ public final class ItemInstance extends GameObject {
     } else if (this.isEquipped()) {
       return false;
     } else {
-      return !ItemFunctions.checkIfCanDiscard(player, this) ? false : this.template.isSellable();
+      return ItemFunctions.checkIfCanDiscard(player, this) && this.template.isSellable();
     }
   }
 
@@ -556,12 +553,12 @@ public final class ItemInstance extends GameObject {
     } else if (this.isTemporalItem()) {
       return false;
     } else {
-      return !ItemFunctions.checkIfCanDiscard(player, this) ? false : this.template.isCrystallizable();
+      return ItemFunctions.checkIfCanDiscard(player, this) && this.template.isCrystallizable();
     }
   }
 
   public boolean canBeEnchanted(boolean gradeCheck) {
-    return (this.getCustomFlags() & 16) == 16 ? false : this.template.canBeEnchanted(gradeCheck);
+    return (this.getCustomFlags() & 16) != 16 && this.template.canBeEnchanted(gradeCheck);
   }
 
   public boolean canBeExchanged(Player player) {
@@ -572,7 +569,7 @@ public final class ItemInstance extends GameObject {
     } else if (this.isTemporalItem()) {
       return false;
     } else {
-      return !ItemFunctions.checkIfCanDiscard(player, this) ? false : this.template.isDestroyable();
+      return ItemFunctions.checkIfCanDiscard(player, this) && this.template.isDestroyable();
     }
   }
 
@@ -598,13 +595,11 @@ public final class ItemInstance extends GameObject {
       dropper = lastAttacker;
     }
 
-    Location pos = Location.findAroundPosition((GameObject)dropper, 128);
+    Location pos = Location.findAroundPosition(dropper, 128);
     if (lastAttacker != null) {
       this._dropPlayers = new HashIntSet(1, 2.0F);
-      Iterator var5 = lastAttacker.getPlayerGroup().iterator();
 
-      while(var5.hasNext()) {
-        Player $member = (Player)var5.next();
+      for (Player $member : lastAttacker.getPlayerGroup()) {
         this._dropPlayers.add($member.getObjectId());
       }
 
@@ -616,7 +611,7 @@ public final class ItemInstance extends GameObject {
       }
     }
 
-    this.dropMe((Creature)dropper, pos);
+    this.dropMe(dropper, pos);
     if (this.isHerb()) {
       ItemsAutoDestroy.getInstance().addHerb(this);
     } else if (Config.AUTODESTROY_ITEM_AFTER > 0 && !this.isCursed()) {
@@ -720,7 +715,7 @@ public final class ItemInstance extends GameObject {
       Element[] var2 = Element.VALUES;
       int var3 = var2.length;
 
-      for(int var4 = 0; var4 < var3; ++var4) {
+      for (int var4 = 0; var4 < var3; ++var4) {
         Element e = var2[var4];
         if (this.template.getBaseAttributeValue(e) > 0) {
           return e;
@@ -813,7 +808,7 @@ public final class ItemInstance extends GameObject {
     }
 
     if (old != null) {
-      old.setItem((ItemInstance)null);
+      old.setItem(null);
     }
 
   }
@@ -835,7 +830,7 @@ public final class ItemInstance extends GameObject {
     }
 
     public void calc(Env env) {
-      env.value += (double)ItemInstance.this.getAttributeElementValue(this.element, true);
+      env.value += ItemInstance.this.getAttributeElementValue(this.element, true);
     }
   }
 
@@ -848,11 +843,11 @@ public final class ItemInstance extends GameObject {
     }
 
     public void calc(Env env) {
-      env.value += (double)ItemInstance.this.getAttributeElementValue(this.element, true);
+      env.value += ItemInstance.this.getAttributeElementValue(this.element, true);
     }
   }
 
-  public static enum ItemLocation {
+  public enum ItemLocation {
     VOID,
     INVENTORY,
     PAPERDOLL,
@@ -861,12 +856,14 @@ public final class ItemInstance extends GameObject {
     WAREHOUSE,
     CLANWH,
     FREIGHT,
-    /** @deprecated */
+    /**
+     * @deprecated
+     */
     @Deprecated
     LEASE,
     MAIL;
 
-    private ItemLocation() {
+    ItemLocation() {
     }
   }
 }

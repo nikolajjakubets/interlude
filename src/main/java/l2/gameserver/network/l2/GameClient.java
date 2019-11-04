@@ -85,9 +85,9 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
 
     this.setState(GameClient.GameClientState.DISCONNECTED);
     Player player = this.getActiveChar();
-    this.setActiveChar((Player)null);
+    this.setActiveChar(null);
     if (player != null) {
-      player.setNetConnection((GameClient)null);
+      player.setNetConnection(null);
       player.scheduleDelete();
     }
 
@@ -142,7 +142,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
       try {
         con = DatabaseFactory.getInstance().getConnection();
         statement = con.prepareStatement("UPDATE characters SET deletetime=? WHERE obj_id=?");
-        statement.setLong(1, (long)((int)(System.currentTimeMillis() / 1000L)));
+        statement.setLong(1, (int)(System.currentTimeMillis() / 1000L));
         statement.setInt(2, objid);
         statement.execute();
       } catch (Exception var9) {
@@ -183,7 +183,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
         oldPlayer.sendPacket(Msg.ANOTHER_PERSON_HAS_LOGGED_IN_WITH_THE_SAME_ACCOUNT);
         GameClient oldClient = oldPlayer.getNetConnection();
         if (oldClient != null) {
-          oldClient.setActiveChar((Player)null);
+          oldClient.setActiveChar(null);
           oldClient.closeNow(false);
         }
 
@@ -207,7 +207,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
 
   public int getObjectIdForSlot(int charslot) {
     if (charslot >= 0 && charslot < this._charSlotMapping.size()) {
-      return (Integer)this._charSlotMapping.get(charslot);
+      return this._charSlotMapping.get(charslot);
     } else {
       _log.warn(this.getLogin() + " tried to modify Character in slot " + charslot + " but no characters exits at that slot.");
       return -1;
@@ -239,7 +239,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
   }
 
   public boolean isSecondPasswordAuthed() {
-    return this._secondPasswordAuth == null ? false : this._isSecondPasswordAuthed;
+    return this._secondPasswordAuth != null && this._isSecondPasswordAuthed;
   }
 
   public void setSecondPasswordAuthed(boolean authed) {
@@ -276,11 +276,9 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
 
   public void setCharSelection(CharSelectInfoPackage[] chars) {
     this._charSlotMapping.clear();
-    CharSelectInfoPackage[] var2 = chars;
     int var3 = chars.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
-      CharSelectInfoPackage element = var2[var4];
+    for (CharSelectInfoPackage element : chars) {
       int objectId = element.getObjectId();
       this._charSlotMapping.add(objectId);
     }
@@ -363,7 +361,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
   }
 
   public long getLastIncomePacketTimeStamp(Class<? extends L2GameClientPacket> pktCls) {
-    MutableLong theVal = (MutableLong)this._lastIncomePacketTimeStamp.get(pktCls);
+    MutableLong theVal = this._lastIncomePacketTimeStamp.get(pktCls);
     if (theVal == null) {
       this._lastIncomePacketTimeStamp.put(pktCls, theVal = new MutableLong(0L));
     }
@@ -372,7 +370,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
   }
 
   public void setLastIncomePacketTimeStamp(Class<? extends L2GameClientPacket> pktCls, long val) {
-    MutableLong theVal = (MutableLong)this._lastIncomePacketTimeStamp.get(pktCls);
+    MutableLong theVal = this._lastIncomePacketTimeStamp.get(pktCls);
     if (theVal == null) {
       this._lastIncomePacketTimeStamp.put(pktCls, theVal = new MutableLong(0L));
     }
@@ -387,8 +385,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
   }
 
   public boolean decrypt(ByteBuffer buf, int size) {
-    boolean ret = this._crypt.decrypt(buf.array(), buf.position(), size);
-    return ret;
+    return this._crypt.decrypt(buf.array(), buf.position(), size);
   }
 
   public void sendPacket(L2GameServerPacket gsp) {
@@ -421,12 +418,10 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
 
   public void sendPackets(List<L2GameServerPacket> gsps) {
     if (this.isConnected()) {
-      Iterator var2 = gsps.iterator();
 
-      while(var2.hasNext()) {
-        L2GameServerPacket gsp = (L2GameServerPacket)var2.next();
+      for (L2GameServerPacket gsp : gsps) {
         if (gsp instanceof NpcHtmlMessage) {
-          NpcHtmlMessage npcHtmlMessage = (NpcHtmlMessage)gsp;
+          NpcHtmlMessage npcHtmlMessage = (NpcHtmlMessage) gsp;
           npcHtmlMessage.processHtml(this);
         }
       }
@@ -462,10 +457,8 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
 
   public void setState(GameClient.GameClientState state) {
     this._state = state;
-    switch(state) {
-      case AUTHED:
-        this.onPing(0, 0, DEFAULT_PAWN_CLIPPING_RANGE);
-      default:
+    if (state == GameClientState.AUTHED) {
+      this.onPing(0, 0, DEFAULT_PAWN_CLIPPING_RANGE);
     }
   }
 
@@ -501,12 +494,12 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
 
   }
 
-  private final void doPing() {
+  private void doPing() {
     long nowMs = System.currentTimeMillis();
     long serverStartTimeMs = GameServer.getInstance().getServerStartTime();
     int timestamp = (int)(nowMs - serverStartTimeMs);
     this._pingTimestamp = timestamp;
-    this.sendPacket((L2GameServerPacket)(new RequestNetPing(timestamp)));
+    this.sendPacket(new RequestNetPing(timestamp));
   }
 
   public int getPing() {
@@ -535,13 +528,13 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
     }
   }
 
-  public static enum GameClientState {
+  public enum GameClientState {
     CONNECTED,
     AUTHED,
     IN_GAME,
     DISCONNECTED;
 
-    private GameClientState() {
+    GameClientState() {
     }
   }
 }
