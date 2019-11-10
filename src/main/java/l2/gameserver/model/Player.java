@@ -93,6 +93,7 @@ import l2.gameserver.templates.item.WeaponTemplate.WeaponType;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.utils.*;
 import l2.gameserver.utils.Log.ItemLog;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -117,12 +118,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
+@Slf4j
 public class Player extends Playable implements PlayerGroup {
   public static final int DEFAULT_TITLE_COLOR = 16777079;
   public static final int MAX_POST_FRIEND_SIZE = 100;
   public static final int MAX_FRIEND_SIZE = 128;
-  private static final Logger _log = LoggerFactory.getLogger(Player.class);
   public static final String NO_TRADERS_VAR = "notraders";
   public static final String CUSTOM_HERO_END_TIME_VAR = "CustomHeroEndTime";
   public static final String ANIMATION_OF_CAST_RANGE_VAR = "buffAnimRange";
@@ -630,13 +630,13 @@ public class Player extends Playable implements PlayerGroup {
     try {
       this.getInventory().store();
     } catch (Throwable var4) {
-      _log.error("", var4);
+      log.error("", var4);
     }
 
     try {
       this.store(false);
     } catch (Throwable var3) {
-      _log.error("", var3);
+      log.error("", var3);
     }
 
   }
@@ -787,13 +787,13 @@ public class Player extends Playable implements PlayerGroup {
         this.getInventory().store();
         this.getRefund().clear();
       } catch (Throwable var11) {
-        _log.error("", var11);
+        log.error("", var11);
       }
 
       try {
         this.store(false);
       } catch (Throwable var10) {
-        _log.error("", var10);
+        log.error("", var10);
       }
 
     }
@@ -847,7 +847,7 @@ public class Player extends Playable implements PlayerGroup {
       mysql.set("DELETE FROM `character_recipebook` WHERE `char_id`=? AND `id`=? LIMIT 1", this.getObjectId(), RecipeID);
       this._commonrecipebook.remove(RecipeID);
     } else {
-      _log.warn("Attempted to remove unknown RecipeList" + RecipeID);
+      log.warn("Attempted to remove unknown RecipeList" + RecipeID);
     }
 
   }
@@ -963,7 +963,7 @@ public class Player extends Playable implements PlayerGroup {
     if (qs == null) {
       Quest q = QuestManager.getQuest(quest);
       if (q == null) {
-        _log.warn("Quest " + quest + " not found!");
+        log.warn("Quest " + quest + " not found!");
         return;
       }
 
@@ -1168,7 +1168,7 @@ public class Player extends Playable implements PlayerGroup {
         this._recommendedCharIds.add(recommendedCharId);
       }
     } catch (SQLException var8) {
-      _log.error("Can't load recommended characters", var8);
+      log.error("Can't load recommended characters", var8);
     } finally {
       DbUtils.closeQuietly(conn, pstmt, rset);
     }
@@ -1196,7 +1196,7 @@ public class Player extends Playable implements PlayerGroup {
         }
       }
     } catch (SQLException var7) {
-      _log.error("Can't store recommended characters", var7);
+      log.error("Can't store recommended characters", var7);
     } finally {
       DbUtils.closeQuietly(conn, pstmt);
     }
@@ -1493,7 +1493,7 @@ public class Player extends Playable implements PlayerGroup {
 
       PlayerTemplate t = CharTemplateTable.getInstance().getTemplate(id, this.getSex() == 1);
       if (t == null) {
-        _log.error("Missing template for classId: " + id);
+        log.error("Missing template for classId: " + id);
       } else {
         this._template = t;
         if (this.isInParty()) {
@@ -2386,7 +2386,7 @@ public class Player extends Playable implements PlayerGroup {
 
   public void doPickupItem(GameObject object) {
     if (!object.isItem()) {
-      _log.warn("trying to pickup wrong target." + this.getTarget());
+      log.warn("trying to pickup wrong target." + this.getTarget());
     } else {
       this.sendActionFailed();
       this.stopMove();
@@ -3529,7 +3529,7 @@ public class Player extends Playable implements PlayerGroup {
       statement.setInt(3, this.getObjectId());
       statement.execute();
     } catch (Exception var7) {
-      _log.error("", var7);
+      log.error("", var7);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -3741,7 +3741,7 @@ public class Player extends Playable implements PlayerGroup {
             player.setExpandInventory(Integer.parseInt(var));
           }
         } catch (Exception var35) {
-          _log.error("", var35);
+          log.error("", var35);
         }
 
         try {
@@ -3750,7 +3750,7 @@ public class Player extends Playable implements PlayerGroup {
             player.setExpandWarehouse(Integer.parseInt(var));
           }
         } catch (Exception var34) {
-          _log.error("", var34);
+          log.error("", var34);
         }
 
         try {
@@ -3759,7 +3759,7 @@ public class Player extends Playable implements PlayerGroup {
             player.setBuffAnimRange(Integer.parseInt(var));
           }
         } catch (Exception var33) {
-          _log.error("", var33);
+          log.error("", var33);
         }
 
         try {
@@ -3768,7 +3768,7 @@ public class Player extends Playable implements PlayerGroup {
             player.setNotShowTraders(Boolean.parseBoolean(var));
           }
         } catch (Exception var32) {
-          _log.error("", var32);
+          log.error("", var32);
         }
 
         try {
@@ -3777,7 +3777,7 @@ public class Player extends Playable implements PlayerGroup {
             player.setPetControlItem(Integer.parseInt(var));
           }
         } catch (Exception var31) {
-          _log.error("", var31);
+          log.error("", var31);
         }
 
         statement3 = con.prepareStatement("SELECT obj_Id, char_name FROM characters WHERE account_name=? AND obj_Id!=?");
@@ -3846,7 +3846,7 @@ public class Player extends Playable implements PlayerGroup {
         }
       }
     } catch (Exception var36) {
-      _log.error("Could not restore char data!", var36);
+      log.error("Could not restore char data!", var36);
     } finally {
       DbUtils.closeQuietly(statement2, rset2);
       DbUtils.closeQuietly(statement3, rset3);
@@ -3876,7 +3876,7 @@ public class Player extends Playable implements PlayerGroup {
         this._premiumItems.put(itemNum, item);
       }
     } catch (Exception var13) {
-      _log.error("", var13);
+      log.error("", var13);
     } finally {
       DbUtils.closeQuietly(con, statement, rs);
     }
@@ -3895,7 +3895,7 @@ public class Player extends Playable implements PlayerGroup {
       statement.setInt(3, itemNum);
       statement.execute();
     } catch (Exception var10) {
-      _log.error("", var10);
+      log.error("", var10);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -3913,7 +3913,7 @@ public class Player extends Playable implements PlayerGroup {
       statement.setInt(2, itemNum);
       statement.execute();
     } catch (Exception var8) {
-      _log.error("", var8);
+      log.error("", var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -3985,7 +3985,7 @@ public class Player extends Playable implements PlayerGroup {
           this.storeCharSubClasses();
           this.storeRecommendedCharacters();
         } catch (Exception var13) {
-          _log.error("Could not store char data: " + this + "!", var13);
+          log.error("Could not store char data: " + this + "!", var13);
         } finally {
           DbUtils.closeQuietly(con, statement);
         }
@@ -4034,7 +4034,7 @@ public class Player extends Playable implements PlayerGroup {
           statement.setInt(3, this.getActiveClassId());
           statement.execute();
         } catch (Exception var10) {
-          _log.error("Could not delete skill!", var10);
+          log.error("Could not delete skill!", var10);
         } finally {
           DbUtils.closeQuietly(con, statement);
         }
@@ -4046,7 +4046,7 @@ public class Player extends Playable implements PlayerGroup {
 
   private void storeSkill(Skill newSkill, Skill oldSkill) {
     if (newSkill == null) {
-      _log.warn("could not store new skill. its NULL");
+      log.warn("could not store new skill. its NULL");
     } else {
       Connection con = null;
       PreparedStatement statement = null;
@@ -4060,7 +4060,7 @@ public class Player extends Playable implements PlayerGroup {
         statement.setInt(4, this.getActiveClassId());
         statement.execute();
       } catch (Exception var9) {
-        _log.error("Error could not store skills!", var9);
+        log.error("Error could not store skills!", var9);
       } finally {
         DbUtils.closeQuietly(con, statement);
       }
@@ -4151,7 +4151,7 @@ public class Player extends Playable implements PlayerGroup {
           } while(skill == null);
 
           if (!this.isGM() && !Config.ALT_WEAK_SKILL_LEARN && !SkillAcquireHolder.getInstance().isSkillPossible(this, skill)) {
-            _log.warn("Skill " + skill.toString() + " not possible for player " + this.toString() + " with classId " + this.getActiveClassId());
+            log.warn("Skill " + skill.toString() + " not possible for player " + this.toString() + " with classId " + this.getActiveClassId());
             this.removeSkill(skill, true);
             this.removeSkillFromShortCut(skill.getId());
           } else {
@@ -4160,8 +4160,8 @@ public class Player extends Playable implements PlayerGroup {
         }
       }
     } catch (Exception var13) {
-      _log.warn("Could not restore skills for player objId: " + this.getObjectId());
-      _log.error("", var13);
+      log.warn("Could not restore skills for player objId: " + this.getObjectId());
+      log.error("", var13);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -4203,7 +4203,7 @@ public class Player extends Playable implements PlayerGroup {
         return;
       }
     } catch (Exception var12) {
-      _log.warn("Could not store disable skills data: " + var12);
+      log.warn("Could not store disable skills data: " + var12);
       return;
     } finally {
       DbUtils.closeQuietly(conn, pstmt);
@@ -4243,7 +4243,7 @@ public class Player extends Playable implements PlayerGroup {
       pstmt.setLong(3, System.currentTimeMillis());
       pstmt.executeUpdate();
     } catch (Exception var16) {
-      _log.error("Could not restore active skills data!", var16);
+      log.error("Could not restore active skills data!", var16);
     } finally {
       DbUtils.closeQuietly(conn, pstmt, rset);
     }
@@ -4280,7 +4280,7 @@ public class Player extends Playable implements PlayerGroup {
         }
       }
     } catch (Exception var10) {
-      _log.warn("could not restore henna: " + var10);
+      log.warn("could not restore henna: " + var10);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -4320,7 +4320,7 @@ public class Player extends Playable implements PlayerGroup {
           statement.setInt(3, this.getActiveClassId());
           statement.execute();
         } catch (Exception var10) {
-          _log.warn("could not remove char henna: " + var10, var10);
+          log.warn("could not remove char henna: " + var10, var10);
         } finally {
           DbUtils.closeQuietly(con, statement);
         }
@@ -4357,7 +4357,7 @@ public class Player extends Playable implements PlayerGroup {
             statement.setInt(4, this.getActiveClassId());
             statement.execute();
           } catch (Exception var9) {
-            _log.warn("could not save char henna: " + var9);
+            log.warn("could not save char henna: " + var9);
           } finally {
             DbUtils.closeQuietly(con, statement);
           }
@@ -5156,7 +5156,7 @@ public class Player extends Playable implements PlayerGroup {
         }
       }
     } catch (SQLException var9) {
-      _log.warn("Can't restore player blocklist " + var9, var9);
+      log.warn("Can't restore player blocklist " + var9, var9);
     } finally {
       DbUtils.closeQuietly(con, statement, rs);
     }
@@ -5192,7 +5192,7 @@ public class Player extends Playable implements PlayerGroup {
         return;
       }
     } catch (Exception var14) {
-      _log.warn("Can't store player blocklist " + var14);
+      log.warn("Can't store player blocklist " + var14);
       return;
     } finally {
       DbUtils.closeQuietly(con, statement);
@@ -5383,7 +5383,7 @@ public class Player extends Playable implements PlayerGroup {
     if (unit != null) {
       UnitMember unitMember = unit.getUnitMember(this.getObjectId());
       if (unitMember == null) {
-        _log.warn("Player: unitMember null, clan: " + this._clan.getClanId() + "; pledgeType: " + unit.getType());
+        log.warn("Player: unitMember null, clan: " + this._clan.getClanId() + "; pledgeType: " + unit.getType());
         return;
       }
 
@@ -5732,7 +5732,7 @@ public class Player extends Playable implements PlayerGroup {
       statement.setInt(2, this.getObjectId());
       statement.executeUpdate();
     } catch (Exception var9) {
-      _log.warn("Could not activate nochannel:" + var9);
+      log.warn("Could not activate nochannel:" + var9);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -5868,7 +5868,7 @@ public class Player extends Playable implements PlayerGroup {
       statement.executeUpdate();
       DbUtils.close(statement);
     } catch (SQLException var9) {
-      _log.error("", var9);
+      log.error("", var9);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -5884,7 +5884,7 @@ public class Player extends Playable implements PlayerGroup {
       main.setActive(true);
       this.getSubClasses().put(this.getActiveClassId(), main);
     } else {
-      _log.warn("Could not store char sub data, main class " + this.getActiveClassId() + " not found for " + this);
+      log.warn("Could not store char sub data, main class " + this.getActiveClassId() + " not found for " + this);
     }
 
     Connection con = null;
@@ -5919,8 +5919,8 @@ public class Player extends Playable implements PlayerGroup {
       sb.append(" WHERE char_obj_id=").append(this.getObjectId()).append(" AND active=1 LIMIT 1");
       statement.executeUpdate(sb.toString());
     } catch (Exception var10) {
-      _log.warn("Could not store char sub data: " + var10);
-      _log.error("", var10);
+      log.warn("Could not store char sub data: " + var10);
+      log.error("", var10);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -5975,8 +5975,8 @@ public class Player extends Playable implements PlayerGroup {
         player.setActiveSubClass(pBaseClassId.getClassId(), false);
       }
     } catch (Exception var10) {
-      _log.warn("Could not restore char sub-classes: " + var10);
-      _log.error("", var10);
+      log.warn("Could not restore char sub-classes: " + var10);
+      log.error("", var10);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -6020,7 +6020,7 @@ public class Player extends Playable implements PlayerGroup {
             statement.execute();
             break label106;
           } catch (Exception var15) {
-            _log.warn("Could not add character sub-class: " + var15, var15);
+            log.warn("Could not add character sub-class: " + var15, var15);
             var8 = false;
           } finally {
             DbUtils.closeQuietly(con, statement);
@@ -6099,8 +6099,8 @@ public class Player extends Playable implements PlayerGroup {
         statement.execute();
         DbUtils.close(statement);
       } catch (Exception var10) {
-        _log.warn("Could not delete char sub-class: " + var10);
-        _log.error("", var10);
+        log.warn("Could not delete char sub-class: " + var10);
+        log.error("", var10);
       } finally {
         DbUtils.closeQuietly(con, statement);
       }
@@ -6130,7 +6130,7 @@ public class Player extends Playable implements PlayerGroup {
           }
         }
       } catch (Exception var7) {
-        _log.warn("", var7);
+        log.warn("", var7);
       }
 
       SubClass oldsub = this.getActiveClass();
@@ -7467,8 +7467,8 @@ public class Player extends Playable implements PlayerGroup {
         this.registerRecipe(recipe, false);
       }
     } catch (Exception var9) {
-      _log.warn("count not recipe skills:" + var9);
-      _log.error("", var9);
+      log.warn("count not recipe skills:" + var9);
+      log.error("", var9);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -7726,7 +7726,7 @@ public class Player extends Playable implements PlayerGroup {
       st.setInt(2, this.getObjectId());
       st.executeUpdate();
     } catch (Exception var7) {
-      _log.error("", var7);
+      log.error("", var7);
     } finally {
       DbUtils.closeQuietly(con, st);
     }
@@ -8192,7 +8192,7 @@ public class Player extends Playable implements PlayerGroup {
         this._instancesReuses.put(id, reuse);
       }
     } catch (Exception var10) {
-      _log.error("", var10);
+      log.error("", var10);
     } finally {
       DbUtils.closeQuietly(con, offline, rs);
     }

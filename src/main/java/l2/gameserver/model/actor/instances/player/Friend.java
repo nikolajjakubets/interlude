@@ -55,12 +55,12 @@ public class Friend {
   }
 
   public boolean isOnline() {
-    Player player = (Player)this._playerRef.get();
+    Player player = this._playerRef.get();
     return player != null && !player.isInOfflineMode();
   }
 
   public Player getPlayer() {
-    Player player = (Player)this._playerRef.get();
+    Player player = this._playerRef.get();
     return player != null && !player.isInOfflineMode() ? player : null;
   }
 }

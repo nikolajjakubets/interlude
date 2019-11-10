@@ -15,19 +15,17 @@ import l2.gameserver.model.Player;
 import l2.gameserver.model.actor.instances.player.Friend;
 
 public class L2FriendList extends L2GameServerPacket {
-  private List<L2FriendList.FriendInfo> _list = Collections.emptyList();
+  private List<L2FriendList.FriendInfo> _list;
 
   public L2FriendList(Player player) {
     Map<Integer, Friend> list = player.getFriendList().getList();
-    this._list = new ArrayList(list.size());
-    Iterator var3 = list.entrySet().iterator();
+    this._list = new ArrayList<>(list.size());
 
-    while(var3.hasNext()) {
-      Entry<Integer, Friend> entry = (Entry)var3.next();
-      L2FriendList.FriendInfo f = new L2FriendList.FriendInfo();
-      f._objectId = (Integer)entry.getKey();
-      f._name = ((Friend)entry.getValue()).getName();
-      f._online = ((Friend)entry.getValue()).isOnline();
+    for (Entry<Integer, Friend> integerFriendEntry : list.entrySet()) {
+      FriendInfo f = new FriendInfo();
+      f._objectId = integerFriendEntry.getKey();
+      f._name = integerFriendEntry.getValue().getName();
+      f._online = integerFriendEntry.getValue().isOnline();
       this._list.add(f);
     }
 
@@ -36,10 +34,8 @@ public class L2FriendList extends L2GameServerPacket {
   protected final void writeImpl() {
     this.writeC(250);
     this.writeD(this._list.size());
-    Iterator var1 = this._list.iterator();
 
-    while(var1.hasNext()) {
-      L2FriendList.FriendInfo friendInfo = (L2FriendList.FriendInfo)var1.next();
+    for (FriendInfo friendInfo : this._list) {
       this.writeD(0);
       this.writeS(friendInfo._name);
       this.writeD(friendInfo._online ? 1 : 0);
