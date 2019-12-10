@@ -11,7 +11,6 @@ import java.sql.ResultSet;
 
 @Slf4j
 public class Account {
-    //    private static final Logger _log = LoggerFactory.getLogger(Account.class);
     private static final String SQLP_ACCOUNT_LOAD = "{CALL `lip_AccountLoad`(?)}";
     private static final String SQLP_ACCOUNT_CREATE = "{CALL `lip_AccountCreate`(?, ?)}";
     private static final String SQLP_ACCOUNT_UPDATE = "{CALL `lip_AccountUpdate`(?, ?, ?, ?, ?, ?, ?)}";
