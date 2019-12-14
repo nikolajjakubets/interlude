@@ -70,18 +70,9 @@ public class Config {
   }
 
   static void initCrypt() throws Throwable {
-    DEFAULT_CRYPT = new PasswordHash(DEFAULT_PASSWORD_HASH);
-    List<PasswordHash> legacy = new ArrayList<PasswordHash>();
-    String[] var1 = LEGACY_PASSWORD_HASH.split(";");
-    int var2 = var1.length;
-
-    int i;
-    for (i = 0; i < var2; ++i) {
-      String method = var1[i];
-      if (!method.equalsIgnoreCase(DEFAULT_PASSWORD_HASH)) {
-        legacy.add(new PasswordHash(method));
-      }
-    }
+    DEFAULT_CRYPT = new PasswordHash();
+    List<PasswordHash> legacy = new ArrayList<>();
+    legacy.add(DEFAULT_CRYPT);
 
     LEGACY_CRYPT = legacy.toArray(new PasswordHash[0]);
 
@@ -92,14 +83,14 @@ public class Config {
     RSAKeyGenParameterSpec spec = new RSAKeyGenParameterSpec(1024, RSAKeyGenParameterSpec.F4);
     keygen.initialize(spec);
 
-    for (i = 0; i < keyPairs.length; ++i) {
+    for (int i = 0; i < keyPairs.length; ++i) {
       keyPairs[i] = new ScrambledKeyPair(keygen.generateKeyPair());
     }
 
     log.info("initCrypt: Cached ={} KeyPairs for RSA communication ", keyPairs.length);
     blowfishKeys = new byte[LOGIN_BLOWFISH_KEYS][16];
 
-    for (i = 0; i < blowfishKeys.length; ++i) {
+    for (int i = 0; i < blowfishKeys.length; ++i) {
       for (int j = 0; j < blowfishKeys[i].length; ++j) {
         blowfishKeys[i][j] = (byte) (Rnd.get(255) + 1);
       }

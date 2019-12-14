@@ -4,16 +4,17 @@ import l2.authserver.Config;
 import l2.authserver.accounts.Account;
 import l2.authserver.database.L2DatabaseFactory;
 import l2.commons.dbutils.DbUtils;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 @Slf4j
+@Data
+@NoArgsConstructor
 public class Log {
-
-  public Log() {
-  }
 
   public static void LogAccount(Account account) {
     if (Config.LOGIN_LOG) {
@@ -32,7 +33,6 @@ public class Log {
       } finally {
         DbUtils.closeQuietly(con, statement);
       }
-
     }
   }
 }
