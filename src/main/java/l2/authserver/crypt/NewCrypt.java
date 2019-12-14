@@ -30,17 +30,17 @@ public class NewCrypt {
 
             int i;
             for(i = offset; i < count; i += 4) {
-                check = (long)(raw[i] & 255);
-                check |= (long)(raw[i + 1] << 8 & '\uff00');
-                check |= (long)(raw[i + 2] << 16 & 16711680);
-                check |= (long)(raw[i + 3] << 24 & -16777216);
+              check = raw[i] & 255;
+              check |= raw[i + 1] << 8 & '\uff00';
+              check |= raw[i + 2] << 16 & 16711680;
+              check |= raw[i + 3] << 24 & -16777216;
                 chksum ^= check;
             }
 
-            check = (long)(raw[i] & 255);
-            check |= (long)(raw[i + 1] << 8 & '\uff00');
-            check |= (long)(raw[i + 2] << 16 & 16711680);
-            check |= (long)(raw[i + 3] << 24 & -16777216);
+          check = raw[i] & 255;
+          check |= raw[i + 1] << 8 & '\uff00';
+          check |= raw[i + 2] << 16 & 16711680;
+          check |= raw[i + 3] << 24 & -16777216;
             return check == chksum;
         } else {
             return false;
@@ -58,16 +58,16 @@ public class NewCrypt {
         long ecx;
         int i;
         for(i = offset; i < count; i += 4) {
-            ecx = (long)(raw[i] & 255);
-            ecx |= (long)(raw[i + 1] << 8 & '\uff00');
-            ecx |= (long)(raw[i + 2] << 16 & 16711680);
-            ecx |= (long)(raw[i + 3] << 24 & -16777216);
+          ecx = raw[i] & 255;
+          ecx |= raw[i + 1] << 8 & '\uff00';
+          ecx |= raw[i + 2] << 16 & 16711680;
+          ecx |= raw[i + 3] << 24 & -16777216;
             chksum ^= ecx;
         }
 
-        ecx = (long)(raw[i] & 255);
-        ecx |= (long)(raw[i + 1] << 8 & '\uff00');
-        ecx |= (long)(raw[i + 2] << 16 & 16711680);
+      ecx = raw[i] & 255;
+      ecx |= raw[i + 1] << 8 & '\uff00';
+      ecx |= raw[i + 2] << 16 & 16711680;
         long var10000 = ecx | (long)(raw[i + 3] << 24 & -16777216);
         raw[i] = (byte)((int)(chksum & 255L));
         raw[i + 1] = (byte)((int)(chksum >> 8 & 255L));
