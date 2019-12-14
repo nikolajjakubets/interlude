@@ -16,6 +16,8 @@ public class Account {
   private static final String SQLP_ACCOUNT_LOAD = "{CALL `lip_AccountLoad`(?)}";
   private static final String SQLP_ACCOUNT_CREATE = "{CALL `lip_AccountCreate`(?, ?)}";
   private static final String SQLP_ACCOUNT_UPDATE = "{CALL `lip_AccountUpdate`(?, ?, ?, ?, ?, ?, ?)}";
+
+
   private final String login;
   private String passwordHash;
   private NetList allowedIpList = new NetList();
