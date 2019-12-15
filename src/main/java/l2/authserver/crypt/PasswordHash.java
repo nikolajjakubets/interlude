@@ -16,10 +16,7 @@ public class PasswordHash {
   }
 
   public static String encrypt(String password) {
-    log.info("encrypt: before={}", password);
-    String encodedString = passwordEncoder.encode(password);
-    log.info("encrypt: after={}", encodedString);
-    return encodedString;
+    return passwordEncoder.encode(password);
   }
 
 }

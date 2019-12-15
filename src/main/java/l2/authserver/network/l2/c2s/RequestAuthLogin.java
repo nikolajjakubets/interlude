@@ -19,6 +19,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.security.NoSuchAlgorithmException;
 
 import static l2.authserver.crypt.PasswordHash.compare;
+import static l2.authserver.crypt.PasswordHash.encrypt;
 
 @Data
 @Slf4j
@@ -73,7 +74,8 @@ public class RequestAuthLogin extends L2LoginClientPacket {
         client.close(LoginFailReason.REASON_USER_OR_PASS_WRONG);
         return;
       }
-      account.setPasswordHash(requestPassword);
+      var passwordHash = encrypt(requestPassword);
+      account.setPasswordHash(passwordHash);
       account.save();
     }
 
