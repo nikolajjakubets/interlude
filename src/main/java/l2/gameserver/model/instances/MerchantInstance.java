@@ -5,31 +5,27 @@
 
 package l2.gameserver.model.instances;
 
-import java.util.StringTokenizer;
 import l2.gameserver.Config;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.data.htm.HtmCache;
 import l2.gameserver.data.xml.holder.BuyListHolder;
+import l2.gameserver.data.xml.holder.BuyListHolder.NpcTradeList;
 import l2.gameserver.data.xml.holder.MultiSellHolder;
 import l2.gameserver.data.xml.holder.ResidenceHolder;
-import l2.gameserver.data.xml.holder.BuyListHolder.NpcTradeList;
 import l2.gameserver.instancemanager.MapRegionManager;
 import l2.gameserver.instancemanager.ReflectionManager;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.entity.residence.Castle;
-import l2.gameserver.network.l2.s2c.BuyList;
-import l2.gameserver.network.l2.s2c.ExGetPremiumItemList;
-import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
-import l2.gameserver.network.l2.s2c.SellRefundList;
-import l2.gameserver.network.l2.s2c.ShopPreviewList;
+import l2.gameserver.network.l2.s2c.*;
 import l2.gameserver.templates.mapregion.DomainArea;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.utils.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.StringTokenizer;
+
+@Slf4j
 public class MerchantInstance extends NpcInstance {
-  private static final Logger _log = LoggerFactory.getLogger(MerchantInstance.class);
   private static final int NEWBIE_EXCHANGE_MULTISELL = 6001;
 
   public MerchantInstance(int objectId, NpcTemplate template) {
@@ -69,7 +65,7 @@ public class MerchantInstance extends NpcInstance {
         ShopPreviewList bl = new ShopPreviewList(list, player);
         player.sendPacket(bl);
       } else {
-        _log.warn("no buylist with id:" + val);
+        log.warn("no buylist with id:" + val);
         player.sendActionFailed();
       }
 
@@ -88,8 +84,8 @@ public class MerchantInstance extends NpcInstance {
 
       NpcTradeList list = BuyListHolder.getInstance().getBuyList(listId);
       if (list != null && list.getNpcId() != this.getNpcId()) {
-        _log.warn("[L2MerchantInstance] possible client hacker: " + player.getName() + " attempting to buy from GM shop! < Ban him!");
-        _log.warn("buylist id:" + listId + " / list_npc = " + list.getNpcId() + " / npc = " + this.getNpcId());
+        log.warn("[L2MerchantInstance] possible client hacker: " + player.getName() + " attempting to buy from GM shop! < Ban him!");
+        log.warn("buylist id:" + listId + " / list_npc = " + list.getNpcId() + " / npc = " + this.getNpcId());
       } else {
         player.sendPacket(new BuyList(list, player, taxRate));
       }
@@ -156,9 +152,9 @@ public class MerchantInstance extends NpcInstance {
         String var = player.getVar("backCoords");
         if (var != null && !var.isEmpty()) {
           Location loc = Location.parseLoc(var);
-          DomainArea domain = (DomainArea)MapRegionManager.getInstance().getRegionData(DomainArea.class, loc);
+          DomainArea domain = (DomainArea) MapRegionManager.getInstance().getRegionData(DomainArea.class, loc);
           if (domain != null) {
-            return (Castle)ResidenceHolder.getInstance().getResidence(Castle.class, domain.getId());
+            return (Castle) ResidenceHolder.getInstance().getResidence(Castle.class, domain.getId());
           }
         }
 

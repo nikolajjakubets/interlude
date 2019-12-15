@@ -5,9 +5,6 @@
 
 package l2.gameserver.model;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import l2.commons.collections.MultiValueSet;
 import l2.commons.time.cron.NextTime;
 import l2.commons.util.Rnd;
@@ -25,12 +22,14 @@ import l2.gameserver.taskmanager.SpawnTaskManager;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.templates.spawn.SpawnRange;
 import l2.gameserver.utils.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+@Slf4j
 public abstract class Spawner extends EventOwner implements Cloneable {
   private static final long serialVersionUID = 1L;
-  protected static final Logger _log = LoggerFactory.getLogger(Spawner.class);
   protected static final int MIN_RESPAWN_DELAY = 300;
   protected int _maximumCount;
   protected int _referenceCount;
@@ -50,7 +49,7 @@ public abstract class Spawner extends EventOwner implements Cloneable {
   }
 
   public void decreaseScheduledCount() {
-    while(true) {
+    while (true) {
       int scheduledCount = this._scheduledCount.get();
       if (scheduledCount > 0) {
         if (!this._scheduledCount.compareAndSet(scheduledCount, scheduledCount - 1)) {
@@ -106,10 +105,8 @@ public abstract class Spawner extends EventOwner implements Cloneable {
 
   public void deleteAll() {
     this.stopRespawn();
-    Iterator var1 = this._spawned.iterator();
 
-    while(var1.hasNext()) {
-      NpcInstance npc = (NpcInstance)var1.next();
+    for (NpcInstance npc : this._spawned) {
       npc.deleteMe();
     }
 
@@ -132,7 +129,7 @@ public abstract class Spawner extends EventOwner implements Cloneable {
   public abstract SpawnRange getCurrentSpawnRange();
 
   public int init() {
-    while(this._currentCount.get() + this._scheduledCount.get() < this._maximumCount) {
+    while (this._currentCount.get() + this._scheduledCount.get() < this._maximumCount) {
       this.doSpawn(false);
     }
 
@@ -158,12 +155,12 @@ public abstract class Spawner extends EventOwner implements Cloneable {
 
   public NpcInstance getFirstSpawned() {
     List<NpcInstance> npcs = this.getAllSpawned();
-    return npcs.size() > 0 ? (NpcInstance)npcs.get(0) : null;
+    return npcs.size() > 0 ? (NpcInstance) npcs.get(0) : null;
   }
 
   public void setRespawnDelay(long respawnDelay, long respawnDelayRandom) {
     if (respawnDelay < 0L) {
-      _log.warn("respawn delay is negative");
+      log.warn("respawn delay is negative");
     }
 
     this._respawnDelay = respawnDelay;
@@ -171,7 +168,7 @@ public abstract class Spawner extends EventOwner implements Cloneable {
   }
 
   public void setRespawnDelay(int respawnDelay) {
-    this.setRespawnDelay((long)respawnDelay, 0L);
+    this.setRespawnDelay((long) respawnDelay, 0L);
   }
 
   public void setRespawnTime(int respawnTime) {
@@ -193,7 +190,7 @@ public abstract class Spawner extends EventOwner implements Cloneable {
         return null;
       } else {
         if (!spawn) {
-          spawn = (long)this._respawnTime <= System.currentTimeMillis() / 1000L + 300L;
+          spawn = (long) this._respawnTime <= System.currentTimeMillis() / 1000L + 300L;
         }
 
         return this.initNpc(tmp, spawn, set);
@@ -206,21 +203,19 @@ public abstract class Spawner extends EventOwner implements Cloneable {
 
   protected NpcInstance initNpc0(NpcInstance mob, Location newLoc, boolean spawn, MultiValueSet<String> set) {
     mob.setParameters(set);
-    mob.setCurrentHpMp((double)mob.getMaxHp(), (double)mob.getMaxMp(), true);
+    mob.setCurrentHpMp((double) mob.getMaxHp(), (double) mob.getMaxMp(), true);
     mob.setSpawn(this);
     mob.setSpawnedLoc(newLoc);
     mob.setUnderground(GeoEngine.getHeight(newLoc, this.getReflection().getGeoIndex()) < GeoEngine.getHeight(newLoc.clone().changeZ(5000), this.getReflection().getGeoIndex()));
-    Iterator var5 = this.getEvents().iterator();
 
-    while(var5.hasNext()) {
-      GlobalEvent e = (GlobalEvent)var5.next();
+    for (GlobalEvent e : this.getEvents()) {
       mob.addEvent(e);
     }
 
     if (spawn) {
       mob.setReflection(this.getReflection());
       if (mob.isMonster()) {
-        ((MonsterInstance)mob).setChampion();
+        ((MonsterInstance) mob).setChampion();
       }
 
       mob.spawnMe(newLoc);
@@ -228,7 +223,7 @@ public abstract class Spawner extends EventOwner implements Cloneable {
     } else {
       mob.setLoc(newLoc);
       this._scheduledCount.incrementAndGet();
-      SpawnTaskManager.getInstance().addSpawnTask(mob, (long)this._respawnTime * 1000L - System.currentTimeMillis());
+      SpawnTaskManager.getInstance().addSpawnTask(mob, (long) this._respawnTime * 1000L - System.currentTimeMillis());
     }
 
     this._spawned.add(mob);
@@ -240,7 +235,7 @@ public abstract class Spawner extends EventOwner implements Cloneable {
     int currentCount;
     do {
       currentCount = this._currentCount.get();
-    } while(currentCount > 0 && !this._currentCount.compareAndSet(currentCount, currentCount - 1));
+    } while (currentCount > 0 && !this._currentCount.compareAndSet(currentCount, currentCount - 1));
 
     if (this.getRespawnDelay() != 0L || this.getRespawnCron() != null) {
       if (this._doRespawn && this._scheduledCount.get() + this._currentCount.get() < this._maximumCount) {
@@ -248,7 +243,7 @@ public abstract class Spawner extends EventOwner implements Cloneable {
         long delay;
         if (this.getRespawnCron() == null) {
           if (template.isRaid) {
-            delay = (long)(Config.ALT_RAID_RESPAWN_MULTIPLIER * (double)this.getRespawnDelayWithRnd()) * 1000L;
+            delay = (long) (Config.ALT_RAID_RESPAWN_MULTIPLIER * (double) this.getRespawnDelayWithRnd()) * 1000L;
           } else {
             delay = this.getRespawnDelayWithRnd() * 1000L;
           }
@@ -257,7 +252,7 @@ public abstract class Spawner extends EventOwner implements Cloneable {
         }
 
         delay = Math.max(1000L, delay - deadTime);
-        this._respawnTime = (int)((now + delay) / 1000L);
+        this._respawnTime = (int) ((now + delay) / 1000L);
         this._scheduledCount.incrementAndGet();
         SpawnTaskManager.getInstance().addSpawnTask(spawnedNpc, delay);
       }
@@ -267,10 +262,8 @@ public abstract class Spawner extends EventOwner implements Cloneable {
 
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    Iterator var2 = this._spawned.iterator();
 
-    while(var2.hasNext()) {
-      NpcInstance spawnedNpc = (NpcInstance)var2.next();
+    for (NpcInstance spawnedNpc : this._spawned) {
       sb.append(spawnedNpc.getNpcId());
     }
 

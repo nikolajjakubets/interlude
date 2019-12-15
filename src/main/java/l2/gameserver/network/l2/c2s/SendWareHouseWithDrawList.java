@@ -14,16 +14,14 @@ import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.model.items.PcInventory;
 import l2.gameserver.model.items.Warehouse;
 import l2.gameserver.model.items.Warehouse.WarehouseType;
-import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.components.SystemMsg;
 import l2.gameserver.utils.Log;
 import l2.gameserver.utils.Log.ItemLog;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class SendWareHouseWithDrawList extends L2GameClientPacket {
-  private static final Logger _log = LoggerFactory.getLogger(SendWareHouseWithDrawList.class);
   private int _count;
   private int[] _items;
   private long[] _itemQ;
@@ -37,9 +35,9 @@ public class SendWareHouseWithDrawList extends L2GameClientPacket {
       this._items = new int[this._count];
       this._itemQ = new long[this._count];
 
-      for(int i = 0; i < this._count; ++i) {
+      for (int i = 0; i < this._count; ++i) {
         this._items[i] = this.readD();
-        this._itemQ[i] = (long)this.readD();
+        this._itemQ[i] = this.readD();
         if (this._itemQ[i] < 1L || ArrayUtils.indexOf(this._items, this._items[i]) < i) {
           this._count = 0;
           break;
@@ -52,7 +50,7 @@ public class SendWareHouseWithDrawList extends L2GameClientPacket {
   }
 
   protected void runImpl() {
-    Player activeChar = ((GameClient)this.getClient()).getActiveChar();
+    Player activeChar = this.getClient().getActiveChar();
     if (activeChar != null && this._count != 0) {
       if (!activeChar.getPlayerAccess().UseWarehouse) {
         activeChar.sendActionFailed();
@@ -67,8 +65,8 @@ public class SendWareHouseWithDrawList extends L2GameClientPacket {
         if ((whkeeper == null || !whkeeper.isInActingRange(activeChar)) && !Config.ALT_ALLOW_REMOTE_USE_CARGO_BOX) {
           activeChar.sendPacket(Msg.WAREHOUSE_IS_TOO_FAR);
         } else {
-          Warehouse warehouse = null;
-          ItemLog logType = null;
+          Warehouse warehouse;
+          ItemLog logType;
           if (activeChar.getUsingWarehouseType() == WarehouseType.PRIVATE) {
             warehouse = activeChar.getWarehouse();
             logType = ItemLog.WarehouseWithdraw;
@@ -92,7 +90,7 @@ public class SendWareHouseWithDrawList extends L2GameClientPacket {
             warehouse = activeChar.getClan().getWarehouse();
           } else {
             if (activeChar.getUsingWarehouseType() != WarehouseType.FREIGHT) {
-              _log.warn("Error retrieving a warehouse object for char " + activeChar.getName() + " - using warehouse type: " + activeChar.getUsingWarehouseType());
+              log.warn("Error retrieving a warehouse object for char " + activeChar.getName() + " - using warehouse type: " + activeChar.getUsingWarehouseType());
               return;
             }
 
@@ -102,17 +100,17 @@ public class SendWareHouseWithDrawList extends L2GameClientPacket {
 
           PcInventory inventory = activeChar.getInventory();
           inventory.writeLock();
-          ((Warehouse)warehouse).writeLock();
+          warehouse.writeLock();
 
           try {
             long weight = 0L;
             int slots = 0;
             int i = 0;
 
-            while(true) {
+            while (true) {
               ItemInstance item;
               if (i >= this._count) {
-                if (!activeChar.getInventory().validateCapacity((long)slots)) {
+                if (!activeChar.getInventory().validateCapacity(slots)) {
                   activeChar.sendPacket(Msg.YOUR_INVENTORY_IS_FULL);
                   return;
                 }
@@ -122,21 +120,21 @@ public class SendWareHouseWithDrawList extends L2GameClientPacket {
                   return;
                 }
 
-                for(i = 0; i < this._count; ++i) {
-                  item = ((Warehouse)warehouse).removeItemByObjectId(this._items[i], this._itemQ[i]);
+                for (i = 0; i < this._count; ++i) {
+                  item = warehouse.removeItemByObjectId(this._items[i], this._itemQ[i]);
                   Log.LogItem(activeChar, logType, item);
                   activeChar.getInventory().addItem(item);
                 }
                 break;
               }
 
-              item = ((Warehouse)warehouse).getItemByObjectId(this._items[i]);
+              item = warehouse.getItemByObjectId(this._items[i]);
               if (item == null || item.getCount() < this._itemQ[i]) {
                 activeChar.sendPacket(SystemMsg.INCORRECT_ITEM_COUNT);
                 return;
               }
 
-              weight = SafeMath.addAndCheck(weight, SafeMath.mulAndCheck((long)item.getTemplate().getWeight(), this._itemQ[i]));
+              weight = SafeMath.addAndCheck(weight, SafeMath.mulAndCheck(item.getTemplate().getWeight(), this._itemQ[i]));
               if (!item.isStackable() || inventory.getItemByItemId(item.getItemId()) == null) {
                 ++slots;
               }
@@ -147,7 +145,7 @@ public class SendWareHouseWithDrawList extends L2GameClientPacket {
             this.sendPacket(Msg.YOU_HAVE_EXCEEDED_THE_QUANTITY_THAT_CAN_BE_INPUTTED);
             return;
           } finally {
-            ((Warehouse)warehouse).writeUnlock();
+            warehouse.writeUnlock();
             inventory.writeUnlock();
           }
 

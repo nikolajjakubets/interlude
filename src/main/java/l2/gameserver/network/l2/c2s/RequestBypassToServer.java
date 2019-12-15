@@ -22,15 +22,14 @@ import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.scripts.Scripts;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+@Slf4j
 public class RequestBypassToServer extends L2GameClientPacket {
-  private static final Logger _log = LoggerFactory.getLogger(RequestBypassToServer.class);
   private DecodedBypass bp = null;
   private String _bypass;
 
@@ -42,7 +41,7 @@ public class RequestBypassToServer extends L2GameClientPacket {
   }
 
   protected void runImpl() {
-    GameClient client = (GameClient)this.getClient();
+    GameClient client = this.getClient();
     Player activeChar = client.getActiveChar();
 
     GameObject object;
@@ -66,13 +65,13 @@ public class RequestBypassToServer extends L2GameClientPacket {
       NpcInstance npc = activeChar.getLastNpc();
       GameObject target = activeChar.getTarget();
       if (npc == null && target != null && target.isNpc()) {
-        npc = (NpcInstance)target;
+        npc = (NpcInstance) target;
       }
 
       if (this.bp.bypass.startsWith("admin_")) {
         AdminCommandHandler.getInstance().useAdminCommandHandler(activeChar, this.bp.bypass);
       } else if (this.bp.bypass.equals("come_here") && activeChar.isGM()) {
-        comeHere((GameClient)this.getClient());
+        comeHere(this.getClient());
       } else if (this.bp.bypass.startsWith("player_help ")) {
         playerHelp(activeChar, this.bp.bypass.substring(12));
       } else {
@@ -83,7 +82,7 @@ public class RequestBypassToServer extends L2GameClientPacket {
           String[] args = p.substring(word[0].length()).trim().split("\\s+");
           String[] path = word[0].split(":");
           if (path.length != 2) {
-            _log.warn("Bad Script bypass!");
+            log.warn("Bad Script bypass!");
             return;
           }
 
@@ -108,7 +107,7 @@ public class RequestBypassToServer extends L2GameClientPacket {
             if (vch != null) {
               vch.useVoicedCommand(id, activeChar, args);
             } else {
-              _log.warn("Unknown voiced command '" + id + "'");
+              log.warn("Unknown voiced command '" + id + "'");
             }
           } else {
             int stadium_id;
@@ -135,7 +134,7 @@ public class RequestBypassToServer extends L2GameClientPacket {
                 stadium_id = Integer.parseInt(this.bp.bypass.substring(38));
                 CompetitionController.getInstance().watchCompetition(activeChar, stadium_id);
               } catch (Exception var10) {
-                _log.warn("OlyObserver", var10);
+                log.warn("OlyObserver", var10);
                 var10.printStackTrace();
               }
             } else {
@@ -157,7 +156,7 @@ public class RequestBypassToServer extends L2GameClientPacket {
               } else if (this.bp.bypass.startsWith("manor_menu_select?")) {
                 object = activeChar.getTarget();
                 if (object != null && object.isNpc()) {
-                  ((NpcInstance)object).onBypassFeedback(activeChar, this.bp.bypass);
+                  ((NpcInstance) object).onBypassFeedback(activeChar, this.bp.bypass);
                 }
               } else if (this.bp.bypass.startsWith("multisell ")) {
                 MultiSellHolder.getInstance().SeparateAndSend(Integer.parseInt(this.bp.bypass.substring(10)), activeChar, 0.0D);
@@ -185,10 +184,10 @@ public class RequestBypassToServer extends L2GameClientPacket {
       String st = "Bad RequestBypassToServer: " + this.bp.bypass;
       object = activeChar != null ? activeChar.getTarget() : null;
       if (object != null && object.isNpc()) {
-        st = st + " via NPC #" + ((NpcInstance)object).getNpcId();
+        st = st + " via NPC #" + ((NpcInstance) object).getNpcId();
       }
 
-      _log.error(st, var11);
+      log.error(st, var11);
     }
 
   }
@@ -196,7 +195,7 @@ public class RequestBypassToServer extends L2GameClientPacket {
   private static void comeHere(GameClient client) {
     GameObject obj = client.getActiveChar().getTarget();
     if (obj != null && obj.isNpc()) {
-      NpcInstance temp = (NpcInstance)obj;
+      NpcInstance temp = (NpcInstance) obj;
       Player activeChar = client.getActiveChar();
       temp.setTarget(activeChar);
       temp.moveToLocation(activeChar.getLoc(), 0, true);

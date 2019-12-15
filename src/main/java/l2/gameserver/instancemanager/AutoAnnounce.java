@@ -5,12 +5,6 @@
 
 package l2.gameserver.instancemanager;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import javax.xml.parsers.DocumentBuilderFactory;
 import l2.gameserver.Announcements;
 import l2.gameserver.Config;
 import l2.gameserver.model.GWAutoAnnounce;
@@ -18,14 +12,20 @@ import l2.gameserver.model.GameObjectsStorage;
 import l2.gameserver.model.Player;
 import l2.gameserver.network.l2.s2c.ExShowScreenMessage;
 import l2.gameserver.network.l2.s2c.ExShowScreenMessage.ScreenMessageAlign;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+@Slf4j
 public class AutoAnnounce implements Runnable {
-  private static final Logger _log = LoggerFactory.getLogger(AutoAnnounce.class.getName());
   private static AutoAnnounce _instance;
   static Map<Integer, GWAutoAnnounce> _lists;
 
@@ -43,9 +43,9 @@ public class AutoAnnounce implements Runnable {
 
   public AutoAnnounce() {
     _lists = new HashMap<>();
-    _log.info("AutoAnnounce: Initializing");
+    log.info("AutoAnnounce: Initializing");
     this.load();
-    _log.info("AutoAnnounce: Loaded " + (_lists.size() - 1) + " announce.");
+    log.info("AutoAnnounce: Loaded " + (_lists.size() - 1) + " announce.");
   }
 
   private void load() {
@@ -64,7 +64,7 @@ public class AutoAnnounce implements Runnable {
 
       Document doc = factory.newDocumentBuilder().parse(file);
       int counterAnnounce = 0;
-      if (counterAnnounce == 0) {
+      {
         ArrayList<String> msg = new ArrayList<>();
         GWAutoAnnounce aa = new GWAutoAnnounce(counterAnnounce);
         int revision = 0;
@@ -114,7 +114,7 @@ public class AutoAnnounce implements Runnable {
         System.out.println("AutoAnnounce: OK");
       }
     } catch (Exception var15) {
-      _log.error("AutoAnnounce: Error parsing autoannounce.xml file. " + var15);
+      log.error("AutoAnnounce: Error parsing autoannounce.xml file. " + var15);
     }
 
   }
@@ -122,7 +122,7 @@ public class AutoAnnounce implements Runnable {
   public void run() {
     if (_lists.size() > 1) {
       for(int i = 1; i < _lists.size(); ++i) {
-        GWAutoAnnounce item = (GWAutoAnnounce)_lists.get(i);
+        GWAutoAnnounce item = _lists.get(i);
         if (item.canAnnounce()) {
           ArrayList<String> msg = item.getMessage();
           Iterator var4 = msg.iterator();
@@ -135,16 +135,14 @@ public class AutoAnnounce implements Runnable {
               } else {
                 int _time = 3000 + text.length() * 100;
                 ExShowScreenMessage sm = new ExShowScreenMessage(text, _time, ScreenMessageAlign.TOP_CENTER, false);
-                Iterator var8 = GameObjectsStorage.getAllPlayersForIterate().iterator();
 
-                while(var8.hasNext()) {
-                  Player player = (Player)var8.next();
+                for (Player player : GameObjectsStorage.getAllPlayersForIterate()) {
                   player.sendPacket(sm);
                 }
               }
             }
 
-            ((GWAutoAnnounce)_lists.get(i)).updateRepeat();
+            _lists.get(i).updateRepeat();
             break;
           }
         }
@@ -154,10 +152,10 @@ public class AutoAnnounce implements Runnable {
   }
 
   public static String getRevision() {
-    return _lists.size() == 0 ? "" : (String)((GWAutoAnnounce)_lists.get(0)).getMessage().get(0);
+    return _lists.size() == 0 ? "" : _lists.get(0).getMessage().get(0);
   }
 
   public static String getOwnerName() {
-    return _lists.size() == 0 ? "" : (String)((GWAutoAnnounce)_lists.get(0)).getMessage().get(1);
+    return _lists.size() == 0 ? "" : _lists.get(0).getMessage().get(1);
   }
 }

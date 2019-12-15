@@ -21,14 +21,13 @@ import l2.gameserver.network.l2.s2c.PlaySound.Type;
 import l2.gameserver.templates.item.ItemTemplate;
 import l2.gameserver.templates.spawn.PeriodOfDay;
 import l2.gameserver.utils.ItemFunctions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public final class QuestState {
-  private static final Logger _log = LoggerFactory.getLogger(QuestState.class);
   public static final int RESTART_HOUR = 6;
   public static final int RESTART_MINUTES = 30;
   public static final String VAR_COND = "cond";
@@ -52,8 +51,8 @@ public final class QuestState {
   public void addExpAndSp(long exp, long sp) {
     Player player = this.getPlayer();
     if (player != null) {
-      exp = (long)((double)exp * this.getRateQuestsRewardExp());
-      sp = (long)((double)sp * this.getRateQuestsRewardSp());
+      exp = (long) ((double) exp * this.getRateQuestsRewardExp());
+      sp = (long) ((double) sp * this.getRateQuestsRewardSp());
       if (exp > 0L && sp > 0L) {
         player.addExpAndSp(exp, sp);
       } else {
@@ -166,7 +165,7 @@ public final class QuestState {
   }
 
   public String get(String var) {
-    return (String)this._vars.get(var);
+    return (String) this._vars.get(var);
   }
 
   public Map<String, String> getVars() {
@@ -184,7 +183,7 @@ public final class QuestState {
 
       varint = Integer.parseInt(val);
     } catch (Exception var4) {
-      _log.error(this.getPlayer().getName() + ": variable " + var + " isn't an integer: " + varint, var4);
+      log.error(this.getPlayer().getName() + ": variable " + var + " isn't an integer: " + varint, var4);
     }
 
     return varint;
@@ -210,7 +209,7 @@ public final class QuestState {
       int[] var3 = itemIds;
       int var4 = itemIds.length;
 
-      for(int var5 = 0; var5 < var4; ++var5) {
+      for (int var5 = 0; var5 < var4; ++var5) {
         int itemId = var3[var5];
         if (player.getInventory().getCountOf(itemId) <= 0L) {
           return false;
@@ -230,7 +229,7 @@ public final class QuestState {
       int[] var5 = itemIds;
       int var6 = itemIds.length;
 
-      for(int var7 = 0; var7 < var6; ++var7) {
+      for (int var7 = 0; var7 < var6; ++var7) {
         int itemId = var5[var7];
         count += player.getInventory().getCountOf(itemId);
       }
@@ -249,7 +248,7 @@ public final class QuestState {
     int[] var4 = itemsIds;
     int var5 = itemsIds.length;
 
-    for(int var6 = 0; var6 < var5; ++var6) {
+    for (int var6 = 0; var6 < var5; ++var6) {
       int id = var4[var6];
       result += this.getQuestItemsCount(id);
     }
@@ -258,7 +257,7 @@ public final class QuestState {
   }
 
   public boolean haveQuestItem(int itemId, int count) {
-    return this.getQuestItemsCount(itemId) >= (long)count;
+    return this.getQuestItemsCount(itemId) >= (long) count;
   }
 
   public boolean haveQuestItem(int itemId) {
@@ -290,7 +289,7 @@ public final class QuestState {
       }
 
       if (rate) {
-        count = (long)((double)count * this.getRateQuestsReward());
+        count = (long) ((double) count * this.getRateQuestsReward());
       }
 
       ItemFunctions.addItem(player, itemId, count, true);
@@ -307,7 +306,7 @@ public final class QuestState {
 
       ItemTemplate template = ItemHolder.getInstance().getTemplate(itemId);
       if (template != null) {
-        for(int i = 0; (long)i < count; ++i) {
+        for (int i = 0; (long) i < count; ++i) {
           ItemInstance item = ItemFunctions.createItem(itemId);
           if (element != Element.NONE) {
             item.setAttributeElement(element, power);
@@ -347,12 +346,12 @@ public final class QuestState {
       }
 
       if (calcChance > 100.0D) {
-        if ((double)((int)Math.ceil(calcChance / 100.0D)) <= calcChance / 100.0D) {
+        if ((double) ((int) Math.ceil(calcChance / 100.0D)) <= calcChance / 100.0D) {
           calcChance = Math.nextUp(calcChance);
         }
 
-        dropmult = (int)Math.ceil(calcChance / 100.0D);
-        calcChance /= (double)dropmult;
+        dropmult = (int) Math.ceil(calcChance / 100.0D);
+        calcChance /= (double) dropmult;
       }
 
       return Rnd.chance(calcChance) ? Rnd.get(min * dropmult, max * dropmult) : 0;
@@ -363,40 +362,40 @@ public final class QuestState {
 
   public double getRateQuestsDrop() {
     Player player = this.getPlayer();
-    double Bonus = player == null ? 1.0D : (double)player.getBonus().getQuestDropRate();
+    double Bonus = player == null ? 1.0D : (double) player.getBonus().getQuestDropRate();
     return Config.RATE_QUESTS_DROP * Bonus * this.getQuest().getRates().getDropRate();
   }
 
   public double getRateQuestsReward() {
     Player player = this.getPlayer();
-    double Bonus = player == null ? 1.0D : (double)player.getBonus().getQuestRewardRate();
+    double Bonus = player == null ? 1.0D : (double) player.getBonus().getQuestRewardRate();
     return Config.RATE_QUESTS_REWARD * Bonus * this.getQuest().getRates().getRewardRate();
   }
 
   public double getRateQuestsRewardExp() {
     Player player = this.getPlayer();
-    double Bonus = player == null ? 1.0D : (double)player.getBonus().getQuestRewardRate();
+    double Bonus = player == null ? 1.0D : (double) player.getBonus().getQuestRewardRate();
     return Config.RATE_QUESTS_REWARD_EXP_SP * Bonus * this.getQuest().getRates().getExpRate();
   }
 
   public double getRateQuestsRewardSp() {
     Player player = this.getPlayer();
-    double Bonus = player == null ? 1.0D : (double)player.getBonus().getQuestRewardRate();
+    double Bonus = player == null ? 1.0D : (double) player.getBonus().getQuestRewardRate();
     return Config.RATE_QUESTS_REWARD_EXP_SP * Bonus * this.getQuest().getRates().getSpRate();
   }
 
   public boolean rollAndGive(int itemId, int min, int max, int limit, double calcChance) {
     if (calcChance > 0.0D && min > 0 && max > 0 && limit > 0 && itemId > 0) {
-      long count = (long)this.rollDrop(min, max, calcChance);
+      long count = (long) this.rollDrop(min, max, calcChance);
       if (count > 0L) {
         long alreadyCount = this.getQuestItemsCount(itemId);
-        if (alreadyCount + count > (long)limit) {
-          count = (long)limit - alreadyCount;
+        if (alreadyCount + count > (long) limit) {
+          count = (long) limit - alreadyCount;
         }
 
         if (count > 0L) {
           this.giveItems(itemId, count, false);
-          if (count + alreadyCount >= (long)limit) {
+          if (count + alreadyCount >= (long) limit) {
             this.playSound("ItemSound.quest_middle");
             return true;
           }
@@ -415,7 +414,7 @@ public final class QuestState {
     if (calcChance > 0.0D && min > 0 && max > 0 && itemId > 0) {
       int count = this.rollDrop(min, max, calcChance);
       if (count > 0) {
-        this.giveItems(itemId, (long)count, false);
+        this.giveItems(itemId, (long) count, false);
         this.playSound("ItemSound.quest_itemget");
       }
 
@@ -426,7 +425,7 @@ public final class QuestState {
     if (calcChance > 0.0D && count > 0 && itemId > 0) {
       int countToDrop = this.rollDrop(count, calcChance);
       if (countToDrop > 0) {
-        this.giveItems(itemId, (long)countToDrop, false);
+        this.giveItems(itemId, (long) countToDrop, false);
         this.playSound("ItemSound.quest_itemget");
         return true;
       } else {
@@ -452,9 +451,9 @@ public final class QuestState {
   public void killNpcByObjectId(int _objId) {
     NpcInstance npc = GameObjectsStorage.getNpc(_objId);
     if (npc != null) {
-      npc.doDie((Creature)null);
+      npc.doDie((Creature) null);
     } else {
-      _log.warn("Attemp to kill object that is not npc in quest " + this.getQuest().getQuestIntId());
+      log.warn("Attemp to kill object that is not npc in quest " + this.getQuest().getQuestIntId());
     }
 
   }
@@ -553,13 +552,13 @@ public final class QuestState {
   }
 
   public void startQuestTimer(String name, long time) {
-    this.startQuestTimer(name, time, (NpcInstance)null);
+    this.startQuestTimer(name, time, (NpcInstance) null);
   }
 
   public void startQuestTimer(String name, long time, NpcInstance npc) {
     QuestTimer timer = new QuestTimer(name, time, npc);
     timer.setQuestState(this);
-    QuestTimer oldTimer = (QuestTimer)this.getTimers().put(name, timer);
+    QuestTimer oldTimer = (QuestTimer) this.getTimers().put(name, timer);
     if (oldTimer != null) {
       oldTimer.stop();
     }
@@ -581,9 +580,9 @@ public final class QuestState {
   }
 
   QuestTimer removeQuestTimer(String name) {
-    QuestTimer timer = (QuestTimer)this.getTimers().remove(name);
+    QuestTimer timer = (QuestTimer) this.getTimers().remove(name);
     if (timer != null) {
-      timer.setQuestState((QuestState)null);
+      timer.setQuestState((QuestState) null);
     }
 
     return timer;
@@ -596,9 +595,9 @@ public final class QuestState {
   public void stopQuestTimers() {
     Iterator var1 = this.getTimers().values().iterator();
 
-    while(var1.hasNext()) {
-      QuestTimer timer = (QuestTimer)var1.next();
-      timer.setQuestState((QuestState)null);
+    while (var1.hasNext()) {
+      QuestTimer timer = (QuestTimer) var1.next();
+      timer.setQuestState((QuestState) null);
       timer.stop();
     }
 
@@ -642,7 +641,7 @@ public final class QuestState {
     int[] var4 = itemsIds;
     int var5 = itemsIds.length;
 
-    for(int var6 = 0; var6 < var5; ++var6) {
+    for (int var6 = 0; var6 < var5; ++var6) {
       int id = var4[var6];
       result += this.takeAllItems(id);
     }
@@ -654,8 +653,8 @@ public final class QuestState {
     long result = 0L;
 
     int id;
-    for(Iterator var4 = itemsIds.iterator(); var4.hasNext(); result += this.takeAllItems(id)) {
-      id = (Integer)var4.next();
+    for (Iterator var4 = itemsIds.iterator(); var4.hasNext(); result += this.takeAllItems(id)) {
+      id = (Integer) var4.next();
     }
 
     return result;
@@ -665,7 +664,7 @@ public final class QuestState {
     if (var == null) {
       return null;
     } else {
-      String old = (String)this._vars.remove(var);
+      String old = (String) this._vars.remove(var);
       if (old != null) {
         Quest.deleteQuestVarInDb(this, var);
       }
@@ -677,7 +676,7 @@ public final class QuestState {
   private boolean checkPartyMember(Player member, int state, int maxrange, GameObject rangefrom) {
     if (member == null) {
       return false;
-    } else if (rangefrom != null && maxrange > 0 && !member.isInRange(rangefrom, (long)maxrange)) {
+    } else if (rangefrom != null && maxrange > 0 && !member.isInRange(rangefrom, (long) maxrange)) {
       return false;
     } else {
       QuestState qs = member.getQuestState(this.getQuest().getName());
@@ -697,8 +696,8 @@ public final class QuestState {
     } else {
       Iterator var6 = party.getPartyMembers().iterator();
 
-      while(var6.hasNext()) {
-        Player member = (Player)var6.next();
+      while (var6.hasNext()) {
+        Player member = (Player) var6.next();
         if (this.checkPartyMember(member, state, maxrange, rangefrom)) {
           result.add(member);
         }
@@ -714,7 +713,7 @@ public final class QuestState {
 
   public Player getRandomPartyMember(int state, int maxrange, GameObject rangefrom) {
     List<Player> list = this.getPartyMembers(state, maxrange, rangefrom);
-    return list.size() == 0 ? null : (Player)list.get(Rnd.get(list.size()));
+    return list.size() == 0 ? null : (Player) list.get(Rnd.get(list.size()));
   }
 
   public NpcInstance addSpawn(int npcId) {
@@ -746,8 +745,8 @@ public final class QuestState {
         return null;
       }
 
-      spawn = (Spawner)var2.next();
-    } while(spawn == null || spawn.getCurrentNpcId() != npcId);
+      spawn = (Spawner) var2.next();
+    } while (spawn == null || spawn.getCurrentNpcId() != npcId);
 
     return spawn.getLastSpawn();
   }
@@ -762,7 +761,7 @@ public final class QuestState {
       if ((val & -2147483648) != 0) {
         val &= 2147483647;
 
-        for(int i = 1; i < 32; ++i) {
+        for (int i = 1; i < 32; ++i) {
           val >>= 1;
           if (val == 0) {
             val = i;
@@ -844,10 +843,10 @@ public final class QuestState {
         Object players;
         Iterator var5;
         Player $member;
-        Player actorPlayer = (Player)actor;
+        Player actorPlayer = (Player) actor;
         players = null;
         label38:
-        switch(QuestState.this._quest.getParty()) {
+        switch (QuestState.this._quest.getParty()) {
           case 0:
             players = Collections.singletonList(actorPlayer);
             break;
@@ -859,14 +858,14 @@ public final class QuestState {
               players = new ArrayList(actorPlayer.getParty().getMemberCount());
               var5 = actorPlayer.getParty().getPartyMembers().iterator();
 
-              while(true) {
+              while (true) {
                 if (!var5.hasNext()) {
                   break label38;
                 }
 
-                $member = (Player)var5.next();
+                $member = (Player) var5.next();
                 if ($member.isInActingRange(actorPlayer)) {
-                  ((List)players).add($member);
+                  ((List) players).add($member);
                 }
               }
             }
@@ -874,13 +873,13 @@ public final class QuestState {
             players = Collections.emptyList();
         }
 
-        var5 = ((List)players).iterator();
+        var5 = ((List) players).iterator();
 
-        while(var5.hasNext()) {
-          $member = (Player)var5.next();
+        while (var5.hasNext()) {
+          $member = (Player) var5.next();
           QuestState questState = $member.getQuestState(QuestState.this._quest.getClass());
           if (questState != null && !questState.isCompleted()) {
-            QuestState.this._quest.notifyKill((Player)victim, questState);
+            QuestState.this._quest.notifyKill((Player) victim, questState);
           }
         }
 

@@ -9,14 +9,13 @@ import l2.commons.net.nio.impl.ReceivablePacket;
 import l2.gameserver.GameServer;
 import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.s2c.L2GameServerPacket;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.nio.BufferUnderflowException;
 import java.util.List;
 
+@Slf4j
 public abstract class L2GameClientPacket extends ReceivablePacket<GameClient> {
-  private static final Logger _log = LoggerFactory.getLogger(L2GameClientPacket.class);
 
   public L2GameClientPacket() {
   }
@@ -27,9 +26,9 @@ public abstract class L2GameClientPacket extends ReceivablePacket<GameClient> {
       return true;
     } catch (BufferUnderflowException var2) {
       this._client.onPacketReadFail();
-      _log.error("Client: " + this._client + " - Failed reading: " + this.getType() + " - Server Version: " + GameServer.getInstance().getVersion().getRevisionNumber(), var2);
+      log.error("Client: " + this._client + " - Failed reading: " + this.getType() + " - Server Version: " + GameServer.getInstance().getVersion().getRevisionNumber(), var2);
     } catch (Exception var3) {
-      _log.error("Client: " + this._client + " - Failed reading: " + this.getType() + " - Server Version: " + GameServer.getInstance().getVersion().getRevisionNumber(), var3);
+      log.error("Client: " + this._client + " - Failed reading: " + this.getType() + " - Server Version: " + GameServer.getInstance().getVersion().getRevisionNumber(), var3);
     }
 
     return false;
@@ -43,7 +42,7 @@ public abstract class L2GameClientPacket extends ReceivablePacket<GameClient> {
     try {
       this.runImpl();
     } catch (Exception var3) {
-      _log.error("Client: " + client + " - Failed running: " + this.getType() + " - Server Version: " + GameServer.getInstance().getVersion().getRevisionNumber(), var3);
+      log.error("Client: " + client + " - Failed running: " + this.getType() + " - Server Version: " + GameServer.getInstance().getVersion().getRevisionNumber(), var3);
     }
 
   }

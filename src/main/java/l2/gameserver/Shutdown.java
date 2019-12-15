@@ -24,8 +24,6 @@ import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.scripts.Scripts;
 import l2.gameserver.utils.Util;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Timer;
@@ -33,7 +31,6 @@ import java.util.TimerTask;
 
 @Slf4j
 public class Shutdown extends Thread {
-  private static final Logger _log = LoggerFactory.getLogger(Shutdown.class);
   public static final int SHUTDOWN = 0;
   public static final int RESTART = 2;
   public static final int NONE = -1;
@@ -68,7 +65,7 @@ public class Shutdown extends Thread {
 
       this.shutdownMode = shutdownMode;
       this.shutdownCounter = seconds;
-      _log.info("Scheduled server " + (shutdownMode == 0 ? "shutdown" : "restart") + " in " + Util.formatTime(seconds) + ".");
+      log.info("Scheduled server " + (shutdownMode == 0 ? "shutdown" : "restart") + " in " + Util.formatTime(seconds) + ".");
       this.counter = new Timer("ShutdownCounter", true);
       this.counter.scheduleAtFixedRate(new Shutdown.ShutdownCounter(), 0L, 1000L);
     }

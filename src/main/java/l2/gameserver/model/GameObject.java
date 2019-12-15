@@ -5,9 +5,6 @@
 
 package l2.gameserver.model;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import l2.commons.lang.reference.HardReference;
 import l2.commons.lang.reference.HardReferences;
 import l2.gameserver.geodata.GeoEngine;
@@ -22,11 +19,14 @@ import l2.gameserver.scripts.Events;
 import l2.gameserver.utils.Location;
 import l2.gameserver.utils.Log;
 import l2.gameserver.utils.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+@Slf4j
 public abstract class GameObject extends EventOwner {
-  private static final Logger _log = LoggerFactory.getLogger(GameObject.class);
   public static final GameObject[] EMPTY_L2OBJECT_ARRAY = new GameObject[0];
   protected static final int CREATED = 0;
   protected static final int VISIBLE = 1;
@@ -144,7 +144,7 @@ public abstract class GameObject extends EventOwner {
     this._x = World.validCoordX(x);
     this._y = World.validCoordY(y);
     this._z = World.validCoordZ(z);
-    World.addVisibleObject(this, (Creature)null);
+    World.addVisibleObject(this, null);
   }
 
   public final boolean isVisible() {
@@ -160,7 +160,7 @@ public abstract class GameObject extends EventOwner {
   }
 
   public void spawnMe(Location loc) {
-    this.spawnMe0(loc, (Creature)null);
+    this.spawnMe0(loc, null);
   }
 
   protected void spawnMe0(Location loc, Creature dropper) {
@@ -171,7 +171,7 @@ public abstract class GameObject extends EventOwner {
   }
 
   public final void spawnMe() {
-    this.spawn0((Creature)null);
+    this.spawn0(null);
   }
 
   protected void spawn0(Creature dropper) {
@@ -246,8 +246,8 @@ public abstract class GameObject extends EventOwner {
   }
 
   public final long getXYDeltaSq(int x, int y) {
-    long dx = (long)(x - this.getX());
-    long dy = (long)(y - this.getY());
+    long dx = x - this.getX();
+    long dy = y - this.getY();
     return dx * dx + dy * dy;
   }
 
@@ -256,7 +256,7 @@ public abstract class GameObject extends EventOwner {
   }
 
   public final long getZDeltaSq(int z) {
-    long dz = (long)(z - this.getZ());
+    long dz = z - this.getZ();
     return dz * dz;
   }
 
@@ -290,15 +290,15 @@ public abstract class GameObject extends EventOwner {
     } else if (obj.getReflection() != this.getReflection()) {
       return false;
     } else {
-      long dx = (long)Math.abs(obj.getX() - this.getX());
+      long dx = Math.abs(obj.getX() - this.getX());
       if (dx > range) {
         return false;
       } else {
-        long dy = (long)Math.abs(obj.getY() - this.getY());
+        long dy = Math.abs(obj.getY() - this.getY());
         if (dy > range) {
           return false;
         } else {
-          long dz = (long)Math.abs(obj.getZ() - this.getZ());
+          long dz = Math.abs(obj.getZ() - this.getZ());
           return dz <= 1500L && dx * dx + dy * dy <= range * range;
         }
       }
@@ -306,7 +306,7 @@ public abstract class GameObject extends EventOwner {
   }
 
   public final boolean isInActingRange(GameObject obj) {
-    return this.isInRange(obj, (long)this.getActingRange());
+    return this.isInRange(obj, this.getActingRange());
   }
 
   public final boolean isInRangeZ(GameObject obj, long range) {
@@ -315,15 +315,15 @@ public abstract class GameObject extends EventOwner {
     } else if (obj.getReflection() != this.getReflection()) {
       return false;
     } else {
-      long dx = (long)Math.abs(obj.getX() - this.getX());
+      long dx = Math.abs(obj.getX() - this.getX());
       if (dx > range) {
         return false;
       } else {
-        long dy = (long)Math.abs(obj.getY() - this.getY());
+        long dy = Math.abs(obj.getY() - this.getY());
         if (dy > range) {
           return false;
         } else {
-          long dz = (long)Math.abs(obj.getZ() - this.getZ());
+          long dz = Math.abs(obj.getZ() - this.getZ());
           return dz <= range && dx * dx + dy * dy + dz * dz <= range * range;
         }
       }
@@ -372,7 +372,7 @@ public abstract class GameObject extends EventOwner {
       distance -= ((Creature)obj).getTemplate().collisionRadius;
     }
 
-    return distance > 0.0D ? distance : 0.0D;
+    return Math.max(distance, 0.0D);
   }
 
   public final long getSqDistance(int x, int y) {
@@ -420,13 +420,13 @@ public abstract class GameObject extends EventOwner {
   }
 
   public double getColRadius() {
-    _log.warn("getColRadius called directly from L2Object");
+    log.warn("getColRadius called directly from L2Object");
     Thread.dumpStack();
     return 0.0D;
   }
 
   public double getColHeight() {
-    _log.warn("getColHeight called directly from L2Object");
+    log.warn("getColHeight called directly from L2Object");
     Thread.dumpStack();
     return 0.0D;
   }

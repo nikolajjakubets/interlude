@@ -5,6 +5,27 @@
 
 package l2.gameserver.instancemanager;
 
+import l2.commons.geometry.Rectangle;
+import l2.commons.util.Rnd;
+import l2.gameserver.Config;
+import l2.gameserver.data.xml.holder.NpcHolder;
+import l2.gameserver.model.Player;
+import l2.gameserver.model.SimpleSpawner;
+import l2.gameserver.model.Territory;
+import l2.gameserver.model.entity.DimensionalRift;
+import l2.gameserver.model.entity.Reflection;
+import l2.gameserver.model.instances.NpcInstance;
+import l2.gameserver.model.items.ItemInstance;
+import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
+import l2.gameserver.network.l2.s2c.TeleportToLocation;
+import l2.gameserver.templates.npc.NpcTemplate;
+import l2.gameserver.utils.Location;
+import lombok.extern.slf4j.Slf4j;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,34 +33,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.xml.parsers.DocumentBuilderFactory;
-import l2.commons.geometry.Rectangle;
-import l2.commons.util.Rnd;
-import l2.gameserver.Config;
-import l2.gameserver.data.xml.holder.NpcHolder;
-import l2.gameserver.model.GameObject;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.SimpleSpawner;
-import l2.gameserver.model.Territory;
-import l2.gameserver.model.entity.DimensionalRift;
-import l2.gameserver.model.entity.Reflection;
-import l2.gameserver.model.entity.boat.Boat;
-import l2.gameserver.model.instances.NpcInstance;
-import l2.gameserver.model.items.ItemInstance;
-import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
-import l2.gameserver.network.l2.s2c.TeleportToLocation;
-import l2.gameserver.templates.npc.NpcTemplate;
-import l2.gameserver.utils.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
 
+@Slf4j
 public class DimensionalRiftManager {
-  private static final Logger _log = LoggerFactory.getLogger(DimensionalRiftManager.class);
   private static DimensionalRiftManager _instance;
-  private Map<Integer, Map<Integer, DimensionalRiftManager.DimensionalRiftRoom>> _rooms = new ConcurrentHashMap();
+  private Map<Integer, Map<Integer, DimensionalRiftManager.DimensionalRiftRoom>> _rooms = new ConcurrentHashMap<>();
   private static final int DIMENSIONAL_FRAGMENT_ITEM_ID = 7079;
 
   public static DimensionalRiftManager getInstance() {
@@ -59,7 +57,7 @@ public class DimensionalRiftManager {
   }
 
   public Map<Integer, DimensionalRiftManager.DimensionalRiftRoom> getRooms(int type) {
-    return (Map)this._rooms.get(type);
+    return this._rooms.get(type);
   }
 
   public void load() {
@@ -96,7 +94,7 @@ public class DimensionalRiftManager {
                   attrs = room.getAttributes();
                   int roomId = Integer.parseInt(attrs.getNamedItem("id").getNodeValue());
                   Node boss = attrs.getNamedItem("isBossRoom");
-                  boolean isBossRoom = boss != null ? Boolean.parseBoolean(boss.getNodeValue()) : false;
+                  boolean isBossRoom = boss != null && Boolean.parseBoolean(boss.getNodeValue());
                   Territory territory = null;
 
                   Node spawn;
@@ -117,11 +115,11 @@ public class DimensionalRiftManager {
                   }
 
                   if (territory == null) {
-                    _log.error("DimensionalRiftManager: invalid spawn data for room id " + roomId + "!");
+                    log.error("DimensionalRiftManager: invalid spawn data for room id " + roomId + "!");
                   }
 
                   if (!this._rooms.containsKey(type)) {
-                    this._rooms.put(type, new ConcurrentHashMap());
+                    this._rooms.put(type, new ConcurrentHashMap<>());
                   }
 
                   ((Map)this._rooms.get(type)).put(roomId, new DimensionalRiftManager.DimensionalRiftRoom(territory, tele, isBossRoom));
@@ -134,16 +132,16 @@ public class DimensionalRiftManager {
                       int count = Integer.parseInt(attrs.getNamedItem("count").getNodeValue());
                       NpcTemplate template = NpcHolder.getInstance().getTemplate(mobId);
                       if (template == null) {
-                        _log.warn("Template " + mobId + " not found!");
+                        log.warn("Template " + mobId + " not found!");
                       }
 
                       if (!this._rooms.containsKey(type)) {
-                        _log.warn("Type " + type + " not found!");
-                      } else if (!((Map)this._rooms.get(type)).containsKey(roomId)) {
-                        _log.warn("Room " + roomId + " in Type " + type + " not found!");
+                        log.warn("Type " + type + " not found!");
+                      } else if (!this._rooms.get(type).containsKey(roomId)) {
+                        log.warn("Room " + roomId + " in Type " + type + " not found!");
                       }
 
-                      if (template != null && this._rooms.containsKey(type) && ((Map)this._rooms.get(type)).containsKey(roomId)) {
+                      if (template != null && this._rooms.containsKey(type) && this._rooms.get(type).containsKey(roomId)) {
                         SimpleSpawner spawnDat = new SimpleSpawner(template);
                         spawnDat.setTerritory(territory);
                         spawnDat.setHeading(-1);
@@ -163,7 +161,7 @@ public class DimensionalRiftManager {
         }
       }
     } catch (Exception var28) {
-      _log.error("DimensionalRiftManager: Error on loading dimensional rift spawns!", var28);
+      log.error("DimensionalRiftManager: Error on loading dimensional rift spawns!", var28);
     }
 
     int typeSize = this._rooms.keySet().size();
@@ -174,16 +172,14 @@ public class DimensionalRiftManager {
       b = (Integer)var31.next();
     }
 
-    _log.info("DimensionalRiftManager: Loaded " + typeSize + " room types with " + roomSize + " rooms.");
-    _log.info("DimensionalRiftManager: Loaded " + countGood + " dimensional rift spawns, " + countBad + " errors.");
+    log.info("DimensionalRiftManager: Loaded " + typeSize + " room types with " + roomSize + " rooms.");
+    log.info("DimensionalRiftManager: Loaded " + countGood + " dimensional rift spawns, " + countBad + " errors.");
   }
 
   public void reload() {
-    Iterator var1 = this._rooms.keySet().iterator();
 
-    while(var1.hasNext()) {
-      int b = (Integer)var1.next();
-      ((Map)this._rooms.get(b)).clear();
+    for (int b : this._rooms.keySet()) {
+      this._rooms.get(b).clear();
     }
 
     this._rooms.clear();
@@ -203,7 +199,7 @@ public class DimensionalRiftManager {
   }
 
   public void teleportToWaitingRoom(Player player) {
-    teleToLocation(player, Location.findPointToStay(this.getRoom(0, 0).getTeleportCoords(), 0, 250, ReflectionManager.DEFAULT.getGeoIndex()), (Reflection)null);
+    teleToLocation(player, Location.findPointToStay(this.getRoom(0, 0).getTeleportCoords(), 0, 250, ReflectionManager.DEFAULT.getGeoIndex()), null);
   }
 
   public void start(Player player, int type, NpcInstance npc) {
@@ -219,7 +215,7 @@ public class DimensionalRiftManager {
         if (player.getParty().isInDimensionalRift()) {
           this.showHtmlFile(player, "rift/Cheater.htm", npc);
           if (!player.isGM()) {
-            _log.warn("Player " + player.getName() + "(" + player.getObjectId() + ") was cheating in dimension rift area!");
+            log.warn("Player " + player.getName() + "(" + player.getObjectId() + ") was cheating in dimension rift area!");
           }
 
           return;
@@ -230,10 +226,7 @@ public class DimensionalRiftManager {
           return;
         }
 
-        Iterator var4 = player.getParty().getPartyMembers().iterator();
-
-        while(var4.hasNext()) {
-          Player p = (Player)var4.next();
+        for (Player p : player.getParty().getPartyMembers()) {
           if (!this.checkIfInPeaceZone(p.getLoc())) {
             this.showHtmlFile(player, "rift/NotInWaitingRoom.htm", npc);
             return;
@@ -269,24 +262,24 @@ public class DimensionalRiftManager {
         }
       }
 
-      new DimensionalRift(player.getParty(), type, Rnd.get(1, ((Map)this._rooms.get(type)).size() - 1));
+      new DimensionalRift(player.getParty(), type, Rnd.get(1, this._rooms.get(type).size() - 1));
     }
   }
 
   private long getNeededItems(int type) {
     switch(type) {
       case 1:
-        return (long)Config.RIFT_ENTER_COST_RECRUIT;
+        return Config.RIFT_ENTER_COST_RECRUIT;
       case 2:
-        return (long)Config.RIFT_ENTER_COST_SOLDIER;
+        return Config.RIFT_ENTER_COST_SOLDIER;
       case 3:
-        return (long)Config.RIFT_ENTER_COST_OFFICER;
+        return Config.RIFT_ENTER_COST_OFFICER;
       case 4:
-        return (long)Config.RIFT_ENTER_COST_CAPTAIN;
+        return Config.RIFT_ENTER_COST_CAPTAIN;
       case 5:
-        return (long)Config.RIFT_ENTER_COST_COMMANDER;
+        return Config.RIFT_ENTER_COST_COMMANDER;
       case 6:
-        return (long)Config.RIFT_ENTER_COST_HERO;
+        return Config.RIFT_ENTER_COST_HERO;
       default:
         return 9223372036854775807L;
     }
@@ -302,10 +295,10 @@ public class DimensionalRiftManager {
   public static void teleToLocation(Player player, Location loc, Reflection ref) {
     if (!player.isTeleporting() && !player.isDeleted()) {
       player.setIsTeleporting(true);
-      player.setTarget((GameObject)null);
+      player.setTarget(null);
       player.stopMove();
       if (player.isInBoat()) {
-        player.setBoat((Boat)null);
+        player.setBoat(null);
       }
 
       player.breakFakeDeath();
@@ -315,8 +308,8 @@ public class DimensionalRiftManager {
         player.setReflection(ReflectionManager.DEFAULT);
       }
 
-      player.setLastClientPosition((Location)null);
-      player.setLastServerPosition((Location)null);
+      player.setLastClientPosition(null);
+      player.setLastServerPosition(null);
       player.sendPacket(new TeleportToLocation(player, loc));
     }
   }

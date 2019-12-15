@@ -5,12 +5,6 @@
 
 package l2.gameserver.instancemanager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import l2.commons.dbutils.DbUtils;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.ThreadPoolManager;
@@ -19,11 +13,17 @@ import l2.gameserver.model.GameObjectsStorage;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.entity.Couple;
 import l2.gameserver.network.l2.components.CustomMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+@Slf4j
 public class CoupleManager {
-  private static final Logger _log = LoggerFactory.getLogger(CoupleManager.class);
   private static CoupleManager _instance;
   private List<Couple> _couples;
   private List<Couple> _deletedCouples;
@@ -38,7 +38,7 @@ public class CoupleManager {
 
   public CoupleManager() {
     _instance = this;
-    _log.info("Initializing CoupleManager");
+    log.info("Initializing CoupleManager");
     _instance.load();
     ThreadPoolManager.getInstance().scheduleAtFixedRate(new CoupleManager.StoreTask(), 600000L, 600000L);
   }
@@ -53,7 +53,7 @@ public class CoupleManager {
       statement = con.prepareStatement("SELECT * FROM couples ORDER BY id");
       rs = statement.executeQuery();
 
-      while(rs.next()) {
+      while (rs.next()) {
         Couple c = new Couple(rs.getInt("id"));
         c.setPlayer1Id(rs.getInt("player1Id"));
         c.setPlayer2Id(rs.getInt("player2Id"));
@@ -63,9 +63,9 @@ public class CoupleManager {
         this.getCouples().add(c);
       }
 
-      _log.info("Loaded: " + this.getCouples().size() + " couples(s)");
+      log.info("Loaded: " + this.getCouples().size() + " couples(s)");
     } catch (Exception var8) {
-      _log.error("", var8);
+      log.error("", var8);
     } finally {
       DbUtils.closeQuietly(con, statement, rs);
     }
@@ -81,8 +81,8 @@ public class CoupleManager {
         return null;
       }
 
-      c = (Couple)var2.next();
-    } while(c == null || c.getId() != coupleId);
+      c = (Couple) var2.next();
+    } while (c == null || c.getId() != coupleId);
 
     return c;
   }
@@ -91,7 +91,7 @@ public class CoupleManager {
     int chaId = cha.getObjectId();
     Iterator var3 = this.getCouples().iterator();
 
-    while(true) {
+    while (true) {
       Couple cl;
       do {
         do {
@@ -99,9 +99,9 @@ public class CoupleManager {
             return;
           }
 
-          cl = (Couple)var3.next();
-        } while(cl == null);
-      } while(cl.getPlayer1Id() != chaId && cl.getPlayer2Id() != chaId);
+          cl = (Couple) var3.next();
+        } while (cl == null);
+      } while (cl.getPlayer1Id() != chaId && cl.getPlayer2Id() != chaId);
 
       if (cl.getMaried()) {
         cha.setMaried(true);
@@ -161,8 +161,8 @@ public class CoupleManager {
         statement = con.prepareStatement("DELETE FROM couples WHERE id = ?");
         var3 = this._deletedCouples.iterator();
 
-        while(var3.hasNext()) {
-          c = (Couple)var3.next();
+        while (var3.hasNext()) {
+          c = (Couple) var3.next();
           statement.setInt(1, c.getId());
           statement.execute();
         }
@@ -173,16 +173,16 @@ public class CoupleManager {
       if (this._couples != null && !this._couples.isEmpty()) {
         var3 = this._couples.iterator();
 
-        while(var3.hasNext()) {
-          c = (Couple)var3.next();
+        while (var3.hasNext()) {
+          c = (Couple) var3.next();
           if (c != null && c.isChanged()) {
             c.store(con);
             c.setChanged(false);
           }
         }
       }
-    } catch (Exception var8) {
-      _log.error("", var8);
+    } catch (Exception e) {
+      log.error("store: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }

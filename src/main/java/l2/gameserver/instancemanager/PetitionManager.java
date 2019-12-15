@@ -5,14 +5,6 @@
 
 package l2.gameserver.instancemanager;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import l2.gameserver.Config;
 import l2.gameserver.dao.CharacterDAO;
 import l2.gameserver.handler.petition.IPetitionHandler;
@@ -24,23 +16,27 @@ import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
 import l2.gameserver.network.l2.s2c.Say2;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.tables.GmListTable;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+@Slf4j
 public final class PetitionManager implements IPetitionHandler {
-  private static final Logger _log = LoggerFactory.getLogger(PetitionManager.class.getName());
   private static final PetitionManager _instance = new PetitionManager();
   private AtomicInteger _nextId = new AtomicInteger();
-  private Map<Integer, PetitionManager.Petition> _pendingPetitions = new ConcurrentHashMap();
-  private Map<Integer, PetitionManager.Petition> _completedPetitions = new ConcurrentHashMap();
+  private Map<Integer, PetitionManager.Petition> _pendingPetitions = new ConcurrentHashMap<>();
+  private Map<Integer, PetitionManager.Petition> _completedPetitions = new ConcurrentHashMap<>();
 
-  public static final PetitionManager getInstance() {
+  public static PetitionManager getInstance() {
     return _instance;
   }
 
   private PetitionManager() {
-    _log.info("Initializing PetitionManager");
+    log.info("Initializing PetitionManager");
   }
 
   public int getNextId() {
@@ -50,20 +46,20 @@ public final class PetitionManager implements IPetitionHandler {
   public void clearCompletedPetitions() {
     int numPetitions = this.getPendingPetitionCount();
     this.getCompletedPetitions().clear();
-    _log.info("PetitionManager: Completed petition data cleared. " + numPetitions + " petition(s) removed.");
+    log.info("PetitionManager: Completed petition data cleared. " + numPetitions + " petition(s) removed.");
   }
 
   public void clearPendingPetitions() {
     int numPetitions = this.getPendingPetitionCount();
     this.getPendingPetitions().clear();
-    _log.info("PetitionManager: Pending petition queue cleared. " + numPetitions + " petition(s) removed.");
+    log.info("PetitionManager: Pending petition queue cleared. " + numPetitions + " petition(s) removed.");
   }
 
   public boolean acceptPetition(Player respondingAdmin, int petitionId) {
     if (!this.isValidPetition(petitionId)) {
       return false;
     } else {
-      PetitionManager.Petition currPetition = (PetitionManager.Petition)this.getPendingPetitions().get(petitionId);
+      PetitionManager.Petition currPetition = this.getPendingPetitions().get(petitionId);
       if (currPetition.getResponder() != null) {
         return false;
       } else {
@@ -97,15 +93,11 @@ public final class PetitionManager implements IPetitionHandler {
 
   public void checkPetitionMessages(Player petitioner) {
     if (petitioner != null) {
-      Iterator var2 = this.getPendingPetitions().values().iterator();
 
-      while(var2.hasNext()) {
-        PetitionManager.Petition currPetition = (PetitionManager.Petition)var2.next();
+      for (Petition currPetition : this.getPendingPetitions().values()) {
         if (currPetition != null && currPetition.getPetitioner() != null && currPetition.getPetitioner().getObjectId() == petitioner.getObjectId()) {
-          Iterator var4 = currPetition.getLogMessages().iterator();
 
-          while(var4.hasNext()) {
-            Say2 logMessage = (Say2)var4.next();
+          for (Say2 logMessage : currPetition.getLogMessages()) {
             petitioner.sendPacket(logMessage);
           }
 
@@ -209,18 +201,16 @@ public final class PetitionManager implements IPetitionHandler {
     if (!this.isValidPetition(petitionId)) {
       return false;
     } else {
-      PetitionManager.Petition currPetition = (PetitionManager.Petition)this.getPendingPetitions().get(petitionId);
+      PetitionManager.Petition currPetition = this.getPendingPetitions().get(petitionId);
       return currPetition.getState() == PetitionManager.PetitionState.In_Process;
     }
   }
 
   public boolean isPlayerInConsultation(Player player) {
     if (player != null) {
-      Iterator var2 = this.getPendingPetitions().values().iterator();
 
-      while(var2.hasNext()) {
-        PetitionManager.Petition currPetition = (PetitionManager.Petition)var2.next();
-        if (currPetition != null && currPetition.getState() == PetitionManager.PetitionState.In_Process && (currPetition.getPetitioner() != null && currPetition.getPetitioner().getObjectId() == player.getObjectId() || currPetition.getResponder() != null && currPetition.getResponder().getObjectId() == player.getObjectId())) {
+      for (Petition currPetition : this.getPendingPetitions().values()) {
+        if (currPetition != null && currPetition.getState() == PetitionState.In_Process && (currPetition.getPetitioner() != null && currPetition.getPetitioner().getObjectId() == player.getObjectId() || currPetition.getResponder() != null && currPetition.getResponder().getObjectId() == player.getObjectId())) {
           return true;
         }
       }
@@ -235,10 +225,8 @@ public final class PetitionManager implements IPetitionHandler {
 
   public boolean isPlayerPetitionPending(Player petitioner) {
     if (petitioner != null) {
-      Iterator var2 = this.getPendingPetitions().values().iterator();
 
-      while(var2.hasNext()) {
-        PetitionManager.Petition currPetition = (PetitionManager.Petition)var2.next();
+      for (Petition currPetition : this.getPendingPetitions().values()) {
         if (currPetition != null && currPetition.getPetitioner() != null && currPetition.getPetitioner().getObjectId() == petitioner.getObjectId()) {
           return true;
         }
@@ -256,7 +244,7 @@ public final class PetitionManager implements IPetitionHandler {
     if (!this.isValidPetition(petitionId)) {
       return false;
     } else {
-      PetitionManager.Petition currPetition = (PetitionManager.Petition)this.getPendingPetitions().get(petitionId);
+      PetitionManager.Petition currPetition = this.getPendingPetitions().get(petitionId);
       if (currPetition.getResponder() != null) {
         return false;
       } else {
@@ -267,10 +255,8 @@ public final class PetitionManager implements IPetitionHandler {
   }
 
   public boolean sendActivePetitionMessage(Player player, String messageText) {
-    Iterator var4 = this.getPendingPetitions().values().iterator();
 
-    while(var4.hasNext()) {
-      PetitionManager.Petition currPetition = (PetitionManager.Petition)var4.next();
+    for (Petition currPetition : this.getPendingPetitions().values()) {
       if (currPetition != null) {
         Say2 cs;
         if (currPetition.getPetitioner() != null && currPetition.getPetitioner().getObjectId() == player.getObjectId()) {
@@ -306,15 +292,13 @@ public final class PetitionManager implements IPetitionHandler {
 
     boolean color = true;
     int petcount = 0;
-    Iterator var6 = this.getPendingPetitions().values().iterator();
 
-    while(var6.hasNext()) {
-      PetitionManager.Petition currPetition = (PetitionManager.Petition)var6.next();
+    for (Petition currPetition : this.getPendingPetitions().values()) {
       if (currPetition != null) {
         htmlContent.append("<tr><td width=\"270\"><table width=\"270\" cellpadding=\"2\" bgcolor=").append(color ? "131210" : "444444").append("><tr><td width=\"130\">").append(dateFormat.format(new Date(currPetition.getSubmitTime())));
         htmlContent.append("</td><td width=\"140\" align=right><font color=\"").append(currPetition.isPetitionerOnline() ? "00FF00" : "999999").append("\">").append(currPetition.getPetitionerName()).append("</font></td></tr>");
         htmlContent.append("<tr><td width=\"130\">");
-        if (currPetition.getState() != PetitionManager.PetitionState.In_Process) {
+        if (currPetition.getState() != PetitionState.In_Process) {
           htmlContent.append("<table width=\"130\" cellpadding=\"2\"><tr><td><button value=\"View\" action=\"bypass -h admin_view_petition ").append(currPetition.getId()).append("\" width=\"50\" height=\"21\" back=\"sek.cbui94\" fore=\"sek.cbui94\"></td><td><button value=\"Reject\" action=\"bypass -h admin_reject_petition ").append(currPetition.getId()).append("\" width=\"50\" height=\"21\" back=\"sek.cbui94\" fore=\"sek.cbui94\"></td></tr></table>");
         } else {
           htmlContent.append("<font color=\"").append(currPetition.getResponder().isOnline() ? "00FF00" : "999999").append("\">").append(currPetition.getResponder().getName()).append("</font>");
@@ -348,7 +332,7 @@ public final class PetitionManager implements IPetitionHandler {
   public void viewPetition(Player activeChar, int petitionId) {
     if (activeChar.isGM()) {
       if (this.isValidPetition(petitionId)) {
-        PetitionManager.Petition currPetition = (PetitionManager.Petition)this.getPendingPetitions().get(petitionId);
+        PetitionManager.Petition currPetition = this.getPendingPetitions().get(petitionId);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         NpcHtmlMessage html = new NpcHtmlMessage(0);
         html.setFile("admin/petition.htm");
@@ -379,7 +363,7 @@ public final class PetitionManager implements IPetitionHandler {
       } else if (txt.length() > 255) {
         player.sendPacket(new SystemMessage(971));
       } else if (typeId >= PetitionManager.PetitionType.values().length) {
-        _log.warn("PetitionManager: Invalid petition type : " + typeId);
+        log.warn("PetitionManager: Invalid petition type : " + typeId);
       } else {
         int petitionId = getInstance().submitPetition(player, txt, typeId);
         player.sendPacket((new SystemMessage(389)).addNumber(petitionId));
@@ -453,7 +437,7 @@ public final class PetitionManager implements IPetitionHandler {
 
     public boolean isPetitionerOnline() {
       Player pePlayer = World.getPlayer(this._petitioner);
-      return pePlayer != null ? pePlayer.isOnline() : false;
+      return pePlayer != null && pePlayer.isOnline();
     }
 
     public String getPetitionerName() {
@@ -508,7 +492,7 @@ public final class PetitionManager implements IPetitionHandler {
     }
   }
 
-  public static enum PetitionType {
+  public enum PetitionType {
     Immobility,
     Recovery_Related,
     Bug_Report,
@@ -519,11 +503,11 @@ public final class PetitionManager implements IPetitionHandler {
     Operation_Related,
     Other;
 
-    private PetitionType() {
+    PetitionType() {
     }
   }
 
-  public static enum PetitionState {
+  public enum PetitionState {
     Pending,
     Responder_Cancel,
     Responder_Missing,
@@ -534,7 +518,7 @@ public final class PetitionManager implements IPetitionHandler {
     In_Process,
     Completed;
 
-    private PetitionState() {
+    PetitionState() {
     }
   }
 }

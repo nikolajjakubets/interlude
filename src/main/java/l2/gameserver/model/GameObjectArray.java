@@ -5,13 +5,12 @@
 
 package l2.gameserver.model;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 
+@Slf4j
 public class GameObjectArray<E extends GameObject> implements Iterable<E> {
-  private static final Logger _log = LoggerFactory.getLogger(GameObjectArray.class);
   public final String name;
   public final int resizeStep;
   public final int initCapacity;
@@ -59,7 +58,7 @@ public class GameObjectArray<E extends GameObject> implements Iterable<E> {
     } else {
       if (this.elementData.length <= this.size) {
         int newCapacity = this.elementData.length + this.resizeStep;
-        _log.warn("Object array [" + this.name + "] resized: " + this.elementData.length + " -> " + newCapacity);
+        log.warn("Object array [" + this.name + "] resized: " + this.elementData.length + " -> " + newCapacity);
         this.elementData = Arrays.copyOf(this.elementData, newCapacity);
       }
 
@@ -98,7 +97,7 @@ public class GameObjectArray<E extends GameObject> implements Iterable<E> {
     if (objId <= 0) {
       return null;
     } else {
-      for(int i = 0; i < this.size; ++i) {
+      for (int i = 0; i < this.size; ++i) {
         E o = this.elementData[i];
         if (o != null && o.getObjectId() == objId) {
           return o;
@@ -113,7 +112,7 @@ public class GameObjectArray<E extends GameObject> implements Iterable<E> {
     if (s == null) {
       return null;
     } else {
-      for(int i = 0; i < this.size; ++i) {
+      for (int i = 0; i < this.size; ++i) {
         E o = this.elementData[i];
         if (o != null && s.equalsIgnoreCase(o.getName())) {
           return o;
@@ -130,7 +129,7 @@ public class GameObjectArray<E extends GameObject> implements Iterable<E> {
     } else {
       List<E> result = new ArrayList<>();
 
-      for(int i = 0; i < this.size; ++i) {
+      for (int i = 0; i < this.size; ++i) {
         E o = this.elementData[i];
         if (o != null && s.equalsIgnoreCase(o.getName())) {
           result.add(o);
@@ -146,7 +145,7 @@ public class GameObjectArray<E extends GameObject> implements Iterable<E> {
   }
 
   public List<E> getAll(List<E> list) {
-    for(int i = 0; i < this.size; ++i) {
+    for (int i = 0; i < this.size; ++i) {
       E o = this.elementData[i];
       if (o != null) {
         list.add(o);
@@ -160,7 +159,7 @@ public class GameObjectArray<E extends GameObject> implements Iterable<E> {
     if (o == null) {
       return -1;
     } else {
-      for(int i = 0; i < this.size; ++i) {
+      for (int i = 0; i < this.size; ++i) {
         if (o.equals(this.elementData[i])) {
           return i;
         }
@@ -192,7 +191,7 @@ public class GameObjectArray<E extends GameObject> implements Iterable<E> {
     }
 
     public boolean hasNext() {
-      while(true) {
+      while (true) {
         if (this.cursor < GameObjectArray.this.size) {
           if ((this._next = GameObjectArray.this.elementData[this.cursor++]) == null) {
             continue;

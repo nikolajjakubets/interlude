@@ -9,6 +9,7 @@ import l2.gameserver.Config;
 import l2.gameserver.model.Player;
 import l2.gameserver.utils.Language;
 import l2.gameserver.utils.Strings;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ehcache.Cache;
@@ -16,20 +17,18 @@ import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class HtmCache {
   public static final int DISABLED = 0; // все диалоги кешируются при загрузке
   // сервера
   public static final int LAZY = 1; // диалоги кешируются по мере обращения
   public static final int ENABLED = 2; // кеширование отключено (только для тестирования)
-  private static final Logger _log = LoggerFactory.getLogger(HtmCache.class);
   private static final HtmCache _instance = new HtmCache();
   List<Cache<String, String>> _cache;
 //  private Cache[] _cache  = new Cache[Language.VALUES.length];
@@ -61,10 +60,10 @@ public class HtmCache {
     this.clear();
     switch (Config.HTM_CACHE_MODE) {
       case 0:
-        _log.info("HtmCache: disabled.");
+        log.info("HtmCache: disabled.");
         break;
       case 1:
-        _log.info("HtmCache: lazy cache mode.");
+        log.info("HtmCache: lazy cache mode.");
         break;
       case 2:
         Language[] var1 = Language.VALUES;
@@ -72,14 +71,14 @@ public class HtmCache {
         for (Language lang : var1) {
           File root = new File(Config.DATAPACK_ROOT, "data/html-" + lang.getShortName());
           if (!root.exists()) {
-            _log.info("HtmCache: Not find html dir for lang: " + lang);
+            log.info("HtmCache: Not find html dir for lang: " + lang);
           } else {
             this.load(lang, root, root.getAbsolutePath() + "/");
           }
         }
         for (int i = 0; i < this._cache.size(); ++i) {
           Cache c = _cache.get(i);
-          _log.info(String.format("HtmCache: parsing %d documents; lang: %s.", c.hashCode(), Language.VALUES[i]));
+          log.info(String.format("HtmCache: parsing %d documents; lang: %s.", c.hashCode(), Language.VALUES[i]));
         }
     }
 
@@ -87,7 +86,7 @@ public class HtmCache {
 
   private void load(Language lang, File f, String rootPath) {
     if (!f.exists()) {
-      _log.info("HtmCache: dir not exists: " + f);
+      log.info("HtmCache: dir not exists: " + f);
     } else {
       File[] files = f.listFiles();
 
@@ -98,7 +97,7 @@ public class HtmCache {
           try {
             this.putContent(lang, file, rootPath);
           } catch (IOException var10) {
-            _log.info("HtmCache: file error" + var10, var10);
+            log.info("HtmCache: file error" + var10, var10);
           }
         }
       }
@@ -163,7 +162,7 @@ public class HtmCache {
         cache = FileUtils.readFileToString(f, "UTF-8");
         cache = Strings.bbParse(cache);
       } catch (IOException var6) {
-        _log.info("HtmCache: File error: " + file + " lang: " + lang);
+        log.info("HtmCache: File error: " + file + " lang: " + lang);
       }
     }
 
@@ -179,7 +178,7 @@ public class HtmCache {
         cache = Strings.bbParse(cache);
         this._cache.get(lang.ordinal()).put(file, cache);
       } catch (IOException var6) {
-        _log.info("HtmCache: File error: " + file + " lang: " + lang);
+        log.info("HtmCache: File error: " + file + " lang: " + lang);
       }
     }
 

@@ -21,8 +21,7 @@ import l2.gameserver.tables.ClanTable;
 import l2.gameserver.templates.manor.CropProcure;
 import l2.gameserver.templates.manor.SeedProduction;
 import l2.gameserver.utils.Log;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,8 +31,8 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
+@Slf4j
 public class CastleManorManager {
-  private static final Logger _log = LoggerFactory.getLogger(CastleManorManager.class);
   private static CastleManorManager _instance;
   public static final int PERIOD_CURRENT = 0;
   public static final int PERIOD_NEXT = 1;
@@ -50,7 +49,7 @@ public class CastleManorManager {
 
   public static CastleManorManager getInstance() {
     if (_instance == null) {
-      _log.info("Manor System: Initializing...");
+      log.info("Manor System: Initializing...");
       _instance = new CastleManorManager();
     }
 
@@ -129,11 +128,11 @@ public class CastleManorManager {
         castle.setCropProcure(procure, 0);
         castle.setCropProcure(procureNext, 1);
         if (!procure.isEmpty() || !procureNext.isEmpty() || !production.isEmpty() || !productionNext.isEmpty()) {
-          _log.info("Manor System: Loaded data for " + castle.getName() + " castle");
+          log.info("Manor System: Loaded data for " + castle.getName() + " castle");
         }
       }
     } catch (Exception var23) {
-      _log.error("Manor System: Error restoring manor data!", var23);
+      log.error("Manor System: Error restoring manor data!", var23);
     } finally {
       DbUtils.closeQuietly(con, statement, rs);
     }
@@ -184,13 +183,11 @@ public class CastleManorManager {
       } while(clan == null);
 
       Warehouse cwh = clan.getWarehouse();
-      Iterator var6 = c.getCropProcure(0).iterator();
 
-      while(var6.hasNext()) {
-        CropProcure crop = (CropProcure)var6.next();
+      for (CropProcure crop : c.getCropProcure(0)) {
         if (crop.getStartAmount() != 0L) {
           if (crop.getStartAmount() > crop.getAmount()) {
-            _log.info("Manor System [" + c.getName() + "]: Start Amount of Crop " + crop.getStartAmount() + " > Amount of current " + crop.getAmount());
+            log.info("Manor System [" + c.getName() + "]: Start Amount of Crop " + crop.getStartAmount() + " > Amount of current " + crop.getAmount());
             long count = crop.getStartAmount() - crop.getAmount();
             count = count * 90L / 100L;
             if (count < 1L && Rnd.get(99) < 90) {
@@ -252,10 +249,8 @@ public class CastleManorManager {
 
   public void approveNextPeriod() {
     List<Castle> castleList = ResidenceHolder.getInstance().getResidenceList(Castle.class);
-    Iterator var2 = castleList.iterator();
 
-    while(var2.hasNext()) {
-      Castle c = (Castle)var2.next();
+    for (Castle c : castleList) {
       if (c.getOwnerId() > 0) {
         long manor_cost = c.getManorCost(1);
         if (c.getTreasury() < manor_cost) {
@@ -282,10 +277,8 @@ public class CastleManorManager {
   private List<SeedProduction> getNewSeedsList(int castleId) {
     List<SeedProduction> seeds = new ArrayList<>();
     List<Integer> seedsIds = Manor.getInstance().getSeedsForCastle(castleId);
-    Iterator var4 = seedsIds.iterator();
 
-    while(var4.hasNext()) {
-      int sd = (Integer)var4.next();
+    for (int sd : seedsIds) {
       seeds.add(new SeedProduction(sd));
     }
 
@@ -295,10 +288,8 @@ public class CastleManorManager {
   private List<CropProcure> getNewCropsList(int castleId) {
     List<CropProcure> crops = new ArrayList<>();
     List<Integer> cropsIds = Manor.getInstance().getCropsForCastle(castleId);
-    Iterator var4 = cropsIds.iterator();
 
-    while(var4.hasNext()) {
-      int cr = (Integer)var4.next();
+    for (int cr : cropsIds) {
       crops.add(new CropProcure(cr));
     }
 
@@ -331,10 +322,8 @@ public class CastleManorManager {
 
   public void save() {
     List<Castle> castleList = ResidenceHolder.getInstance().getResidenceList(Castle.class);
-    Iterator var2 = castleList.iterator();
 
-    while(var2.hasNext()) {
-      Castle c = (Castle)var2.next();
+    for (Castle c : castleList) {
       c.saveSeedData();
       c.saveCropData();
     }
@@ -346,7 +335,7 @@ public class CastleManorManager {
     NEXT_PERIOD_APPROVE_MIN = Config.MANOR_APPROVE_MIN;
     MANOR_REFRESH = Config.MANOR_REFRESH_TIME;
     MANOR_REFRESH_MIN = Config.MANOR_REFRESH_MIN;
-    MAINTENANCE_PERIOD = (long)(Config.MANOR_MAINTENANCE_PERIOD / '\uea60');
+    MAINTENANCE_PERIOD = Config.MANOR_MAINTENANCE_PERIOD / '\uea60';
   }
 
   private class ManorTask extends RunnableImpl {
@@ -360,12 +349,12 @@ public class CastleManorManager {
         if (H < CastleManorManager.NEXT_PERIOD_APPROVE || H > CastleManorManager.MANOR_REFRESH || H == CastleManorManager.MANOR_REFRESH && M >= CastleManorManager.MANOR_REFRESH_MIN) {
           ServerVariables.set("ManorApproved", false);
           CastleManorManager.this.setUnderMaintenance(true);
-          _log.info("Manor System: Under maintenance mode started");
+          log.info("Manor System: Under maintenance mode started");
         }
       } else if (CastleManorManager.this.isUnderMaintenance()) {
         if (H != CastleManorManager.MANOR_REFRESH || (long)M >= (long)CastleManorManager.MANOR_REFRESH_MIN + CastleManorManager.MAINTENANCE_PERIOD) {
           CastleManorManager.this.setUnderMaintenance(false);
-          _log.info("Manor System: Next period started");
+          log.info("Manor System: Next period started");
           if (CastleManorManager.this.isDisabled()) {
             return;
           }
@@ -375,12 +364,12 @@ public class CastleManorManager {
           try {
             CastleManorManager.this.save();
           } catch (Exception var4) {
-            _log.info("Manor System: Failed to save manor data: " + var4);
+            log.info("Manor System: Failed to save manor data: " + var4);
           }
         }
       } else if (H > CastleManorManager.NEXT_PERIOD_APPROVE && H < CastleManorManager.MANOR_REFRESH || H == CastleManorManager.NEXT_PERIOD_APPROVE && M >= CastleManorManager.NEXT_PERIOD_APPROVE_MIN) {
         ServerVariables.set("ManorApproved", true);
-        _log.info("Manor System: Next period approved");
+        log.info("Manor System: Next period approved");
         if (CastleManorManager.this.isDisabled()) {
           return;
         }

@@ -39,10 +39,9 @@ import l2.gameserver.stats.funcs.FuncTemplate;
 import l2.gameserver.tables.SkillTable;
 import l2.gameserver.templates.StatsSet;
 import l2.gameserver.utils.PositionUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -50,8 +49,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+@Slf4j
 public abstract class Skill extends StatTemplate implements Cloneable {
-  private static final Logger _log = LoggerFactory.getLogger(Skill.class);
   public static final Skill[] EMPTY_ARRAY = new Skill[0];
   protected EffectTemplate[] _effectTemplates;
   protected List<Integer> _teachers;
@@ -513,7 +512,6 @@ public abstract class Skill extends StatTemplate implements Cloneable {
               env.target = target;
               if (first) {
                 Condition[] var16 = this._preCondition;
-                int var10 = var16.length;
 
                 for (Condition с : var16) {
                   if (!с.test(env)) {
@@ -1027,7 +1025,7 @@ public abstract class Skill extends StatTemplate implements Cloneable {
     }
 
     Summon pet = target.getPet();
-    if (pet != null && actor.isInRange(pet, this._skillRadius) && pet.isDead() == this._isCorpse) {
+    if (actor.isInRange(pet, this._skillRadius) && pet.isDead() == this._isCorpse) {
       targets.add(pet);
     }
 
@@ -1053,10 +1051,7 @@ public abstract class Skill extends StatTemplate implements Cloneable {
       terr.setZmin(Math.min(zmin1, zmin2)).setZmax(Math.max(zmax1, zmax2));
     }
 
-    Iterator var18 = aimingTarget.getAroundCharacters(this._skillRadius, 300).iterator();
-
-    while (var18.hasNext()) {
-      Creature target = (Creature) var18.next();
+    for (Creature target : aimingTarget.getAroundCharacters(this._skillRadius, 300)) {
       if ((terr == null || terr.isInside(target.getX(), target.getY(), target.getZ())) && target != null && activeChar != target && (activeChar.getPlayer() == null || activeChar.getPlayer() != target.getPlayer()) && this.checkTarget(activeChar, target, aimingTarget, forceUse, false) == null && (!activeChar.isNpc() || !target.isNpc())) {
         targets.add(target);
         ++count;
@@ -1110,8 +1105,7 @@ public abstract class Skill extends StatTemplate implements Cloneable {
             int var5 = var4.length;
 
             label250:
-            for (int var6 = 0; var6 < var5; ++var6) {
-              EffectTemplate et = var4[var6];
+            for (EffectTemplate et : var4) {
               if (applyOnCaster == et._applyOnCaster && et._count != 0) {
                 Creature character = !et._applyOnCaster && (!et._isReflectable || !skillReflected) ? effected : effector;
                 List<Creature> targets = new LazyArrayList(1);
@@ -1146,10 +1140,8 @@ public abstract class Skill extends StatTemplate implements Cloneable {
                     } else if (!Skill.this.isBlockedByChar(target, et)) {
                       if (et._stackOrder == -1) {
                         if (!et._stackType.equals("none")) {
-                          Iterator var12 = target.getEffectList().getAllEffects().iterator();
 
-                          while (var12.hasNext()) {
-                            Effect e = (Effect) var12.next();
+                          for (Effect e : target.getEffectList().getAllEffects()) {
                             if (e.getStackType().equalsIgnoreCase(et._stackType)) {
                               continue label235;
                             }
@@ -1381,10 +1373,8 @@ public abstract class Skill extends StatTemplate implements Cloneable {
 
   public Effect getSameByStackType(List<Effect> list) {
     EffectTemplate[] var3 = this.getEffectTemplates();
-    int var4 = var3.length;
 
-    for (int var5 = 0; var5 < var4; ++var5) {
-      EffectTemplate et = var3[var5];
+    for (EffectTemplate et : var3) {
       Effect ret;
       if (et != null && (ret = et.getSameByStackType(list)) != null) {
         return ret;
@@ -1621,10 +1611,8 @@ public abstract class Skill extends StatTemplate implements Cloneable {
       return false;
     } else {
       FuncTemplate[] var3 = et.getAttachedFuncs();
-      int var4 = var3.length;
 
-      for (int var5 = 0; var5 < var4; ++var5) {
-        FuncTemplate func = var3[var5];
+      for (FuncTemplate func : var3) {
         if (func != null && effected.checkBlockedStat(func._stat)) {
           return true;
         }
@@ -2154,19 +2142,14 @@ public abstract class Skill extends StatTemplate implements Cloneable {
       try {
         Constructor<? extends Skill> c = this.clazz.getConstructor(StatsSet.class);
         return c.newInstance(set);
-      } catch (Exception var3) {
-        Skill._log.error("", var3);
-        throw new RuntimeException(var3);
+      } catch (Exception e) {
+        log.error("closeQuietly: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+        throw new RuntimeException(e);
       }
     }
 
     public final boolean isPvM() {
-      switch (this) {
-        case DISCORD:
-          return true;
-        default:
-          return false;
-      }
+      return this == SkillType.DISCORD;
     }
 
     public boolean isAI() {

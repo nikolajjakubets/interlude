@@ -24,6 +24,7 @@ import l2.gameserver.templates.npc.Faction;
 import l2.gameserver.templates.npc.MinionData;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.utils.Location;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.dom4j.Element;
 
@@ -33,6 +34,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+@Slf4j
 public final class NpcParser extends AbstractDirParser<NpcHolder> {
   private static final NpcParser _instance = new NpcParser();
 
@@ -60,7 +62,7 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
     NpcTemplate template;
     label302:
     for (Iterator npcIterator = rootElement.elementIterator(); npcIterator.hasNext(); this.getHolder().addTemplate(template)) {
-      Element npcElement = (Element)npcIterator.next();
+      Element npcElement = (Element) npcIterator.next();
       int npcId = Integer.parseInt(npcElement.attributeValue("id"));
       int templateId = npcElement.attributeValue("template_id") == null ? 0 : Integer.parseInt(npcElement.attributeValue("id"));
       String name = npcElement.attributeValue("name");
@@ -74,29 +76,29 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
       set.set("baseCpMax", 0);
       Iterator firstIterator = npcElement.elementIterator();
 
-      while(true) {
+      while (true) {
         Iterator eIterator;
         Element secondElement;
-        while(firstIterator.hasNext()) {
-          Element firstElement = (Element)firstIterator.next();
+        while (firstIterator.hasNext()) {
+          Element firstElement = (Element) firstIterator.next();
           if (firstElement.getName().equalsIgnoreCase("set")) {
             set.set(firstElement.attributeValue("name"), firstElement.attributeValue("value"));
           } else {
             int itemId;
             if (firstElement.getName().equalsIgnoreCase("equip")) {
-              for(eIterator = firstElement.elementIterator(); eIterator.hasNext(); set.set(secondElement.getName(), String.valueOf(itemId))) {
-                secondElement = (Element)eIterator.next();
+              for (eIterator = firstElement.elementIterator(); eIterator.hasNext(); set.set(secondElement.getName(), String.valueOf(itemId))) {
+                secondElement = (Element) eIterator.next();
                 itemId = Integer.parseInt(secondElement.attributeValue("item_id"));
                 if (ItemHolder.getInstance().getTemplate(itemId) == null) {
-                  this._log.error("Undefined item " + itemId + " used in slot " + secondElement.getName() + " of npc " + npcId);
+                  log.error("Undefined item " + itemId + " used in slot " + secondElement.getName() + " of npc " + npcId);
                 }
               }
             } else if (firstElement.getName().equalsIgnoreCase("ai_params")) {
               StatsSet ai = new StatsSet();
               eIterator = firstElement.elementIterator();
 
-              while(eIterator.hasNext()) {
-                Element eElement = (Element)eIterator.next();
+              while (eIterator.hasNext()) {
+                Element eElement = (Element) eIterator.next();
                 ai.set(eElement.attributeValue("name"), eElement.attributeValue("value"));
               }
 
@@ -106,8 +108,8 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
               int[] attributeDefence = new int[6];
               eIterator = firstElement.elementIterator();
 
-              while(eIterator.hasNext()) {
-                Element eElement = (Element)eIterator.next();
+              while (eIterator.hasNext()) {
+                Element eElement = (Element) eIterator.next();
                 l2.gameserver.model.base.Element element;
                 if (eElement.getName().equalsIgnoreCase("defence")) {
                   element = l2.gameserver.model.base.Element.getElementByName(eElement.attributeValue("attribute"));
@@ -128,13 +130,13 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
         List<Location> teleportLocations = new LinkedList();
         eIterator = npcElement.elementIterator();
 
-        while(true) {
-          while(true) {
+        while (true) {
+          while (true) {
             if (!eIterator.hasNext()) {
               continue label302;
             }
 
-            secondElement = (Element)eIterator.next();
+            secondElement = (Element) eIterator.next();
             String nodeName = secondElement.getName();
             int id;
             Iterator nextIterator;
@@ -147,8 +149,8 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
               faction.setRange(id);
               nextIterator = secondElement.elementIterator();
 
-              while(nextIterator.hasNext()) {
-                nextElement = (Element)nextIterator.next();
+              while (nextIterator.hasNext()) {
+                nextElement = (Element) nextIterator.next();
                 maxLevel = Integer.parseInt(nextElement.attributeValue("npc_id"));
                 faction.addIgnoreNpcId(maxLevel);
               }
@@ -160,18 +162,18 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
               RewardList list = new RewardList(type, autoLoot);
               nextIterator = secondElement.elementIterator();
 
-              while(true) {
+              while (true) {
                 label226:
-                while(nextIterator.hasNext()) {
-                  nextElement = (Element)nextIterator.next();
+                while (nextIterator.hasNext()) {
+                  nextElement = (Element) nextIterator.next();
                   String nextName = nextElement.getName();
                   if (nextName.equalsIgnoreCase("group")) {
                     double enterChance = nextElement.attributeValue("chance") == null ? 1000000.0D : Double.parseDouble(nextElement.attributeValue("chance")) * 10000.0D;
                     RewardGroup group = type != RewardType.SWEEP && type != RewardType.NOT_RATED_NOT_GROUPED ? new RewardGroup(enterChance) : null;
                     Iterator rewardIterator = nextElement.elementIterator();
 
-                    while(true) {
-                      while(true) {
+                    while (true) {
+                      while (true) {
                         RewardData data;
                         do {
                           if (!rewardIterator.hasNext()) {
@@ -181,9 +183,9 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
                             continue label226;
                           }
 
-                          Element rewardElement = (Element)rewardIterator.next();
+                          Element rewardElement = (Element) rewardIterator.next();
                           data = this.parseReward(rewardElement, type);
-                        } while(data == null);
+                        } while (data == null);
 
                         if (type != RewardType.SWEEP && type != RewardType.NOT_RATED_NOT_GROUPED) {
                           group.addData(data);
@@ -220,12 +222,12 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
               if (nodeName.equalsIgnoreCase("skills")) {
                 sublistIterator = secondElement.elementIterator();
 
-                while(sublistIterator.hasNext()) {
-                  subListElement = (Element)sublistIterator.next();
+                while (sublistIterator.hasNext()) {
+                  subListElement = (Element) sublistIterator.next();
                   id = Integer.parseInt(subListElement.attributeValue("id"));
                   cursedChance = Integer.parseInt(subListElement.attributeValue("level"));
                   if (SkillTable.getInstance().getInfo(id, cursedChance) == null) {
-                    this._log.error("Undefined id " + id + " and level " + cursedChance + " of npc " + npcId);
+                    log.error("Undefined id " + id + " and level " + cursedChance + " of npc " + npcId);
                   }
 
                   if (id == 4416) {
@@ -240,8 +242,8 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
               } else if (nodeName.equalsIgnoreCase("minions")) {
                 sublistIterator = secondElement.elementIterator();
 
-                while(sublistIterator.hasNext()) {
-                  subListElement = (Element)sublistIterator.next();
+                while (sublistIterator.hasNext()) {
+                  subListElement = (Element) sublistIterator.next();
                   id = Integer.parseInt(subListElement.attributeValue("npc_id"));
                   cursedChance = Integer.parseInt(subListElement.attributeValue("count"));
                   template.addMinion(new MinionData(id, cursedChance));
@@ -249,16 +251,16 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
               } else if (nodeName.equalsIgnoreCase("teach_classes")) {
                 sublistIterator = secondElement.elementIterator();
 
-                while(sublistIterator.hasNext()) {
-                  subListElement = (Element)sublistIterator.next();
+                while (sublistIterator.hasNext()) {
+                  subListElement = (Element) sublistIterator.next();
                   id = Integer.parseInt(subListElement.attributeValue("id"));
                   template.addTeachInfo(ClassId.VALUES[id]);
                 }
               } else if (nodeName.equalsIgnoreCase("absorblist")) {
                 sublistIterator = secondElement.elementIterator();
 
-                while(sublistIterator.hasNext()) {
-                  subListElement = (Element)sublistIterator.next();
+                while (sublistIterator.hasNext()) {
+                  subListElement = (Element) sublistIterator.next();
                   id = Integer.parseInt(subListElement.attributeValue("chance"));
                   cursedChance = subListElement.attributeValue("cursed_chance") == null ? 0 : Integer.parseInt(subListElement.attributeValue("cursed_chance"));
                   int minLevel = Integer.parseInt(subListElement.attributeValue("min_level"));
@@ -270,14 +272,14 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
               } else if (nodeName.equalsIgnoreCase("teleportlist")) {
                 sublistIterator = secondElement.elementIterator();
 
-                while(sublistIterator.hasNext()) {
-                  subListElement = (Element)sublistIterator.next();
+                while (sublistIterator.hasNext()) {
+                  subListElement = (Element) sublistIterator.next();
                   id = Integer.parseInt(subListElement.attributeValue("id"));
                   List<TeleportLocation> list = new ArrayList<>();
                   Iterator targetIterator = subListElement.elementIterator();
 
-                  while(targetIterator.hasNext()) {
-                    Element targetElement = (Element)targetIterator.next();
+                  while (targetIterator.hasNext()) {
+                    Element targetElement = (Element) targetIterator.next();
                     int itemId = Integer.parseInt(targetElement.attributeValue("item_id", "57"));
                     long price = Integer.parseInt(targetElement.attributeValue("price"));
                     int minLevel = Integer.parseInt(targetElement.attributeValue("min_level", "0"));
@@ -290,7 +292,7 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
 
                       for (Location minMaxCheckLoc : teleportLocations) {
                         if (minMaxCheckLoc.x == loc.x && minMaxCheckLoc.y == loc.y && minMaxCheckLoc.z == loc.z) {
-                          this._log.warn("Teleport location may intersect for " + targetElement.asXML());
+                          log.warn("Teleport location may intersect for " + targetElement.asXML());
                         }
                       }
                     }
@@ -322,10 +324,10 @@ public final class NpcParser extends AbstractDirParser<NpcHolder> {
 
     int min = Integer.parseInt(rewardElement.attributeValue("min"));
     int max = Integer.parseInt(rewardElement.attributeValue("max"));
-    int chance = (int)(Double.parseDouble(rewardElement.attributeValue("chance")) * 10000.0D);
+    int chance = (int) (Double.parseDouble(rewardElement.attributeValue("chance")) * 10000.0D);
     RewardData data = new RewardData(itemId);
     if (data.getItem().isHerb()) {
-      data.setChance((double)chance * Config.RATE_DROP_HERBS);
+      data.setChance((double) chance * Config.RATE_DROP_HERBS);
     } else {
       data.setChance(chance);
     }

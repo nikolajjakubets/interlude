@@ -5,17 +5,17 @@
 
 package l2.gameserver.model.entity;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.idfactory.IdFactory;
 import l2.gameserver.instancemanager.CoupleManager;
 import l2.gameserver.model.Player;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+@Slf4j
 public class Couple {
-  private static final Logger _log = LoggerFactory.getLogger(Couple.class);
   private int _id = 0;
   private int _player1Id = 0;
   private int _player2Id = 0;
@@ -64,8 +64,8 @@ public class Couple {
       statement.setLong(5, this._affiancedDate);
       statement.setLong(6, this._weddingDate);
       statement.execute();
-    } catch (Exception var7) {
-      _log.error("", var7);
+    } catch (Exception e) {
+      log.error("store: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(statement);
     }

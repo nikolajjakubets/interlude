@@ -5,17 +5,17 @@
 
 package l2.gameserver.model.entity;
 
-import java.lang.reflect.Constructor;
 import l2.commons.util.Rnd;
 import l2.gameserver.data.xml.holder.NpcHolder;
 import l2.gameserver.idfactory.IdFactory;
 import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.templates.npc.NpcTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Constructor;
+
+@Slf4j
 public class MonsterRace {
-  private static final Logger _log = LoggerFactory.getLogger(MonsterRace.class);
   private NpcInstance[] monsters = new NpcInstance[8];
   private static MonsterRace _instance;
   private Constructor<?> _constructor;
@@ -37,11 +37,11 @@ public class MonsterRace {
   public void newRace() {
 //    int random = false;
 
-    for(int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 8; ++i) {
       int id = 31003;
       int random = Rnd.get(24);
 
-      for(int j = i - 1; j >= 0; --j) {
+      for (int j = i - 1; j >= 0; --j) {
         if (this.monsters[j].getTemplate().npcId == id + random) {
           random = Rnd.get(24);
         }
@@ -51,9 +51,9 @@ public class MonsterRace {
         NpcTemplate template = NpcHolder.getInstance().getTemplate(id + random);
         this._constructor = template.getInstanceConstructor();
         int objectId = IdFactory.getInstance().getNextId();
-        this.monsters[i] = (NpcInstance)this._constructor.newInstance(objectId, template);
-      } catch (Exception var6) {
-        _log.error("", var6);
+        this.monsters[i] = (NpcInstance) this._constructor.newInstance(objectId, template);
+      } catch (Exception e) {
+        log.error("newRace: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
       }
     }
 
@@ -66,10 +66,10 @@ public class MonsterRace {
     this.first[1] = 0;
     this.second[1] = 0;
 
-    for(int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 8; ++i) {
       int total = 0;
 
-      for(int j = 0; j < 20; ++j) {
+      for (int j = 0; j < 20; ++j) {
         if (j == 19) {
           this.speeds[i][j] = 100;
         } else {

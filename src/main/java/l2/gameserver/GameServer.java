@@ -83,9 +83,9 @@ public class GameServer {
     (new File("./log/")).mkdir();
 //    this.version = new Version(GameServer.class);
     log.info("=================================================");
-//    _log.info("Revision: ................ " + this.version.getRevisionNumber());
-//    _log.info("Build date: .............. " + this.version.getBuildDate());
-//    _log.info("Compiler version: ........ " + this.version.getBuildJdk());
+//    log.info("Revision: ................ " + this.version.getRevisionNumber());
+//    log.info("Build date: .............. " + this.version.getBuildDate());
+//    log.info("Compiler version: ........ " + this.version.getBuildJdk());
     log.info("=================================================");
     Config.load();
     checkFreePorts();

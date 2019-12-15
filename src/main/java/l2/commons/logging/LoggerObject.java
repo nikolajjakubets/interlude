@@ -1,35 +1,34 @@
 package l2.commons.logging;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class LoggerObject {
-    protected final Logger _log = LoggerFactory.getLogger(this.getClass());
 
-    public LoggerObject() {
-    }
+  public LoggerObject() {
+  }
 
-    public void error(String st, Exception e) {
-        this._log.error(this.getClass().getSimpleName() + ": " + st, e);
-    }
+  public void error(String st, Exception e) {
+    log.error(this.getClass().getSimpleName() + ": " + st, e);
+  }
 
-    public void error(String st) {
-        this._log.error(this.getClass().getSimpleName() + ": " + st);
-    }
+  public void error(String st) {
+    log.error(this.getClass().getSimpleName() + ": " + st);
+  }
 
-    public void warn(String st, Exception e) {
-        this._log.warn(this.getClass().getSimpleName() + ": " + st, e);
-    }
+  public void warn(String st, Exception e) {
+    log.warn(this.getClass().getSimpleName() + ": " + st, e);
+  }
 
-    public void warn(String st) {
-        this._log.warn(this.getClass().getSimpleName() + ": " + st);
-    }
+  public void warn(String st) {
+    log.warn(this.getClass().getSimpleName() + ": " + st);
+  }
 
-    public void info(String st, Exception e) {
-        this._log.info(this.getClass().getSimpleName() + ": " + st, e);
-    }
+  public void info(String st, Exception e) {
+    log.info(this.getClass().getSimpleName() + ": " + st, e);
+  }
 
-    public void info(String st) {
-        this._log.info(this.getClass().getSimpleName() + ": " + st);
-    }
+  public void info(String st) {
+    log.info(this.getClass().getSimpleName() + ": " + st);
+  }
 }

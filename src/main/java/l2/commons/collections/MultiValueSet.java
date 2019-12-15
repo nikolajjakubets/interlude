@@ -138,7 +138,13 @@ public class MultiValueSet<T> extends HashMap<T, Object> {
     try {
       return this.getIntegerArray(key);
     } catch (IllegalArgumentException e) {
-      log.error("getIntegerArray: eMessage={}, eClass={}", e.getMessage(), e.getClass());
+      if ("baseAttributeAttack".equals(key) || "baseAttributeDefence".equals(key)) {
+      } else {
+        log.warn("getIntegerArray: not found key={}", key);
+      }
+//      if (!"baseAttributeDefence".equals(key)) {
+//        log.warn("getIntegerArray: not found key={}", key);
+//      }
       return defaultArray;
     }
   }

@@ -5,10 +5,6 @@
 
 package l2.gameserver.model.instances;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.concurrent.Future;
 import l2.commons.dbutils.DbUtils;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.Config;
@@ -16,12 +12,7 @@ import l2.gameserver.ThreadPoolManager;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.idfactory.IdFactory;
-import l2.gameserver.model.Creature;
-import l2.gameserver.model.GameObject;
-import l2.gameserver.model.PetData;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.Skill;
-import l2.gameserver.model.Summon;
+import l2.gameserver.model.*;
 import l2.gameserver.model.base.BaseStats;
 import l2.gameserver.model.base.Experience;
 import l2.gameserver.model.items.ItemInstance;
@@ -30,7 +21,6 @@ import l2.gameserver.model.items.attachment.FlagItemAttachment;
 import l2.gameserver.network.l2.components.CustomMessage;
 import l2.gameserver.network.l2.components.SystemMsg;
 import l2.gameserver.network.l2.s2c.InventoryUpdate;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.SocialAction;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.stats.Stats;
@@ -39,12 +29,16 @@ import l2.gameserver.templates.item.WeaponTemplate;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.utils.Log;
 import l2.gameserver.utils.Log.ItemLog;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.concurrent.Future;
+
+@Slf4j
 public class PetInstance extends Summon {
-  private static final Logger _log = LoggerFactory.getLogger(PetInstance.class);
   private static final int DELUXE_FOOD_FOR_STRIDER = 5169;
   private final int _controlItemObjId;
   private int _curFed;
@@ -55,13 +49,13 @@ public class PetInstance extends Summon {
   private boolean _respawned;
   private int lostExp;
 
-  public static final PetInstance restore(ItemInstance control, NpcTemplate template, Player owner) {
+  public static PetInstance restore(ItemInstance control, NpcTemplate template, Player owner) {
     PetInstance pet = null;
     Connection con = null;
     PreparedStatement statement = null;
     ResultSet rset = null;
 
-    Object var7;
+    PetInstance petInstance;
     try {
       con = DatabaseFactory.getInstance().getConnection();
       statement = con.prepareStatement("SELECT objId, name, level, curHp, curMp, exp, sp, fed FROM pets WHERE item_obj_id=?");
@@ -74,14 +68,14 @@ public class PetInstance extends Summon {
           pet = new PetBabyInstance(rset.getInt("objId"), template, owner, control, rset.getInt("level"), rset.getLong("exp"));
         }
 
-        ((PetInstance)pet).setRespawned(true);
+        pet.setRespawned(true);
         String name = rset.getString("name");
-        ((PetInstance)pet).setName(name != null && !name.isEmpty() ? name : template.name);
-        ((PetInstance)pet).setCurrentHpMp(rset.getDouble("curHp"), (double)rset.getInt("curMp"), true);
-        ((PetInstance)pet).setCurrentCp((double)((PetInstance)pet).getMaxCp());
-        ((PetInstance)pet).setSp(rset.getInt("sp"));
-        ((PetInstance)pet).setCurrentFed(rset.getInt("fed"));
-        return (PetInstance)pet;
+        pet.setName(name != null && !name.isEmpty() ? name : template.name);
+        pet.setCurrentHpMp(rset.getDouble("curHp"), rset.getInt("curMp"), true);
+        pet.setCurrentCp(pet.getMaxCp());
+        pet.setSp(rset.getInt("sp"));
+        pet.setCurrentFed(rset.getInt("fed"));
+        return pet;
       }
 
       if (!PetDataTable.isBabyPet(template.getNpcId()) && !PetDataTable.isImprovedBabyPet(template.getNpcId())) {
@@ -90,16 +84,15 @@ public class PetInstance extends Summon {
         pet = new PetBabyInstance(IdFactory.getInstance().getNextId(), template, owner, control);
       }
 
-      var7 = pet;
+      petInstance = pet;
     } catch (Exception var12) {
-      _log.error("Could not restore Pet data from item: " + control + "!", var12);
-      Object var8 = null;
-      return (PetInstance)var8;
+      log.error("Could not restore Pet data from item: " + control + "!", var12);
+      return null;
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
 
-    return (PetInstance)var7;
+    return petInstance;
   }
 
   public PetInstance(int objectId, NpcTemplate template, Player owner, ItemInstance control) {
@@ -130,11 +123,11 @@ public class PetInstance extends Summon {
       this._exp = this.getExpForThisLevel();
     }
 
-    while(this._exp >= this.getExpForNextLevel() && this._level < Experience.getMaxLevel()) {
+    while (this._exp >= this.getExpForNextLevel() && this._level < Experience.getMaxLevel()) {
       ++this._level;
     }
 
-    while(this._exp < this.getExpForThisLevel() && this._level > minLevel) {
+    while (this._exp < this.getExpForThisLevel() && this._level > minLevel) {
       --this._level;
     }
 
@@ -184,7 +177,7 @@ public class PetInstance extends Summon {
   public void addExpAndSp(long addToExp, long addToSp) {
     Player owner = this.getPlayer();
     this._exp += addToExp;
-    this._sp = (int)((long)this._sp + addToSp);
+    this._sp = (int) ((long) this._sp + addToSp);
     if (this._exp > this.getMaxExp()) {
       this._exp = this.getMaxExp();
     }
@@ -194,17 +187,17 @@ public class PetInstance extends Summon {
     }
 
     int old_level;
-    for(old_level = this._level; this._exp >= this.getExpForNextLevel() && this._level < Experience.getMaxLevel(); ++this._level) {
+    for (old_level = this._level; this._exp >= this.getExpForNextLevel() && this._level < Experience.getMaxLevel(); ++this._level) {
     }
 
-    while(this._exp < this.getExpForThisLevel() && this._level > this.getMinLevel()) {
+    while (this._exp < this.getExpForThisLevel() && this._level > this.getMinLevel()) {
       --this._level;
     }
 
     if (old_level < this._level) {
-      owner.sendMessage((new CustomMessage("l2p.gameserver.model.instances.L2PetInstance.PetLevelUp", owner, new Object[0])).addNumber((long)this._level));
-      this.broadcastPacket(new L2GameServerPacket[]{new SocialAction(this.getObjectId(), 15)});
-      this.setCurrentHpMp((double)this.getMaxHp(), (double)this.getMaxMp());
+      owner.sendMessage((new CustomMessage("l2p.gameserver.model.instances.L2PetInstance.PetLevelUp", owner)).addNumber(this._level));
+      this.broadcastPacket(new SocialAction(this.getObjectId(), 15));
+      this.setCurrentHpMp(this.getMaxHp(), this.getMaxMp());
     }
 
     if (old_level != this._level) {
@@ -225,9 +218,9 @@ public class PetInstance extends Summon {
   private void deathPenalty() {
     if (!this.isInZoneBattle()) {
       int lvl = this.getLevel();
-      double percentLost = -0.07D * (double)lvl + 6.5D;
-      this.lostExp = (int)Math.round((double)(this.getExpForNextLevel() - this.getExpForThisLevel()) * percentLost / 100.0D);
-      this.addExpAndSp((long)(-this.lostExp), 0L);
+      double percentLost = -0.07D * (double) lvl + 6.5D;
+      this.lostExp = (int) Math.round((double) (this.getExpForNextLevel() - this.getExpForThisLevel()) * percentLost / 100.0D);
+      this.addExpAndSp(-this.lostExp, 0L);
     }
   }
 
@@ -244,7 +237,7 @@ public class PetInstance extends Summon {
           statement.setInt(1, this.getControlItemObjId());
           statement.execute();
         } catch (Exception var8) {
-          _log.warn("could not delete pet:" + var8);
+          log.warn("could not delete pet:" + var8);
         } finally {
           DbUtils.closeQuietly(con, statement);
         }
@@ -266,11 +259,11 @@ public class PetInstance extends Summon {
     Player owner = this.getPlayer();
     this.stopMove();
     if (object.isItem()) {
-      ItemInstance item = (ItemInstance)object;
+      ItemInstance item = (ItemInstance) object;
       if (item.isCursed()) {
         owner.sendPacket((new SystemMessage(56)).addItemName(item.getItemId()));
       } else {
-        synchronized(item) {
+        synchronized (item) {
           if (!item.isVisible()) {
             return;
           }
@@ -281,7 +274,7 @@ public class PetInstance extends Summon {
               Skill[] var6 = skills;
               int var7 = skills.length;
 
-              for(int var8 = 0; var8 < var7; ++var8) {
+              for (int var8 = 0; var8 < var7; ++var8) {
                 Skill skill = var6[var8];
                 this.altUseSkill(skill, this);
               }
@@ -305,7 +298,7 @@ public class PetInstance extends Summon {
             return;
           }
 
-          FlagItemAttachment attachment = item.getAttachment() instanceof FlagItemAttachment ? (FlagItemAttachment)item.getAttachment() : null;
+          FlagItemAttachment attachment = item.getAttachment() instanceof FlagItemAttachment ? (FlagItemAttachment) item.getAttachment() : null;
           if (attachment != null) {
             return;
           }
@@ -314,7 +307,7 @@ public class PetInstance extends Summon {
         }
 
         if (owner.getParty() != null && owner.getParty().getLootDistribution() != 0) {
-          owner.getParty().distributeItem(owner, item, (NpcInstance)null);
+          owner.getParty().distributeItem(owner, item, null);
         } else {
           Log.LogItem(owner, ItemLog.PetPickup, item);
           this.getInventory().addItem(item);
@@ -341,7 +334,7 @@ public class PetInstance extends Summon {
   }
 
   public int getAccuracy() {
-    return (int)this.calcStat(Stats.ACCURACY_COMBAT, (double)this._data.getAccuracy(), (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.ACCURACY_COMBAT, this._data.getAccuracy(), null, null);
   }
 
   public ItemInstance getActiveWeaponInstance() {
@@ -367,7 +360,7 @@ public class PetInstance extends Summon {
   }
 
   public int getCriticalHit(Creature target, Skill skill) {
-    return (int)this.calcStat(Stats.CRITICAL_BASE, (double)this._data.getCritical(), target, skill);
+    return (int) this.calcStat(Stats.CRITICAL_BASE, this._data.getCritical(), target, skill);
   }
 
   public int getCurrentFed() {
@@ -375,7 +368,7 @@ public class PetInstance extends Summon {
   }
 
   public int getEvasionRate(Creature target) {
-    return (int)this.calcStat(Stats.EVASION_RATE, (double)this._data.getEvasion(), target, (Skill)null);
+    return (int) this.calcStat(Stats.EVASION_RATE, this._data.getEvasion(), target, null);
   }
 
   public long getExpForNextLevel() {
@@ -411,7 +404,7 @@ public class PetInstance extends Summon {
   }
 
   public double getLevelMod() {
-    return (89.0D + (double)this.getLevel()) / 100.0D;
+    return (89.0D + (double) this.getLevel()) / 100.0D;
   }
 
   public int getMinLevel() {
@@ -427,7 +420,7 @@ public class PetInstance extends Summon {
   }
 
   public int getMaxLoad() {
-    return (int)this.calcStat(Stats.MAX_LOAD, (double)this._data.getMaxLoad(), (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.MAX_LOAD, this._data.getMaxLoad(), null, null);
   }
 
   public int getInventoryLimit() {
@@ -435,41 +428,41 @@ public class PetInstance extends Summon {
   }
 
   public int getMaxHp() {
-    return (int)this.calcStat(Stats.MAX_HP, (double)this._data.getHP(), (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.MAX_HP, this._data.getHP(), null, null);
   }
 
   public int getMaxMp() {
-    return (int)this.calcStat(Stats.MAX_MP, (double)this._data.getMP(), (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.MAX_MP, this._data.getMP(), null, null);
   }
 
   public int getPAtk(Creature target) {
     double mod = BaseStats.STR.calcBonus(this) * this.getLevelMod();
-    return (int)this.calcStat(Stats.POWER_ATTACK, (double)this._data.getPAtk() / mod, target, (Skill)null);
+    return (int) this.calcStat(Stats.POWER_ATTACK, (double) this._data.getPAtk() / mod, target, null);
   }
 
   public int getPDef(Creature target) {
     double mod = this.getLevelMod();
-    return (int)this.calcStat(Stats.POWER_DEFENCE, (double)this._data.getPDef() / mod, target, (Skill)null);
+    return (int) this.calcStat(Stats.POWER_DEFENCE, (double) this._data.getPDef() / mod, target, null);
   }
 
   public int getMAtk(Creature target, Skill skill) {
     double ib = BaseStats.INT.calcBonus(this);
     double lvlb = this.getLevelMod();
     double mod = lvlb * lvlb * ib * ib;
-    return (int)this.calcStat(Stats.MAGIC_ATTACK, (double)this._data.getMAtk() / mod, target, skill);
+    return (int) this.calcStat(Stats.MAGIC_ATTACK, (double) this._data.getMAtk() / mod, target, skill);
   }
 
   public int getMDef(Creature target, Skill skill) {
     double mod = BaseStats.MEN.calcBonus(this) * this.getLevelMod();
-    return (int)this.calcStat(Stats.MAGIC_DEFENCE, (double)this._data.getMDef() / mod, target, skill);
+    return (int) this.calcStat(Stats.MAGIC_DEFENCE, (double) this._data.getMDef() / mod, target, skill);
   }
 
   public int getPAtkSpd() {
-    return (int)this.calcStat(Stats.POWER_ATTACK_SPEED, this.calcStat(Stats.ATK_BASE, (double)this._data.getAtkSpeed(), (Creature)null, (Skill)null), (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.POWER_ATTACK_SPEED, this.calcStat(Stats.ATK_BASE, this._data.getAtkSpeed(), null, null), null, null);
   }
 
   public int getMAtkSpd() {
-    return (int)this.calcStat(Stats.MAGIC_ATTACK_SPEED, (double)this._data.getCastSpeed(), (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.MAGIC_ATTACK_SPEED, this._data.getCastSpeed(), null, null);
   }
 
   public int getRunSpeed() {
@@ -506,7 +499,7 @@ public class PetInstance extends Summon {
   }
 
   public NpcTemplate getTemplate() {
-    return (NpcTemplate)this._template;
+    return (NpcTemplate) this._template;
   }
 
   public boolean isMountable() {
@@ -519,7 +512,7 @@ public class PetInstance extends Summon {
 
   public void restoreExp(double percent) {
     if (this.lostExp != 0) {
-      this.addExpAndSp((long)((double)this.lostExp * percent / 100.0D), 0L);
+      this.addExpAndSp((long) ((double) this.lostExp * percent / 100.0D), 0L);
       this.lostExp = 0;
     }
 
@@ -542,7 +535,7 @@ public class PetInstance extends Summon {
     this.stopFeed();
     if (!this.isDead()) {
       int feedTime = Math.max(first ? 15000 : 1000, '\uea60' / (battleFeed ? this._data.getFeedBattle() : this._data.getFeedNormal()));
-      this._feedTask = ThreadPoolManager.getInstance().schedule(new PetInstance.FeedTask(), (long)feedTime);
+      this._feedTask = ThreadPoolManager.getInstance().schedule(new PetInstance.FeedTask(), feedTime);
     }
 
   }
@@ -575,13 +568,13 @@ public class PetInstance extends Summon {
         statement.setDouble(3, this.getCurrentHp());
         statement.setDouble(4, this.getCurrentMp());
         statement.setLong(5, this._exp);
-        statement.setLong(6, (long)this._sp);
+        statement.setLong(6, this._sp);
         statement.setInt(7, this._curFed);
         statement.setInt(8, this.getObjectId());
         statement.setInt(9, this._controlItemObjId);
         statement.executeUpdate();
       } catch (Exception var7) {
-        _log.error("Could not store pet data!", var7);
+        log.error("Could not store pet data!", var7);
       } finally {
         DbUtils.closeQuietly(con, statement);
       }
@@ -640,19 +633,19 @@ public class PetInstance extends Summon {
     if (!this.isDead()) {
       SystemMessage sm = new SystemMessage(1016);
       if (attacker.isNpc()) {
-        sm.addNpcName(((NpcInstance)attacker).getTemplate().npcId);
+        sm.addNpcName(((NpcInstance) attacker).getTemplate().npcId);
       } else {
         sm.addString(attacker.getName());
       }
 
-      sm.addNumber((long)damage);
+      sm.addNumber((long) damage);
       owner.sendPacket(sm);
     }
 
   }
 
   public int getFormId() {
-    switch(this.getNpcId()) {
+    switch (this.getNpcId()) {
       case 16025:
       case 16037:
       case 16041:
@@ -688,11 +681,11 @@ public class PetInstance extends Summon {
     public void runImpl() throws Exception {
       Player owner = PetInstance.this.getPlayer();
 
-      while((double)PetInstance.this.getCurrentFed() <= 0.55D * (double)PetInstance.this.getMaxFed() && PetInstance.this.tryFeed()) {
+      while ((double) PetInstance.this.getCurrentFed() <= 0.55D * (double) PetInstance.this.getMaxFed() && PetInstance.this.tryFeed()) {
       }
 
-      if ((double)PetInstance.this.getCurrentFed() <= 0.1D * (double)PetInstance.this.getMaxFed()) {
-        owner.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2PetInstance.UnSummonHungryPet", owner, new Object[0]));
+      if ((double) PetInstance.this.getCurrentFed() <= 0.1D * (double) PetInstance.this.getMaxFed()) {
+        owner.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2PetInstance.UnSummonHungryPet", owner));
         PetInstance.this.unSummon();
       } else {
         PetInstance.this.setCurrentFed(PetInstance.this.getCurrentFed() - 5);

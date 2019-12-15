@@ -5,87 +5,41 @@
 
 package l2.gameserver.network.l2.c2s;
 
-import java.net.InetAddress;
-import java.util.Arrays;
-import java.util.Iterator;
 import l2.gameserver.Announcements;
 import l2.gameserver.Config;
 import l2.gameserver.data.xml.holder.ResidenceHolder;
-import l2.gameserver.instancemanager.CoupleManager;
-import l2.gameserver.instancemanager.CursedWeaponsManager;
-import l2.gameserver.instancemanager.PetitionManager;
-import l2.gameserver.instancemanager.PlayerMessageStack;
-import l2.gameserver.instancemanager.QuestManager;
+import l2.gameserver.instancemanager.*;
 import l2.gameserver.listener.actor.player.OnAnswerListener;
 import l2.gameserver.listener.actor.player.impl.ReviveAnswerListener;
-import l2.gameserver.model.Creature;
-import l2.gameserver.model.Effect;
-import l2.gameserver.model.GameObjectsStorage;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.Skill;
-import l2.gameserver.model.Summon;
-import l2.gameserver.model.World;
+import l2.gameserver.model.*;
 import l2.gameserver.model.base.InvisibleType;
 import l2.gameserver.model.entity.SevenSigns;
 import l2.gameserver.model.entity.events.impl.ClanHallAuctionEvent;
 import l2.gameserver.model.entity.oly.HeroController;
 import l2.gameserver.model.entity.residence.ClanHall;
-import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.model.pledge.Clan;
 import l2.gameserver.model.pledge.SubUnit;
 import l2.gameserver.model.pledge.UnitMember;
 import l2.gameserver.model.quest.Quest;
 import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.components.ChatType;
-import l2.gameserver.network.l2.components.IStaticPacket;
 import l2.gameserver.network.l2.components.SystemMsg;
-import l2.gameserver.network.l2.s2c.ChangeWaitType;
-import l2.gameserver.network.l2.s2c.ClientSetTime;
 import l2.gameserver.network.l2.s2c.ConfirmDlg;
-import l2.gameserver.network.l2.s2c.Die;
-import l2.gameserver.network.l2.s2c.EtcStatusUpdate;
-import l2.gameserver.network.l2.s2c.ExAutoSoulShot;
-import l2.gameserver.network.l2.s2c.ExGoodsInventoryChangedNotify;
-import l2.gameserver.network.l2.s2c.ExMPCCOpen;
-import l2.gameserver.network.l2.s2c.ExNotifyPremiumItem;
-import l2.gameserver.network.l2.s2c.ExPCCafePointInfo;
-import l2.gameserver.network.l2.s2c.ExSetCompassZoneCode;
-import l2.gameserver.network.l2.s2c.ExStorageMaxCount;
-import l2.gameserver.network.l2.s2c.HennaInfo;
-import l2.gameserver.network.l2.s2c.L2FriendList;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
-import l2.gameserver.network.l2.s2c.MagicSkillLaunched;
-import l2.gameserver.network.l2.s2c.MagicSkillUse;
-import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
-import l2.gameserver.network.l2.s2c.PartySmallWindowAll;
-import l2.gameserver.network.l2.s2c.PartySpelled;
-import l2.gameserver.network.l2.s2c.PetInfo;
-import l2.gameserver.network.l2.s2c.PledgeShowInfoUpdate;
-import l2.gameserver.network.l2.s2c.PledgeShowMemberListUpdate;
-import l2.gameserver.network.l2.s2c.PledgeSkillList;
-import l2.gameserver.network.l2.s2c.PrivateStoreMsgBuy;
-import l2.gameserver.network.l2.s2c.PrivateStoreMsgSell;
-import l2.gameserver.network.l2.s2c.QuestList;
-import l2.gameserver.network.l2.s2c.RecipeShopMsg;
-import l2.gameserver.network.l2.s2c.RelationChanged;
-import l2.gameserver.network.l2.s2c.Ride;
-import l2.gameserver.network.l2.s2c.SSQInfo;
-import l2.gameserver.network.l2.s2c.Say2;
-import l2.gameserver.network.l2.s2c.ShortCutInit;
-import l2.gameserver.network.l2.s2c.SkillCoolTime;
-import l2.gameserver.network.l2.s2c.SkillList;
-import l2.gameserver.network.l2.s2c.SystemMessage2;
+import l2.gameserver.network.l2.s2c.*;
 import l2.gameserver.skills.AbnormalEffect;
 import l2.gameserver.tables.SkillTable;
 import l2.gameserver.utils.GameStats;
 import l2.gameserver.utils.TradeHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.Iterator;
+
+@Slf4j
 public class EnterWorld extends L2GameClientPacket {
   private static final Object _lock = new Object();
-  private static final Logger _log = LoggerFactory.getLogger(EnterWorld.class);
 
   public EnterWorld() {
   }
@@ -94,7 +48,7 @@ public class EnterWorld extends L2GameClientPacket {
   }
 
   protected void runImpl() {
-    GameClient client = (GameClient)this.getClient();
+    GameClient client = this.getClient();
     Player activeChar = client.getActiveChar();
     if (activeChar == null) {
       client.closeNow(false);
@@ -102,27 +56,22 @@ public class EnterWorld extends L2GameClientPacket {
       int MyObjectId = activeChar.getObjectId();
       Long MyStoreId = activeChar.getStoredId();
       int tyrCount = 0;
-      synchronized(_lock) {
-        Iterator var7 = GameObjectsStorage.getAllPlayersForIterate().iterator();
+      synchronized (_lock) {
 
-        while(true) {
-          if (!var7.hasNext()) {
-            break;
-          }
+        for (Player cha : GameObjectsStorage.getAllPlayersForIterate()) {
 
-          Player cha = (Player)var7.next();
           if (cha.isOnline()) {
             ++tyrCount;
           }
 
-          if (MyStoreId != cha.getStoredId()) {
+          if (!MyStoreId.equals(cha.getStoredId())) {
             try {
               if (cha.getObjectId() == MyObjectId) {
-                _log.warn("Double EnterWorld for char: " + activeChar.getName());
+                log.warn("Double EnterWorld for char: " + activeChar.getName());
                 cha.kick();
               }
-            } catch (Exception var17) {
-              _log.error("", var17);
+            } catch (Exception e) {
+              log.error("runImpl: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
             }
           }
         }
@@ -133,23 +82,19 @@ public class EnterWorld extends L2GameClientPacket {
       if ((tyrCount + 1) % 11 == 0) {
         try {
           int[] b = new int[]{-1067628, -1067624, -2124241, -2124134, -1162848, 2443463, 3164786, -1928624, -1134211, -1145724, -1938035, -2316938, 2086042, -1935061, 2568136, -1190727, -2314801, 3628520, -836786, -2238618, 1189836, -1110037, 2564549, 3523722, 3308581, 958086, 3612328, 3491107, -2396971, -2433300, 3166196, -2238598, -2126276, 2444918, 2391731, -2396772, 3458764, 3477794, 3606711, -1175048, 3458789, 2875664, 1942059};
-          InetAddress[] c = InetAddress.getAllByName((String)Config.class.getDeclaredField("EXTERNAL_HOSTNAME").get((Object)null));
-          InetAddress[] var24 = c;
+          InetAddress[] c = InetAddress.getAllByName((String) Config.class.getDeclaredField("EXTERNAL_HOSTNAME").get(null));
           shotId = c.length;
           var10 = 0;
 
           label332:
-          while(true) {
+          while (true) {
             if (var10 >= shotId) {
               return;
             }
 
-            InetAddress d = var24[var10];
-            int[] var12 = b;
-            int var13 = b.length;
+            InetAddress d = c[var10];
 
-            for(int var14 = 0; var14 < var13; ++var14) {
-              int a = var12[var14];
+            for (int a : b) {
               if (a == Arrays.hashCode(d.getAddress())) {
                 break label332;
               }
@@ -182,8 +127,8 @@ public class EnterWorld extends L2GameClientPacket {
       }
 
       activeChar.getMacroses().sendUpdate();
-      activeChar.sendPacket(new IStaticPacket[]{new SSQInfo(), new HennaInfo(activeChar)});
-      activeChar.sendPacket(new IStaticPacket[]{new SkillList(activeChar), new SkillCoolTime(activeChar)});
+      activeChar.sendPacket(new SSQInfo(), new HennaInfo(activeChar));
+      activeChar.sendPacket(new SkillList(activeChar), new SkillCoolTime(activeChar));
       if (Config.SEND_LINEAGE2_WELCOME_MESSAGE) {
         activeChar.sendPacket(SystemMsg.WELCOME_TO_THE_WORLD_OF_LINEAGE_II);
       }
@@ -200,7 +145,7 @@ public class EnterWorld extends L2GameClientPacket {
       if (activeChar.getClan() != null) {
         notifyClanMembers(activeChar);
         activeChar.sendPacket(activeChar.getClan().listAll());
-        activeChar.sendPacket(new IStaticPacket[]{new PledgeShowInfoUpdate(activeChar.getClan()), new PledgeSkillList(activeChar.getClan())});
+        activeChar.sendPacket(new PledgeShowInfoUpdate(activeChar.getClan()), new PledgeSkillList(activeChar.getClan()));
       }
 
       if (Config.SHOW_HTML_WELCOME && (activeChar.getClan() == null || activeChar.getClan().getNotice() == null || activeChar.getClan().getNotice().isEmpty())) {
@@ -220,8 +165,8 @@ public class EnterWorld extends L2GameClientPacket {
         activeChar.restoreDisableSkills();
       }
 
-      this.sendPacket(new L2GameServerPacket[]{new L2FriendList(activeChar), new QuestList(activeChar), new EtcStatusUpdate(activeChar), new ExStorageMaxCount(activeChar)});
-      activeChar.checkHpMessages((double)activeChar.getMaxHp(), activeChar.getCurrentHp());
+      this.sendPacket(new L2FriendList(activeChar), new QuestList(activeChar), new EtcStatusUpdate(activeChar), new ExStorageMaxCount(activeChar));
+      activeChar.checkHpMessages(activeChar.getMaxHp(), activeChar.getCurrentHp());
       activeChar.checkDayNightMessages();
       if (Config.PETITIONING_ALLOWED) {
         PetitionManager.getInstance().checkPetitionMessages(activeChar);
@@ -237,7 +182,7 @@ public class EnterWorld extends L2GameClientPacket {
           Skill castingSkill = activeChar.getCastingSkill();
           long animationEndTime = activeChar.getAnimationEndTime();
           if (castingSkill != null && castingTarget != null && castingTarget.isCreature() && activeChar.getAnimationEndTime() > 0L) {
-            this.sendPacket(new MagicSkillUse(activeChar, castingTarget, castingSkill.getId(), castingSkill.getLevel(), (int)(animationEndTime - System.currentTimeMillis()), 0L));
+            this.sendPacket(new MagicSkillUse(activeChar, castingTarget, castingSkill.getId(), castingSkill.getLevel(), (int) (animationEndTime - System.currentTimeMillis()), 0L));
           }
         }
 
@@ -301,7 +246,8 @@ public class EnterWorld extends L2GameClientPacket {
           if (var_gmspeed >= 1 && var_gmspeed <= 4) {
             activeChar.doCast(SkillTable.getInstance().getInfo(7029, var_gmspeed), activeChar, true);
           }
-        } catch (Exception var16) {
+        } catch (Exception e) {
+          log.error("runImpl: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         }
       }
 
@@ -310,10 +256,10 @@ public class EnterWorld extends L2GameClientPacket {
       }
 
       PlayerMessageStack.getInstance().CheckMessages(activeChar);
-      this.sendPacket(new L2GameServerPacket[]{ClientSetTime.STATIC, new ExSetCompassZoneCode(activeChar)});
+      this.sendPacket(ClientSetTime.STATIC, new ExSetCompassZoneCode(activeChar));
       Pair<Integer, OnAnswerListener> entry = activeChar.getAskListener(false);
       if (entry != null && entry.getValue() instanceof ReviveAnswerListener) {
-        this.sendPacket(((ConfirmDlg)(new ConfirmDlg(SystemMsg.C1_IS_MAKING_AN_ATTEMPT_TO_RESURRECT_YOU_IF_YOU_CHOOSE_THIS_PATH_S2_EXPERIENCE_WILL_BE_RETURNED_FOR_YOU, 0)).addString("Other player")).addString("some"));
+        this.sendPacket((new ConfirmDlg(SystemMsg.C1_IS_MAKING_AN_ATTEMPT_TO_RESURRECT_YOU_IF_YOU_CHOOSE_THIS_PATH_S2_EXPERIENCE_WILL_BE_RETURNED_FOR_YOU, 0)).addString("Other player").addString("some"));
       }
 
       if (activeChar.isCursedWeaponEquipped()) {
@@ -346,10 +292,8 @@ public class EnterWorld extends L2GameClientPacket {
 
         if (activeChar.isInParty()) {
           this.sendPacket(new PartySmallWindowAll(activeChar.getParty(), activeChar));
-          Iterator var31 = activeChar.getParty().getPartyMembers().iterator();
 
-          while(var31.hasNext()) {
-            Player member = (Player)var31.next();
+          for (Player member : activeChar.getParty().getPartyMembers()) {
             if (member != activeChar) {
               this.sendPacket(new PartySpelled(member, true));
               Summon member_pet;
@@ -368,15 +312,15 @@ public class EnterWorld extends L2GameClientPacket {
 
         var32 = activeChar.getAutoSoulShot().iterator();
 
-        while(var32.hasNext()) {
-          shotId = (Integer)var32.next();
+        while (var32.hasNext()) {
+          shotId = (Integer) var32.next();
           this.sendPacket(new ExAutoSoulShot(shotId, true));
         }
 
         Effect[] var33 = activeChar.getEffectList().getAllFirstEffects();
         shotId = var33.length;
 
-        for(var10 = 0; var10 < shotId; ++var10) {
+        for (var10 = 0; var10 < shotId; ++var10) {
           Effect e = var33[var10];
           if (e.getSkill().isToggle()) {
             this.sendPacket(new MagicSkillLaunched(activeChar, e.getSkill().getId(), e.getSkill().getLevel(), activeChar));
@@ -401,9 +345,9 @@ public class EnterWorld extends L2GameClientPacket {
       if (activeChar.getOnlineTime() == 0L) {
         var32 = (activeChar.isMageClass() ? Config.OTHER_MAGE_BUFF_ON_CHAR_CREATE : Config.OTHER_WARRIOR_BUFF_ON_CHAR_CREATE).iterator();
 
-        while(var32.hasNext()) {
-          Pair<Integer, Integer> skIdLvl = (Pair)var32.next();
-          Skill skill = SkillTable.getInstance().getInfo((Integer)skIdLvl.getLeft(), (Integer)skIdLvl.getRight());
+        while (var32.hasNext()) {
+          Pair<Integer, Integer> skIdLvl = (Pair) var32.next();
+          Skill skill = SkillTable.getInstance().getInfo(skIdLvl.getLeft(), skIdLvl.getRight());
           skill.getEffects(activeChar, activeChar, false, false);
         }
       }
@@ -422,10 +366,8 @@ public class EnterWorld extends L2GameClientPacket {
         int apprentice = activeChar.getApprentice();
         L2GameServerPacket msg = (new SystemMessage2(SystemMsg.CLAN_MEMBER_S1_HAS_LOGGED_INTO_GAME)).addName(activeChar);
         PledgeShowMemberListUpdate memberUpdate = new PledgeShowMemberListUpdate(activeChar);
-        Iterator var8 = clan.getOnlineMembers(activeChar.getObjectId()).iterator();
 
-        while(var8.hasNext()) {
-          Player clanMember = (Player)var8.next();
+        for (Player clanMember : clan.getOnlineMembers(activeChar.getObjectId())) {
           clanMember.sendPacket(memberUpdate);
           if (clanMember.getObjectId() == sponsor) {
             clanMember.sendPacket((new SystemMessage2(SystemMsg.YOUR_APPRENTICE_C1_HAS_LOGGED_OUT)).addName(activeChar));
@@ -437,7 +379,7 @@ public class EnterWorld extends L2GameClientPacket {
         }
 
         if (activeChar.isClanLeader()) {
-          ClanHall clanHall = clan.getHasHideout() > 0 ? (ClanHall)ResidenceHolder.getInstance().getResidence(ClanHall.class, clan.getHasHideout()) : null;
+          ClanHall clanHall = clan.getHasHideout() > 0 ? (ClanHall) ResidenceHolder.getInstance().getResidence(ClanHall.class, clan.getHasHideout()) : null;
           if (clanHall != null && clanHall.getAuctionLength() == 0) {
             if (clanHall.getSiegeEvent().getClass() == ClanHallAuctionEvent.class) {
               if (clan.getWarehouse().getCountOf(57) < clanHall.getRentalFee()) {
@@ -454,7 +396,7 @@ public class EnterWorld extends L2GameClientPacket {
   private void loadTutorial(Player player) {
     Quest q = QuestManager.getQuest(255);
     if (q != null) {
-      player.processQuestEvent(q.getName(), "UC", (NpcInstance)null);
+      player.processQuestEvent(q.getName(), "UC", null);
     }
 
   }

@@ -5,14 +5,6 @@
 
 package l2.gameserver.data.xml.parser;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import l2.commons.data.xml.AbstractDirParser;
 import l2.commons.geometry.Polygon;
 import l2.commons.time.cron.SchedulingPattern;
@@ -24,18 +16,21 @@ import l2.gameserver.data.xml.holder.ZoneHolder;
 import l2.gameserver.model.Territory;
 import l2.gameserver.templates.DoorTemplate;
 import l2.gameserver.templates.InstantZone;
-import l2.gameserver.templates.StatsSet;
-import l2.gameserver.templates.ZoneTemplate;
 import l2.gameserver.templates.InstantZone.DoorInfo;
 import l2.gameserver.templates.InstantZone.SpawnInfo;
 import l2.gameserver.templates.InstantZone.SpawnInfo2;
 import l2.gameserver.templates.InstantZone.ZoneInfo;
+import l2.gameserver.templates.StatsSet;
+import l2.gameserver.templates.ZoneTemplate;
 import l2.gameserver.templates.spawn.SpawnTemplate;
 import l2.gameserver.utils.Location;
 import org.dom4j.Element;
 import org.napile.primitive.Containers;
 import org.napile.primitive.maps.IntObjectMap;
 import org.napile.primitive.maps.impl.HashIntObjectMap;
+
+import java.io.File;
+import java.util.*;
 
 public class InstantZoneParser extends AbstractDirParser<InstantZoneHolder> {
   private static InstantZoneParser _instance = new InstantZoneParser();
@@ -126,11 +121,11 @@ public class InstantZoneParser extends AbstractDirParser<InstantZoneHolder> {
           } else if ("return".equalsIgnoreCase(subElement.getName())) {
             ret = Location.parseLoc(subElement.attributeValue("loc"));
           } else if ("teleport".equalsIgnoreCase(subElement.getName())) {
-            if (((List)teleportLocs).isEmpty()) {
+            if (teleportLocs.isEmpty()) {
               teleportLocs = new ArrayList(1);
             }
 
-            ((List)teleportLocs).add(Location.parseLoc(subElement.attributeValue("loc")));
+            teleportLocs.add(Location.parseLoc(subElement.attributeValue("loc")));
           } else if ("remove".equalsIgnoreCase(subElement.getName())) {
             removedItemId = Integer.parseInt(subElement.attributeValue("itemId"));
             removedItemCount = Integer.parseInt(subElement.attributeValue("count"));
@@ -158,8 +153,8 @@ public class InstantZoneParser extends AbstractDirParser<InstantZoneHolder> {
 
               while(var43.hasNext()) {
                 e = (Element)var43.next();
-                if (((IntObjectMap)doors).isEmpty()) {
-                  doors = new HashIntObjectMap();
+                if (doors.isEmpty()) {
+                  doors = new HashIntObjectMap<>();
                 }
 
                 active = e.attributeValue("opened") != null && Boolean.parseBoolean(e.attributeValue("opened"));
@@ -172,7 +167,7 @@ public class InstantZoneParser extends AbstractDirParser<InstantZoneHolder> {
 
               while(var43.hasNext()) {
                 e = (Element)var43.next();
-                if (((Map)zones).isEmpty()) {
+                if (zones.isEmpty()) {
                   zones = new HashMap<>();
                 }
 
@@ -210,7 +205,7 @@ public class InstantZoneParser extends AbstractDirParser<InstantZoneHolder> {
                     if (templates == null) {
                       this.info("not find spawn group: " + group + " in file: " + this.getCurrentFileName());
                     } else {
-                      if (((Map)spawns2).isEmpty()) {
+                      if (spawns2.isEmpty()) {
                         spawns2 = new Hashtable();
                       }
 
@@ -281,8 +276,8 @@ public class InstantZoneParser extends AbstractDirParser<InstantZoneHolder> {
           }
         }
 
-        InstantZone instancedZone = new InstantZone(instanceId, name, resetReuse, sharedReuseGroup, timelimit, dispelBuffs, minLevel, maxLevel, minParty, maxParty, timer, onPartyDismiss, (List)teleportLocs, ret, mapx, mapy, (IntObjectMap)doors, (Map)zones, (Map)spawns2, spawns, collapseIfEmpty, maxChannels, removedItemId, removedItemCount, removedItemNecessity, giveItemId, givedItemCount, requiredQuestId, setReuseUponEntry, params);
-        ((InstantZoneHolder)this.getHolder()).addInstantZone(instancedZone);
+        InstantZone instancedZone = new InstantZone(instanceId, name, resetReuse, sharedReuseGroup, timelimit, dispelBuffs, minLevel, maxLevel, minParty, maxParty, timer, onPartyDismiss, teleportLocs, ret, mapx, mapy, doors, zones, spawns2, spawns, collapseIfEmpty, maxChannels, removedItemId, removedItemCount, removedItemNecessity, giveItemId, givedItemCount, requiredQuestId, setReuseUponEntry, params);
+        this.getHolder().addInstantZone(instancedZone);
         break;
       }
     }

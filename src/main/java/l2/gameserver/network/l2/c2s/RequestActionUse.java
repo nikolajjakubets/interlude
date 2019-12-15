@@ -10,32 +10,22 @@ import l2.gameserver.Config;
 import l2.gameserver.ThreadPoolManager;
 import l2.gameserver.ai.CtrlIntention;
 import l2.gameserver.cache.Msg;
-import l2.gameserver.model.Creature;
-import l2.gameserver.model.GameObject;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.Skill;
-import l2.gameserver.model.Summon;
+import l2.gameserver.model.*;
 import l2.gameserver.model.instances.DoorInstance;
 import l2.gameserver.model.instances.StaticObjectInstance;
 import l2.gameserver.model.instances.residences.SiegeFlagInstance;
 import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.components.IStaticPacket;
 import l2.gameserver.network.l2.components.SystemMsg;
-import l2.gameserver.network.l2.s2c.ActionFail;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
-import l2.gameserver.network.l2.s2c.PrivateStoreManageListBuy;
-import l2.gameserver.network.l2.s2c.PrivateStoreManageListSell;
-import l2.gameserver.network.l2.s2c.RecipeShopManageList;
-import l2.gameserver.network.l2.s2c.SocialAction;
+import l2.gameserver.network.l2.s2c.*;
 import l2.gameserver.tables.PetSkillsTable;
 import l2.gameserver.tables.SkillTable;
 import l2.gameserver.templates.DoorTemplate.DoorType;
 import l2.gameserver.utils.TradeHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class RequestActionUse extends L2GameClientPacket {
-  private static final Logger _log = LoggerFactory.getLogger(RequestActionUse.class);
   private int _actionId;
   private boolean _ctrlPressed;
   private boolean _shiftPressed;
@@ -55,7 +45,7 @@ public class RequestActionUse extends L2GameClientPacket {
     if (activeChar != null) {
       RequestActionUse.Action action = RequestActionUse.Action.find(this._actionId);
       if (action == null) {
-        _log.warn("unhandled action type " + this._actionId + " by player " + activeChar.getName());
+        log.warn("unhandled action type " + this._actionId + " by player " + activeChar.getName());
         activeChar.sendActionFailed();
       } else {
         boolean usePet = action.type == 1 || action.type == 2;
@@ -110,7 +100,7 @@ public class RequestActionUse extends L2GameClientPacket {
                   activeChar.breakFakeDeath();
                   activeChar.updateEffectIcons();
                 } else if (!activeChar.isSitting()) {
-                  if (target != null && target instanceof StaticObjectInstance && ((StaticObjectInstance)target).getType() == 1 && activeChar.getDistance3D(target) <= (double)target.getActingRange()) {
+                  if (target instanceof StaticObjectInstance && ((StaticObjectInstance) target).getType() == 1 && activeChar.getDistance3D(target) <= (double) target.getActingRange()) {
                     activeChar.sitDown((StaticObjectInstance)target);
                   } else {
                     activeChar.sitDown((StaticObjectInstance)null);
@@ -317,14 +307,14 @@ public class RequestActionUse extends L2GameClientPacket {
                 }
                 break;
               case 96:
-                _log.info("96 Accessed");
+                log.info("96 Accessed");
                 break;
               case 97:
-                _log.info("97 Accessed");
+                log.info("97 Accessed");
               case 1001:
                 break;
               default:
-                _log.warn("unhandled action type " + this._actionId + " by player " + activeChar.getName());
+                log.warn("unhandled action type " + this._actionId + " by player " + activeChar.getName());
             }
 
             activeChar.sendActionFailed();
@@ -539,11 +529,8 @@ public class RequestActionUse extends L2GameClientPacket {
     }
 
     public static RequestActionUse.Action find(int id) {
-      RequestActionUse.Action[] var1 = VALUES;
-      int var2 = var1.length;
 
-      for(int var3 = 0; var3 < var2; ++var3) {
-        RequestActionUse.Action action = var1[var3];
+      for (Action action : VALUES) {
         if (action.id == id) {
           return action;
         }

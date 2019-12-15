@@ -5,31 +5,30 @@
 
 package l2.gameserver.model;
 
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.CopyOnWriteArrayList;
 import l2.commons.collections.MultiValueSet;
 import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.templates.StatsSet;
 import l2.gameserver.templates.spawn.SpawnNpcInfo;
 import l2.gameserver.templates.spawn.SpawnRange;
 import l2.gameserver.templates.spawn.SpawnTemplate;
+import lombok.extern.slf4j.Slf4j;
 import org.napile.primitive.maps.IntObjectMap;
 import org.napile.primitive.maps.impl.CHashIntObjectMap;
 
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+@Slf4j
 public class HardSpawner extends Spawner {
-  private IntObjectMap<Queue<NpcInstance>> _cache = new CHashIntObjectMap();
+  private IntObjectMap<Queue<NpcInstance>> _cache = new CHashIntObjectMap<>();
   private final SpawnTemplate _template;
   private int _pointIndex;
   private int _npcIndex;
-  private List<NpcInstance> _reSpawned = new CopyOnWriteArrayList();
+  private List<NpcInstance> _reSpawned = new CopyOnWriteArrayList<>();
 
   public HardSpawner(SpawnTemplate template) {
     this._template = template;
-    this._spawned = new CopyOnWriteArrayList();
+    this._spawned = new CopyOnWriteArrayList<>();
   }
 
   public void decreaseCount(NpcInstance oldNpc) {
@@ -104,17 +103,14 @@ public class HardSpawner extends Spawner {
     npcInfo = this._template.getNpcId(old);
     if (npcInfo.getMax() > 0) {
       int count = 0;
-      Iterator var5 = this._spawned.iterator();
 
-      while(var5.hasNext()) {
-        NpcInstance npc = (NpcInstance)var5.next();
+      for (NpcInstance npc : this._spawned) {
         if (npc.getNpcId() == npcInfo.getTemplate().getNpcId()) {
           ++count;
         }
       }
 
       if (count >= npcInfo.getMax()) {
-        int var7 = attempts + 1;
         if (attempts > this._template.getNpcSize() * 2) {
           throw new IllegalStateException("getNextNpcInfo failed (" + count + ", " + npcInfo.getMax() + ", " + npcInfo.getNpcId() + ")");
         }
@@ -143,24 +139,24 @@ public class HardSpawner extends Spawner {
   }
 
   private void addToCache(NpcInstance npc) {
-    npc.setSpawn((Spawner)null);
+    npc.setSpawn(null);
     npc.decayMe();
-    Queue<NpcInstance> queue = (Queue)this._cache.get(npc.getNpcId());
+    Queue<NpcInstance> queue = this._cache.get(npc.getNpcId());
     if (queue == null) {
-      this._cache.put(npc.getNpcId(), queue = new ArrayDeque());
+      this._cache.put(npc.getNpcId(), queue = new ArrayDeque<>());
     }
 
-    ((Queue)queue).add(npc);
+    queue.add(npc);
   }
 
   private NpcInstance getCachedNpc(int id) {
-    Queue<NpcInstance> queue = (Queue)this._cache.get(id);
+    Queue<NpcInstance> queue = this._cache.get(id);
     if (queue == null) {
       return null;
     } else {
-      NpcInstance npc = (NpcInstance)queue.poll();
+      NpcInstance npc = queue.poll();
       if (npc != null && npc.isDeleted()) {
-        _log.info("Npc: " + id + " is deleted, cant used by cache.");
+        log.info("Npc: " + id + " is deleted, cant used by cache.");
         return this.getCachedNpc(id);
       } else {
         return npc;

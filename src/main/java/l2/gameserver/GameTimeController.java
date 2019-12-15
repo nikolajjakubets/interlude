@@ -15,14 +15,12 @@ import l2.gameserver.model.GameObjectsStorage;
 import l2.gameserver.model.Player;
 import l2.gameserver.network.l2.s2c.ClientSetTime;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Calendar;
 import java.util.Iterator;
 
+@Slf4j
 public class GameTimeController {
-  private static final Logger _log = LoggerFactory.getLogger(GameTimeController.class);
   public static final int TICKS_PER_SECOND = 10;
   public static final int MILLIS_IN_TICK = 100;
   private static final GameTimeController _instance = new GameTimeController();
@@ -53,7 +51,7 @@ public class GameTimeController {
     }
 
     msg.append(".");
-    _log.info(msg.toString());
+    log.info(msg.toString());
     long nightStart = 0L;
 
     long dayStart;
@@ -129,7 +127,7 @@ public class GameTimeController {
           }
         } catch (Exception e) {
           log.error("onDay: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
-          GameTimeController._log.warn("Exception during day change", e);
+          GameTimeController.log.warn("Exception during day change", e);
         }
       }
 
@@ -145,7 +143,7 @@ public class GameTimeController {
           }
         } catch (Exception e) {
           log.error("onNight: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
-          GameTimeController._log.warn("Exception during night change", e);
+          GameTimeController.log.warn("Exception during night change", e);
         }
       }
 

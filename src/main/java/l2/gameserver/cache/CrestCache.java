@@ -7,29 +7,29 @@ package l2.gameserver.cache;
 
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
+import l2.commons.dbutils.DbUtils;
+import l2.gameserver.database.DatabaseFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import l2.commons.dbutils.DbUtils;
-import l2.gameserver.database.DatabaseFactory;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class CrestCache {
   public static final int ALLY_CREST_SIZE = 192;
   public static final int CREST_SIZE = 256;
   public static final int LARGE_CREST_SIZE = 2176;
-  private static final Logger _log = LoggerFactory.getLogger(CrestCache.class);
   private static final CrestCache _instance = new CrestCache();
   private final TIntIntHashMap _pledgeCrestId = new TIntIntHashMap();
   private final TIntIntHashMap _pledgeCrestLargeId = new TIntIntHashMap();
   private final TIntIntHashMap _allyCrestId = new TIntIntHashMap();
-  private final TIntObjectHashMap<byte[]> _pledgeCrest = new TIntObjectHashMap();
-  private final TIntObjectHashMap<byte[]> _pledgeCrestLarge = new TIntObjectHashMap();
-  private final TIntObjectHashMap<byte[]> _allyCrest = new TIntObjectHashMap();
+  private final TIntObjectHashMap<byte[]> _pledgeCrest = new TIntObjectHashMap<>();
+  private final TIntObjectHashMap<byte[]> _pledgeCrestLarge = new TIntObjectHashMap<>();
+  private final TIntObjectHashMap<byte[]> _allyCrest = new TIntObjectHashMap<>();
   private final Lock readLock;
   private final Lock writeLock;
 
@@ -92,13 +92,13 @@ public class CrestCache {
         this._allyCrestId.put(pledgeId, crestId);
         this._allyCrest.put(crestId, crest);
       }
-    } catch (Exception var12) {
-      _log.error("", var12);
+    } catch (Exception e) {
+      log.error("load: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
 
-    _log.info("CrestCache: Loaded " + count + " crests");
+    log.info("CrestCache: Loaded " + count + " crests");
   }
 
   private static int getCrestId(int pledgeId, byte[] crest) {
@@ -207,8 +207,8 @@ public class CrestCache {
       statement.setNull(1, -3);
       statement.setInt(2, pledgeId);
       statement.execute();
-    } catch (Exception var12) {
-      _log.error("", var12);
+    } catch (Exception e) {
+      log.error("removePledgeCrest: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -234,7 +234,7 @@ public class CrestCache {
       statement.setInt(2, pledgeId);
       statement.execute();
     } catch (Exception e) {
-      _log.error("removePledgeCrestLarge: eMessage={}, eClause={}", e.getMessage(), e.getClass());
+      log.error("removePledgeCrestLarge: eMessage={}, eClause={}", e.getMessage(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -260,7 +260,7 @@ public class CrestCache {
       statement.setInt(2, pledgeId);
       statement.execute();
     } catch (Exception e) {
-      _log.error("removeAllyCrest: eMessage={}, eClause={}", e.getMessage(), e.getClass());
+      log.error("removeAllyCrest: eMessage={}, eClause={}", e.getMessage(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -288,7 +288,7 @@ public class CrestCache {
       statement.setInt(2, pledgeId);
       statement.execute();
     } catch (Exception e) {
-      _log.error("savePledgeCrest: eMessage={}, eClause={}", e.getMessage(), e.getClass());
+      log.error("savePledgeCrest: eMessage={}, eClause={}", e.getMessage(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -317,7 +317,7 @@ public class CrestCache {
       statement.setInt(2, pledgeId);
       statement.execute();
     } catch (Exception e) {
-      _log.error("savePledgeCrestLarge: eMessage={}, eClause={}", e.getMessage(), e.getClass());
+      log.error("savePledgeCrestLarge: eMessage={}, eClause={}", e.getMessage(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -346,7 +346,7 @@ public class CrestCache {
       statement.setInt(2, pledgeId);
       statement.execute();
     } catch (Exception e) {
-      _log.error("saveAllyCrest: eMessage={}, eClause={}", e.getMessage(), e.getClass());
+      log.error("saveAllyCrest: eMessage={}, eClause={}", e.getMessage(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }

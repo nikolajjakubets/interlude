@@ -5,22 +5,17 @@
 
 package l2.gameserver.database;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import l2.commons.dbutils.DbUtils;
+import lombok.extern.slf4j.Slf4j;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import l2.commons.dbutils.DbUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public abstract class mysql {
-  private static final Logger _log = LoggerFactory.getLogger(mysql.class);
 
   public mysql() {
   }
@@ -30,7 +25,6 @@ public abstract class mysql {
     Statement statement = null;
     PreparedStatement pstatement = null;
 
-    boolean var7;
     try {
       if (db == null) {
         db = DatabaseFactory.getInstance();
@@ -48,14 +42,13 @@ public abstract class mysql {
 
       return true;
     } catch (Exception var11) {
-      _log.warn("Could not execute update '" + query + "': " + var11);
+      log.warn("Could not execute update '" + query + "': " + var11);
       var11.printStackTrace();
-      var7 = false;
     } finally {
-      DbUtils.closeQuietly(con, (Statement)(vars.length == 0 ? statement : pstatement));
+      DbUtils.closeQuietly(con, vars.length == 0 ? statement : pstatement);
     }
 
-    return var7;
+    return false;
   }
 
   public static void setVars(PreparedStatement statement, Object... vars) throws SQLException {
@@ -77,11 +70,11 @@ public abstract class mysql {
   }
 
   public static boolean set(String query, Object... vars) {
-    return setEx((DatabaseFactory)null, query, vars);
+    return setEx(null, query, vars);
   }
 
   public static boolean set(String query) {
-    return setEx((DatabaseFactory)null, query);
+    return setEx(null, query);
   }
 
   public static Object get(String query) {
@@ -109,7 +102,7 @@ public abstract class mysql {
         }
       }
     } catch (Exception var11) {
-      _log.warn("Could not execute query '" + query + "': " + var11);
+      log.warn("Could not execute query '" + query + "': " + var11);
       var11.printStackTrace();
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
@@ -140,7 +133,7 @@ public abstract class mysql {
         ret.add(tmp);
       }
     } catch (Exception var11) {
-      _log.warn("Could not execute query '" + query + "': " + var11);
+      log.warn("Could not execute query '" + query + "': " + var11);
       var11.printStackTrace();
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
@@ -183,7 +176,7 @@ public abstract class mysql {
         return ret;
       }
     } catch (Exception var12) {
-      _log.warn("Could not execute query '" + query + "': " + var12);
+      log.warn("Could not execute query '" + query + "': " + var12);
       var12.printStackTrace();
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
@@ -193,7 +186,7 @@ public abstract class mysql {
   }
 
   public static List<Object> get_array(String query) {
-    return get_array((DatabaseFactory)null, query);
+    return get_array(null, query);
   }
 
   public static int simple_get_int(String ret_field, String table, String where) {
@@ -211,7 +204,7 @@ public abstract class mysql {
         res = rset.getInt(1);
       }
     } catch (Exception var12) {
-      _log.warn("mSGI: Error in query '" + query + "':" + var12);
+      log.warn("mSGI: Error in query '" + query + "':" + var12);
       var12.printStackTrace();
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
@@ -222,11 +215,8 @@ public abstract class mysql {
 
   public static Integer[][] simple_get_int_array(DatabaseFactory db, String[] ret_fields, String table, String where) {
     String fields = null;
-    String[] var5 = ret_fields;
-    int var6 = ret_fields.length;
 
-    for(int var7 = 0; var7 < var6; ++var7) {
-      String field = var5[var7];
+    for (String field : ret_fields) {
       if (fields != null) {
         fields = fields + ",";
         fields = fields + "`" + field + "`";
@@ -239,7 +229,7 @@ public abstract class mysql {
     Connection con = null;
     PreparedStatement statement = null;
     ResultSet rset = null;
-    Integer[][] res = (Integer[][])null;
+    Integer[][] res = null;
 
     try {
       if (db == null) {
@@ -262,9 +252,9 @@ public abstract class mysql {
         al.add(row, tmp);
       }
 
-      res = (Integer[][])al.toArray(new Integer[row][ret_fields.length]);
+      res = al.toArray(new Integer[row][ret_fields.length]);
     } catch (Exception var17) {
-      _log.warn("mSGIA: Error in query '" + query + "':" + var17);
+      log.warn("mSGIA: Error in query '" + query + "':" + var17);
       var17.printStackTrace();
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
@@ -274,6 +264,6 @@ public abstract class mysql {
   }
 
   public static Integer[][] simple_get_int_array(String[] ret_fields, String table, String where) {
-    return simple_get_int_array((DatabaseFactory)null, ret_fields, table, where);
+    return simple_get_int_array(null, ret_fields, table, where);
   }
 }

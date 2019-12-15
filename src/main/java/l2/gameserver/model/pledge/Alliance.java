@@ -5,27 +5,26 @@
 
 package l2.gameserver.model.pledge;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.cache.CrestCache;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.Player;
 import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.tables.ClanTable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Slf4j
 public class Alliance {
-  private static final Logger _log = LoggerFactory.getLogger(Alliance.class);
   private String _allyName;
   private int _allyId;
   private Clan _leader = null;
-  private Map<Integer, Clan> _members = new ConcurrentHashMap();
+  private Map<Integer, Clan> _members = new ConcurrentHashMap<>();
   private int _allyCrestId;
   private long _expelledMemberTime;
   public static long EXPELLED_MEMBER_PENALTY = 86400000L;
@@ -67,14 +66,14 @@ public class Alliance {
   }
 
   public Clan getAllyMember(int id) {
-    return (Clan)this._members.get(id);
+    return (Clan) this._members.get(id);
   }
 
   public void removeAllyMember(int id) {
     if (this._leader == null || this._leader.getClanId() != id) {
-      Clan exMember = (Clan)this._members.remove(id);
+      Clan exMember = (Clan) this._members.remove(id);
       if (exMember == null) {
-        _log.warn("Clan " + id + " not found in alliance while trying to remove");
+        log.warn("Clan " + id + " not found in alliance while trying to remove");
       } else {
         this.removeMemberInDatabase(exMember);
       }
@@ -82,7 +81,7 @@ public class Alliance {
   }
 
   public Clan[] getMembers() {
-    return (Clan[])this._members.values().toArray(new Clan[this._members.size()]);
+    return (Clan[]) this._members.values().toArray(new Clan[this._members.size()]);
   }
 
   public int getMembersCount() {
@@ -136,10 +135,10 @@ public class Alliance {
 
   public void updateAllyInDB() {
     if (this.getLeaderId() == 0) {
-      _log.warn("updateAllyInDB with empty LeaderId");
+      log.warn("updateAllyInDB with empty LeaderId");
       Thread.dumpStack();
     } else if (this.getAllyId() == 0) {
-      _log.warn("updateAllyInDB with empty AllyId");
+      log.warn("updateAllyInDB with empty AllyId");
       Thread.dumpStack();
     } else {
       Connection con = null;
@@ -153,7 +152,7 @@ public class Alliance {
         statement.setInt(3, this.getAllyId());
         statement.execute();
       } catch (Exception var7) {
-        _log.warn("error while updating ally '" + this.getAllyId() + "' data in db: " + var7);
+        log.warn("error while updating ally '" + this.getAllyId() + "' data in db: " + var7);
       } finally {
         DbUtils.closeQuietly(con, statement);
       }
@@ -178,7 +177,7 @@ public class Alliance {
       statement.setInt(2, this.getLeaderId());
       statement.execute();
     } catch (Exception var7) {
-      _log.warn("error while saving new ally to db " + var7);
+      log.warn("error while saving new ally to db " + var7);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -196,7 +195,7 @@ public class Alliance {
       statement.setInt(2, member.getClanId());
       statement.execute();
     } catch (Exception var8) {
-      _log.warn("error while saving new alliance member to db " + var8);
+      log.warn("error while saving new alliance member to db " + var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -213,7 +212,7 @@ public class Alliance {
       statement.setInt(1, member.getClanId());
       statement.execute();
     } catch (Exception var8) {
-      _log.warn("error while removing ally member in db " + var8);
+      log.warn("error while removing ally member in db " + var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -239,7 +238,7 @@ public class Alliance {
           statement.setInt(1, this.getAllyId());
           rset = statement.executeQuery();
 
-          while(rset.next()) {
+          while (rset.next()) {
             Clan member = ClanTable.getInstance().getClan(rset.getInt("clan_id"));
             if (member != null) {
               if (member.getClanId() == leaderId) {
@@ -253,8 +252,8 @@ public class Alliance {
 
         this.setAllyCrestId(CrestCache.getInstance().getAllyCrestId(this.getAllyId()));
       } catch (Exception var9) {
-        _log.warn("error while restoring ally");
-        _log.error("", var9);
+        log.warn("error while restoring ally");
+        log.error("", var9);
       } finally {
         DbUtils.closeQuietly(con, statement, rset);
       }
@@ -263,10 +262,8 @@ public class Alliance {
   }
 
   public void broadcastToOnlineMembers(L2GameServerPacket packet) {
-    Iterator var2 = this._members.values().iterator();
 
-    while(var2.hasNext()) {
-      Clan member = (Clan)var2.next();
+    for (Clan member : this._members.values()) {
       if (member != null) {
         member.broadcastToOnlineMembers(new L2GameServerPacket[]{packet});
       }
@@ -275,10 +272,8 @@ public class Alliance {
   }
 
   public void broadcastToOtherOnlineMembers(L2GameServerPacket packet, Player player) {
-    Iterator var3 = this._members.values().iterator();
 
-    while(var3.hasNext()) {
-      Clan member = (Clan)var3.next();
+    for (Clan member : this._members.values()) {
       if (member != null) {
         member.broadcastToOtherOnlineMembers(packet, player);
       }
@@ -296,10 +291,8 @@ public class Alliance {
 
   public void broadcastAllyStatus() {
     Clan[] var1 = this.getMembers();
-    int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      Clan member = var1[var3];
+    for (Clan member : var1) {
       member.broadcastClanStatus(false, true, false);
     }
 

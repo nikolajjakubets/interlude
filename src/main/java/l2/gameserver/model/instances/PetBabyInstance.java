@@ -5,26 +5,22 @@
 
 package l2.gameserver.model.instances;
 
-import java.util.Iterator;
-import java.util.concurrent.Future;
 import l2.commons.threading.RunnableImpl;
 import l2.commons.util.Rnd;
 import l2.gameserver.Config;
 import l2.gameserver.ThreadPoolManager;
-import l2.gameserver.model.Creature;
-import l2.gameserver.model.Effect;
-import l2.gameserver.model.EffectList;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.Skill;
+import l2.gameserver.model.*;
 import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.tables.PetDataTable;
 import l2.gameserver.tables.SkillTable;
 import l2.gameserver.templates.npc.NpcTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Iterator;
+import java.util.concurrent.Future;
+
+@Slf4j
 public final class PetBabyInstance extends PetInstance {
-  private static final Logger _log = LoggerFactory.getLogger(PetBabyInstance.class);
   private Future<?> _actionTask;
   private boolean _buffEnabled = true;
   private static final int HealTrick = 4717;
@@ -65,7 +61,7 @@ public final class PetBabyInstance extends PetInstance {
   }
 
   public Skill[] getBuffs() {
-    switch(this.getNpcId()) {
+    switch (this.getNpcId()) {
       case 16034:
         return BUFFALO_BUFFS[this.getBuffLevel()];
       case 16035:
@@ -119,11 +115,7 @@ public final class PetBabyInstance extends PetInstance {
           return null;
         }
 
-        Skill[] var11 = this.getBuffs();
-        int var5 = var11.length;
-
-        for(int var12 = 0; var12 < var5; ++var12) {
-          Skill buff = var11[var12];
+        for (Skill buff : this.getBuffs()) {
           if (this.getCurrentMp() >= buff.getMpConsume2()) {
             Iterator var8 = owner.getEffectList().getAllEffects().iterator();
 
@@ -139,14 +131,14 @@ public final class PetBabyInstance extends PetInstance {
                 return null;
               }
 
-              ef = (Effect)var8.next();
-            } while(!this.checkEffect(ef, buff));
+              ef = (Effect) var8.next();
+            } while (!this.checkEffect(ef, buff));
           }
         }
       }
     } catch (Throwable var10) {
-      _log.warn("Pet [#" + this.getNpcId() + "] a buff task error has occurred: " + var10);
-      _log.error("", var10);
+      log.warn("Pet [#" + this.getNpcId() + "] a buff task error has occurred: " + var10);
+      log.error("", var10);
     }
 
     return null;
@@ -159,7 +151,7 @@ public final class PetBabyInstance extends PetInstance {
       } else if (ef.getTimeLeft() > 10) {
         return true;
       } else {
-        return ef.getNext() != null ? this.checkEffect(ef.getNext(), skill) : false;
+        return ef.getNext() != null && this.checkEffect(ef.getNext(), skill);
       }
     } else {
       return false;
@@ -234,7 +226,7 @@ public final class PetBabyInstance extends PetInstance {
 
     public void runImpl() throws Exception {
       Skill skill = PetBabyInstance.this.onActionTask();
-      PetBabyInstance.this._actionTask = ThreadPoolManager.getInstance().schedule(PetBabyInstance.this.new ActionTask(), skill == null ? 1000L : (long)(skill.getHitTime() * 333 / Math.max(PetBabyInstance.this.getMAtkSpd(), 1) - 100));
+      PetBabyInstance.this._actionTask = ThreadPoolManager.getInstance().schedule(PetBabyInstance.this.new ActionTask(), skill == null ? 1000L : (long) (skill.getHitTime() * 333 / Math.max(PetBabyInstance.this.getMAtkSpd(), 1) - 100));
     }
   }
 }

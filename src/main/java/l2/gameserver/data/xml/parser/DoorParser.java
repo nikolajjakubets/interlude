@@ -69,7 +69,7 @@ public final class DoorParser extends AbstractDirParser<DoorHolder> {
     return baseDat;
   }
 
-  protected void readData(Element rootElement) throws Exception {
+  protected void readData(Element rootElement) {
     Iterator iterator = rootElement.elementIterator();
 
     while(true) {
@@ -133,7 +133,7 @@ public final class DoorParser extends AbstractDirParser<DoorHolder> {
         doorSet.set("collision_height", maxz - minz & '\ufff0');
         doorSet.set("collision_radius", Math.max(50, Math.min(doorPos.x - shape.getXmin(), doorPos.y - shape.getYmin())));
         DoorTemplate template = new DoorTemplate(doorSet);
-        ((DoorHolder)this.getHolder()).addTemplate(template);
+        this.getHolder().addTemplate(template);
         break;
       }
     }

@@ -12,7 +12,7 @@ import org.napile.primitive.maps.impl.HashIntObjectMap;
 
 public final class DoorHolder extends AbstractHolder {
   private static final DoorHolder _instance = new DoorHolder();
-  private IntObjectMap<DoorTemplate> _doors = new HashIntObjectMap();
+  private static IntObjectMap<DoorTemplate> _doors = new HashIntObjectMap<>();
 
   public DoorHolder() {
   }
@@ -26,7 +26,7 @@ public final class DoorHolder extends AbstractHolder {
   }
 
   public DoorTemplate getTemplate(int doorId) {
-    return (DoorTemplate)this._doors.get(doorId);
+    return this._doors.get(doorId);
   }
 
   public IntObjectMap<DoorTemplate> getDoors() {

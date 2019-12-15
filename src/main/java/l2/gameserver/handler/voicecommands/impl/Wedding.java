@@ -32,6 +32,7 @@ import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.skills.AbnormalEffect;
 import l2.gameserver.tables.SkillTable;
 import l2.gameserver.utils.Location;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+@Slf4j
 public class Wedding implements IVoicedCommandHandler {
   private static final Logger _log = LoggerFactory.getLogger(Wedding.class);
   private static String[] _voicedCommands = new String[]{"divorce", "engage", "gotolove"};
@@ -168,8 +170,8 @@ public class Wedding implements IVoicedCommandHandler {
                 break;
               }
             }
-          } catch (Exception var13) {
-            _log.error("", var13);
+          } catch (Exception e) {
+            log.error("engage: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
           } finally {
             DbUtils.closeQuietly(con, statement, rset);
           }
