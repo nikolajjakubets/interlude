@@ -16,7 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -53,7 +53,7 @@ public class FishTable {
       int mindrop;
       int maxdrop;
       int chance;
-      for(resultSet = statement.executeQuery(); resultSet.next(); ++count) {
+      for (resultSet = statement.executeQuery(); resultSet.next(); ++count) {
         int id = resultSet.getInt("id");
         int lvl = resultSet.getInt("level");
         String name = resultSet.getString("name");
@@ -65,13 +65,11 @@ public class FishTable {
         int guts_check_time = resultSet.getInt("guts_check_time");
         int wait_time = resultSet.getInt("wait_time");
         int combat_time = resultSet.getInt("combat_time");
-        FishTemplate fish = new FishTemplate(id, lvl, name, rewardid, mindrop, maxdrop, chance, fish_guts, guts_check_time, wait_time, combat_time);
-        Object fishes;
-        if ((fishes = this._fishes.get(chance)) == null) {
-          this._fishes.put(chance, new ArrayList<>());
+        if (this._fishes.get(chance) == null) {
+          FishTemplate fish = new FishTemplate(id, lvl, name, rewardid, mindrop, maxdrop, chance, fish_guts, guts_check_time, wait_time, combat_time);
+          this._fishes.put(chance, Collections.singletonList(fish));
         }
 
-        ((List)fishes).add(fish);
       }
 
       DbUtils.close(statement, resultSet);
@@ -79,24 +77,21 @@ public class FishTable {
       count = 0;
       statement = con.prepareStatement("SELECT fishid, rewardid, min, max, chance FROM fishreward ORDER BY fishid");
 
-      for(resultSet = statement.executeQuery(); resultSet.next(); ++count) {
+      for (resultSet = statement.executeQuery(); resultSet.next(); ++count) {
         int fishid = resultSet.getInt("fishid");
         rewardid = resultSet.getInt("rewardid");
         mindrop = resultSet.getInt("min");
         maxdrop = resultSet.getInt("max");
         chance = resultSet.getInt("chance");
-        RewardData reward = new RewardData(rewardid, mindrop, maxdrop, (double)chance * 10000.0D);
-        Object rewards;
-        if ((rewards = this._fishRewards.get(fishid)) == null) {
-          this._fishRewards.put(fishid, new ArrayList<>());
+        if ((this._fishRewards.get(fishid)) == null) {
+          RewardData reward = new RewardData(rewardid, mindrop, maxdrop, (double) chance * 10000.0D);
+          this._fishRewards.put(chance, Collections.singletonList(reward));
         }
-
-        ((List)rewards).add(reward);
       }
 
       log.info("FishTable: Loaded " + count + " fish rewards.");
-    } catch (Exception var21) {
-      log.error("", var21);
+    } catch (Exception e) {
+      log.error("load: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement, resultSet);
     }
@@ -114,10 +109,8 @@ public class FishTable {
       log.warn("No fishes defined for group : " + group + "!");
       return null;
     } else {
-      Iterator var6 = fishs.iterator();
 
-      while(var6.hasNext()) {
-        FishTemplate f = (FishTemplate)var6.next();
+      for (FishTemplate f : fishs) {
         if (f.getType() == type && f.getLevel() == lvl) {
           result.add(f);
         }

@@ -7,16 +7,19 @@ package l2.gameserver.data.xml.holder;
 
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntObjectIterator;
-import java.util.HashMap;
-import java.util.Map;
 import l2.commons.data.xml.AbstractHolder;
 import l2.commons.lang.ArrayUtils;
 import l2.gameserver.templates.item.ItemTemplate;
 import l2.gameserver.templates.item.ItemTemplate.Grade;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
 public final class ItemHolder extends AbstractHolder {
   private static final ItemHolder _instance = new ItemHolder();
-  private final TIntObjectHashMap<ItemTemplate> _items = new TIntObjectHashMap();
+  private final TIntObjectHashMap<ItemTemplate> _items = new TIntObjectHashMap<>();
   private ItemTemplate[] _allTemplates;
 
   public static ItemHolder getInstance() {
@@ -32,11 +35,7 @@ public final class ItemHolder extends AbstractHolder {
 
   private void buildFastLookupTable() {
     int highestId = 0;
-    int[] var2 = this._items.keys();
-    int var3 = var2.length;
-
-    for(int var4 = 0; var4 < var3; ++var4) {
-      int id = var2[var4];
+    for (int id : _items.keys()) {
       if (id > highestId) {
         highestId = id;
       }
@@ -51,9 +50,9 @@ public final class ItemHolder extends AbstractHolder {
   }
 
   public ItemTemplate getTemplate(int id) {
-    ItemTemplate item = (ItemTemplate)ArrayUtils.valid(this._allTemplates, id);
+    ItemTemplate item = ArrayUtils.valid(this._allTemplates, id);
     if (item == null) {
-      this.warn("Not defined item id : " + id + ", or out of range!", new Exception());
+      log.warn("Not defined item id : " + id + ", or out of range!", new Exception());
       return null;
     } else {
       return this._allTemplates[id];
@@ -85,9 +84,9 @@ public final class ItemHolder extends AbstractHolder {
       ItemTemplate itemTemplate = (ItemTemplate)iterator.value();
       if (itemTemplate != null) {
         crystalCount = itemTemplate.getCrystalCount();
-        long refPrice = (long)itemTemplate.getReferencePrice();
+        long refPrice = itemTemplate.getReferencePrice();
         Grade grade = itemTemplate.getCrystalType();
-        Long crystalPrice = (Long)refGradeCrystalPrices.get(grade);
+        Long crystalPrice = refGradeCrystalPrices.get(grade);
         if (crystalPrice != null && grade.cry != itemTemplate.getItemId() && crystalCount != 0 && refPrice != 0L) {
           long crystalizedPrice = (long)crystalCount * crystalPrice;
           if (crystalPrice > refPrice) {

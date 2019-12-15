@@ -21,16 +21,13 @@ public class ItemHandler extends AbstractHolder {
 
   public void registerItemHandler(IItemHandler handler) {
     int[] ids = handler.getItemIds();
-    int[] var3 = ids;
-    int var4 = ids.length;
 
-    for(int var5 = 0; var5 < var4; ++var5) {
-      int itemId = var3[var5];
+    for (int itemId : ids) {
       ItemTemplate template = ItemHolder.getInstance().getTemplate(itemId);
       if (template == null) {
         this.warn("Item not found: " + itemId + " handler: " + handler.getClass().getSimpleName());
       } else if (template.getHandler() != IItemHandler.NULL) {
-        this.warn("Duplicate handler for item: " + itemId + "(" + template.getHandler().getClass().getSimpleName() + "," + handler.getClass().getSimpleName() + ")");
+        this.warn("Duplicate handler for item: " + itemId + " name = " + template.getName() + "(" + template.getHandler().getClass().getSimpleName() + "," + handler.getClass().getSimpleName() + ")");
       } else {
         template.setHandler(handler);
       }
@@ -40,11 +37,8 @@ public class ItemHandler extends AbstractHolder {
 
   public void unregisterItemHandler(IItemHandler handler) {
     int[] ids = handler.getItemIds();
-    int[] var3 = ids;
-    int var4 = ids.length;
 
-    for(int var5 = 0; var5 < var4; ++var5) {
-      int itemId = var3[var5];
+    for (int itemId : ids) {
       ItemTemplate template = ItemHolder.getInstance().getTemplate(itemId);
       if (template == null) {
         this.warn("Item not found: " + itemId + " handler: " + handler.getClass().getSimpleName());

@@ -5,7 +5,6 @@
 
 package l2.gameserver.templates.item;
 
-import java.util.Calendar;
 import l2.commons.lang.ArrayUtils;
 import l2.gameserver.Config;
 import l2.gameserver.handler.items.IItemHandler;
@@ -27,6 +26,8 @@ import l2.gameserver.templates.item.WeaponTemplate.WeaponType;
 import org.napile.primitive.Containers;
 import org.napile.primitive.maps.IntObjectMap;
 import org.napile.primitive.maps.impl.HashIntObjectMap;
+
+import java.util.Calendar;
 
 public abstract class ItemTemplate extends StatTemplate {
   public static final int ITEM_ID_PC_BANG_POINTS = -100;
@@ -134,7 +135,7 @@ public abstract class ItemTemplate extends StatTemplate {
     this._handler = IItemHandler.NULL;
     this._isStatDisabled = false;
     this._itemId = set.getInteger("item_id");
-    this._class = (ItemTemplate.ItemClass)set.getEnum("class", ItemTemplate.ItemClass.class, ItemTemplate.ItemClass.OTHER);
+    this._class = set.getEnum("class", ItemClass.class, ItemClass.OTHER);
     this._name = set.getString("name");
     this._addname = set.getString("add_name", "");
     this._icon = set.getString("icon", "");
@@ -142,20 +143,18 @@ public abstract class ItemTemplate extends StatTemplate {
     this._weight = set.getInteger("weight", 0);
     this._crystallizable = set.getBool("crystallizable", false);
     this._stackable = set.getBool("stackable", false);
-    this._crystalType = (ItemTemplate.Grade)set.getEnum("crystal_type", ItemTemplate.Grade.class, ItemTemplate.Grade.NONE);
+    this._crystalType = set.getEnum("crystal_type", Grade.class, Grade.NONE);
     this._durability = set.getInteger("durability", -1);
     this._temporal = set.getBool("temporal", false);
     this._bodyPart = set.getInteger("bodypart", 0);
     this._referencePrice = set.getInteger("price", 0);
     this._crystalCount = set.getInteger("crystal_count", 0);
-    this._reuseType = (ItemTemplate.ReuseType)set.getEnum("reuse_type", ItemTemplate.ReuseType.class, ItemTemplate.ReuseType.NORMAL);
+    this._reuseType = set.getEnum("reuse_type", ReuseType.class, ReuseType.NORMAL);
     this._reuseDelay = set.getInteger("reuse_delay", 0);
     this._reuseGroup = set.getInteger("delay_share_group", -this._itemId);
     ItemFlags[] var2 = ItemFlags.VALUES;
-    int var3 = var2.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
-      ItemFlags f = var2[var4];
+    for (ItemFlags f : var2) {
       boolean flag = set.getBool(f.name().toLowerCase(), f.getDefaultValue());
       if (this._name.contains("{PvP}")) {
         if (f == ItemFlags.TRADEABLE && Config.ALT_PVP_ITEMS_TREDABLE) {
@@ -314,7 +313,7 @@ public abstract class ItemTemplate extends StatTemplate {
   }
 
   public void attachSkill(Skill skill) {
-    this._skills = (Skill[])ArrayUtils.add(this._skills, skill);
+    this._skills = ArrayUtils.add(this._skills, skill);
   }
 
   public Skill[] getAttachedSkills() {
@@ -454,7 +453,7 @@ public abstract class ItemTemplate extends StatTemplate {
     } else if (this.isCursed()) {
       return false;
     } else {
-      return this.isQuest() ? false : this.isEnchantable();
+      return !this.isQuest() && this.isEnchantable();
     }
   }
 
@@ -478,10 +477,8 @@ public abstract class ItemTemplate extends StatTemplate {
       env.character = player;
       env.item = instance;
       Condition[] var5 = this.getConditions();
-      int var6 = var5.length;
 
-      for(int var7 = 0; var7 < var6; ++var7) {
-        Condition con = var5[var7];
+      for (Condition con : var5) {
         if (!con.test(env)) {
           if (showMessage && con.getSystemMsg() != null) {
             if (con.getSystemMsg().size() > 0) {
@@ -500,7 +497,7 @@ public abstract class ItemTemplate extends StatTemplate {
   }
 
   public void addCondition(Condition condition) {
-    this._conditions = (Condition[])ArrayUtils.add(this._conditions, condition);
+    this._conditions = ArrayUtils.add(this._conditions, condition);
   }
 
   public Condition[] getConditions() {
@@ -581,7 +578,7 @@ public abstract class ItemTemplate extends StatTemplate {
 
   public void addEnchantOptions(int level, int[] options) {
     if (this._enchantOptions.isEmpty()) {
-      this._enchantOptions = new HashIntObjectMap();
+      this._enchantOptions = new HashIntObjectMap<>();
     }
 
     this._enchantOptions.put(level, options);
@@ -607,7 +604,7 @@ public abstract class ItemTemplate extends StatTemplate {
     return this._isStatDisabled ? Func.EMPTY_FUNC_ARRAY : super.getStatFuncs(owner);
   }
 
-  public static enum Grade {
+  public enum Grade {
     NONE(0, 0),
     D(1458, 1),
     C(1459, 2),
@@ -618,7 +615,7 @@ public abstract class ItemTemplate extends StatTemplate {
     public final int cry;
     public final int externalOrdinal;
 
-    private Grade(int crystal, int ext) {
+    Grade(int crystal, int ext) {
       this.cry = crystal;
       this.externalOrdinal = ext;
     }
@@ -628,7 +625,7 @@ public abstract class ItemTemplate extends StatTemplate {
     }
   }
 
-  public static enum ItemClass {
+  public enum ItemClass {
     ALL,
     WEAPON,
     ARMOR,
@@ -642,17 +639,17 @@ public abstract class ItemTemplate extends StatTemplate {
     MISC,
     OTHER;
 
-    private ItemClass() {
+    ItemClass() {
     }
   }
 
-  public static enum ReuseType {
-    NORMAL(new SystemMsg[]{SystemMsg.THERE_ARE_S2_SECONDS_REMAINING_IN_S1S_REUSE_TIME, SystemMsg.THERE_ARE_S2_MINUTES_S3_SECONDS_REMAINING_IN_S1S_REUSE_TIME, SystemMsg.THERE_ARE_S2_HOURS_S3_MINUTES_AND_S4_SECONDS_REMAINING_IN_S1S_REUSE_TIME}) {
+  public enum ReuseType {
+    NORMAL(SystemMsg.THERE_ARE_S2_SECONDS_REMAINING_IN_S1S_REUSE_TIME, SystemMsg.THERE_ARE_S2_MINUTES_S3_SECONDS_REMAINING_IN_S1S_REUSE_TIME, SystemMsg.THERE_ARE_S2_HOURS_S3_MINUTES_AND_S4_SECONDS_REMAINING_IN_S1S_REUSE_TIME) {
       public long next(ItemInstance item) {
         return System.currentTimeMillis() + (long)item.getTemplate().getReuseDelay();
       }
     },
-    EVERY_DAY_AT_6_30(new SystemMsg[]{SystemMsg.THERE_ARE_S2_SECONDS_REMAINING_FOR_S1S_REUSE_TIME, SystemMsg.THERE_ARE_S2_MINUTES_S3_SECONDS_REMAINING_FOR_S1S_REUSE_TIME, SystemMsg.THERE_ARE_S2_HOURS_S3_MINUTES_S4_SECONDS_REMAINING_FOR_S1S_REUSE_TIME}) {
+    EVERY_DAY_AT_6_30(SystemMsg.THERE_ARE_S2_SECONDS_REMAINING_FOR_S1S_REUSE_TIME, SystemMsg.THERE_ARE_S2_MINUTES_S3_SECONDS_REMAINING_FOR_S1S_REUSE_TIME, SystemMsg.THERE_ARE_S2_HOURS_S3_MINUTES_S4_SECONDS_REMAINING_FOR_S1S_REUSE_TIME) {
       public long next(ItemInstance item) {
         Calendar nextTime = Calendar.getInstance();
         if (nextTime.get(11) > 6 || nextTime.get(11) == 6 && nextTime.get(12) >= 30) {
@@ -667,7 +664,7 @@ public abstract class ItemTemplate extends StatTemplate {
 
     private SystemMsg[] _messages;
 
-    private ReuseType(SystemMsg... msg) {
+    ReuseType(SystemMsg... msg) {
       this._messages = msg;
     }
 
