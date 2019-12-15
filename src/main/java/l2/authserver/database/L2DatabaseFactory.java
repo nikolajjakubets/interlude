@@ -46,7 +46,6 @@ public class L2DatabaseFactory extends BaseDataConnectionFactory {
 //        ds.setAutoReconnectForConnectionPools(true);
       mysqlDB.setAutoReconnectForPools(true);
     } catch (SQLException e) {
-      e.printStackTrace();
       log.error("makeConnectionPoolDataSource: eMessage={}, eCause={}", e.getMessage(), e.getCause());
     }
     return mysqlDB;

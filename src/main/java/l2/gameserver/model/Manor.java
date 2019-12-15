@@ -5,33 +5,25 @@
 
 package l2.gameserver.model;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.LineNumberReader;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.concurrent.ConcurrentHashMap;
 import l2.gameserver.Config;
 import l2.gameserver.data.xml.holder.ItemHolder;
 import l2.gameserver.data.xml.holder.ResidenceHolder;
 import l2.gameserver.model.entity.residence.Castle;
 import l2.gameserver.templates.item.ItemTemplate;
 import l2.gameserver.templates.manor.CropProcure;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Slf4j
 public class Manor {
-  private static final Logger _log = LoggerFactory.getLogger(Manor.class);
   private static Manor _instance;
   private static Map<Integer, Manor.SeedData> _seeds;
 
   public Manor() {
-    _seeds = new ConcurrentHashMap();
+    _seeds = new ConcurrentHashMap<>();
     this.parseData();
   }
 
@@ -45,10 +37,8 @@ public class Manor {
 
   public List<Integer> getAllCrops() {
     List<Integer> crops = new ArrayList<>();
-    Iterator var2 = _seeds.values().iterator();
 
-    while(var2.hasNext()) {
-      Manor.SeedData seed = (Manor.SeedData)var2.next();
+    for (SeedData seed : _seeds.values()) {
       if (!crops.contains(seed.getCrop()) && seed.getCrop() != 0 && !crops.contains(seed.getCrop())) {
         crops.add(seed.getCrop());
       }
@@ -102,17 +92,17 @@ public class Manor {
   }
 
   public long getSeedBuyPrice(int seedId) {
-    long buyPrice = (long)(this.getSeedBasicPrice(seedId) / 10);
+    long buyPrice = this.getSeedBasicPrice(seedId) / 10;
     return buyPrice >= 0L ? buyPrice : 1L;
   }
 
   public int getSeedMinLevel(int seedId) {
-    Manor.SeedData seed = (Manor.SeedData)_seeds.get(seedId);
+    Manor.SeedData seed = _seeds.get(seedId);
     return seed != null ? seed.getLevel() - 5 : -1;
   }
 
   public int getSeedMaxLevel(int seedId) {
-    Manor.SeedData seed = (Manor.SeedData)_seeds.get(seedId);
+    Manor.SeedData seed = _seeds.get(seedId);
     return seed != null ? seed.getLevel() + 5 : -1;
   }
 
@@ -132,7 +122,7 @@ public class Manor {
   }
 
   public int getSeedLevel(int seedId) {
-    Manor.SeedData seed = (Manor.SeedData)_seeds.get(seedId);
+    Manor.SeedData seed = _seeds.get(seedId);
     return seed != null ? seed.getLevel() : -1;
   }
 
@@ -152,7 +142,7 @@ public class Manor {
   }
 
   public int getCropType(int seedId) {
-    Manor.SeedData seed = (Manor.SeedData)_seeds.get(seedId);
+    Manor.SeedData seed = _seeds.get(seedId);
     return seed != null ? seed.getCrop() : -1;
   }
 
@@ -172,7 +162,7 @@ public class Manor {
   }
 
   public synchronized long getRewardAmountPerCrop(int castle, int cropId, int type) {
-    CropProcure cs = (CropProcure)((Castle)ResidenceHolder.getInstance().getResidence(Castle.class, castle)).getCropProcure(0).get(cropId);
+    CropProcure cs = ((Castle) ResidenceHolder.getInstance().getResidence(Castle.class, castle)).getCropProcure(0).get(cropId);
     Iterator var5 = _seeds.values().iterator();
 
     Manor.SeedData seed;
@@ -188,16 +178,14 @@ public class Manor {
   }
 
   public synchronized int getRewardItemBySeed(int seedId, int type) {
-    Manor.SeedData seed = (Manor.SeedData)_seeds.get(seedId);
+    Manor.SeedData seed = _seeds.get(seedId);
     return seed != null ? seed.getReward(type) : 0;
   }
 
   public List<Integer> getCropsForCastle(int castleId) {
     List<Integer> crops = new ArrayList<>();
-    Iterator var3 = _seeds.values().iterator();
 
-    while(var3.hasNext()) {
-      Manor.SeedData seed = (Manor.SeedData)var3.next();
+    for (SeedData seed : _seeds.values()) {
       if (seed.getManorId() == castleId && !crops.contains(seed.getCrop())) {
         crops.add(seed.getCrop());
       }
@@ -208,10 +196,8 @@ public class Manor {
 
   public List<Integer> getSeedsForCastle(int castleId) {
     List<Integer> seedsID = new ArrayList<>();
-    Iterator var3 = _seeds.values().iterator();
 
-    while(var3.hasNext()) {
-      Manor.SeedData seed = (Manor.SeedData)var3.next();
+    for (SeedData seed : _seeds.values()) {
       if (seed.getManorId() == castleId && !seedsID.contains(seed.getId())) {
         seedsID.add(seed.getId());
       }
@@ -221,12 +207,12 @@ public class Manor {
   }
 
   public int getCastleIdForSeed(int seedId) {
-    Manor.SeedData seed = (Manor.SeedData)_seeds.get(seedId);
+    Manor.SeedData seed = _seeds.get(seedId);
     return seed != null ? seed.getManorId() : 0;
   }
 
   public long getSeedSaleLimit(int seedId) {
-    Manor.SeedData seed = (Manor.SeedData)_seeds.get(seedId);
+    Manor.SeedData seed = _seeds.get(seedId);
     return seed != null ? seed.getSeedLimit() : 0L;
   }
 
@@ -251,7 +237,7 @@ public class Manor {
     try {
       File seedData = new File(Config.DATAPACK_ROOT, "data/seeds.csv");
       lnr = new LineNumberReader(new BufferedReader(new FileReader(seedData)));
-      String line = null;
+      String line;
 
       while((line = lnr.readLine()) != null) {
         if (line.trim().length() != 0 && !line.startsWith("#")) {
@@ -260,17 +246,18 @@ public class Manor {
         }
       }
 
-      _log.info("ManorManager: Loaded " + _seeds.size() + " seeds");
-    } catch (FileNotFoundException var15) {
-      _log.info("seeds.csv is missing in data folder");
-    } catch (Exception var16) {
-      _log.error("Error while loading seeds!", var16);
+      log.info("ManorManager.parseData: Loaded " + _seeds.size() + " seeds");
+    } catch (FileNotFoundException e) {
+      log.error("ManorManager.parseData: seeds.csv is missing in data folder");
+    } catch (Exception e) {
+      log.error("ManorManager.parseData: Error while loading seeds!", e);
     } finally {
       try {
         if (lnr != null) {
           lnr.close();
         }
-      } catch (Exception var14) {
+      } catch (Exception e) {
+        log.error("ManorManager.parseData: Error while loading seeds!");
       }
 
     }
@@ -294,7 +281,7 @@ public class Manor {
     return seed;
   }
 
-  public class SeedData {
+  public static class SeedData {
     private int _id;
     private int _level;
     private int _crop;

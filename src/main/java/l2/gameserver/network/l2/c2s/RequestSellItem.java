@@ -15,10 +15,11 @@ import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.s2c.SellRefundList;
 import l2.gameserver.utils.Log;
 import l2.gameserver.utils.Log.ItemLog;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 
+@Slf4j
 public class RequestSellItem extends L2GameClientPacket {
-  private int _listId;
   private int _count;
   private int[] _items;
   private long[] _itemQ;
@@ -27,16 +28,16 @@ public class RequestSellItem extends L2GameClientPacket {
   }
 
   protected void readImpl() {
-    this._listId = this.readD();
+    int _listId = this.readD();
     this._count = this.readD();
     if (this._count * 12 <= this._buf.remaining() && this._count <= 32767 && this._count >= 1) {
       this._items = new int[this._count];
       this._itemQ = new long[this._count];
 
-      for(int i = 0; i < this._count; ++i) {
+      for (int i = 0; i < this._count; ++i) {
         this._items[i] = this.readD();
         this.readD();
-        this._itemQ[i] = (long)this.readD();
+        this._itemQ[i] = (long) this.readD();
         if (this._itemQ[i] < 1L || ArrayUtils.indexOf(this._items, this._items[i]) < i) {
           this._count = 0;
           break;
@@ -49,7 +50,7 @@ public class RequestSellItem extends L2GameClientPacket {
   }
 
   protected void runImpl() {
-    Player activeChar = ((GameClient)this.getClient()).getActiveChar();
+    Player activeChar = ((GameClient) this.getClient()).getActiveChar();
     if (activeChar != null && this._count != 0) {
       if (activeChar.isActionsDisabled()) {
         activeChar.sendActionFailed();
@@ -64,14 +65,15 @@ public class RequestSellItem extends L2GameClientPacket {
       } else {
         NpcInstance merchant = activeChar.getLastNpc();
         boolean isValidMerchant = merchant != null && merchant.isMerchantNpc();
-        if (Config.ALT_ALLOW_REMOTE_SELL_ITEMS_TO_SHOP || activeChar.isGM() || merchant != null && isValidMerchant && activeChar.isInActingRange(merchant)) {
+        if (Config.ALT_ALLOW_REMOTE_SELL_ITEMS_TO_SHOP || activeChar.isGM() || isValidMerchant && activeChar.isInActingRange(merchant)) {
           activeChar.getInventory().writeLock();
 
-          label156: {
+          label156:
+          {
             try {
               int i = 0;
 
-              while(true) {
+              while (true) {
                 if (i >= this._count) {
                   break label156;
                 }
@@ -80,7 +82,7 @@ public class RequestSellItem extends L2GameClientPacket {
                 long count = this._itemQ[i];
                 ItemInstance item = activeChar.getInventory().getItemByObjectId(objectId);
                 if (item != null && item.getCount() >= count && item.canBeSold(activeChar)) {
-                  long price = SafeMath.mulAndCheck(Math.max(1L, (long)item.getReferencePrice() / Config.ALT_SHOP_REFUND_SELL_DIVISOR), count);
+                  long price = SafeMath.mulAndCheck(Math.max(1L, (long) item.getReferencePrice() / Config.ALT_SHOP_REFUND_SELL_DIVISOR), count);
                   ItemInstance refund = activeChar.getInventory().removeItemByObjectId(objectId, count);
                   Log.LogItem(activeChar, ItemLog.RefundSell, refund);
                   activeChar.addAdena(price);
@@ -89,7 +91,8 @@ public class RequestSellItem extends L2GameClientPacket {
 
                 ++i;
               }
-            } catch (ArithmeticException var15) {
+            } catch (ArithmeticException e) {
+              log.error("runImpl: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
               this.sendPacket(Msg.YOU_HAVE_EXCEEDED_THE_QUANTITY_THAT_CAN_BE_INPUTTED);
             } finally {
               activeChar.getInventory().writeUnlock();

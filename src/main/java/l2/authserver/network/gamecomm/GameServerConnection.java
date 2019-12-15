@@ -154,7 +154,7 @@ public class GameServerConnection {
 
         public void runImpl() {
             if (Config.GAME_SERVER_PING_RETRY > 0 && GameServerConnection.this._pingRetry > Config.GAME_SERVER_PING_RETRY) {
-              _log.warn("Gameserver " + GameServerConnection.this.gameServer.getId() + " [" + GameServerConnection.this.gameServer.getServerName() + "] : ping timeout!");
+              log.warn("Gameserver " + GameServerConnection.this.gameServer.getId() + " [" + GameServerConnection.this.gameServer.getServerName() + "] : ping timeout!");
                 GameServerConnection.this.closeNow();
             } else {
                 GameServerConnection.this._pingRetry++;

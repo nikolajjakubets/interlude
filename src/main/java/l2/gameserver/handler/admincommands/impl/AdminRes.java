@@ -5,22 +5,19 @@
 
 package l2.gameserver.handler.admincommands.impl;
 
-import java.util.Iterator;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.handler.admincommands.IAdminCommandHandler;
-import l2.gameserver.model.Creature;
-import l2.gameserver.model.GameObject;
-import l2.gameserver.model.Playable;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.World;
+import l2.gameserver.model.*;
 import l2.gameserver.model.instances.NpcInstance;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AdminRes implements IAdminCommandHandler {
   public AdminRes() {
   }
 
   public boolean useAdminCommand(Enum comm, String[] wordList, String fullString, Player activeChar) {
-    AdminRes.Commands command = (AdminRes.Commands)comm;
+    AdminRes.Commands command = (AdminRes.Commands) comm;
     if (!activeChar.getPlayerAccess().Res) {
       return false;
     } else {
@@ -41,7 +38,7 @@ public class AdminRes implements IAdminCommandHandler {
   }
 
   private void handleRes(Player activeChar) {
-    this.handleRes(activeChar, (String)null);
+    this.handleRes(activeChar, (String) null);
   }
 
   private void handleRes(Player activeChar, String player) {
@@ -51,16 +48,15 @@ public class AdminRes implements IAdminCommandHandler {
       if (plyr == null) {
         try {
           int radius = Math.max(Integer.parseInt(player), 100);
-          Iterator var6 = activeChar.getAroundCharacters(radius, radius).iterator();
 
-          while(var6.hasNext()) {
-            Creature character = (Creature)var6.next();
+          for (Creature character : activeChar.getAroundCharacters(radius, radius)) {
             this.handleRes(character);
           }
 
           activeChar.sendMessage("Resurrected within " + radius + " unit radius.");
           return;
-        } catch (NumberFormatException var8) {
+        } catch (NumberFormatException e) {
+          log.error("handleRes: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
           activeChar.sendMessage("Enter valid player name or radius");
           return;
         }
@@ -74,7 +70,7 @@ public class AdminRes implements IAdminCommandHandler {
     }
 
     if (obj instanceof Creature) {
-      this.handleRes((Creature)obj);
+      this.handleRes((Creature) obj);
     } else {
       activeChar.sendPacket(Msg.INVALID_TARGET);
     }
@@ -85,16 +81,16 @@ public class AdminRes implements IAdminCommandHandler {
     if (target.isDead()) {
       if (target.isPlayable()) {
         if (target.isPlayer()) {
-          ((Player)target).doRevive(100.0D);
+          ((Player) target).doRevive(100.0D);
         } else {
-          ((Playable)target).doRevive();
+          ((Playable) target).doRevive();
         }
       } else if (target.isNpc()) {
-        ((NpcInstance)target).stopDecay();
+        ((NpcInstance) target).stopDecay();
       }
 
-      target.setCurrentHpMp((double)target.getMaxHp(), (double)target.getMaxMp(), true);
-      target.setCurrentCp((double)target.getMaxCp());
+      target.setCurrentHpMp((double) target.getMaxHp(), (double) target.getMaxMp(), true);
+      target.setCurrentCp((double) target.getMaxCp());
     }
   }
 

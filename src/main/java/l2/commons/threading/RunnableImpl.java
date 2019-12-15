@@ -5,23 +5,22 @@
 
 package l2.commons.threading;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class RunnableImpl implements Runnable {
-    public static final Logger _log = LoggerFactory.getLogger(RunnableImpl.class);
 
-    public RunnableImpl() {
+  public RunnableImpl() {
+  }
+
+  public abstract void runImpl() throws Exception;
+
+  public final void run() {
+    try {
+      this.runImpl();
+    } catch (Throwable var2) {
+      log.error("Exception: RunnableImpl.run(): " + var2, var2);
     }
 
-    public abstract void runImpl() throws Exception;
-
-    public final void run() {
-        try {
-            this.runImpl();
-        } catch (Throwable var2) {
-            _log.error("Exception: RunnableImpl.run(): " + var2, var2);
-        }
-
-    }
+  }
 }

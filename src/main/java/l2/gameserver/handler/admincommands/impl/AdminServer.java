@@ -5,42 +5,40 @@
 
 package l2.gameserver.handler.admincommands.impl;
 
-import java.lang.reflect.Field;
-import java.util.Iterator;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import l2.gameserver.ai.CharacterAI;
 import l2.gameserver.ai.DefaultAI;
 import l2.gameserver.data.xml.holder.NpcHolder;
 import l2.gameserver.handler.admincommands.IAdminCommandHandler;
 import l2.gameserver.instancemanager.ServerVariables;
-import l2.gameserver.model.Creature;
-import l2.gameserver.model.GameObject;
-import l2.gameserver.model.GameObjectsStorage;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.SimpleSpawner;
-import l2.gameserver.model.WorldRegion;
+import l2.gameserver.model.*;
 import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.model.instances.RaidBossInstance;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
 import l2.gameserver.templates.npc.NpcTemplate;
+import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Field;
+import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@Slf4j
 public class AdminServer implements IAdminCommandHandler {
   public AdminServer() {
   }
 
   public boolean useAdminCommand(Enum comm, String[] wordList, String fullString, Player activeChar) {
-    AdminServer.Commands command = (AdminServer.Commands)comm;
+    AdminServer.Commands command = (AdminServer.Commands) comm;
     if (!activeChar.getPlayerAccess().Menu) {
       return false;
     } else {
-      switch(command) {
+      switch (command) {
         case admin_server:
           try {
             String val = fullString.substring(13);
             showHelpPage(activeChar, val);
-          } catch (StringIndexOutOfBoundsException var20) {
+          } catch (StringIndexOutOfBoundsException e) {
+            log.error("useAdminCommand: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
           }
           break;
         case admin_check_actor:
@@ -55,7 +53,7 @@ public class AdminServer implements IAdminCommandHandler {
             return false;
           }
 
-          Creature target = (Creature)obj;
+          Creature target = (Creature) obj;
           CharacterAI ai = target.getAI();
           if (ai == null) {
             activeChar.sendMessage("ai == null");
@@ -88,10 +86,8 @@ public class AdminServer implements IAdminCommandHandler {
           int interval = Integer.parseInt(wordList[1]);
           int count = 0;
           int count2 = 0;
-          Iterator var22 = GameObjectsStorage.getAllNpcsForIterate().iterator();
 
-          while(var22.hasNext()) {
-            NpcInstance npc = (NpcInstance)var22.next();
+          for (NpcInstance npc : GameObjectsStorage.getAllNpcsForIterate()) {
             if (npc != null && !(npc instanceof RaidBossInstance)) {
               CharacterAI char_ai = npc.getAI();
               if (char_ai instanceof DefaultAI) {
@@ -108,7 +104,8 @@ public class AdminServer implements IAdminCommandHandler {
                       ++count2;
                     }
                   }
-                } catch (Exception var19) {
+                } catch (Exception e) {
+                  log.error("useAdminCommand: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
                 }
               }
             }
@@ -133,7 +130,8 @@ public class AdminServer implements IAdminCommandHandler {
             }
 
             this.spawnMonster(activeChar, id, respawnTime, mobCount);
-          } catch (Exception var18) {
+          } catch (Exception e) {
+            log.error("useAdminCommand: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
           }
       }
 
@@ -173,7 +171,7 @@ public class AdminServer implements IAdminCommandHandler {
     } else {
       try {
         SimpleSpawner spawn = new SimpleSpawner(template);
-        spawn.setLoc(((GameObject)target).getLoc());
+        spawn.setLoc(target.getLoc());
         spawn.setAmount(mobCount);
         spawn.setHeading(activeChar.getHeading());
         spawn.setRespawnDelay(respawnTime);
@@ -183,22 +181,23 @@ public class AdminServer implements IAdminCommandHandler {
           spawn.stopRespawn();
         }
 
-        activeChar.sendMessage("Created " + template.name + " on " + ((GameObject)target).getObjectId() + ".");
-      } catch (Exception var10) {
+        activeChar.sendMessage("Created " + template.name + " on " + target.getObjectId() + ".");
+      } catch (Exception e) {
+        log.error("spawnMonster: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         activeChar.sendMessage("Target is not ingame.");
       }
 
     }
   }
 
-  private static enum Commands {
+  private enum Commands {
     admin_server,
     admin_check_actor,
     admin_setvar,
     admin_set_ai_interval,
     admin_spawn2;
 
-    private Commands() {
+    Commands() {
     }
   }
 }

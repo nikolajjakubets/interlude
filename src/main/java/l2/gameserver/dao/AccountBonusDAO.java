@@ -5,18 +5,18 @@
 
 package l2.gameserver.dao;
 
+import l2.commons.dbutils.DbUtils;
+import l2.gameserver.database.DatabaseFactory;
+import l2.gameserver.model.actor.instances.player.Bonus;
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import l2.commons.dbutils.DbUtils;
-import l2.gameserver.database.DatabaseFactory;
-import l2.gameserver.model.actor.instances.player.Bonus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class AccountBonusDAO {
-  private static final Logger LOG = LoggerFactory.getLogger(AccountBonusDAO.class);
   private static final AccountBonusDAO INSTANCE = new AccountBonusDAO();
   private static final String SQL_LOAD_BONUS = "SELECT \n    `expireTime` AS `expireTime`,\n    `rateXp` AS `rateXp`,\n    `rateSp` AS `rateSp`,\n    `questRewardRate` AS `questRewardRate`,\n    `questDropRate` AS `questDropRate`,\n    `dropAdena` AS `dropAdena`,\n    `dropItems` AS `dropItems`,\n    `dropRaidItems` AS `dropRaidItems`,\n    `dropSpoil` AS `dropSpoil`,\n    `enchantItemBonus` AS `enchantItemBonus` \nFROM \n    `accounts_bonuses`\nWHERE \n    `account` = ?";
   private static final String SQL_STORE_BONUS = "REPLACE LOW_PRIORITY INTO `accounts_bonuses` (\n    `account`,\n    `expireTime`,\n    `rateXp`,\n    `rateSp`,\n    `questRewardRate`,\n    `questDropRate`,\n    `dropAdena`,\n    `dropItems`,\n    `dropRaidItems`,\n    `dropSpoil`,    `enchantItemBonus`  \n) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -52,7 +52,7 @@ public class AccountBonusDAO {
         bonus.setEnchantItem(rset.getFloat("enchantItemBonus"));
       }
     } catch (SQLException var10) {
-      LOG.error("Can't load account bonus for account \"" + accountName + "\"", var10);
+      log.error("Can't load account bonus for account \"" + accountName + "\"", var10);
     } finally {
       DbUtils.closeQuietly(conn, pstmt, rset);
     }
@@ -85,7 +85,7 @@ public class AccountBonusDAO {
       pstmt.setFloat(11, bonus.getEnchantItemMul());
       pstmt.executeUpdate();
     } catch (SQLException var9) {
-      LOG.error("Can't store account bonus for account \"" + accountName + "\"", var9);
+      log.error("Can't store account bonus for account \"" + accountName + "\"", var9);
     } finally {
       DbUtils.closeQuietly(conn, pstmt);
     }
@@ -102,7 +102,7 @@ public class AccountBonusDAO {
       pstmt.setString(1, accountName);
       pstmt.executeUpdate();
     } catch (SQLException var8) {
-      LOG.error("Can't store account bonus for account \"" + accountName + "\"", var8);
+      log.error("Can't store account bonus for account \"" + accountName + "\"", var8);
     } finally {
       DbUtils.closeQuietly(conn, pstmt);
     }

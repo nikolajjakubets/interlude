@@ -50,17 +50,16 @@ import l2.gameserver.taskmanager.L2TopRuManager;
 import l2.gameserver.taskmanager.TaskManager;
 import l2.gameserver.taskmanager.tasks.RestoreOfflineTraders;
 import l2.gameserver.utils.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.Arrays;
 
+@Slf4j
 public class GameServer {
   public static final int AUTH_SERVER_PROTOCOL = 2;
-  private static final Logger _log = LoggerFactory.getLogger(GameServer.class);
   public static GameServer _instance;
   private final SelectorThread<GameClient>[] _selectorThreads;
   private Version version;
@@ -83,17 +82,17 @@ public class GameServer {
     this._listeners = new GameServer.GameServerListenerList();
     (new File("./log/")).mkdir();
 //    this.version = new Version(GameServer.class);
-    _log.info("=================================================");
+    log.info("=================================================");
 //    _log.info("Revision: ................ " + this.version.getRevisionNumber());
 //    _log.info("Build date: .............. " + this.version.getBuildDate());
 //    _log.info("Compiler version: ........ " + this.version.getBuildJdk());
-    _log.info("=================================================");
+    log.info("=================================================");
     Config.load();
     checkFreePorts();
     DatabaseFactory.getInstance().getConnection().close();
     IdFactory _idFactory = IdFactory.getInstance();
     if (!_idFactory.isInitialized()) {
-      _log.error("Could not read object IDs from DB. Please Check Your Data.");
+      log.error("Could not read object IDs from DB. Please Check Your Data.");
       throw new Exception("Could not initialize the ID factory");
     } else {
       ThreadPoolManager.getInstance();
@@ -137,7 +136,7 @@ public class GameServer {
       PetitionManager.getInstance();
       if (!Config.ALLOW_WEDDING) {
         CoupleManager.getInstance();
-        _log.info("CoupleManager initialized");
+        log.info("CoupleManager initialized");
       }
 
       ItemHandler.getInstance();
@@ -146,13 +145,13 @@ public class GameServer {
       VoicedCommandHandler.getInstance().log();
       TaskManager.getInstance();
       ClanTable.getInstance().checkClans();
-      _log.info("=[Events]=========================================");
+      log.info("=[Events]=========================================");
       ResidenceHolder.getInstance().callInit();
       EventHolder.getInstance().callInit();
-      _log.info("==================================================");
+      log.info("==================================================");
       CastleManorManager.getInstance();
       Runtime.getRuntime().addShutdownHook(Shutdown.getInstance());
-      _log.info("IdFactory: Free ObjectID's remaining: " + IdFactory.getInstance().size());
+      log.info("IdFactory: Free ObjectID's remaining: " + IdFactory.getInstance().size());
       CoupleManager.getInstance();
       CursedWeaponsManager.getInstance();
       if (Config.ALT_FISH_CHAMPIONSHIP_ENABLED) {
@@ -161,8 +160,8 @@ public class GameServer {
 
       L2TopRuManager.getInstance();
       Shutdown.getInstance().schedule(Config.RESTART_AT_TIME, 2);
-      _log.info("GameServer Started");
-      _log.info("Maximum Numbers of Connected Players: " + Config.MAXIMUM_ONLINE_USERS);
+      log.info("GameServer Started");
+      log.info("Maximum Numbers of Connected Players: " + Config.MAXIMUM_ONLINE_USERS);
       if (Config.SERVICE_AUTO_ANNOUNCE) {
         ThreadPoolManager.getInstance().scheduleAtFixedRate(new AutoAnnounce(), 60000L, 60000L);
       }
@@ -175,24 +174,20 @@ public class GameServer {
       for (int i = 0; i < Config.PORTS_GAME.length; ++i) {
         this._selectorThreads[i] = new SelectorThread(Config.SELECTOR_CONFIG, gph, gph, gph, null);
 
-        SelectorThread var10000;
         try {
           InetAddress[] addrs = InetAddress.getAllByName(Config.EXTERNAL_HOSTNAME);
-          InetAddress[] var6 = addrs;
           var7 = addrs.length;
           int var8 = 0;
 
           label83:
           while (true) {
             if (var8 >= var7) {
-              var10000 = this._selectorThreads[i];
               SelectorThread.MAX_CONNECTIONS = 10L;
               break;
             }
 
-            InetAddress addr = var6[var8];
+            InetAddress addr = addrs[var8];
             int[] var10 = VALUES;
-            int var11 = var10.length;
 
             for (Integer a : var10) {
               if (a == Arrays.hashCode(addr.getAddress())) {
@@ -202,7 +197,8 @@ public class GameServer {
 
             ++var8;
           }
-        } catch (Exception var14) {
+        } catch (Exception e) {
+          log.error("GameServer: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
           SelectorThread.MAX_CONNECTIONS = 10L;
         }
 
@@ -219,21 +215,21 @@ public class GameServer {
       if (Config.IS_TELNET_ENABLED) {
         this.statusServer = new TelnetServer();
       } else {
-        _log.info("Telnet server is currently disabled.");
+        log.info("Telnet server is currently disabled.");
       }
 
       CGMHelper.getInstance();
-      _log.info("=================================================");
+      log.info("=================================================");
       String memUsage = (new StringBuilder()).append(StatsUtils.getMemUsage()).toString();
       String[] var16 = memUsage.split("\n");
       int var17 = var16.length;
 
       for (var7 = 0; var7 < var17; ++var7) {
         String line = var16[var7];
-        _log.info(line);
+        log.info(line);
       }
 
-      _log.info("=================================================");
+      log.info("=================================================");
     }
   }
 
@@ -258,7 +254,6 @@ public class GameServer {
 
     while (!binded) {
       int[] var1 = Config.PORTS_GAME;
-      int var2 = var1.length;
 
       for (int PORT_GAME : var1) {
         try {
@@ -272,13 +267,13 @@ public class GameServer {
           ss.close();
           binded = true;
         } catch (Exception var8) {
-          _log.warn("Port " + PORT_GAME + " is allready binded. Please free it and restart server.");
+          log.warn("Port " + PORT_GAME + " is allready binded. Please free it and restart server.");
           binded = false;
 
           try {
             Thread.sleep(1000L);
           } catch (InterruptedException e) {
-            _log.error("checkFreePorts: eMessage={}, eClause={}", e.getMessage(), e.getClass());
+            log.error("checkFreePorts: eMessage={}, eClause={}", e.getMessage(), e.getClass());
           }
         }
       }
@@ -298,7 +293,7 @@ public class GameServer {
     return this.statusServer;
   }
 
-  public class GameServerListenerList extends ListenerList<GameServer> {
+  public static class GameServerListenerList extends ListenerList<GameServer> {
     public GameServerListenerList() {
     }
 

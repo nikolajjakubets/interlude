@@ -11,11 +11,12 @@ import l2.gameserver.ThreadPoolManager;
 import l2.gameserver.model.Spawner;
 import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.utils.Util;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+@Slf4j
 public class SpawnTaskManager {
   private SpawnTaskManager.SpawnTask[] _spawnTasks = new SpawnTaskManager.SpawnTask[500];
   private int _spawnTasksSize = 0;
@@ -45,13 +46,11 @@ public class SpawnTaskManager {
     sb.append("Tasks dump:\n\r");
     long current = System.currentTimeMillis();
     SpawnTaskManager.SpawnTask[] var4 = this._spawnTasks;
-    int var5 = var4.length;
 
-    for(int var6 = 0; var6 < var5; ++var6) {
-      SpawnTaskManager.SpawnTask container = var4[var6];
+    for (SpawnTask container : var4) {
       if (container != null) {
         sb.append("Class/Name: ").append(container.getClass().getSimpleName()).append('/').append(container.getActor());
-        sb.append(" spawn timer: ").append(Util.formatTime((int)((container.endtime - current) / 1000L))).append("\n\r");
+        sb.append(" spawn timer: ").append(Util.formatTime((int) ((container.endtime - current) / 1000L))).append("\n\r");
       }
     }
 
@@ -59,11 +58,11 @@ public class SpawnTaskManager {
   }
 
   private void addObject(SpawnTaskManager.SpawnTask decay) {
-    synchronized(this.spawnTasks_lock) {
+    synchronized (this.spawnTasks_lock) {
       if (this._spawnTasksSize >= this._spawnTasks.length) {
         SpawnTaskManager.SpawnTask[] temp = new SpawnTaskManager.SpawnTask[this._spawnTasks.length * 2];
 
-        for(int i = 0; i < this._spawnTasksSize; ++i) {
+        for (int i = 0; i < this._spawnTasksSize; ++i) {
           temp[i] = this._spawnTasks[i];
         }
 
@@ -76,11 +75,11 @@ public class SpawnTaskManager {
   }
 
   public void removeObject(NpcInstance actor) {
-    synchronized(this.spawnTasks_lock) {
+    synchronized (this.spawnTasks_lock) {
       if (this._spawnTasksSize > 1) {
         int k = -1;
 
-        for(int i = 0; i < this._spawnTasksSize; ++i) {
+        for (int i = 0; i < this._spawnTasksSize; ++i) {
           if (this._spawnTasks[i].getActor() == actor) {
             k = i;
           }
@@ -109,7 +108,7 @@ public class SpawnTaskManager {
     }
 
     public NpcInstance getActor() {
-      return (NpcInstance)this._npcRef.get();
+      return (NpcInstance) this._npcRef.get();
     }
   }
 
@@ -121,12 +120,12 @@ public class SpawnTaskManager {
       if (SpawnTaskManager.this._spawnTasksSize > 0) {
         try {
           List<NpcInstance> works = new ArrayList<>();
-          synchronized(SpawnTaskManager.this.spawnTasks_lock) {
+          synchronized (SpawnTaskManager.this.spawnTasks_lock) {
             long current = System.currentTimeMillis();
             int size = SpawnTaskManager.this._spawnTasksSize;
             int i = size - 1;
 
-            while(true) {
+            while (true) {
               if (i < 0) {
                 break;
               }
@@ -154,18 +153,15 @@ public class SpawnTaskManager {
                     SpawnTaskManager.this._spawnTasksSize--;
                   }
                 }
-              } catch (Exception var10) {
-                _log.error("", var10);
+              } catch (Exception e) {
+                log.error("runImpl: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
               }
 
               --i;
             }
           }
 
-          Iterator var2 = works.iterator();
-
-          while(var2.hasNext()) {
-            NpcInstance work = (NpcInstance)var2.next();
+          for (NpcInstance work : works) {
             Spawner spawn = work.getSpawn();
             if (spawn != null) {
               spawn.decreaseScheduledCount();
@@ -174,8 +170,8 @@ public class SpawnTaskManager {
               }
             }
           }
-        } catch (Exception var12) {
-          _log.error("", var12);
+        } catch (Exception e) {
+          log.error("runImpl: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         }
       }
 

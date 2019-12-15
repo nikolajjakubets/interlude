@@ -5,18 +5,18 @@
 
 package l2.gameserver.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import l2.commons.dao.JdbcEntityState;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.entity.residence.Castle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+@Slf4j
 public class CastleDAO {
-  private static final Logger _log = LoggerFactory.getLogger(CastleDAO.class);
   private static final CastleDAO _instance = new CastleDAO();
   public static final String SELECT_SQL_QUERY = "SELECT tax_percent, treasury, reward_count, siege_date, last_siege_date, own_date FROM castle WHERE id=? LIMIT 1";
   public static final String UPDATE_SQL_QUERY = "UPDATE castle SET tax_percent=?, treasury=?, reward_count=?, siege_date=?, last_siege_date=?, own_date=? WHERE id=?";
@@ -35,7 +35,7 @@ public class CastleDAO {
 
     try {
       con = DatabaseFactory.getInstance().getConnection();
-      statement = con.prepareStatement("SELECT tax_percent, treasury, reward_count, siege_date, last_siege_date, own_date FROM castle WHERE id=? LIMIT 1");
+      statement = con.prepareStatement(SELECT_SQL_QUERY);
       statement.setInt(1, castle.getId());
       rset = statement.executeQuery();
       if (rset.next()) {
@@ -47,7 +47,7 @@ public class CastleDAO {
         castle.getOwnDate().setTimeInMillis(rset.getLong("own_date"));
       }
     } catch (Exception var9) {
-      _log.error("CastleDAO.select(Castle):" + var9, var9);
+      log.error("CastleDAO.select(Castle):" + var9, var9);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -67,7 +67,7 @@ public class CastleDAO {
 
     try {
       con = DatabaseFactory.getInstance().getConnection();
-      statement = con.prepareStatement("UPDATE castle SET tax_percent=?, treasury=?, reward_count=?, siege_date=?, last_siege_date=?, own_date=? WHERE id=?");
+      statement = con.prepareStatement(UPDATE_SQL_QUERY);
       statement.setInt(1, castle.getTaxPercent0());
       statement.setLong(2, castle.getTreasury());
       statement.setInt(3, castle.getRewardCount());
@@ -77,7 +77,7 @@ public class CastleDAO {
       statement.setInt(7, castle.getId());
       statement.execute();
     } catch (Exception var8) {
-      _log.warn("CastleDAO#update0(Castle): " + var8, var8);
+      log.error("CastleDAO#update0(Castle): " + var8, var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }

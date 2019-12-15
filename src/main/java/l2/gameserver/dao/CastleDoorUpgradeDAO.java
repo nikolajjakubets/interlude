@@ -5,17 +5,17 @@
 
 package l2.gameserver.dao;
 
+import l2.commons.dbutils.DbUtils;
+import l2.gameserver.database.DatabaseFactory;
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import l2.commons.dbutils.DbUtils;
-import l2.gameserver.database.DatabaseFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class CastleDoorUpgradeDAO {
   private static final CastleDoorUpgradeDAO _instance = new CastleDoorUpgradeDAO();
-  private static final Logger _log = LoggerFactory.getLogger(CastleDoorUpgradeDAO.class);
   public static final String SELECT_SQL_QUERY = "SELECT hp FROM castle_door_upgrade WHERE door_id=?";
   public static final String REPLACE_SQL_QUERY = "REPLACE INTO castle_door_upgrade (door_id, hp) VALUES (?,?)";
   public static final String DELETE_SQL_QUERY = "DELETE FROM castle_door_upgrade WHERE door_id=?";
@@ -35,7 +35,7 @@ public class CastleDoorUpgradeDAO {
     int var5;
     try {
       con = DatabaseFactory.getInstance().getConnection();
-      statement = con.prepareStatement("SELECT hp FROM castle_door_upgrade WHERE door_id=?");
+      statement = con.prepareStatement(SELECT_SQL_QUERY);
       statement.setInt(1, doorId);
       rset = statement.executeQuery();
       if (!rset.next()) {
@@ -44,7 +44,7 @@ public class CastleDoorUpgradeDAO {
 
       var5 = rset.getInt("hp");
     } catch (Exception var9) {
-      _log.error("CastleDoorUpgradeDAO:load(int): " + var9, var9);
+      log.error("CastleDoorUpgradeDAO:load(int): " + var9, var9);
       return 0;
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
@@ -59,12 +59,12 @@ public class CastleDoorUpgradeDAO {
 
     try {
       con = DatabaseFactory.getInstance().getConnection();
-      statement = con.prepareStatement("REPLACE INTO castle_door_upgrade (door_id, hp) VALUES (?,?)");
+      statement = con.prepareStatement(REPLACE_SQL_QUERY);
       statement.setInt(1, uId);
       statement.setInt(2, val);
       statement.execute();
     } catch (Exception var9) {
-      _log.error("CastleDoorUpgradeDAO:insert(int, int): " + var9, var9);
+      log.error("CastleDoorUpgradeDAO:insert(int, int): " + var9, var9);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -77,11 +77,11 @@ public class CastleDoorUpgradeDAO {
 
     try {
       con = DatabaseFactory.getInstance().getConnection();
-      statement = con.prepareStatement("DELETE FROM castle_door_upgrade WHERE door_id=?");
+      statement = con.prepareStatement(DELETE_SQL_QUERY);
       statement.setInt(1, uId);
       statement.execute();
     } catch (Exception var8) {
-      _log.error("CastleDoorUpgradeDAO:delete(int): " + var8, var8);
+      log.error("CastleDoorUpgradeDAO:delete(int): " + var8, var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }

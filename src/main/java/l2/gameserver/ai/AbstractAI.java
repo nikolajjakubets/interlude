@@ -12,11 +12,10 @@ import l2.gameserver.model.Creature;
 import l2.gameserver.model.GameObject;
 import l2.gameserver.model.Skill;
 import l2.gameserver.utils.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class AbstractAI extends RunnableImpl {
-  protected static final Logger _log = LoggerFactory.getLogger(AbstractAI.class);
   protected final Creature _actor;
   private HardReference<? extends Creature> _attackTarget = HardReferences.emptyRef();
   private CtrlIntention _intention;
@@ -32,22 +31,22 @@ public abstract class AbstractAI extends RunnableImpl {
   public void changeIntention(CtrlIntention intention, Object arg0, Object arg1) {
     this._intention = intention;
     if (intention != CtrlIntention.AI_INTENTION_CAST && intention != CtrlIntention.AI_INTENTION_ATTACK) {
-      this.setAttackTarget((Creature)null);
+      this.setAttackTarget(null);
     }
 
   }
 
   public final void setIntention(CtrlIntention intention) {
-    this.setIntention(intention, (Object)null, (Object)null);
+    this.setIntention(intention, null, null);
   }
 
   public final void setIntention(CtrlIntention intention, Object arg0) {
-    this.setIntention(intention, arg0, (Object)null);
+    this.setIntention(intention, arg0, null);
   }
 
   public void setIntention(CtrlIntention intention, Object arg0, Object arg1) {
     if (intention != CtrlIntention.AI_INTENTION_CAST && intention != CtrlIntention.AI_INTENTION_ATTACK) {
-      this.setAttackTarget((Creature)null);
+      this.setAttackTarget(null);
     }
 
     Creature actor = this.getActor();
@@ -60,7 +59,7 @@ public abstract class AbstractAI extends RunnableImpl {
     }
 
     actor.getListeners().onAiIntention(intention, arg0, arg1);
-    switch(intention) {
+    switch (intention) {
       case AI_INTENTION_IDLE:
         this.onIntentionIdle();
         break;
@@ -71,19 +70,19 @@ public abstract class AbstractAI extends RunnableImpl {
         this.onIntentionRest();
         break;
       case AI_INTENTION_ATTACK:
-        this.onIntentionAttack((Creature)arg0);
+        this.onIntentionAttack((Creature) arg0);
         break;
       case AI_INTENTION_CAST:
-        this.onIntentionCast((Skill)arg0, (Creature)arg1);
+        this.onIntentionCast((Skill) arg0, (Creature) arg1);
         break;
       case AI_INTENTION_PICK_UP:
-        this.onIntentionPickUp((GameObject)arg0);
+        this.onIntentionPickUp((GameObject) arg0);
         break;
       case AI_INTENTION_INTERACT:
-        this.onIntentionInteract((GameObject)arg0);
+        this.onIntentionInteract((GameObject) arg0);
         break;
       case AI_INTENTION_FOLLOW:
-        this.onIntentionFollow((Creature)arg0);
+        this.onIntentionFollow((Creature) arg0);
     }
 
   }
@@ -108,18 +107,18 @@ public abstract class AbstractAI extends RunnableImpl {
     Creature actor = this.getActor();
     if (actor != null && actor.isVisible()) {
       actor.getListeners().onAiEvent(evt, args);
-      switch(evt) {
+      switch (evt) {
         case EVT_THINK:
           this.onEvtThink();
           break;
         case EVT_ATTACKED:
-          this.onEvtAttacked((Creature)args[0], ((Number)args[1]).intValue());
+          this.onEvtAttacked((Creature) args[0], ((Number) args[1]).intValue());
           break;
         case EVT_CLAN_ATTACKED:
-          this.onEvtClanAttacked((Creature)args[0], (Creature)args[1], ((Number)args[2]).intValue());
+          this.onEvtClanAttacked((Creature) args[0], (Creature) args[1], ((Number) args[2]).intValue());
           break;
         case EVT_AGGRESSION:
-          this.onEvtAggression((Creature)args[0], ((Number)args[1]).intValue());
+          this.onEvtAggression((Creature) args[0], ((Number) args[1]).intValue());
           break;
         case EVT_READY_TO_ACT:
           this.onEvtReadyToAct();
@@ -131,22 +130,22 @@ public abstract class AbstractAI extends RunnableImpl {
           this.onEvtArrivedTarget();
           break;
         case EVT_ARRIVED_BLOCKED:
-          this.onEvtArrivedBlocked((Location)args[0]);
+          this.onEvtArrivedBlocked((Location) args[0]);
           break;
         case EVT_FORGET_OBJECT:
-          this.onEvtForgetObject((GameObject)args[0]);
+          this.onEvtForgetObject((GameObject) args[0]);
           break;
         case EVT_DEAD:
-          this.onEvtDead((Creature)args[0]);
+          this.onEvtDead((Creature) args[0]);
           break;
         case EVT_FAKE_DEATH:
           this.onEvtFakeDeath();
           break;
         case EVT_FINISH_CASTING:
-          this.onEvtFinishCasting((Skill)args[0], (Creature)args[1]);
+          this.onEvtFinishCasting((Skill) args[0], (Creature) args[1]);
           break;
         case EVT_SEE_SPELL:
-          this.onEvtSeeSpell((Skill)args[0], (Creature)args[1]);
+          this.onEvtSeeSpell((Skill) args[0], (Creature) args[1]);
           break;
         case EVT_SPAWN:
           this.onEvtSpawn();
@@ -155,7 +154,7 @@ public abstract class AbstractAI extends RunnableImpl {
           this.onEvtDeSpawn();
           break;
         case EVT_TIMER:
-          this.onEvtTimer(((Number)args[0]).intValue(), args[1], args[2]);
+          this.onEvtTimer(((Number) args[0]).intValue(), args[1], args[2]);
       }
 
     }
@@ -192,7 +191,7 @@ public abstract class AbstractAI extends RunnableImpl {
   }
 
   public Creature getAttackTarget() {
-    return (Creature)this._attackTarget.get();
+    return this._attackTarget.get();
   }
 
   public boolean isGlobalAI() {

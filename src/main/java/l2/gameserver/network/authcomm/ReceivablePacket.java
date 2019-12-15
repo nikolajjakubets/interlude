@@ -5,12 +5,12 @@
 
 package l2.gameserver.network.authcomm;
 
-import java.nio.ByteBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.nio.ByteBuffer;
+
+@Slf4j
 public abstract class ReceivablePacket extends l2.commons.net.nio.ReceivablePacket<AuthServerCommunication> {
-  private static final Logger _log = LoggerFactory.getLogger(ReceivablePacket.class);
 
   public ReceivablePacket() {
   }
@@ -26,8 +26,8 @@ public abstract class ReceivablePacket extends l2.commons.net.nio.ReceivablePack
   public final boolean read() {
     try {
       this.readImpl();
-    } catch (Exception var2) {
-      _log.error("", var2);
+    } catch (Exception e) {
+      log.error("read: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     }
 
     return true;
@@ -36,8 +36,9 @@ public abstract class ReceivablePacket extends l2.commons.net.nio.ReceivablePack
   public final void run() {
     try {
       this.runImpl();
-    } catch (Exception var2) {
-      _log.error("", var2);
+    } catch (Exception e) {
+      log.error("run: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+
     }
 
   }

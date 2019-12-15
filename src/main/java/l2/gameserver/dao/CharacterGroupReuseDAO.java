@@ -5,22 +5,22 @@
 
 package l2.gameserver.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Collection;
-import java.util.Iterator;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.Player;
 import l2.gameserver.skills.TimeStamp;
 import l2.gameserver.utils.SqlBatch;
+import lombok.extern.slf4j.Slf4j;
 import org.napile.primitive.maps.IntObjectMap.Entry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Collection;
+import java.util.Iterator;
+
+@Slf4j
 public class CharacterGroupReuseDAO {
-  private static final Logger _log = LoggerFactory.getLogger(CharacterGroupReuseDAO.class);
   private static CharacterGroupReuseDAO _instance = new CharacterGroupReuseDAO();
   public static final String DELETE_SQL_QUERY = "DELETE FROM character_group_reuse WHERE object_id=?";
   public static final String SELECT_SQL_QUERY = "SELECT * FROM character_group_reuse WHERE object_id=?";
@@ -45,7 +45,7 @@ public class CharacterGroupReuseDAO {
       statement.setInt(1, player.getObjectId());
       rset = statement.executeQuery();
 
-      while(rset.next()) {
+      while (rset.next()) {
         int group = rset.getInt("reuse_group");
         int item_id = rset.getInt("item_id");
         long endTime = rset.getLong("end_time");
@@ -61,7 +61,7 @@ public class CharacterGroupReuseDAO {
       statement.setInt(1, player.getObjectId());
       statement.execute();
     } catch (Exception var17) {
-      _log.error("CharacterGroupReuseDAO.select(L2Player):", var17);
+      log.error("CharacterGroupReuseDAO.select(L2Player):", var17);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -80,17 +80,17 @@ public class CharacterGroupReuseDAO {
       Collection<Entry<TimeStamp>> reuses = player.getSharedGroupReuses();
       if (!reuses.isEmpty()) {
         SqlBatch b = new SqlBatch("REPLACE INTO `character_group_reuse` (`object_id`,`reuse_group`,`item_id`,`end_time`,`reuse`) VALUES");
-        synchronized(reuses) {
+        synchronized (reuses) {
           Iterator var7 = reuses.iterator();
 
-          while(true) {
+          while (true) {
             if (!var7.hasNext()) {
               break;
             }
 
-            Entry<TimeStamp> entry = (Entry)var7.next();
+            Entry<TimeStamp> entry = (Entry) var7.next();
             int group = entry.getKey();
-            TimeStamp timeStamp = (TimeStamp)entry.getValue();
+            TimeStamp timeStamp = (TimeStamp) entry.getValue();
             if (timeStamp.hasNotPassed()) {
               StringBuilder sb = new StringBuilder("(");
               sb.append(player.getObjectId()).append(",");
@@ -107,11 +107,9 @@ public class CharacterGroupReuseDAO {
           statement.executeUpdate(b.close());
         }
 
-        return;
       }
     } catch (Exception var18) {
-      _log.error("CharacterGroupReuseDAO.insert(L2Player):", var18);
-      return;
+      log.error("CharacterGroupReuseDAO.insert(L2Player):", var18);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }

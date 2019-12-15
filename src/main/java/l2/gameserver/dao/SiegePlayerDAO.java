@@ -5,19 +5,19 @@
 
 package l2.gameserver.dao;
 
+import l2.commons.dbutils.DbUtils;
+import l2.gameserver.database.DatabaseFactory;
+import l2.gameserver.model.entity.residence.Residence;
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
-import l2.commons.dbutils.DbUtils;
-import l2.gameserver.database.DatabaseFactory;
-import l2.gameserver.model.entity.residence.Residence;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class SiegePlayerDAO {
-  private static final Logger _log = LoggerFactory.getLogger(SiegePlayerDAO.class);
   private static final SiegePlayerDAO _instance = new SiegePlayerDAO();
   public static final String INSERT_SQL_QUERY = "INSERT INTO siege_players(residence_id, object_id, clan_id) VALUES (?,?,?)";
   public static final String DELETE_SQL_QUERY = "DELETE FROM siege_players WHERE residence_id=? AND object_id=? AND clan_id=?";
@@ -48,7 +48,7 @@ public class SiegePlayerDAO {
         set.add(rset.getInt("object_id"));
       }
     } catch (Exception var11) {
-      _log.error("SiegePlayerDAO.select(Residence, int): " + var11, var11);
+      log.error("SiegePlayerDAO.select(Residence, int): " + var11, var11);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -68,7 +68,7 @@ public class SiegePlayerDAO {
       statement.setInt(3, clanId);
       statement.execute();
     } catch (Exception var10) {
-      _log.error("SiegePlayerDAO.insert(Residence, int, int): " + var10, var10);
+      log.error("SiegePlayerDAO.insert(Residence, int, int): " + var10, var10);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -87,7 +87,7 @@ public class SiegePlayerDAO {
       statement.setInt(3, clanId);
       statement.execute();
     } catch (Exception var10) {
-      _log.error("SiegePlayerDAO.delete(Residence, int, int): " + var10, var10);
+      log.error("SiegePlayerDAO.delete(Residence, int, int): " + var10, var10);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -104,7 +104,7 @@ public class SiegePlayerDAO {
       statement.setInt(1, residence.getId());
       statement.execute();
     } catch (Exception var8) {
-      _log.error("SiegePlayerDAO.delete(Residence): " + var8, var8);
+      log.error("SiegePlayerDAO.delete(Residence): " + var8, var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }

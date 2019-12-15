@@ -7,16 +7,19 @@ package l2.gameserver.data;
 
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntObjectIterator;
-import java.lang.reflect.Constructor;
 import l2.commons.data.xml.AbstractHolder;
 import l2.gameserver.idfactory.IdFactory;
 import l2.gameserver.model.entity.boat.Boat;
 import l2.gameserver.templates.CharTemplate;
+import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Constructor;
+
+@Slf4j
 public final class BoatHolder extends AbstractHolder {
   public static final CharTemplate TEMPLATE = new CharTemplate(CharTemplate.getEmptyStatsSet());
   private static BoatHolder _instance = new BoatHolder();
-  private final TIntObjectHashMap<Boat> _boats = new TIntObjectHashMap();
+  private final TIntObjectHashMap<Boat> _boats = new TIntObjectHashMap<>();
 
   public BoatHolder() {
   }
@@ -45,8 +48,9 @@ public final class BoatHolder extends AbstractHolder {
       boat.setName(name);
       this.addBoat(boat);
       return boat;
-    } catch (Exception var6) {
-      this.error("Fail to init boat: " + clazz, var6);
+    } catch (Exception e) {
+      log.error("initBoat: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+      this.error("Fail to init boat: " + clazz, e);
       return null;
     }
   }

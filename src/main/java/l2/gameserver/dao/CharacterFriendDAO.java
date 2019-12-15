@@ -5,20 +5,20 @@
 
 package l2.gameserver.dao;
 
+import l2.commons.dbutils.DbUtils;
+import l2.gameserver.database.DatabaseFactory;
+import l2.gameserver.model.Player;
+import l2.gameserver.model.actor.instances.player.Friend;
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import l2.commons.dbutils.DbUtils;
-import l2.gameserver.database.DatabaseFactory;
-import l2.gameserver.model.Player;
-import l2.gameserver.model.actor.instances.player.Friend;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class CharacterFriendDAO {
-  private static final Logger _log = LoggerFactory.getLogger(CharacterFriendDAO.class);
   private static final CharacterFriendDAO _instance = new CharacterFriendDAO();
 
   public CharacterFriendDAO() {
@@ -48,7 +48,7 @@ public class CharacterFriendDAO {
         map.put(objectId, new Friend(objectId, name, level, classId));
       }
     } catch (Exception var13) {
-      _log.error("CharacterFriendDAO.load(L2Player): " + var13, var13);
+      log.error("CharacterFriendDAO.load(L2Player): " + var13, var13);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -67,7 +67,7 @@ public class CharacterFriendDAO {
       statement.setInt(2, friend.getObjectId());
       statement.execute();
     } catch (Exception var9) {
-      _log.warn(owner.getFriendList() + " could not add friend objectid: " + friend.getObjectId(), var9);
+      log.error(owner.getFriendList() + " could not add friend objectid: " + friend.getObjectId(), var9);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -87,7 +87,7 @@ public class CharacterFriendDAO {
       statement.setInt(4, owner.getObjectId());
       statement.execute();
     } catch (Exception var9) {
-      _log.warn("FriendList: could not delete friend objectId: " + friend + " ownerId: " + owner.getObjectId(), var9);
+      log.error("FriendList: could not delete friend objectId: " + friend + " ownerId: " + owner.getObjectId(), var9);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }

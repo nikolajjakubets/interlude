@@ -5,34 +5,33 @@
 
 package l2.commons.threading;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class RunnableStatsWrapper implements Runnable {
-    private static final Logger _log = LoggerFactory.getLogger(RunnableStatsWrapper.class);
-    private final Runnable _runnable;
+  private final Runnable _runnable;
 
-    RunnableStatsWrapper(Runnable runnable) {
-        this._runnable = runnable;
+  RunnableStatsWrapper(Runnable runnable) {
+    this._runnable = runnable;
+  }
+
+  public static Runnable wrap(Runnable runnable) {
+    return new RunnableStatsWrapper(runnable);
+  }
+
+  public void run() {
+    execute(this._runnable);
+  }
+
+  public static void execute(Runnable runnable) {
+    long begin = System.nanoTime();
+
+    try {
+      runnable.run();
+      RunnableStatsManager.getInstance().handleStats(runnable.getClass(), System.nanoTime() - begin);
+    } catch (Exception var4) {
+      log.error("Exception in a Runnable execution:", var4);
     }
 
-    public static Runnable wrap(Runnable runnable) {
-        return new RunnableStatsWrapper(runnable);
-    }
-
-    public void run() {
-        execute(this._runnable);
-    }
-
-    public static void execute(Runnable runnable) {
-        long begin = System.nanoTime();
-
-        try {
-            runnable.run();
-            RunnableStatsManager.getInstance().handleStats(runnable.getClass(), System.nanoTime() - begin);
-        } catch (Exception var4) {
-            _log.error("Exception in a Runnable execution:", var4);
-        }
-
-    }
+  }
 }

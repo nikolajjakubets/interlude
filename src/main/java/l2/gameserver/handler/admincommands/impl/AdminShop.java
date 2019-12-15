@@ -12,21 +12,24 @@ import l2.gameserver.model.Player;
 import l2.gameserver.network.l2.s2c.BuyList;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
 import l2.gameserver.utils.GameStats;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AdminShop implements IAdminCommandHandler {
   public AdminShop() {
   }
 
   public boolean useAdminCommand(Enum comm, String[] wordList, String fullString, Player activeChar) {
-    AdminShop.Commands command = (AdminShop.Commands)comm;
+    AdminShop.Commands command = (AdminShop.Commands) comm;
     if (!activeChar.getPlayerAccess().UseGMShop) {
       return false;
     } else {
-      switch(command) {
+      switch (command) {
         case admin_buy:
           try {
             this.handleBuyRequest(activeChar, fullString.substring(10));
-          } catch (IndexOutOfBoundsException var7) {
+          } catch (IndexOutOfBoundsException e) {
+            log.error("useAdminCommand: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
             activeChar.sendMessage("Please specify buylist.");
           }
           break;
@@ -54,7 +57,8 @@ public class AdminShop implements IAdminCommandHandler {
 
     try {
       val = Integer.parseInt(command);
-    } catch (Exception var5) {
+    } catch (Exception e) {
+      log.error("handleBuyRequest: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     }
 
     NpcTradeList list = BuyListHolder.getInstance().getBuyList(val);
@@ -65,13 +69,13 @@ public class AdminShop implements IAdminCommandHandler {
     activeChar.sendActionFailed();
   }
 
-  private static enum Commands {
+  private enum Commands {
     admin_buy,
     admin_gmshop,
     admin_tax,
     admin_taxclear;
 
-    private Commands() {
+    Commands() {
     }
   }
 }

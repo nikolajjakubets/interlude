@@ -5,16 +5,6 @@
 
 package l2.gameserver.network.l2;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Random;
-import java.util.Stack;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.Config;
 import l2.gameserver.ThreadPoolManager;
@@ -25,11 +15,16 @@ import l2.gameserver.network.l2.s2c.ConfirmDlg;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
 import l2.gameserver.utils.Language;
 import l2.gameserver.utils.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+
+@Slf4j
 public class SecondPasswordAuth {
-  private static final Logger LOG = LoggerFactory.getLogger(SecondPasswordAuth.class);
   private final String _login;
   private String _secondPassword;
   private int _tryLine;
@@ -60,7 +55,7 @@ public class SecondPasswordAuth {
           this._blockEndTime = rset.getLong("blockEndTime");
         }
       } catch (SQLException var8) {
-        LOG.warn("Database error on retreiving second password for login '" + this._login + "' :", var8);
+        log.warn("Database error on retreiving second password for login '" + this._login + "' :", var8);
       } finally {
         DbUtils.closeQuietly(conn, pstmt, rset);
       }
@@ -83,7 +78,7 @@ public class SecondPasswordAuth {
         pstmt.setLong(4, this._blockEndTime);
         pstmt.executeUpdate();
       } catch (SQLException var7) {
-        LOG.warn("Database error on storing second password for login '" + this._login + "' :", var7);
+        log.warn("Database error on storing second password for login '" + this._login + "' :", var7);
       } finally {
         DbUtils.closeQuietly(conn, pstmt);
       }
@@ -354,8 +349,8 @@ public class SecondPasswordAuth {
       if (args != null) {
         try {
           this.handleArg(client, args);
-        } catch (Exception var4) {
-          var4.printStackTrace();
+        } catch (Exception e) {
+          log.error("handle: eMessage={}, eClass={}", e.getMessage(), e.getClass());
         }
       }
 
@@ -450,10 +445,8 @@ public class SecondPasswordAuth {
     private void formatInputs(StringBuilder sb) {
       sb.append("<table width=250 height=60 border=0 cellspacing=5 cellpadding=0>");
       SecondPasswordAuth.SecondPasswordAuthUI.SPAUIPINInputData[] var2 = this._inputs;
-      int var3 = var2.length;
 
-      for(int var4 = 0; var4 < var3; ++var4) {
-        SecondPasswordAuth.SecondPasswordAuthUI.SPAUIPINInputData suid = var2[var4];
+      for (SPAUIPINInputData suid : var2) {
         suid.formatPINInput(sb, this._inputFocus == suid);
       }
 
@@ -517,10 +510,8 @@ public class SecondPasswordAuth {
     static {
       Language lang = Language.ENGLISH;
       Language[] var1 = Language.VALUES;
-      int var2 = var1.length;
 
-      for(int var3 = 0; var3 < var2; ++var3) {
-        Language lang2 = var1[var3];
+      for (Language lang2 : var1) {
         if (lang2.getShortName().equals(Config.DEFAULT_LANG)) {
           lang = lang2;
         }
@@ -530,7 +521,7 @@ public class SecondPasswordAuth {
     }
 
     private static class SPAUIPINInputData {
-      private final Stack<Integer> _pin = new Stack();
+      private final Stack<Integer> _pin = new Stack<>();
       private final String _label;
       private final int _inputFieldIdx;
 
@@ -646,11 +637,9 @@ public class SecondPasswordAuth {
 
       public String toString() {
         StringBuilder pinText = new StringBuilder(8);
-        Iterator var2 = this._pin.iterator();
 
-        while(var2.hasNext()) {
-          Integer digit = (Integer)var2.next();
-          pinText.append((char)(48 + Math.min(9, Math.max(digit, 0))));
+        for (Integer digit : this._pin) {
+          pinText.append((char) (48 + Math.min(9, Math.max(digit, 0))));
         }
 
         return pinText.toString();

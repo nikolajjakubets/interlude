@@ -8,18 +8,6 @@ package l2.gameserver;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.xml.parsers.DocumentBuilderFactory;
 import l2.commons.configuration.ExProperties;
 import l2.commons.net.nio.impl.SelectorConfig;
 import l2.gameserver.data.xml.parser.ChatFilterParser;
@@ -32,6 +20,7 @@ import l2.gameserver.network.l2.components.ChatType;
 import l2.gameserver.skills.AbnormalEffect;
 import l2.gameserver.templates.item.ItemTemplate.Grade;
 import l2.gameserver.templates.item.ItemTemplate.ItemClass;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,12 +33,17 @@ import org.dom4j.io.SAXReader;
 import org.napile.primitive.lists.impl.CArrayIntList;
 import org.napile.primitive.sets.IntSet;
 import org.napile.primitive.sets.impl.HashIntSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Slf4j
 public class Config {
-  private static final Logger _log = LoggerFactory.getLogger(Config.class);
   public static final int NCPUS = Runtime.getRuntime().availableProcessors();
   public static final String OTHER_CONFIG_FILE = "config/other.properties";
   public static final String RESIDENCE_CONFIG_FILE = "config/residence.properties";
@@ -1057,14 +1051,14 @@ public class Config {
     AUTH_SERVER_BRACKETS = serverSettings.getProperty("ServerBrackets", false);
     AUTH_SERVER_IS_PVP = serverSettings.getProperty("PvPServer", false);
     USE_SECOND_PASSWORD_AUTH = serverSettings.getProperty("UseSecondPasswordAuth", false);
-    SECOND_AUTH_BLOCK_TIME = (long)serverSettings.getProperty("SecondAuthBlockTime", 28800);
+    SECOND_AUTH_BLOCK_TIME = (long) serverSettings.getProperty("SecondAuthBlockTime", 28800);
     SECOND_AUTH_MAX_TRYS = serverSettings.getProperty("SecondAuthBlockMaxTry", 5);
     SECOND_AUTH_MIN_LENG = serverSettings.getProperty("SecondAuthPinMinLength", 6);
     SECOND_AUTH_MAX_LENG = serverSettings.getProperty("SecondAuthPinMaxLength", 8);
     String[] var1 = serverSettings.getProperty("ServerType", ArrayUtils.EMPTY_STRING_ARRAY);
     int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
+    for (int var3 = 0; var3 < var2; ++var3) {
       String a = var1[var3];
       if (!a.trim().isEmpty()) {
         ServerType t = ServerType.valueOf(a.toUpperCase());
@@ -1144,8 +1138,8 @@ public class Config {
 
     try {
       DATAPACK_ROOT = (new File(serverSettings.getProperty("DatapackRoot", "."))).getCanonicalFile();
-    } catch (IOException var6) {
-      _log.error("", var6);
+    } catch (IOException e) {
+      log.error("loadServerConfig: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     }
 
     ALLOW_DISCARDITEM = serverSettings.getProperty("AllowDiscardItem", true);
@@ -1187,11 +1181,11 @@ public class Config {
     StringTokenizer st = new StringTokenizer(serverSettings.getProperty("ChatBanChannels", "ALL,SHOUT,TELL,TRADE,HERO_VOICE"), ",");
     ArrayList channels = new ArrayList<>();
 
-    while(st.hasMoreTokens()) {
+    while (st.hasMoreTokens()) {
       channels.add(ChatType.valueOf(st.nextToken()));
     }
 
-    BAN_CHANNEL_LIST = (ChatType[])channels.toArray(new ChatType[channels.size()]);
+    BAN_CHANNEL_LIST = (ChatType[]) channels.toArray(new ChatType[channels.size()]);
     BANCHAT_ANNOUNCE = serverSettings.getProperty("BANCHAT_ANNOUNCE", true);
     BANCHAT_ANNOUNCE_FOR_ALL_WORLD = serverSettings.getProperty("BANCHAT_ANNOUNCE_FOR_ALL_WORLD", true);
     BANCHAT_ANNOUNCE_NICK = serverSettings.getProperty("BANCHAT_ANNOUNCE_NICK", true);
@@ -1303,7 +1297,7 @@ public class Config {
       PRIVATE_BUY_MATCH_ENCHANT = otherSettings.getProperty("AltPrivateBuyMatchEnchant", true);
       SENDSTATUS_TRADE_JUST_OFFLINE = otherSettings.getProperty("SendStatusTradeJustOffline", false);
       SENDSTATUS_TRADE_MOD = otherSettings.getProperty("SendStatusTradeMod", 1.0D);
-      MUL_PLAYERS_ONLINE = (double)otherSettings.getProperty("MulOnlinePlayers", 1);
+      MUL_PLAYERS_ONLINE = (double) otherSettings.getProperty("MulOnlinePlayers", 1);
       ANNOUNCE_MAMMON_SPAWN = otherSettings.getProperty("AnnounceMammonSpawn", true);
       GM_NAME_COLOUR = Integer.decode("0x" + otherSettings.getProperty("GMNameColour", "FFFFFF"));
       GM_HERO_AURA = otherSettings.getProperty("GMHeroAura", false);
@@ -1318,7 +1312,7 @@ public class Config {
       int var3;
       String s;
       String[] ss;
-      for(var3 = 0; var3 < var2; ++var3) {
+      for (var3 = 0; var3 < var2; ++var3) {
         s = var1[var3];
         ss = StringUtils.split(s, "-:");
         OTHER_MAGE_BUFF_ON_CHAR_CREATE.add(Pair.of(Integer.parseInt(ss[0]), Integer.parseInt(ss[1])));
@@ -1328,7 +1322,7 @@ public class Config {
       var1 = StringUtils.split(otherSettings.getProperty("StartWarriorBuff", "1086-1"), ";,");
       var2 = var1.length;
 
-      for(var3 = 0; var3 < var2; ++var3) {
+      for (var3 = 0; var3 < var2; ++var3) {
         s = var1[var3];
         ss = StringUtils.split(s, "-:");
         OTHER_WARRIOR_BUFF_ON_CHAR_CREATE.add(Pair.of(Integer.parseInt(ss[0]), Integer.parseInt(ss[1])));
@@ -1433,7 +1427,7 @@ public class Config {
     LIM_MAX_CP = formulasSettings.getProperty("LimitMaxCP", 100000);
     LIM_MAX_HP = formulasSettings.getProperty("LimitMaxHP", 40000);
     LIM_MAX_MP = formulasSettings.getProperty("LimitMaxMP", 40000);
-    MCRITICAL_BASE_STAT = (double)formulasSettings.getProperty("MCriticalBaseStat", 1);
+    MCRITICAL_BASE_STAT = (double) formulasSettings.getProperty("MCriticalBaseStat", 1);
     MDAM_CRIT_POSSIBLE = formulasSettings.getProperty("MDamCritPossibale", true);
     HEAL_CRIT_POSSIBLE = formulasSettings.getProperty("HealCritPossibale", false);
     LIM_FAME = formulasSettings.getProperty("LimitFame", 50000);
@@ -1581,7 +1575,7 @@ public class Config {
     String[] rec_time = altSettings.getProperty("SkillDurationMod", new String[]{""}, ";");
     int var2 = rec_time.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
+    for (int var3 = 0; var3 < var2; ++var3) {
       String skill = rec_time[var3];
       String[] parts = skill.trim().split("-");
       if (parts.length == 2) {
@@ -1647,7 +1641,7 @@ public class Config {
     ALT_ALLOW_DELAY_NPC_TALK = altSettings.getProperty("AltDelayOnMoveAfterTalkWithNPC", false);
     ALT_SPREADING_AFTER_TELEPORT = altSettings.getProperty("AltSpreadingTeleportPoints", true);
     ALT_TELEPORT_PROTECTION = altSettings.getProperty("AltTeleportProtection", false);
-    ALT_TELEPORT_PROTECTION_TIME = (long)altSettings.getProperty("AltTeleportProtectionTime", 10);
+    ALT_TELEPORT_PROTECTION_TIME = (long) altSettings.getProperty("AltTeleportProtectionTime", 10);
     ALT_INITIAL_QUESTS = altSettings.getProperty("AltInitialQuests", new int[]{255});
     ALT_MAX_PARTY_SIZE = altSettings.getProperty("AltMaxPartySize", 9);
   }
@@ -1702,15 +1696,15 @@ public class Config {
       Element root = document.getRootElement();
       Iterator rateBonusIt = root.elementIterator();
 
-      while(true) {
+      while (true) {
         Element rateBonusNode;
         do {
           if (!rateBonusIt.hasNext()) {
-            return (Config.RateBonusInfo[])result.toArray(new Config.RateBonusInfo[result.size()]);
+            return (Config.RateBonusInfo[]) result.toArray(new Config.RateBonusInfo[result.size()]);
           }
 
-          rateBonusNode = (Element)rateBonusIt.next();
-        } while(!"rate_bonus".equalsIgnoreCase(rateBonusNode.getName()));
+          rateBonusNode = (Element) rateBonusIt.next();
+        } while (!"rate_bonus".equalsIgnoreCase(rateBonusNode.getName()));
 
         int id = Integer.parseInt(rateBonusNode.attributeValue("id"));
         int consumeItemId = Integer.parseInt(rateBonusNode.attributeValue("consume_item_id"));
@@ -1718,8 +1712,8 @@ public class Config {
         Config.RateBonusInfo rateBonusInfo = new Config.RateBonusInfo(id, consumeItemId, consumeItemAmount);
         Iterator rateIt = rateBonusNode.elementIterator();
 
-        while(rateIt.hasNext()) {
-          Element rateNode = (Element)rateIt.next();
+        while (rateIt.hasNext()) {
+          Element rateNode = (Element) rateIt.next();
           if ("exp".equalsIgnoreCase(rateNode.getName())) {
             rateBonusInfo.rateXp = Float.parseFloat(rateNode.attributeValue("value"));
           } else if ("sp".equalsIgnoreCase(rateNode.getName())) {
@@ -1739,7 +1733,7 @@ public class Config {
           } else if ("enchant_item_mul".equalsIgnoreCase(rateNode.getName())) {
             rateBonusInfo.enchantItemMul = Float.parseFloat(rateNode.attributeValue("value"));
           } else if ("bonus_days".equalsIgnoreCase(rateNode.getName())) {
-            rateBonusInfo.bonusTimeSeconds = (long)(Integer.parseInt(rateNode.attributeValue("value")) * 24 * 60 * 60);
+            rateBonusInfo.bonusTimeSeconds = (long) (Integer.parseInt(rateNode.attributeValue("value")) * 24 * 60 * 60);
           } else if ("reward".equalsIgnoreCase(rateNode.getName())) {
             rateBonusInfo.rewardItem.add(Pair.of(Integer.parseInt(rateNode.attributeValue("item_id")), Long.parseLong(rateNode.attributeValue("item_count"))));
           } else if ("name_color".equalsIgnoreCase(rateNode.getName())) {
@@ -1749,9 +1743,9 @@ public class Config {
 
         result.add(rateBonusInfo);
       }
-    } catch (Exception var13) {
-      _log.error("", var13);
-      return (Config.RateBonusInfo[])result.toArray(new Config.RateBonusInfo[result.size()]);
+    } catch (Exception e) {
+      log.error("loadRateBonusInfo: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+      return (Config.RateBonusInfo[]) result.toArray(new RateBonusInfo[0]);
     }
   }
 
@@ -1771,9 +1765,9 @@ public class Config {
     QUEST_SELL_QUEST_PRICES = servicesSettings.getProperty("QuestSellQuestPrices", "");
     APPEARANCE_APPLY_ITEM_ID = servicesSettings.getProperty("ChangeAppearanceItemId", 3435);
     APPEARANCE_SUPPORT_ITEM_ID = servicesSettings.getProperty("ChangeAppearanceCostItemId", 57);
-    APPEARANCE_SUPPORT_ITEM_CNT = (long)servicesSettings.getProperty("ChangeAppearanceCostCount", 2000000);
+    APPEARANCE_SUPPORT_ITEM_CNT = (long) servicesSettings.getProperty("ChangeAppearanceCostCount", 2000000);
     APPEARANCE_CANCEL_ITEM_ID = servicesSettings.getProperty("CancelAppearanceCostItemId", 3434);
-    APPEARANCE_CANCEL_PRICE = (long)servicesSettings.getProperty("CancelAppearanceAdenaPrice", 1000);
+    APPEARANCE_CANCEL_PRICE = (long) servicesSettings.getProperty("CancelAppearanceAdenaPrice", 1000);
     SERVICES_CHANGE_CLAN_NAME_ENABLED = servicesSettings.getProperty("ClanNameChangeEnabled", false);
     SERVICES_CHANGE_CLAN_NAME_PRICE = servicesSettings.getProperty("ClanNameChangePrice", 100);
     SERVICES_CHANGE_CLAN_NAME_ITEM = servicesSettings.getProperty("ClanNameChangeItem", 4037);
@@ -1831,7 +1825,7 @@ public class Config {
     SERVICES_CLAN_BUFF_ENABLED = servicesSettings.getProperty("ClanBuffServiceEnable", false);
     SERVICES_CLAN_BUFF_SKILL_ID = servicesSettings.getProperty("ClanBuffServiceBuffId", 9200);
     SERVICES_CLAN_BUFF_LEVELS_MIN_ONLINE = servicesSettings.getProperty("ClanBuffServiceOnlineLevelUp", "10-1;20-2;30-3");
-    SERVICES_CLAN_BUFF_TASK_DELAY = (long)servicesSettings.getProperty("ClanBuffServiceTaskDelay", 5);
+    SERVICES_CLAN_BUFF_TASK_DELAY = (long) servicesSettings.getProperty("ClanBuffServiceTaskDelay", 5);
     SERVICES_CLANSKILL_SELL_ENABLED = servicesSettings.getProperty("ClanSkillsSellEnable", false);
     SERVICES_CLAN_SKILL_SELL_ITEM = servicesSettings.getProperty("ClanSkillsSellItemId", 4037);
     SERVICES_CLAN_SKILL_SELL_PRICE = servicesSettings.getProperty("ClanSkillsSellItemCount", 1000);
@@ -1861,13 +1855,13 @@ public class Config {
     SERVICES_OLY_POINTS_REWARD = servicesSettings.getProperty("ServiceOlyPointsResetAmount", 18);
     SERVICES_PK_CLEAN_ENABLED = servicesSettings.getProperty("PKCleanEnabled", false);
     SERVICES_PK_CLEAN_SELL_ITEM = servicesSettings.getProperty("PKCleanItemId", 4037);
-    SERVICES_PK_CLEAN_SELL_PRICE = (long)servicesSettings.getProperty("PKCleanPrice", 1000);
+    SERVICES_PK_CLEAN_SELL_PRICE = (long) servicesSettings.getProperty("PKCleanPrice", 1000);
     SERVICES_PK_ANNOUNCE = servicesSettings.getProperty("AnnouncePK", false);
     SERVICES_ALLOW_WYVERN_RIDE = servicesSettings.getProperty("AllowRideWyvernService", false);
     SERVICES_WYVERN_ITEM_ID = servicesSettings.getProperty("RideWyvernServiceItemId", 4037);
     SERVICES_KARMA_CLEAN_ENABLED = servicesSettings.getProperty("KarmaCleanServiceEnabled", false);
     SERVICES_KARMA_CLEAN_SELL_ITEM = servicesSettings.getProperty("KarmaCleanItemId", 4037);
-    SERVICES_KARMA_CLEAN_SELL_PRICE = (long)servicesSettings.getProperty("KarmaCleanPrice", 1000);
+    SERVICES_KARMA_CLEAN_SELL_PRICE = (long) servicesSettings.getProperty("KarmaCleanPrice", 1000);
     SERVICES_EXPAND_INVENTORY_ENABLED = servicesSettings.getProperty("ExpandInventoryEnabled", false);
     SERVICES_EXPAND_INVENTORY_PRICE = servicesSettings.getProperty("ExpandInventoryPrice", 1000);
     SERVICES_EXPAND_INVENTORY_ITEM = servicesSettings.getProperty("ExpandInventoryItem", 4037);
@@ -1893,7 +1887,7 @@ public class Config {
     SERVICES_OFFLINE_TRADE_ABNORMAL = AbnormalEffect.getByName(servicesSettings.getProperty("OfflineTradeAbnormalEffectName", "null"));
     SERVICES_OFFLINE_TRADE_PRICE_ITEM = servicesSettings.getProperty("OfflineTradePriceItem", 0);
     SERVICES_OFFLINE_TRADE_PRICE = servicesSettings.getProperty("OfflineTradePrice", 0);
-    SERVICES_OFFLINE_TRADE_SECONDS_TO_KICK = (long)servicesSettings.getProperty("OfflineTradeDaysToKick", 14) * 86400L;
+    SERVICES_OFFLINE_TRADE_SECONDS_TO_KICK = (long) servicesSettings.getProperty("OfflineTradeDaysToKick", 14) * 86400L;
     SERVICES_OFFLINE_TRADE_RESTORE_AFTER_RESTART = servicesSettings.getProperty("OfflineRestoreAfterRestart", true);
     SERVICES_NO_TRADE_ONLY_OFFLINE = servicesSettings.getProperty("NoTradeOnlyOffline", false);
     SERVICES_TRADE_TAX = servicesSettings.getProperty("TradeTax", 0.0D);
@@ -1944,7 +1938,7 @@ public class Config {
     SERVICES_CLAN_SUMMON_COMMAND_SELL_ITEM = servicesSettings.getProperty("ClanLeaderSummonItemId", 4037);
     SERVICES_CLAN_SUMMON_COMMAND_SELL_PRICE = servicesSettings.getProperty("ClanLeaderSummonItemCount", 1);
     SERVICES_CLAN_SUMMON_COMMAND_SUMMON_CRYSTAL_COUNT = servicesSettings.getProperty("ClanSummonCrystalCount", 1);
-    REUSE_DELAY_FOR_CLAN_SUMMON = (long)(servicesSettings.getProperty("ClanSummonReuseDelay", 30) * 60);
+    REUSE_DELAY_FOR_CLAN_SUMMON = (long) (servicesSettings.getProperty("ClanSummonReuseDelay", 30) * 60);
     SERVICES_WHOIAM_COMMAND_ENABLE = servicesSettings.getProperty("WhoiameCommandForAll", true);
     SERVICES_CPACP_ENABLE = servicesSettings.getProperty("ACPServiceEnableCP", false);
     SERVICES_CPACP_MIN_PERCENT = Math.min(Math.max(0, servicesSettings.getProperty("ACPServiceCPMinPercent", 10)), 100);
@@ -1961,19 +1955,19 @@ public class Config {
     SERVICES_BOSS_STATUS_FORMAT = servicesSettings.getProperty("BossStatusRespawnFormat", "HH:mm dd.MM.yyyy");
     SERVICES_PVP_PK_STATISTIC = servicesSettings.getProperty("TopPvPPKStatistic", false);
     SERVICE_AUTO_ANNOUNCE = servicesSettings.getProperty("ServiceAutoAnnounce", false);
-    PVP_PK_STAT_CACHE_UPDATE_INTERVAL = (long)(servicesSettings.getProperty("TopPvPPKCacheUpdateTimeInterval", 1) * 60) * 1000L;
+    PVP_PK_STAT_CACHE_UPDATE_INTERVAL = (long) (servicesSettings.getProperty("TopPvPPKCacheUpdateTimeInterval", 1) * 60) * 1000L;
     PVP_PK_STAT_RECORD_LIMIT = servicesSettings.getProperty("TopPvPPKRecordLimit", 15);
     PAWNSHOP_ENABLED = servicesSettings.getProperty("PawnShopEnabled", true);
     List<ItemClass> pawnShopItemClasses = new ArrayList<>();
     String[] var2 = servicesSettings.getProperty("PawnShopItemClasses", new String[]{"WEAPON", "ARMOR", "JEWELRY"});
     int var3 = var2.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
+    for (int var4 = 0; var4 < var3; ++var4) {
       String pwics = var2[var4];
       pawnShopItemClasses.add(ItemClass.valueOf(pwics));
     }
 
-    PAWNSHOP_ITEMS_CLASSES = (ItemClass[])pawnShopItemClasses.toArray(new ItemClass[pawnShopItemClasses.size()]);
+    PAWNSHOP_ITEMS_CLASSES = (ItemClass[]) pawnShopItemClasses.toArray(new ItemClass[pawnShopItemClasses.size()]);
     PAWNSHOP_ITEMS_PER_PAGE = servicesSettings.getProperty("PawnShopItemsPerPage", 5);
     PAWNSHOP_MIN_ENCHANT_LEVEL = servicesSettings.getProperty("PawnShopMinEnchantLevel", 0);
     PAWNSHOP_ALLOW_SELL_AUGMENTED_ITEMS = servicesSettings.getProperty("PawnShopAllowTradeAugmentedItems", false);
@@ -1987,7 +1981,7 @@ public class Config {
     PAWNSHOP_REFUND_ITEM_COUNT = servicesSettings.getProperty("PawnShopRefundItemCount", 1000L);
     PAWNSHOP_PROHIBITED_ITEM_IDS = servicesSettings.getProperty("PawnShopProhibitedItemIds", new int[]{6611, 6612, 6613, 6614, 6615, 6616, 6617, 6618, 6619, 6620, 6621, 6842});
     ITEM_BROKER_ITEM_SEARCH = servicesSettings.getProperty("UseItemBrokerItemSearch", false);
-    ITEM_BROKER_UPDATE_TIME = (long)(servicesSettings.getProperty("BrokerItemListTimeUpdate", 2) * 60) * 1000L;
+    ITEM_BROKER_UPDATE_TIME = (long) (servicesSettings.getProperty("BrokerItemListTimeUpdate", 2) * 60) * 1000L;
     ALLOW_EVENT_GATEKEEPER = servicesSettings.getProperty("AllowEventGatekeeper", false);
     ALLOW_GLOBAL_GK = servicesSettings.getProperty("AllowSpawnGlobalGatekeeper", false);
     ALLOW_BUFFER = servicesSettings.getProperty("AllowSpawnBuffer", false);
@@ -2011,7 +2005,7 @@ public class Config {
     WEDDING_NORMAL_COLOR = Integer.decode("0x" + servicesSettings.getProperty("WeddingNormalCoupleNickColor", "BF0000"));
     WEDDING_GAY_COLOR = Integer.decode("0x" + servicesSettings.getProperty("WeddingGayCoupleNickColor", "0000BF"));
     WEDDING_LESBIAN_COLOR = Integer.decode("0x" + servicesSettings.getProperty("WeddingLesbianCoupleNickColor", "BF00BF"));
-    L2TOPRU_DELAY = (long)(servicesSettings.getProperty("L2TopRuDelay", 0) * 1000 * 60);
+    L2TOPRU_DELAY = (long) (servicesSettings.getProperty("L2TopRuDelay", 0) * 1000 * 60);
     L2TOPRU_PREFIX = servicesSettings.getProperty("L2TopRuServerPrefix");
     L2TOPRU_WEB_VOTE_URL = servicesSettings.getProperty("L2TopRuWebURL");
     L2TOPRU_SMS_VOTE_URL = servicesSettings.getProperty("L2TopRuSMSURL");
@@ -2021,7 +2015,7 @@ public class Config {
     L2TOPRU_SMS_REWARD_ITEMCOUNT = servicesSettings.getProperty("L2TopRuSMSRewardItemCount", 10);
     L2TOPRU_SMS_REWARD_VOTE_MULTI = servicesSettings.getProperty("L2TopRuSMSRewardMultiVote", false);
     L2TOPZONE_ENABLED = servicesSettings.getProperty("L2TopZoneServiceEnabled", false);
-    L2TOPZONE_VOTE_TIME_TO_LIVE = (long)(servicesSettings.getProperty("L2TopZoneVoteTimeToLive", 12) * 3600);
+    L2TOPZONE_VOTE_TIME_TO_LIVE = (long) (servicesSettings.getProperty("L2TopZoneVoteTimeToLive", 12) * 3600);
     L2TOPZONE_SERVER_ID = servicesSettings.getProperty("L2TopZoneServerId", 0);
     L2TOPZONE_API_KEY = servicesSettings.getProperty("L2TopZoneApiKey", "");
     L2TOPZONE_REWARD_ITEM_ID = servicesSettings.getProperty("L2TopZoneRewardItemId", 57);
@@ -2064,7 +2058,7 @@ public class Config {
     int[] var1 = pvpSettings.getProperty("ListOfNonDroppableItems", new int[]{57, 1147, 425, 1146, 461, 10, 2368, 7, 6, 2370, 2369, 3500, 3501, 3502, 4422, 4423, 4424, 2375, 6648, 6649, 6650, 6842, 6834, 6835, 6836, 6837, 6838, 6839, 6840, 5575, 7694, 6841, 8181});
     int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
+    for (int var3 = 0; var3 < var2; ++var3) {
       int id = var1[var3];
       KARMA_LIST_NONDROPPABLE_ITEMS.add(id);
     }
@@ -2077,16 +2071,16 @@ public class Config {
   public static void loadAISettings() {
     ExProperties aiSettings = load("config/ai.properties");
     AI_TASK_MANAGER_COUNT = aiSettings.getProperty("AiTaskManagers", 1);
-    AI_TASK_ATTACK_DELAY = (long)aiSettings.getProperty("AiTaskDelay", 1000);
-    AI_TASK_ACTIVE_DELAY = (long)aiSettings.getProperty("AiTaskActiveDelay", 1000);
+    AI_TASK_ATTACK_DELAY = (long) aiSettings.getProperty("AiTaskDelay", 1000);
+    AI_TASK_ACTIVE_DELAY = (long) aiSettings.getProperty("AiTaskActiveDelay", 1000);
     BLOCK_ACTIVE_TASKS = aiSettings.getProperty("BlockActiveTasks", false);
     ALWAYS_TELEPORT_HOME = aiSettings.getProperty("AlwaysTeleportHome", false);
     RND_WALK = aiSettings.getProperty("RndWalk", true);
     RND_WALK_RATE = aiSettings.getProperty("RndWalkRate", 1);
     RND_ANIMATION_RATE = aiSettings.getProperty("RndAnimationRate", 2);
     AGGRO_CHECK_INTERVAL = aiSettings.getProperty("AggroCheckInterval", 250);
-    NONAGGRO_TIME_ONTELEPORT = (long)aiSettings.getProperty("NonAggroTimeOnTeleport", 15000);
-    NONAGGRO_TIME_ONLOGIN = (long)aiSettings.getProperty("NonAggroTimeOnLogin", 15000);
+    NONAGGRO_TIME_ONTELEPORT = (long) aiSettings.getProperty("NonAggroTimeOnTeleport", 15000);
+    NONAGGRO_TIME_ONLOGIN = (long) aiSettings.getProperty("NonAggroTimeOnLogin", 15000);
     MAX_DRIFT_RANGE = aiSettings.getProperty("MaxDriftRange", 100);
     MAX_PURSUE_RANGE = aiSettings.getProperty("MaxPursueRange", 4000);
     MAX_PURSUE_UNDERGROUND_RANGE = aiSettings.getProperty("MaxPursueUndergoundRange", 2000);
@@ -2113,7 +2107,7 @@ public class Config {
     PATHFIND_MAX_Z_DIFF = geodataSettings.getProperty("PathFindMaxZDiff", 32);
     MAX_Z_DIFF = geodataSettings.getProperty("MaxZDiff", 64);
     MIN_LAYER_HEIGHT = geodataSettings.getProperty("MinLayerHeight", 64);
-    PATHFIND_MAX_TIME = (long)geodataSettings.getProperty("PathFindMaxTime", 10000000);
+    PATHFIND_MAX_TIME = (long) geodataSettings.getProperty("PathFindMaxTime", 10000000);
     PATHFIND_BUFFERS = geodataSettings.getProperty("PathFindBuffers", "8x96;8x128;8x160;8x192;4x224;4x256;4x288;2x320;2x384;2x352;1x512");
   }
 
@@ -2147,7 +2141,7 @@ public class Config {
     EVENT_CHANGE_OF_HEART_CHANCE = eventSettings.getProperty("EVENT_CHANGE_OF_HEART_CHANCE", 5.0D);
     EVENT_CHRISTMAS_CHANCE = eventSettings.getProperty("EVENT_CHRISTMAS_CHANCE", 1.0D);
     EVENT_APIL_FOOLS_DROP_CHANCE = eventSettings.getProperty("AprilFollsDropChance", 50.0D);
-    EVENT_SAVING_SNOWMAN_LOTERY_PRICE = (long)eventSettings.getProperty("SavingSnowmanLoteryPrice", 50000);
+    EVENT_SAVING_SNOWMAN_LOTERY_PRICE = (long) eventSettings.getProperty("SavingSnowmanLoteryPrice", 50000);
     EVENT_SAVING_SNOWMAN_REWARDER_CHANCE = eventSettings.getProperty("SavingSnowmanRewarderChance", 2);
     EVENT_SAVING_SNOWMAN_LOTERY_CURENCY = eventSettings.getProperty("SavingSnowmanLoteryCurency", 20076);
     EVENT_FINDER_REWARD_ID = eventSettings.getProperty("EventFinderRewardId", 57);
@@ -2164,7 +2158,7 @@ public class Config {
     EVENT_GVG_MAX_LEVEL = eventSettings.getProperty("EventGvGMaxParticipantLevel", 81);
     EVENT_GVG_GROUPS_LIMIT = eventSettings.getProperty("EventGvGMaxGroups", 50);
     EVENT_GVG_MIN_PARTY_SIZE = eventSettings.getProperty("EventGvGMinPartySize", 6);
-    EVENT_GVG_REG_TIME = (long)(Math.max(5, eventSettings.getProperty("EventGvGRegistrationTime", 10)) * 60) * 1000L;
+    EVENT_GVG_REG_TIME = (long) (Math.max(5, eventSettings.getProperty("EventGvGRegistrationTime", 10)) * 60) * 1000L;
     EVENT_PUMPKIN_GHOST_ID = eventSettings.getProperty("HalloweenEventPumpkinGhostNPC", 40028);
     EVENT_SKOOLDIE_REWARDER = eventSettings.getProperty("HalloweenSkooldieRewarderNPC", 40029);
     EVENT_PUMPKIN_DELAY = eventSettings.getProperty("HalloweenEventPumpkinDelay", 120) * 60 * 1000;
@@ -2187,7 +2181,7 @@ public class Config {
     OLY_RESTRICT_HWID = olympSettings.getProperty("OlympiadHWIDCheck", true);
     OLY_RESTRICT_IP = olympSettings.getProperty("OlympiadIPCheck", true);
     OLY_RESTRICT_CLASS_IDS = olympSettings.getProperty("OlympiadProhibitClassIds", ArrayUtils.EMPTY_INT_ARRAY);
-    OLYMPIAD_COMPETITION_TIME = (long)(olympSettings.getProperty("OlympiadCompetitionTime", 5) * 60) * 1000L;
+    OLYMPIAD_COMPETITION_TIME = (long) (olympSettings.getProperty("OlympiadCompetitionTime", 5) * 60) * 1000L;
     OLYMPIAD_STADIUM_TELEPORT_DELAY = olympSettings.getProperty("OlympiadStadiumTeleportDelay", 45);
     OLY_MAX_SPECTATORS_PER_STADIUM = olympSettings.getProperty("MaxSpectatorPerStadium", 18);
     OLY_SEASON_TIME_CALC_MODE = Config.OlySeasonTimeCalcMode.valueOf(olympSettings.getProperty("SeasonTimeCalcMode", "NORMAL").toUpperCase());
@@ -2206,8 +2200,8 @@ public class Config {
     OLY_BUFFS = new TIntObjectHashMap();
     StringTokenizer olyBuffTok = new StringTokenizer(olyBuffsStr, ";", false);
 
-    while(true) {
-      while(true) {
+    while (true) {
+      while (true) {
         String olyBuff;
         do {
           if (!olyBuffTok.hasMoreTokens()) {
@@ -2238,14 +2232,14 @@ public class Config {
           }
 
           olyBuff = olyBuffTok.nextToken();
-        } while(olyBuff.isEmpty());
+        } while (olyBuff.isEmpty());
 
         int olyBuffSkillDelimIdx = olyBuff.indexOf(58);
         if (olyBuffSkillDelimIdx < 0) {
-          _log.warn("Can't parse \"" + olyBuff + "\"");
+          log.warn("Can't parse \"" + olyBuff + "\"");
         } else {
           int classId = Integer.parseInt(olyBuff.substring(0, olyBuffSkillDelimIdx));
-          TIntIntHashMap buffs = (TIntIntHashMap)OLY_BUFFS.get(classId);
+          TIntIntHashMap buffs = (TIntIntHashMap) OLY_BUFFS.get(classId);
           if (buffs == null) {
             OLY_BUFFS.put(classId, buffs = new TIntIntHashMap());
           }
@@ -2253,7 +2247,7 @@ public class Config {
           String olyPlayerJobBuffsStr = olyBuff.substring(olyBuffSkillDelimIdx + 1);
           StringTokenizer olyPlayerJobBuffsTok = new StringTokenizer(olyPlayerJobBuffsStr, ",", false);
 
-          while(olyPlayerJobBuffsTok.hasMoreTokens()) {
+          while (olyPlayerJobBuffsTok.hasMoreTokens()) {
             String olyPlayerJobBuffStr = olyPlayerJobBuffsTok.nextToken();
             int buffIdLvlDelimIdx = olyPlayerJobBuffStr.indexOf("-");
             int skillId = Integer.parseInt(olyPlayerJobBuffStr.substring(0, buffIdLvlDelimIdx));
@@ -2270,13 +2264,13 @@ public class Config {
     Map<Integer, QuestRates> questRates = new HashMap<>();
     Iterator var2 = questRateSettings.keySet().iterator();
 
-    while(var2.hasNext()) {
+    while (var2.hasNext()) {
       Object keyObj = var2.next();
       String key = keyObj.toString();
       int questId = 0;
 
       int paramIdx;
-      for(paramIdx = 0; paramIdx < key.length(); ++paramIdx) {
+      for (paramIdx = 0; paramIdx < key.length(); ++paramIdx) {
         if (key.charAt(paramIdx) != '_') {
           if (!Character.isDigit(key.charAt(paramIdx))) {
             break;
@@ -2287,14 +2281,14 @@ public class Config {
       }
 
       if (questId == 0) {
-        _log.warn("Can't parse quest id for quest rate \"" + key + "\"");
+        log.warn("Can't parse quest id for quest rate \"" + key + "\"");
       } else {
         paramIdx = key.indexOf(46);
         if (paramIdx < 0) {
-          _log.warn("Can't parse quest rate param \"" + key + "\"");
+          log.warn("Can't parse quest rate param \"" + key + "\"");
         } else {
           String questRateParam = key.substring(paramIdx + 1);
-          QuestRates questRate = (QuestRates)questRates.get(questId);
+          QuestRates questRate = (QuestRates) questRates.get(questId);
           if (questRate == null) {
             questRates.put(questId, questRate = new QuestRates(questId));
           }
@@ -2302,7 +2296,7 @@ public class Config {
           try {
             questRate.updateParam(questRateParam, questRateSettings.getProperty(key));
           } catch (Exception var10) {
-            _log.warn("Can't process quest rate setting \"" + key + "\"", var10);
+            log.warn("Can't process quest rate setting \"" + key + "\"", var10);
           }
         }
       }
@@ -2348,7 +2342,7 @@ public class Config {
       File[] var1 = dir.listFiles();
       int var2 = var1.length;
 
-      for(int var3 = 0; var3 < var2; ++var3) {
+      for (int var3 = 0; var3 < var2; ++var3) {
         File f = var1[var3];
         if (!f.isDirectory() && f.getName().endsWith(".xml")) {
           loadGMAccess(f);
@@ -2356,7 +2350,7 @@ public class Config {
       }
 
     } else {
-      _log.info("Dir " + dir.getAbsolutePath() + " not exists.");
+      log.info("Dir " + dir.getAbsolutePath() + " not exists.");
     }
   }
 
@@ -2367,12 +2361,12 @@ public class Config {
       factory.setIgnoringComments(true);
       org.w3c.dom.Document doc = factory.newDocumentBuilder().parse(file);
 
-      for(Node z = doc.getFirstChild(); z != null; z = z.getNextSibling()) {
-        for(Node n = z.getFirstChild(); n != null; n = n.getNextSibling()) {
+      for (Node z = doc.getFirstChild(); z != null; z = z.getNextSibling()) {
+        for (Node n = z.getFirstChild(); n != null; n = n.getNextSibling()) {
           if (n.getNodeName().equalsIgnoreCase("char")) {
             PlayerAccess pa = new PlayerAccess();
 
-            for(Node d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
+            for (Node d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
               Class<?> cls = pa.getClass();
               String node = d.getNodeName();
               if (!"#text".equalsIgnoreCase(node)) {
@@ -2380,7 +2374,7 @@ public class Config {
                 try {
                   fld = cls.getField(node);
                 } catch (NoSuchFieldException var11) {
-                  _log.info("Not found desclarate ACCESS name: " + node + " in XML Player access Object");
+                  log.error("Not found desclarate ACCESS name: " + node + " in XML Player access Object");
                   continue;
                 }
 
@@ -2408,7 +2402,7 @@ public class Config {
       return null;
     } else {
       try {
-        return String.valueOf(field.get((Object)null));
+        return String.valueOf(field.get((Object) null));
       } catch (IllegalArgumentException var3) {
       } catch (IllegalAccessException var4) {
       }
@@ -2424,19 +2418,19 @@ public class Config {
     } else {
       try {
         if (field.getType() == Boolean.TYPE) {
-          field.setBoolean((Object)null, BooleanUtils.toBoolean(value));
+          field.setBoolean((Object) null, BooleanUtils.toBoolean(value));
         } else if (field.getType() == Integer.TYPE) {
-          field.setInt((Object)null, NumberUtils.toInt(value));
+          field.setInt((Object) null, NumberUtils.toInt(value));
         } else if (field.getType() == Long.TYPE) {
-          field.setLong((Object)null, NumberUtils.toLong(value));
+          field.setLong((Object) null, NumberUtils.toLong(value));
         } else if (field.getType() == Double.TYPE) {
-          field.setDouble((Object)null, NumberUtils.toDouble(value));
+          field.setDouble((Object) null, NumberUtils.toDouble(value));
         } else {
           if (field.getType() != String.class) {
             return false;
           }
 
-          field.set((Object)null, value);
+          field.set((Object) null, value);
         }
 
         return true;
@@ -2458,7 +2452,7 @@ public class Config {
     try {
       result.load(file);
     } catch (IOException var3) {
-      _log.error("Error loading config : " + file.getName() + "!");
+      log.error("Error loading config : " + file.getName() + "!");
     }
 
     return result;

@@ -104,8 +104,6 @@ import org.napile.primitive.maps.IntObjectMap;
 import org.napile.primitive.maps.impl.CHashIntObjectMap;
 import org.napile.primitive.sets.IntSet;
 import org.napile.primitive.sets.impl.HashIntSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.sql.*;
@@ -118,6 +116,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 @Slf4j
 public class Player extends Playable implements PlayerGroup {
   public static final int DEFAULT_TITLE_COLOR = 16777079;
@@ -494,11 +493,11 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public final PlayerTemplate getTemplate() {
-    return (PlayerTemplate)this._template;
+    return (PlayerTemplate) this._template;
   }
 
   public PlayerTemplate getBaseTemplate() {
-    return (PlayerTemplate)this._baseTemplate;
+    return (PlayerTemplate) this._baseTemplate;
   }
 
   public void changeSex() {
@@ -511,7 +510,7 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public PlayerAI getAI() {
-    return (PlayerAI)this._ai;
+    return (PlayerAI) this._ai;
   }
 
   public void doCast(Skill skill, Creature target, boolean forceUse) {
@@ -629,14 +628,14 @@ public class Player extends Playable implements PlayerGroup {
 
     try {
       this.getInventory().store();
-    } catch (Throwable var4) {
-      log.error("", var4);
+    } catch (Throwable e) {
+      log.error("offline: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     }
 
     try {
       this.store(false);
-    } catch (Throwable var3) {
-      log.error("", var3);
+    } catch (Throwable e) {
+      log.error("offline: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     }
 
   }
@@ -786,14 +785,15 @@ public class Player extends Playable implements PlayerGroup {
       try {
         this.getInventory().store();
         this.getRefund().clear();
-      } catch (Throwable var11) {
-        log.error("", var11);
+      } catch (Throwable e) {
+        log.error("prepareToLogout: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
       }
 
       try {
         this.store(false);
-      } catch (Throwable var10) {
-        log.error("", var10);
+      } catch (Throwable e) {
+        log.error("prepareToLogout: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+
       }
 
     }
@@ -821,7 +821,7 @@ public class Player extends Playable implements PlayerGroup {
 
   public void registerRecipe(Recipe recipe, boolean saveDB) {
     if (recipe != null) {
-      switch(recipe.getType()) {
+      switch (recipe.getType()) {
         case ERT_COMMON:
           this._commonrecipebook.put(recipe.getId(), recipe);
           break;
@@ -942,7 +942,7 @@ public class Player extends Playable implements PlayerGroup {
     if (quests != null) {
       int var7 = quests.length;
 
-      for(int var8 = 0; var8 < var7; ++var8) {
+      for (int var8 = 0; var8 < var7; ++var8) {
         Quest quest = quests[var8];
         QuestState qs = this.getQuestState(quest.getName());
         if (qs != null && !qs.isCompleted()) {
@@ -977,7 +977,7 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public boolean isQuestContinuationPossible(boolean msg) {
-    if (this.getWeightPenalty() < 3 && (double)this.getInventoryLimit() * 0.8D >= (double)this.getInventory().getSize()) {
+    if (this.getWeightPenalty() < 3 && (double) this.getInventoryLimit() * 0.8D >= (double) this.getInventory().getSize()) {
       return true;
     } else {
       if (msg) {
@@ -1126,12 +1126,12 @@ public class Player extends Playable implements PlayerGroup {
     temp.set(12, Config.REC_FLUSH_MINUTE);
     temp.set(13, 0);
     temp.set(14, 0);
-    long daysElapsed = Math.round((float)((System.currentTimeMillis() / 1000L - this.getLastAccess()) / 86400L));
+    long daysElapsed = Math.round((float) ((System.currentTimeMillis() / 1000L - this.getLastAccess()) / 86400L));
     if (daysElapsed == 0L && this.getLastAccess() < temp.getTimeInMillis() / 1000L && System.currentTimeMillis() > temp.getTimeInMillis()) {
       ++daysElapsed;
     }
 
-    for(int i = 1; (long)i < daysElapsed; ++i) {
+    for (int i = 1; (long) i < daysElapsed; ++i) {
       this.updateRecommends();
     }
 
@@ -1163,7 +1163,7 @@ public class Player extends Playable implements PlayerGroup {
       rset = pstmt.executeQuery();
       this._recommendedCharIds.clear();
 
-      while(rset.next()) {
+      while (rset.next()) {
         int recommendedCharId = rset.getInt("recommendedObjId");
         this._recommendedCharIds.add(recommendedCharId);
       }
@@ -1189,7 +1189,7 @@ public class Player extends Playable implements PlayerGroup {
         pstmt = conn.prepareStatement("INSERT INTO `character_recommends` (`objId`, `targetId`) VALUES (?, ?)");
         IntIterator $it = this._recommendedCharIds.iterator();
 
-        while($it.hasNext()) {
+        while ($it.hasNext()) {
           pstmt.setInt(1, this.getObjectId());
           pstmt.setInt(2, $it.next());
           pstmt.executeUpdate();
@@ -1225,9 +1225,9 @@ public class Player extends Playable implements PlayerGroup {
   public int getMaxLoad() {
     int con = this.getCON();
     if (con < 1) {
-      return (int)(31000.0D * Config.MAXLOAD_MODIFIER);
+      return (int) (31000.0D * Config.MAXLOAD_MODIFIER);
     } else {
-      return con > 59 ? (int)(176000.0D * Config.MAXLOAD_MODIFIER) : (int)this.calcStat(Stats.MAX_LOAD, Math.pow(1.029993928D, con) * 30495.627366D * Config.MAXLOAD_MODIFIER, this, null);
+      return con > 59 ? (int) (176000.0D * Config.MAXLOAD_MODIFIER) : (int) this.calcStat(Stats.MAX_LOAD, Math.pow(1.029993928D, con) * 30495.627366D * Config.MAXLOAD_MODIFIER, this, null);
     }
   }
 
@@ -1290,7 +1290,7 @@ public class Player extends Playable implements PlayerGroup {
   public void refreshOverloaded() {
     if (!this.isLogoutStarted() && this.getMaxLoad() > 0) {
       this.setOverloaded(this.getCurrentLoad() > this.getMaxLoad());
-      double weightproc = 100.0D * ((double)this.getCurrentLoad() - this.calcStat(Stats.MAX_NO_PENALTY_LOAD, 0.0D, this, null)) / (double)this.getMaxLoad();
+      double weightproc = 100.0D * ((double) this.getCurrentLoad() - this.calcStat(Stats.MAX_NO_PENALTY_LOAD, 0.0D, this, null)) / (double) this.getMaxLoad();
 //      int newWeightPenalty = false;
       byte newWeightPenalty;
       if (weightproc < 50.0D) {
@@ -1330,11 +1330,11 @@ public class Player extends Playable implements PlayerGroup {
 
   public void refreshExpertisePenalty() {
     if (!this.isLogoutStarted()) {
-      int level = (int)this.calcStat(Stats.GRADE_EXPERTISE_LEVEL, this.getLevel(), null, null);
+      int level = (int) this.calcStat(Stats.GRADE_EXPERTISE_LEVEL, this.getLevel(), null, null);
 //      int i = false;
 
       int i;
-      for(i = 0; i < EXPERTISE_LEVELS.length && level >= EXPERTISE_LEVELS[i + 1]; ++i) {
+      for (i = 0; i < EXPERTISE_LEVELS.length && level >= EXPERTISE_LEVELS[i + 1]; ++i) {
       }
 
       boolean skillUpdate = false;
@@ -1547,23 +1547,23 @@ public class Player extends Playable implements PlayerGroup {
 
   public WeaponTemplate findFistsWeaponItem(int classId) {
     if (classId >= 0 && classId <= 9) {
-      return (WeaponTemplate)ItemHolder.getInstance().getTemplate(246);
+      return (WeaponTemplate) ItemHolder.getInstance().getTemplate(246);
     } else if (classId >= 10 && classId <= 17) {
-      return (WeaponTemplate)ItemHolder.getInstance().getTemplate(251);
+      return (WeaponTemplate) ItemHolder.getInstance().getTemplate(251);
     } else if (classId >= 18 && classId <= 24) {
-      return (WeaponTemplate)ItemHolder.getInstance().getTemplate(244);
+      return (WeaponTemplate) ItemHolder.getInstance().getTemplate(244);
     } else if (classId >= 25 && classId <= 30) {
-      return (WeaponTemplate)ItemHolder.getInstance().getTemplate(249);
+      return (WeaponTemplate) ItemHolder.getInstance().getTemplate(249);
     } else if (classId >= 31 && classId <= 37) {
-      return (WeaponTemplate)ItemHolder.getInstance().getTemplate(245);
+      return (WeaponTemplate) ItemHolder.getInstance().getTemplate(245);
     } else if (classId >= 38 && classId <= 43) {
-      return (WeaponTemplate)ItemHolder.getInstance().getTemplate(250);
+      return (WeaponTemplate) ItemHolder.getInstance().getTemplate(250);
     } else if (classId >= 44 && classId <= 48) {
-      return (WeaponTemplate)ItemHolder.getInstance().getTemplate(248);
+      return (WeaponTemplate) ItemHolder.getInstance().getTemplate(248);
     } else if (classId >= 49 && classId <= 52) {
-      return (WeaponTemplate)ItemHolder.getInstance().getTemplate(252);
+      return (WeaponTemplate) ItemHolder.getInstance().getTemplate(252);
     } else {
-      return classId >= 53 && classId <= 57 ? (WeaponTemplate)ItemHolder.getInstance().getTemplate(247) : null;
+      return classId >= 53 && classId <= 57 ? (WeaponTemplate) ItemHolder.getInstance().getTemplate(247) : null;
     }
   }
 
@@ -1582,8 +1582,8 @@ public class Player extends Playable implements PlayerGroup {
         spRate = Config.RATE_RAIDBOSS_SP;
       }
 
-      long normalExp = (long)(noRateExp * expRate * this.getRateExp());
-      long normalSp = (long)(noRateSp * spRate * this.getRateSp());
+      long normalExp = (long) (noRateExp * expRate * this.getRateExp());
+      long normalSp = (long) (noRateSp * spRate * this.getRateSp());
       this.addExpAndSp(normalExp, normalSp, false, true);
     }
   }
@@ -1595,15 +1595,15 @@ public class Player extends Playable implements PlayerGroup {
   public void addExpAndSp(long addToExp, long addToSp, boolean applyRate, boolean applyToPet) {
     if (this._activeClass != null) {
       if (applyRate) {
-        addToExp = (long)((double)addToExp * Config.RATE_XP * this.getRateExp());
-        addToSp = (long)((double)addToSp * Config.RATE_SP * this.getRateSp());
+        addToExp = (long) ((double) addToExp * Config.RATE_XP * this.getRateExp());
+        addToSp = (long) ((double) addToSp * Config.RATE_SP * this.getRateSp());
       }
 
       Summon pet = this.getPet();
       boolean updatePetInfo = false;
       if (addToExp > 0L) {
         if (!this.isCursedWeaponEquipped() && addToSp > 0L && this._karma > 0) {
-          this._karma = (int)((double)this._karma - (double)addToSp / ((double)Config.KARMA_SP_DIVIDER * Config.RATE_SP));
+          this._karma = (int) ((double) this._karma - (double) addToSp / ((double) Config.KARMA_SP_DIVIDER * Config.RATE_SP));
           updatePetInfo = true;
         }
 
@@ -1617,14 +1617,14 @@ public class Player extends Playable implements PlayerGroup {
             addToExp = 0L;
           } else if (pet.isPet() && pet.getExpPenalty() > 0.0D) {
             if (pet.getLevel() > this.getLevel() - 20 && pet.getLevel() < this.getLevel() + 5) {
-              pet.addExpAndSp((long)((double)addToExp * pet.getExpPenalty()), 0L);
-              addToExp = (long)((double)addToExp * (1.0D - pet.getExpPenalty()));
+              pet.addExpAndSp((long) ((double) addToExp * pet.getExpPenalty()), 0L);
+              addToExp = (long) ((double) addToExp * (1.0D - pet.getExpPenalty()));
             } else {
-              pet.addExpAndSp((long)((double)addToExp * pet.getExpPenalty() / 5.0D), 0L);
-              addToExp = (long)((double)addToExp * (1.0D - pet.getExpPenalty() / 5.0D));
+              pet.addExpAndSp((long) ((double) addToExp * pet.getExpPenalty() / 5.0D), 0L);
+              addToExp = (long) ((double) addToExp * (1.0D - pet.getExpPenalty() / 5.0D));
             }
           } else if (pet.isSummon()) {
-            addToExp = (long)((double)addToExp * (1.0D - pet.getExpPenalty()));
+            addToExp = (long) ((double) addToExp * (1.0D - pet.getExpPenalty()));
           }
         }
 
@@ -1664,17 +1664,17 @@ public class Player extends Playable implements PlayerGroup {
       int unLearnable = 0;
 
       label78:
-      for(Collection skills = SkillAcquireHolder.getInstance().getAvailableSkills(this, ClassId.VALUES[this.getActiveClassId()], AcquireType.NORMAL, null); skills.size() > unLearnable; skills = SkillAcquireHolder.getInstance().getAvailableSkills(this, AcquireType.NORMAL)) {
+      for (Collection skills = SkillAcquireHolder.getInstance().getAvailableSkills(this, ClassId.VALUES[this.getActiveClassId()], AcquireType.NORMAL, null); skills.size() > unLearnable; skills = SkillAcquireHolder.getInstance().getAvailableSkills(this, AcquireType.NORMAL)) {
         unLearnable = 0;
         Iterator var5 = skills.iterator();
 
-        while(true) {
-          while(true) {
+        while (true) {
+          while (true) {
             if (!var5.hasNext()) {
               continue label78;
             }
 
-            SkillLearn s = (SkillLearn)var5.next();
+            SkillLearn s = (SkillLearn) var5.next();
             Skill sk = SkillTable.getInstance().getInfo(s.getId(), s.getLevel());
             if (sk != null && sk.getCanLearn(this.getClassId()) && s.canAutoLearn()) {
               this.addSkill(sk, true);
@@ -1690,7 +1690,7 @@ public class Player extends Playable implements PlayerGroup {
       Iterator var9 = SkillAcquireHolder.getInstance().getAvailableSkills(this, AcquireType.NORMAL).iterator();
 
       label60:
-      while(true) {
+      while (true) {
         SkillLearn skill;
         do {
           do {
@@ -1698,9 +1698,9 @@ public class Player extends Playable implements PlayerGroup {
               break label60;
             }
 
-            skill = (SkillLearn)var9.next();
-          } while(skill.getCost() != 0);
-        } while(skill.getItemId() != 0);
+            skill = (SkillLearn) var9.next();
+          } while (skill.getCost() != 0);
+        } while (skill.getItemId() != 0);
 
         Skill sk = SkillTable.getInstance().getInfo(skill.getId(), skill.getLevel());
         this.addSkill(sk, true);
@@ -1731,7 +1731,7 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public int getIntSp() {
-    return (int)this.getSp();
+    return (int) this.getSp();
   }
 
   public long getSp() {
@@ -1932,7 +1932,7 @@ public class Player extends Playable implements PlayerGroup {
     Location from = this.getLoc();
     Location to = dest.clone();
     if (this.isInBoat()) {
-      indent = (int)((double)indent + (from.distance(to) - (double)(3 * this.getBoat().getActingRange())));
+      indent = (int) ((double) indent + (from.distance(to) - (double) (3 * this.getBoat().getActingRange())));
       ignoreGeo = true;
     }
 
@@ -2041,7 +2041,7 @@ public class Player extends Playable implements PlayerGroup {
           player.sendActionFailed();
         }
       } else if (this.getPrivateStoreType() != 0) {
-        if (this.getRealDistance(player) > (double)this.getActingRange() && player.getAI().getIntention() != CtrlIntention.AI_INTENTION_INTERACT) {
+        if (this.getRealDistance(player) > (double) this.getActingRange() && player.getAI().getIntention() != CtrlIntention.AI_INTENTION_INTERACT) {
           if (!shift) {
             player.getAI().setIntention(CtrlIntention.AI_INTENTION_INTERACT, this);
           } else {
@@ -2192,17 +2192,17 @@ public class Player extends Playable implements PlayerGroup {
     StatusUpdate su = new StatusUpdate(this);
     int var4 = fields.length;
 
-    for(int var5 = 0; var5 < var4; ++var5) {
+    for (int var5 = 0; var5 < var4; ++var5) {
       int field = fields[var5];
-      switch(field) {
+      switch (field) {
         case 9:
-          su.addAttribute(field, (int)this.getCurrentHp());
+          su.addAttribute(field, (int) this.getCurrentHp());
           break;
         case 10:
           su.addAttribute(field, this.getMaxHp());
           break;
         case 11:
-          su.addAttribute(field, (int)this.getCurrentMp());
+          su.addAttribute(field, (int) this.getCurrentMp());
           break;
         case 12:
           su.addAttribute(field, this.getMaxMp());
@@ -2237,7 +2237,7 @@ public class Player extends Playable implements PlayerGroup {
           su.addAttribute(field, this.getKarma());
           break;
         case 33:
-          su.addAttribute(field, (int)this.getCurrentCp());
+          su.addAttribute(field, (int) this.getCurrentCp());
           break;
         case 34:
           su.addAttribute(field, this.getMaxCp());
@@ -2286,7 +2286,7 @@ public class Player extends Playable implements PlayerGroup {
       IStaticPacket[] var2 = packets;
       int var3 = packets.length;
 
-      for(int var4 = 0; var4 < var3; ++var4) {
+      for (int var4 = 0; var4 < var3; ++var4) {
         IStaticPacket p = var2[var4];
         if (!this.isPacketIgnored(p)) {
           this._connection.sendPacket(p.packet(this));
@@ -2313,9 +2313,9 @@ public class Player extends Playable implements PlayerGroup {
   public void doInteract(GameObject target) {
     if (target != null && !this.isActionsDisabled()) {
       if (target.isPlayer()) {
-        Player temp = (Player)target;
-        if (this.getRealDistance(target) <= (double)target.getActingRange()) {
-          switch(temp.getPrivateStoreType()) {
+        Player temp = (Player) target;
+        if (this.getRealDistance(target) <= (double) target.getActingRange()) {
+          switch (temp.getPrivateStoreType()) {
             case 1:
             case 8:
               this.sendPacket(new PrivateStoreListSell(this, temp));
@@ -2357,7 +2357,7 @@ public class Player extends Playable implements PlayerGroup {
         if (skills.length > 0) {
           int var6 = skills.length;
 
-          for(int var7 = 0; var7 < var6; ++var7) {
+          for (int var7 = 0; var7 < var6; ++var7) {
             Skill skill = skills[var7];
             this.altUseSkill(skill, this);
             if (this.getPet() != null && this.getPet().isSummon() && !this.getPet().isDead()) {
@@ -2390,8 +2390,8 @@ public class Player extends Playable implements PlayerGroup {
     } else {
       this.sendActionFailed();
       this.stopMove();
-      ItemInstance item = (ItemInstance)object;
-      synchronized(item) {
+      ItemInstance item = (ItemInstance) object;
+      synchronized (item) {
         if (item.isVisible()) {
           if (!ItemFunctions.checkIfCanPickup(this, item)) {
             SystemMessage sm;
@@ -2409,7 +2409,7 @@ public class Player extends Playable implements PlayerGroup {
             if (skills.length > 0) {
               int var6 = skills.length;
 
-              for(int var7 = 0; var7 < var6; ++var7) {
+              for (int var7 = 0; var7 < var6; ++var7) {
                 Skill skill = skills[var7];
                 this.altUseSkill(skill, this);
               }
@@ -2418,7 +2418,7 @@ public class Player extends Playable implements PlayerGroup {
             this.broadcastPacket(new GetItem(item, this.getObjectId()));
             item.deleteMe();
           } else {
-            FlagItemAttachment attachment = item.getAttachment() instanceof FlagItemAttachment ? (FlagItemAttachment)item.getAttachment() : null;
+            FlagItemAttachment attachment = item.getAttachment() instanceof FlagItemAttachment ? (FlagItemAttachment) item.getAttachment() : null;
             if (this.isInParty() && attachment == null) {
               this.getParty().distributeItem(this, item, null);
             } else if (this.pickupItem(item, ItemLog.Pickup)) {
@@ -2434,7 +2434,7 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public boolean pickupItem(ItemInstance item, ItemLog log) {
-    PickableAttachment attachment = item.getAttachment() instanceof PickableAttachment ? (PickableAttachment)item.getAttachment() : null;
+    PickableAttachment attachment = item.getAttachment() instanceof PickableAttachment ? (PickableAttachment) item.getAttachment() : null;
     if (!ItemFunctions.canAddItem(this, item)) {
       return false;
     } else {
@@ -2462,7 +2462,7 @@ public class Player extends Playable implements PlayerGroup {
     if (target != null) {
       if (target == this.getTarget()) {
         if (target.isNpc()) {
-          NpcInstance npc = (NpcInstance)target;
+          NpcInstance npc = (NpcInstance) target;
           this.sendPacket(new MyTargetSelected(npc.getObjectId(), this.getLevel() - npc.getLevel()));
           this.sendPacket(npc.makeStatusUpdate(new int[]{9, 10}));
           this.sendPacket(new ValidateLocation(npc), ActionFail.STATIC);
@@ -2499,7 +2499,7 @@ public class Player extends Playable implements PlayerGroup {
       }
 
       if (oldTarget.isCreature()) {
-        ((Creature)oldTarget).removeStatusListener(this);
+        ((Creature) oldTarget).removeStatusListener(this);
       }
 
       this.broadcastPacket(new TargetUnselected(this));
@@ -2507,7 +2507,7 @@ public class Player extends Playable implements PlayerGroup {
 
     if (newTarget != null) {
       if (newTarget.isCreature()) {
-        ((Creature)newTarget).addStatusListener(this);
+        ((Creature) newTarget).addStatusListener(this);
       }
 
       this.broadcastPacket(new TargetSelected(this.getObjectId(), newTarget.getObjectId(), this.getLoc()));
@@ -2522,7 +2522,7 @@ public class Player extends Playable implements PlayerGroup {
 
   public WeaponTemplate getActiveWeaponItem() {
     ItemInstance weapon = this.getActiveWeaponInstance();
-    return weapon == null ? this.getFistsWeaponItem() : (WeaponTemplate)weapon.getTemplate();
+    return weapon == null ? this.getFistsWeaponItem() : (WeaponTemplate) weapon.getTemplate();
   }
 
   public ItemInstance getSecondaryWeaponInstance() {
@@ -2535,7 +2535,7 @@ public class Player extends Playable implements PlayerGroup {
       return this.getFistsWeaponItem();
     } else {
       ItemTemplate item = weapon.getTemplate();
-      return item instanceof WeaponTemplate ? (WeaponTemplate)item : null;
+      return item instanceof WeaponTemplate ? (WeaponTemplate) item : null;
     }
   }
 
@@ -2714,7 +2714,7 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public void checkAddItemToDrop(List<ItemInstance> array, List<ItemInstance> items, int maxCount) {
-    for(int i = 0; i < maxCount && !items.isEmpty(); ++i) {
+    for (int i = 0; i < maxCount && !items.isEmpty(); ++i) {
       array.add(items.remove(Rnd.get(items.size())));
     }
 
@@ -2722,7 +2722,7 @@ public class Player extends Playable implements PlayerGroup {
 
   public FlagItemAttachment getActiveWeaponFlagAttachment() {
     ItemInstance item = this.getActiveWeaponInstance();
-    return item != null && item.getAttachment() instanceof FlagItemAttachment ? (FlagItemAttachment)item.getAttachment() : null;
+    return item != null && item.getAttachment() instanceof FlagItemAttachment ? (FlagItemAttachment) item.getAttachment() : null;
   }
 
   protected void doPKPVPManage(Creature killer) {
@@ -2737,7 +2737,7 @@ public class Player extends Playable implements PlayerGroup {
         if (Config.FUN_ZONE_PVP_COUNT || !inFunZone) {
           if (!(killer instanceof Summon) || (killer = killer.getPlayer()) != null) {
             if (killer.isPlayer()) {
-              Player pk = (Player)killer;
+              Player pk = (Player) killer;
               int repValue = this.getLevel() - pk.getLevel() >= 20 ? Config.CRP_REWARD_ON_WAR_KILL_OVER_LEVEL : Config.CRP_REWARD_ON_WAR_KILL;
               boolean war = this.atMutualWarWith(pk);
               if (war && pk.getClan().getReputationScore() > 0 && this._clan.getLevel() >= 5 && this._clan.getReputationScore() > 0 && pk.getClan().getLevel() >= 5) {
@@ -2773,7 +2773,7 @@ public class Player extends Playable implements PlayerGroup {
                   int max_drop_count = isPvP ? Config.KARMA_DROP_ITEM_LIMIT : 1;
                   double dropRate;
                   if (isPvP) {
-                    dropRate = (double)this._pkKills * Config.KARMA_DROPCHANCE_MOD + Config.KARMA_DROPCHANCE_BASE;
+                    dropRate = (double) this._pkKills * Config.KARMA_DROPCHANCE_MOD + Config.KARMA_DROPCHANCE_BASE;
                   } else {
                     dropRate = Config.NORMAL_DROPCHANCE_BASE;
                   }
@@ -2782,7 +2782,7 @@ public class Player extends Playable implements PlayerGroup {
                   int dropWeaponCount = 0;
                   int dropItemCount = 0;
 
-                  for(int i = 0; (double)i < Math.ceil(dropRate / 100.0D) && i < max_drop_count; ++i) {
+                  for (int i = 0; (double) i < Math.ceil(dropRate / 100.0D) && i < max_drop_count; ++i) {
                     if (Rnd.chance(dropRate)) {
                       int rand = Rnd.get(Config.DROPCHANCE_EQUIPPED_WEAPON + Config.DROPCHANCE_EQUIPMENT + Config.DROPCHANCE_ITEM) + 1;
                       if (rand > Config.DROPCHANCE_EQUIPPED_WEAPON + Config.DROPCHANCE_EQUIPMENT) {
@@ -2805,7 +2805,7 @@ public class Player extends Playable implements PlayerGroup {
                     ItemInstance[] var16 = this.getInventory().getItems();
                     int var17 = var16.length;
 
-                    for(int var18 = 0; var18 < var17; ++var18) {
+                    for (int var18 = 0; var18 < var17; ++var18) {
                       ItemInstance item = var16[var18];
                       if (item.canBeDropped(this, true) && !Config.KARMA_LIST_NONDROPPABLE_ITEMS.contains(item.getItemId())) {
                         if (item.getTemplate().getType2() == 0) {
@@ -2886,7 +2886,7 @@ public class Player extends Playable implements PlayerGroup {
         CursedWeaponsManager.getInstance().dropPlayer(this);
         checkPvp = false;
       } else if (killer != null && killer.isPlayer() && killer.isCursedWeaponEquipped()) {
-        CursedWeaponsManager.getInstance().increaseKills(((Player)killer).getCursedWeaponEquippedId());
+        CursedWeaponsManager.getInstance().increaseKills(((Player) killer).getCursedWeaponEquippedId());
         checkPvp = false;
       }
     }
@@ -2899,7 +2899,7 @@ public class Player extends Playable implements PlayerGroup {
     this.getDeathPenalty().notifyDead(killer);
     this.setIncreasedForce(0);
     if (this.isInParty() && this.getParty().isInReflection() && this.getParty().getReflection() instanceof DimensionalRift) {
-      ((DimensionalRift)this.getParty().getReflection()).memberDead(this);
+      ((DimensionalRift) this.getParty().getReflection()).memberDead(this);
     }
 
     this.stopWaterTask();
@@ -2931,7 +2931,7 @@ public class Player extends Playable implements PlayerGroup {
       }
 
       if (lostexp != 0) {
-        this.addExpAndSp((long)((double)lostexp * percent / 100.0D), 0L);
+        this.addExpAndSp((long) ((double) lostexp * percent / 100.0D), 0L);
       }
 
     }
@@ -2960,18 +2960,18 @@ public class Player extends Playable implements PlayerGroup {
       }
 
       if (Config.ALT_DEATH_PENALTY) {
-        percentLost = percentLost * Config.RATE_XP + (double)this._pkKills * Config.ALT_PK_DEATH_RATE;
+        percentLost = percentLost * Config.RATE_XP + (double) this._pkKills * Config.ALT_PK_DEATH_RATE;
       }
 
       if (this.isFestivalParticipant() || atwar) {
         percentLost /= 4.0D;
       }
 
-      int lostexp = (int)Math.round((double)(Experience.LEVEL[level + 1] - Experience.LEVEL[level]) * percentLost / 100.0D);
-      lostexp = (int)((double)lostexp * deathPenaltyBonus);
-      lostexp = (int)this.calcStat(Stats.EXP_LOST, lostexp, killer, null);
+      int lostexp = (int) Math.round((double) (Experience.LEVEL[level + 1] - Experience.LEVEL[level]) * percentLost / 100.0D);
+      lostexp = (int) ((double) lostexp * deathPenaltyBonus);
+      lostexp = (int) this.calcStat(Stats.EXP_LOST, lostexp, killer, null);
       if (this.isOnSiegeField()) {
-        SiegeEvent<?, ?> siegeEvent = (SiegeEvent)this.getEvent(SiegeEvent.class);
+        SiegeEvent<?, ?> siegeEvent = (SiegeEvent) this.getEvent(SiegeEvent.class);
         if (siegeEvent != null) {
           lostexp = 0;
         }
@@ -3053,7 +3053,7 @@ public class Player extends Playable implements PlayerGroup {
         Skill castingSkill = this.getCastingSkill();
         long animationEndTime = this.getAnimationEndTime();
         if (castingSkill != null && castingTarget != null && castingTarget.isCreature() && this.getAnimationEndTime() > 0L) {
-          list.add(new MagicSkillUse(this, castingTarget, castingSkill, (int)(animationEndTime - System.currentTimeMillis()), 0L));
+          list.add(new MagicSkillUse(this, castingTarget, castingSkill, (int) (animationEndTime - System.currentTimeMillis()), 0L));
         }
       }
 
@@ -3245,7 +3245,7 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public List<TradeItem> getSellList() {
-    switch(this.getPrivateStoreType()) {
+    switch (this.getPrivateStoreType()) {
       case 1:
         return this.getSellList(false);
       case 8:
@@ -3479,7 +3479,7 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public double getLevelMod() {
-    return (89.0D + (double)this.getLevel()) / 100.0D;
+    return (89.0D + (double) this.getLevel()) / 100.0D;
   }
 
   public void updateStats() {
@@ -3528,8 +3528,8 @@ public class Player extends Playable implements PlayerGroup {
       statement.setLong(2, System.currentTimeMillis() / 1000L);
       statement.setInt(3, this.getObjectId());
       statement.execute();
-    } catch (Exception var7) {
-      log.error("", var7);
+    } catch (Exception e) {
+      log.error("updateOnlineStatus: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -3538,7 +3538,7 @@ public class Player extends Playable implements PlayerGroup {
 
   public void increaseKarma(long add_karma) {
     boolean flagChanged = this._karma == 0;
-    long new_karma = (long)this._karma + add_karma;
+    long new_karma = (long) this._karma + add_karma;
     if (new_karma > 2147483647L) {
       new_karma = 2147483647L;
     }
@@ -3554,9 +3554,9 @@ public class Player extends Playable implements PlayerGroup {
         this.sendStatusUpdate(true, true, 26);
       }
 
-      this._karma = (int)new_karma;
+      this._karma = (int) new_karma;
     } else {
-      this._karma = (int)new_karma;
+      this._karma = (int) new_karma;
     }
 
     this.updateKarma(flagChanged);
@@ -3705,11 +3705,11 @@ public class Player extends Playable implements PlayerGroup {
         int reflection = 0;
         String var;
         String charName;
-        if (player.getVar("jailed") != null && System.currentTimeMillis() / 1000L < (long)(Integer.parseInt(player.getVar("jailed")) + 60)) {
+        if (player.getVar("jailed") != null && System.currentTimeMillis() / 1000L < (long) (Integer.parseInt(player.getVar("jailed")) + 60)) {
           player.setXYZ(-114648, -249384, -2984);
           player.sitDown(null);
           player.block();
-          player._unjailTask = ThreadPoolManager.getInstance().schedule(new UnJailTask(player), (long)Integer.parseInt(player.getVar("jailed")) * 1000L);
+          player._unjailTask = ThreadPoolManager.getInstance().schedule(new UnJailTask(player), (long) Integer.parseInt(player.getVar("jailed")) * 1000L);
         } else {
           player.setXYZ(rset.getInt("x"), rset.getInt("y"), rset.getInt("z"));
           var = player.getVar("reflection");
@@ -3740,8 +3740,8 @@ public class Player extends Playable implements PlayerGroup {
           if (var != null) {
             player.setExpandInventory(Integer.parseInt(var));
           }
-        } catch (Exception var35) {
-          log.error("", var35);
+        } catch (Exception e) {
+          log.error("restore: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         }
 
         try {
@@ -3749,8 +3749,8 @@ public class Player extends Playable implements PlayerGroup {
           if (var != null) {
             player.setExpandWarehouse(Integer.parseInt(var));
           }
-        } catch (Exception var34) {
-          log.error("", var34);
+        } catch (Exception e) {
+          log.error("restore: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         }
 
         try {
@@ -3758,8 +3758,8 @@ public class Player extends Playable implements PlayerGroup {
           if (var != null) {
             player.setBuffAnimRange(Integer.parseInt(var));
           }
-        } catch (Exception var33) {
-          log.error("", var33);
+        } catch (Exception e) {
+          log.error("restore: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         }
 
         try {
@@ -3767,8 +3767,8 @@ public class Player extends Playable implements PlayerGroup {
           if (var != null) {
             player.setNotShowTraders(Boolean.parseBoolean(var));
           }
-        } catch (Exception var32) {
-          log.error("", var32);
+        } catch (Exception e) {
+          log.error("restore: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         }
 
         try {
@@ -3776,8 +3776,8 @@ public class Player extends Playable implements PlayerGroup {
           if (var != null) {
             player.setPetControlItem(Integer.parseInt(var));
           }
-        } catch (Exception var31) {
-          log.error("", var31);
+        } catch (Exception e) {
+          log.error("restore: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         }
 
         statement3 = con.prepareStatement("SELECT obj_Id, char_name FROM characters WHERE account_name=? AND obj_Id!=?");
@@ -3785,7 +3785,7 @@ public class Player extends Playable implements PlayerGroup {
         statement3.setInt(2, objectId);
         rset3 = statement3.executeQuery();
 
-        while(rset3.next()) {
+        while (rset3.next()) {
           Integer charId = rset3.getInt("obj_Id");
           charName = rset3.getString("char_name");
           player._chars.put(charId, charName);
@@ -3867,7 +3867,7 @@ public class Player extends Playable implements PlayerGroup {
       statement.setInt(1, this.getObjectId());
       rs = statement.executeQuery();
 
-      while(rs.next()) {
+      while (rs.next()) {
         int itemNum = rs.getInt("itemNum");
         int itemId = rs.getInt("itemId");
         long itemCount = rs.getLong("itemCount");
@@ -3875,8 +3875,9 @@ public class Player extends Playable implements PlayerGroup {
         PremiumItem item = new PremiumItem(itemId, itemCount, itemSender);
         this._premiumItems.put(itemNum, item);
       }
-    } catch (Exception var13) {
-      log.error("", var13);
+    } catch (Exception e) {
+      log.error("loadPremiumItemList: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+
     } finally {
       DbUtils.closeQuietly(con, statement, rs);
     }
@@ -3894,8 +3895,8 @@ public class Player extends Playable implements PlayerGroup {
       statement.setInt(2, this.getObjectId());
       statement.setInt(3, itemNum);
       statement.execute();
-    } catch (Exception var10) {
-      log.error("", var10);
+    } catch (Exception e) {
+      log.error("updatePremiumItem: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -3912,8 +3913,8 @@ public class Player extends Playable implements PlayerGroup {
       statement.setInt(1, this.getObjectId());
       statement.setInt(2, itemNum);
       statement.execute();
-    } catch (Exception var8) {
-      log.error("", var8);
+    } catch (Exception e) {
+      log.error("deletePremiumItem: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -3963,7 +3964,7 @@ public class Player extends Playable implements PlayerGroup {
           statement.setLong(21, this.getLeaveClanTime() / 1000L);
           statement.setLong(22, this.getDeleteClanTime() / 1000L);
           statement.setLong(23, this._NoChannel > 0L ? this.getNoChannelRemained() / 1000L : this._NoChannel);
-          statement.setInt(24, (int)(this._onlineBeginTime > 0L ? (this._onlineTime + System.currentTimeMillis() - this._onlineBeginTime) / 1000L : this._onlineTime / 1000L));
+          statement.setInt(24, (int) (this._onlineBeginTime > 0L ? (this._onlineTime + System.currentTimeMillis() - this._onlineBeginTime) / 1000L : this._onlineTime / 1000L));
           statement.setInt(25, this.getPledgeType());
           statement.setInt(26, this.getPowerGrade());
           statement.setInt(27, this.getLvlJoinedAcademy());
@@ -4084,8 +4085,8 @@ public class Player extends Playable implements PlayerGroup {
       statement.setInt(2, classId);
       rset = statement.executeQuery();
 
-      while(true) {
-        while(true) {
+      while (true) {
+        while (true) {
           Skill skill;
           do {
             if (!rset.next()) {
@@ -4118,7 +4119,7 @@ public class Player extends Playable implements PlayerGroup {
                 }
               }
 
-              switch(activeClassId) {
+              switch (activeClassId) {
                 case dwarvenFighter:
                 case scavenger:
                 case bountyHunter:
@@ -4148,7 +4149,7 @@ public class Player extends Playable implements PlayerGroup {
             int id = rset.getInt("skill_id");
             int level = rset.getInt("skill_level");
             skill = SkillTable.getInstance().getInfo(id, level);
-          } while(skill == null);
+          } while (skill == null);
 
           if (!this.isGM() && !Config.ALT_WEAK_SKILL_LEARN && !SkillAcquireHolder.getInstance().isSkillPossible(this, skill)) {
             log.warn("Skill " + skill.toString() + " not possible for player " + this.toString() + " with classId " + this.getActiveClassId());
@@ -4183,7 +4184,7 @@ public class Player extends Playable implements PlayerGroup {
       if (!this._skillReuses.isEmpty()) {
         pstmt = conn.prepareStatement("REPLACE INTO `character_skills_save`(`char_obj_id`, `skill_id`, `skill_level`, `class_index`, `end_time`, `reuse_delay_org`) VALUES\t(?,?,?,?,?,?)");
         CHashIntObjectMap<TimeStamp> skillReuses = new CHashIntObjectMap();
-        synchronized(this._skillReuses) {
+        synchronized (this._skillReuses) {
           skillReuses.putAll(this._skillReuses);
         }
 
@@ -4200,11 +4201,9 @@ public class Player extends Playable implements PlayerGroup {
           }
         }
 
-        return;
       }
     } catch (Exception var12) {
       log.warn("Could not store disable skills data: " + var12);
-      return;
     } finally {
       DbUtils.closeQuietly(conn, pstmt);
     }
@@ -4224,7 +4223,7 @@ public class Player extends Playable implements PlayerGroup {
       pstmt.setInt(2, this.getActiveClassId());
       rset = pstmt.executeQuery();
 
-      while(rset.next()) {
+      while (rset.next()) {
         int skillId = rset.getInt("skill_id");
         int skillLevel = rset.getInt("skill_level");
         long endTime = rset.getLong("end_time");
@@ -4263,11 +4262,11 @@ public class Player extends Playable implements PlayerGroup {
       rset = statement.executeQuery();
 
       int slot;
-      for(slot = 0; slot < 3; ++slot) {
+      for (slot = 0; slot < 3; ++slot) {
         this._henna[slot] = null;
       }
 
-      while(rset.next()) {
+      while (rset.next()) {
         slot = rset.getInt("slot");
         if (slot >= 1 && slot <= 3) {
           int symbol_id = rset.getInt("symbol_id");
@@ -4291,7 +4290,7 @@ public class Player extends Playable implements PlayerGroup {
   public int getHennaEmptySlots() {
     int totalSlots = 1 + this.getClassId().level();
 
-    for(int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; ++i) {
       if (this._henna[i] != null) {
         --totalSlots;
       }
@@ -4341,7 +4340,7 @@ public class Player extends Playable implements PlayerGroup {
       this.sendPacket(SystemMsg.NO_SLOT_EXISTS_TO_DRAW_THE_SYMBOL);
       return false;
     } else {
-      for(int i = 0; i < 3; ++i) {
+      for (int i = 0; i < 3; ++i) {
         if (this._henna[i] == null) {
           this._henna[i] = henna;
           this.recalcHennaStats();
@@ -4380,7 +4379,7 @@ public class Player extends Playable implements PlayerGroup {
     this._hennaWIT = 0;
     this._hennaDEX = 0;
 
-    for(int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; ++i) {
       Henna henna = this._henna[i];
       if (henna != null && henna.isForThisClass(this)) {
         this._hennaINT += henna.getStatINT();
@@ -4495,7 +4494,7 @@ public class Player extends Playable implements PlayerGroup {
     if (this.isInZone(ZoneType.no_landing)) {
       return false;
     } else {
-      SiegeEvent<?, ?> siege = (SiegeEvent)this.getEvent(SiegeEvent.class);
+      SiegeEvent<?, ?> siege = (SiegeEvent) this.getEvent(SiegeEvent.class);
       if (siege != null) {
         Residence unit = siege.getResidence();
         return unit != null && this.getClan() != null && this.isClanLeader() && this.getClan().getCastle() == unit.getId();
@@ -4507,7 +4506,7 @@ public class Player extends Playable implements PlayerGroup {
 
   public void setMount(int npcId, int obj_id, int level) {
     if (!this.isCursedWeaponEquipped()) {
-      switch(npcId) {
+      switch (npcId) {
         case 0:
           this.setFlying(false);
           this.setRiding(false);
@@ -4583,7 +4582,7 @@ public class Player extends Playable implements PlayerGroup {
         mod = 0.5D;
       }
 
-      baseSpeed = (int)(mod * (double)speed);
+      baseSpeed = (int) (mod * (double) speed);
     }
 
     return super.getSpeed(baseSpeed);
@@ -4625,7 +4624,7 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public Collection<EffectCubic> getCubics() {
-    return (Collection)(this._cubics == null ? Collections.emptyList() : this._cubics.values());
+    return (Collection) (this._cubics == null ? Collections.emptyList() : this._cubics.values());
   }
 
   public void addCubic(EffectCubic cubic) {
@@ -5130,8 +5129,8 @@ public class Player extends Playable implements PlayerGroup {
         return false;
       }
 
-      blockId = (Integer)var2.next();
-    } while(!charName.equalsIgnoreCase(this._blockList.get(blockId)));
+      blockId = (Integer) var2.next();
+    } while (!charName.equalsIgnoreCase(this._blockList.get(blockId)));
 
     return true;
   }
@@ -5148,7 +5147,7 @@ public class Player extends Playable implements PlayerGroup {
       statement.setInt(1, this.getObjectId());
       rs = statement.executeQuery();
 
-      while(rs.next()) {
+      while (rs.next()) {
         int targetId = rs.getInt("target_Id");
         String name = rs.getString("char_name");
         if (name != null) {
@@ -5173,7 +5172,7 @@ public class Player extends Playable implements PlayerGroup {
       statement.executeUpdate("DELETE FROM character_blocklist WHERE obj_Id=" + this.getObjectId());
       if (!this._blockList.isEmpty()) {
         SqlBatch b = new SqlBatch("INSERT IGNORE INTO `character_blocklist` (`obj_Id`,`target_Id`) VALUES");
-        synchronized(this._blockList) {
+        synchronized (this._blockList) {
           Iterator var6 = this._blockList.entrySet().iterator();
 
           while (var6.hasNext()) {
@@ -5392,7 +5391,7 @@ public class Player extends Playable implements PlayerGroup {
       IS_LEADER = unitMember.getLeaderOf() == 0;
     }
 
-    switch(CLAN_LEVEL) {
+    switch (CLAN_LEVEL) {
       case -1:
         this._pledgeClass = 0;
         break;
@@ -5658,7 +5657,7 @@ public class Player extends Playable implements PlayerGroup {
     if (this.isDead()) {
       this.stopWaterTask();
     } else if (Config.ALLOW_WATER && this._taskWater == null) {
-      int timeinwater = (int)(this.calcStat(Stats.BREATH, 86.0D, null, null) * 1000.0D);
+      int timeinwater = (int) (this.calcStat(Stats.BREATH, 86.0D, null, null) * 1000.0D);
       this.sendPacket(new SetupGauge(this, 2, timeinwater));
       if (this.getTransformation() > 0 && this.getTransformationTemplate() > 0 && !this.isCursedWeaponEquipped()) {
         this.setTransformation(0);
@@ -5683,7 +5682,7 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public void reviveRequest(Player reviver, double percent, boolean pet, int expireResurrectTime) {
-    ReviveAnswerListener reviveAsk = this._askDialog != null && this._askDialog.getValue() instanceof ReviveAnswerListener ? (ReviveAnswerListener)this._askDialog.getValue() : null;
+    ReviveAnswerListener reviveAsk = this._askDialog != null && this._askDialog.getValue() instanceof ReviveAnswerListener ? (ReviveAnswerListener) this._askDialog.getValue() : null;
     if (reviveAsk != null) {
       if (reviveAsk.isForPet() == pet && reviveAsk.getPower() >= percent) {
         reviver.sendPacket(Msg.BETTER_RESURRECTION_HAS_BEEN_ALREADY_PROPOSED);
@@ -5867,8 +5866,8 @@ public class Player extends Playable implements PlayerGroup {
       statement.setInt(3, oldclass);
       statement.executeUpdate();
       DbUtils.close(statement);
-    } catch (SQLException var9) {
-      log.error("", var9);
+    } catch (SQLException e) {
+      log.error("changeClassInDb: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -5896,8 +5895,8 @@ public class Player extends Playable implements PlayerGroup {
       Iterator var5 = this.getSubClasses().values().iterator();
 
       StringBuilder sb;
-      while(var5.hasNext()) {
-        SubClass subClass = (SubClass)var5.next();
+      while (var5.hasNext()) {
+        SubClass subClass = (SubClass) var5.next();
         sb = new StringBuilder("UPDATE character_subclasses SET ");
         sb.append("exp=").append(subClass.getExp()).append(",");
         sb.append("sp=").append(subClass.getSp()).append(",");
@@ -5940,7 +5939,7 @@ public class Player extends Playable implements PlayerGroup {
 
       SubClass activeSubclass;
       SubClass subClass;
-      for(activeSubclass = null; rset.next(); player.getSubClasses().put(subClass.getClassId(), subClass)) {
+      for (activeSubclass = null; rset.next(); player.getSubClasses().put(subClass.getClassId(), subClass)) {
         subClass = new SubClass();
         subClass.setBase(rset.getInt("isBase") != 0);
         subClass.setClassId(rset.getInt("class_id"));
@@ -5998,7 +5997,8 @@ public class Player extends Playable implements PlayerGroup {
         Connection con = null;
         PreparedStatement statement = null;
 
-        label106: {
+        label106:
+        {
           boolean var8;
           try {
             con = DatabaseFactory.getInstance().getConnection();
@@ -6033,12 +6033,12 @@ public class Player extends Playable implements PlayerGroup {
         boolean countUnlearnable = true;
         int unLearnable = 0;
 
-        for(Collection skills = SkillAcquireHolder.getInstance().getAvailableSkills(this, AcquireType.NORMAL); skills.size() > unLearnable; skills = SkillAcquireHolder.getInstance().getAvailableSkills(this, AcquireType.NORMAL)) {
+        for (Collection skills = SkillAcquireHolder.getInstance().getAvailableSkills(this, AcquireType.NORMAL); skills.size() > unLearnable; skills = SkillAcquireHolder.getInstance().getAvailableSkills(this, AcquireType.NORMAL)) {
           Iterator var10 = skills.iterator();
 
-          while(true) {
-            while(var10.hasNext()) {
-              SkillLearn s = (SkillLearn)var10.next();
+          while (true) {
+            while (var10.hasNext()) {
+              SkillLearn s = (SkillLearn) var10.next();
               Skill sk = SkillTable.getInstance().getInfo(s.getId(), s.getLevel());
               if (sk != null && sk.getCanLearn(newId)) {
                 this.addSkill(sk, true);
@@ -6129,8 +6129,8 @@ public class Player extends Playable implements PlayerGroup {
             }
           }
         }
-      } catch (Exception var7) {
-        log.warn("", var7);
+      } catch (Exception e) {
+        log.error("modifySubClass: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
       }
 
       SubClass oldsub = this.getActiveClass();
@@ -6160,8 +6160,8 @@ public class Player extends Playable implements PlayerGroup {
       if (Config.ALT_SUBLASS_SKILL_TRANSFER && this.getBaseClassId() == subId) {
         var9 = this.getSubClasses().values().iterator();
 
-        while(var9.hasNext()) {
-          SubClass ssc = (SubClass)var9.next();
+        while (var9.hasNext()) {
+          SubClass ssc = (SubClass) var9.next();
           if (ssc.getClassId() != subId) {
             this.restoreSkills(ssc.getClassId());
           }
@@ -6176,7 +6176,7 @@ public class Player extends Playable implements PlayerGroup {
       this.getInventory().refreshEquip();
       this.getInventory().validateItems();
 
-      for(int i = 0; i < 3; ++i) {
+      for (int i = 0; i < 3; ++i) {
         this._henna[i] = null;
       }
 
@@ -6190,8 +6190,8 @@ public class Player extends Playable implements PlayerGroup {
       this.sendPacket(new ShortCutInit(this));
       var9 = this.getAutoSoulShot().iterator();
 
-      while(var9.hasNext()) {
-        int shotId = (Integer)var9.next();
+      while (var9.hasNext()) {
+        int shotId = (Integer) var9.next();
         this.sendPacket(new ExAutoSoulShot(shotId, true));
       }
 
@@ -6243,23 +6243,23 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public int getInventoryLimit() {
-    return (int)this.calcStat(Stats.INVENTORY_LIMIT, 0.0D, null, null);
+    return (int) this.calcStat(Stats.INVENTORY_LIMIT, 0.0D, null, null);
   }
 
   public int getWarehouseLimit() {
-    return (int)this.calcStat(Stats.STORAGE_LIMIT, 0.0D, null, null);
+    return (int) this.calcStat(Stats.STORAGE_LIMIT, 0.0D, null, null);
   }
 
   public int getTradeLimit() {
-    return (int)this.calcStat(Stats.TRADE_LIMIT, 0.0D, null, null);
+    return (int) this.calcStat(Stats.TRADE_LIMIT, 0.0D, null, null);
   }
 
   public int getDwarvenRecipeLimit() {
-    return (int)this.calcStat(Stats.DWARVEN_RECIPE_LIMIT, 50.0D, null, null) + Config.ALT_ADD_RECIPES;
+    return (int) this.calcStat(Stats.DWARVEN_RECIPE_LIMIT, 50.0D, null, null) + Config.ALT_ADD_RECIPES;
   }
 
   public int getCommonRecipeLimit() {
-    return (int)this.calcStat(Stats.COMMON_RECIPE_LIMIT, 50.0D, null, null) + Config.ALT_ADD_RECIPES;
+    return (int) this.calcStat(Stats.COMMON_RECIPE_LIMIT, 50.0D, null, null) + Config.ALT_ADD_RECIPES;
   }
 
   public Element getAttackElement() {
@@ -6267,11 +6267,11 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public int getAttack(Element element) {
-    return element == Element.NONE ? 0 : (int)this.calcStat(element.getAttack(), 0.0D, null, null);
+    return element == Element.NONE ? 0 : (int) this.calcStat(element.getAttack(), 0.0D, null, null);
   }
 
   public int getDefence(Element element) {
-    return element == Element.NONE ? 0 : (int)this.calcStat(element.getDefence(), 0.0D, null, null);
+    return element == Element.NONE ? 0 : (int) this.calcStat(element.getDefence(), 0.0D, null, null);
   }
 
   public boolean getAndSetLastItemAuctionRequest() {
@@ -6316,8 +6316,8 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public int getPAtk(Creature target) {
-    double init = this.getActiveWeaponInstance() == null ? (double)(this.isMageClass() ? 3 : 4) : 0.0D;
-    return (int)this.calcStat(Stats.POWER_ATTACK, init, target, null);
+    double init = this.getActiveWeaponInstance() == null ? (double) (this.isMageClass() ? 3 : 4) : 0.0D;
+    return (int) this.calcStat(Stats.POWER_ATTACK, init, target, null);
   }
 
   public int getPDef(Creature target) {
@@ -6343,7 +6343,7 @@ public class Player extends Playable implements PlayerGroup {
       init += 7.0D;
     }
 
-    return (int)this.calcStat(Stats.POWER_DEFENCE, init, target, null);
+    return (int) this.calcStat(Stats.POWER_DEFENCE, init, target, null);
   }
 
   public int getMDef(Creature target, Skill skill) {
@@ -6368,7 +6368,7 @@ public class Player extends Playable implements PlayerGroup {
       init += 5.0D;
     }
 
-    return (int)this.calcStat(Stats.MAGIC_DEFENCE, init, target, skill);
+    return (int) this.calcStat(Stats.MAGIC_DEFENCE, init, target, skill);
   }
 
   public boolean isSubClassActive() {
@@ -6484,23 +6484,23 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public double getRateAdena() {
-    return this.calcStat(Stats.ADENA_REWARD_MULTIPLIER, this._party == null ? (double)this._bonus.getDropAdena() : this._party._rateAdena);
+    return this.calcStat(Stats.ADENA_REWARD_MULTIPLIER, this._party == null ? (double) this._bonus.getDropAdena() : this._party._rateAdena);
   }
 
   public double getRateItems() {
-    return this.calcStat(Stats.ITEM_REWARD_MULTIPLIER, this._party == null ? (double)this._bonus.getDropItems() : this._party._rateDrop);
+    return this.calcStat(Stats.ITEM_REWARD_MULTIPLIER, this._party == null ? (double) this._bonus.getDropItems() : this._party._rateDrop);
   }
 
   public double getRateExp() {
-    return this.calcStat(Stats.EXP, this._party == null ? (double)this._bonus.getRateXp() : this._party._rateExp, null, null);
+    return this.calcStat(Stats.EXP, this._party == null ? (double) this._bonus.getRateXp() : this._party._rateExp, null, null);
   }
 
   public double getRateSp() {
-    return this.calcStat(Stats.SP, this._party == null ? (double)this._bonus.getRateSp() : this._party._rateSp, null, null);
+    return this.calcStat(Stats.SP, this._party == null ? (double) this._bonus.getRateSp() : this._party._rateSp, null, null);
   }
 
   public double getRateSpoil() {
-    return this.calcStat(Stats.SPOIL_REWARD_MULTIPLIER, this._party == null ? (double)this._bonus.getDropSpoil() : this._party._rateSpoil);
+    return this.calcStat(Stats.SPOIL_REWARD_MULTIPLIER, this._party == null ? (double) this._bonus.getDropSpoil() : this._party._rateSpoil);
   }
 
   public boolean isMaried() {
@@ -6585,7 +6585,7 @@ public class Player extends Playable implements PlayerGroup {
 
   public void setConsumedSouls(int i, NpcInstance monster) {
     if (i != this._consumedSouls) {
-      int max = (int)this.calcStat(Stats.SOULS_LIMIT, 0.0D, monster, null);
+      int max = (int) this.calcStat(Stats.SOULS_LIMIT, 0.0D, monster, null);
       if (i > max) {
         i = max;
       }
@@ -6638,9 +6638,9 @@ public class Player extends Playable implements PlayerGroup {
   public void falling(int height) {
     if (Config.DAMAGE_FROM_FALLING && !this.isDead() && !this.isFlying() && !this.isInWater() && !this.isInBoat()) {
       this._lastFalling = System.currentTimeMillis();
-      int damage = (int)this.calcStat(Stats.FALL, (double)this.getMaxHp() / 2000.0D * (double)height, null, null);
+      int damage = (int) this.calcStat(Stats.FALL, (double) this.getMaxHp() / 2000.0D * (double) height, null, null);
       if (damage > 0) {
-        int curHp = (int)this.getCurrentHp();
+        int curHp = (int) this.getCurrentHp();
         if (curHp - damage < 1) {
           this.setCurrentHp(1.0D, false);
         } else {
@@ -6661,13 +6661,13 @@ public class Player extends Playable implements PlayerGroup {
     double _newHpPercent = newHp / percent;
     boolean needsUpdate = false;
 
-    for(int i = 0; i < skills.length; ++i) {
+    for (int i = 0; i < skills.length; ++i) {
       int level = this.getSkillLevel(skills[i]);
       if (level > 0) {
-        if (_curHpPercent > (double)_hp[i] && _newHpPercent <= (double)_hp[i]) {
+        if (_curHpPercent > (double) _hp[i] && _newHpPercent <= (double) _hp[i]) {
           this.sendPacket((new SystemMessage(1133)).addSkillName(skills[i], level));
           needsUpdate = true;
-        } else if (_curHpPercent <= (double)_hp[i] && _newHpPercent > (double)_hp[i]) {
+        } else if (_curHpPercent <= (double) _hp[i] && _newHpPercent > (double) _hp[i]) {
           this.sendPacket((new SystemMessage(1134)).addSkillName(skills[i], level));
           needsUpdate = true;
         }
@@ -6868,7 +6868,7 @@ public class Player extends Playable implements PlayerGroup {
     Party party = this.getParty();
     if (party != null && party == target.getParty()) {
       result |= 32;
-      switch(party.getPartyMembers().indexOf(this)) {
+      switch (party.getPartyMembers().indexOf(this)) {
         case 0:
           result |= 16;
           break;
@@ -6908,8 +6908,8 @@ public class Player extends Playable implements PlayerGroup {
     }
 
     GlobalEvent e;
-    for(Iterator var6 = this.getEvents().iterator(); var6.hasNext(); result = e.getRelation(this, target, result)) {
-      e = (GlobalEvent)var6.next();
+    for (Iterator var6 = this.getEvents().iterator(); var6.hasNext(); result = e.getRelation(this, target, result)) {
+      e = (GlobalEvent) var6.next();
     }
 
     return result;
@@ -7002,8 +7002,8 @@ public class Player extends Playable implements PlayerGroup {
       if (transformationId == 0) {
         var2 = this.getEffectList().getAllEffects().iterator();
 
-        while(var2.hasNext()) {
-          effect = (Effect)var2.next();
+        while (var2.hasNext()) {
+          effect = (Effect) var2.next();
           if (effect != null && effect.getEffectType() == EffectType.Transformation && effect.calc() != 0.0D) {
             effect.exit();
             this.preparateToTransform(effect.getSkill());
@@ -7014,8 +7014,8 @@ public class Player extends Playable implements PlayerGroup {
         if (!this._transformationSkills.isEmpty()) {
           var2 = this._transformationSkills.values().iterator();
 
-          while(var2.hasNext()) {
-            s = (Skill)var2.next();
+          while (var2.hasNext()) {
+            s = (Skill) var2.next();
             if (!s.isCommon() && !SkillAcquireHolder.getInstance().isSkillPossible(this, s) && !s.isHeroic()) {
               super.removeSkill(s);
             }
@@ -7029,14 +7029,14 @@ public class Player extends Playable implements PlayerGroup {
         } else {
           var2 = this.getEffectList().getAllEffects().iterator();
 
-          while(var2.hasNext()) {
-            effect = (Effect)var2.next();
+          while (var2.hasNext()) {
+            effect = (Effect) var2.next();
             if (effect != null && effect.getEffectType() == EffectType.Transformation) {
-              if (effect.getSkill() instanceof Transformation && ((Transformation)effect.getSkill()).isDisguise) {
+              if (effect.getSkill() instanceof Transformation && ((Transformation) effect.getSkill()).isDisguise) {
                 Iterator var13 = this.getAllSkills().iterator();
 
                 label117:
-                while(true) {
+                while (true) {
                   Skill nextSkill;
                   do {
                     do {
@@ -7044,9 +7044,9 @@ public class Player extends Playable implements PlayerGroup {
                         break label117;
                       }
 
-                      nextSkill = (Skill)var13.next();
-                    } while(nextSkill == null);
-                  } while(!nextSkill.isActive() && !nextSkill.isToggle());
+                      nextSkill = (Skill) var13.next();
+                    } while (nextSkill == null);
+                  } while (!nextSkill.isActive() && !nextSkill.isToggle());
 
                   this._transformationSkills.put(nextSkill.getId(), nextSkill);
                 }
@@ -7095,8 +7095,8 @@ public class Player extends Playable implements PlayerGroup {
 
         var2 = this._transformationSkills.values().iterator();
 
-        while(var2.hasNext()) {
-          s = (Skill)var2.next();
+        while (var2.hasNext()) {
+          s = (Skill) var2.next();
           this.addSkill(s, false);
         }
       }
@@ -7107,8 +7107,8 @@ public class Player extends Playable implements PlayerGroup {
       this.sendPacket(new ShortCutInit(this));
       var2 = this.getAutoSoulShot().iterator();
 
-      while(var2.hasNext()) {
-        int shotId = (Integer)var2.next();
+      while (var2.hasNext()) {
+        int shotId = (Integer) var2.next();
         this.sendPacket(new ExAutoSoulShot(shotId, true));
       }
 
@@ -7250,8 +7250,8 @@ public class Player extends Playable implements PlayerGroup {
     Iterator var2;
     TradeItem i;
     if (this._sellList != null && !this._sellList.isEmpty()) {
-      for(var2 = this._sellList.iterator(); var2.hasNext(); val = val + i.getObjectId() + ";" + i.getCount() + ";" + i.getOwnersPrice() + ":") {
-        i = (TradeItem)var2.next();
+      for (var2 = this._sellList.iterator(); var2.hasNext(); val = val + i.getObjectId() + ";" + i.getCount() + ";" + i.getOwnersPrice() + ":") {
+        i = (TradeItem) var2.next();
       }
 
       this.setVar("selllist", val, -1L);
@@ -7264,8 +7264,8 @@ public class Player extends Playable implements PlayerGroup {
     }
 
     if (this._packageSellList != null && !this._packageSellList.isEmpty()) {
-      for(var2 = this._packageSellList.iterator(); var2.hasNext(); val = val + i.getObjectId() + ";" + i.getCount() + ";" + i.getOwnersPrice() + ":") {
-        i = (TradeItem)var2.next();
+      for (var2 = this._packageSellList.iterator(); var2.hasNext(); val = val + i.getObjectId() + ";" + i.getCount() + ";" + i.getOwnersPrice() + ":") {
+        i = (TradeItem) var2.next();
       }
 
       this.setVar("packageselllist", val, -1L);
@@ -7278,8 +7278,8 @@ public class Player extends Playable implements PlayerGroup {
     }
 
     if (this._buyList != null && !this._buyList.isEmpty()) {
-      for(var2 = this._buyList.iterator(); var2.hasNext(); val = val + i.getItemId() + ";" + i.getCount() + ";" + i.getOwnersPrice() + ";" + i.getEnchantLevel() + ":") {
-        i = (TradeItem)var2.next();
+      for (var2 = this._buyList.iterator(); var2.hasNext(); val = val + i.getItemId() + ";" + i.getCount() + ";" + i.getOwnersPrice() + ";" + i.getEnchantLevel() + ":") {
+        i = (TradeItem) var2.next();
       }
 
       this.setVar("buylist", val, -1L);
@@ -7293,8 +7293,8 @@ public class Player extends Playable implements PlayerGroup {
 
     if (this._createList != null && !this._createList.isEmpty()) {
       ManufactureItem manufactureItem;
-      for(var2 = this._createList.iterator(); var2.hasNext(); val = val + manufactureItem.getRecipeId() + ";" + manufactureItem.getCost() + ":") {
-        manufactureItem = (ManufactureItem)var2.next();
+      for (var2 = this._createList.iterator(); var2.hasNext(); val = val + manufactureItem.getRecipeId() + ";" + manufactureItem.getCost() + ":") {
+        manufactureItem = (ManufactureItem) var2.next();
       }
 
       this.setVar("createlist", val, -1L);
@@ -7325,7 +7325,7 @@ public class Player extends Playable implements PlayerGroup {
       var3 = items;
       var4 = items.length;
 
-      for(var5 = 0; var5 < var4; ++var5) {
+      for (var5 = 0; var5 < var4; ++var5) {
         item = var3[var5];
         if (!item.equals("")) {
           values = item.split(";");
@@ -7361,7 +7361,7 @@ public class Player extends Playable implements PlayerGroup {
       var3 = items;
       var4 = items.length;
 
-      for(var5 = 0; var5 < var4; ++var5) {
+      for (var5 = 0; var5 < var4; ++var5) {
         item = var3[var5];
         if (!item.equals("")) {
           values = item.split(";");
@@ -7397,7 +7397,7 @@ public class Player extends Playable implements PlayerGroup {
       var3 = items;
       var4 = items.length;
 
-      for(var5 = 0; var5 < var4; ++var5) {
+      for (var5 = 0; var5 < var4; ++var5) {
         item = var3[var5];
         if (!item.equals("")) {
           values = item.split(";");
@@ -7428,7 +7428,7 @@ public class Player extends Playable implements PlayerGroup {
       var3 = items;
       var4 = items.length;
 
-      for(var5 = 0; var5 < var4; ++var5) {
+      for (var5 = 0; var5 < var4; ++var5) {
         item = var3[var5];
         if (!item.equals("")) {
           values = item.split(";");
@@ -7461,7 +7461,7 @@ public class Player extends Playable implements PlayerGroup {
       statement.setInt(1, this.getObjectId());
       rset = statement.executeQuery();
 
-      while(rset.next()) {
+      while (rset.next()) {
         int recipeId = rset.getInt("id");
         Recipe recipe = RecipeHolder.getInstance().getRecipeById(recipeId);
         this.registerRecipe(recipe, false);
@@ -7476,7 +7476,7 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public int getMountType() {
-    switch(this.getMountNpcId()) {
+    switch (this.getMountNpcId()) {
       case 12526:
       case 12527:
       case 12528:
@@ -7725,8 +7725,8 @@ public class Player extends Playable implements PlayerGroup {
       st.setString(1, this.getName());
       st.setInt(2, this.getObjectId());
       st.executeUpdate();
-    } catch (Exception var7) {
-      log.error("", var7);
+    } catch (Exception e) {
+      log.error("saveNameToDB: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, st);
     }
@@ -7738,11 +7738,11 @@ public class Player extends Playable implements PlayerGroup {
   }
 
   public int getTalismanCount() {
-    return (int)this.calcStat(Stats.TALISMANS_LIMIT, 0.0D, null, null);
+    return (int) this.calcStat(Stats.TALISMANS_LIMIT, 0.0D, null, null);
   }
 
   public final void disableDrop(int time) {
-    this._dropDisabled = System.currentTimeMillis() + (long)time;
+    this._dropDisabled = System.currentTimeMillis() + (long) time;
   }
 
   public final boolean isDropDisabled() {
@@ -7815,7 +7815,7 @@ public class Player extends Playable implements PlayerGroup {
               pet.setFollowMode(true);
               pet.getInventory().validateItems();
               if (pet instanceof PetBabyInstance) {
-                ((PetBabyInstance)pet).startBuffTask();
+                ((PetBabyInstance) pet).startBuffTask();
               }
 
             }
@@ -7868,9 +7868,9 @@ public class Player extends Playable implements PlayerGroup {
     if (traps != null && !traps.isEmpty()) {
       Iterator var3 = traps.keySet().iterator();
       if (var3.hasNext()) {
-        Integer trapId = (Integer)var3.next();
+        Integer trapId = (Integer) var3.next();
         TrapInstance trap;
-        if ((trap = (TrapInstance)GameObjectsStorage.get(traps.get(trapId))) != null) {
+        if ((trap = (TrapInstance) GameObjectsStorage.get(traps.get(trapId))) != null) {
           trap.deleteMe();
         }
       }
@@ -7883,15 +7883,15 @@ public class Player extends Playable implements PlayerGroup {
       List<TrapInstance> toRemove = new ArrayList<>();
       Iterator var3 = traps.keySet().iterator();
 
-      while(var3.hasNext()) {
-        Integer trapId = (Integer)var3.next();
-        toRemove.add((TrapInstance)GameObjectsStorage.get(traps.get(trapId)));
+      while (var3.hasNext()) {
+        Integer trapId = (Integer) var3.next();
+        toRemove.add((TrapInstance) GameObjectsStorage.get(traps.get(trapId)));
       }
 
       var3 = toRemove.iterator();
 
-      while(var3.hasNext()) {
-        TrapInstance t = (TrapInstance)var3.next();
+      while (var3.hasNext()) {
+        TrapInstance t = (TrapInstance) var3.next();
         if (t != null) {
           t.deleteMe();
         }
@@ -7902,26 +7902,26 @@ public class Player extends Playable implements PlayerGroup {
 
   public PlayerListenerList getListeners() {
     if (this.listeners == null) {
-      synchronized(this) {
+      synchronized (this) {
         if (this.listeners == null) {
           this.listeners = new PlayerListenerList(this);
         }
       }
     }
 
-    return (PlayerListenerList)this.listeners;
+    return (PlayerListenerList) this.listeners;
   }
 
   public PlayerStatsChangeRecorder getStatsRecorder() {
     if (this._statsRecorder == null) {
-      synchronized(this) {
+      synchronized (this) {
         if (this._statsRecorder == null) {
           this._statsRecorder = new PlayerStatsChangeRecorder(this);
         }
       }
     }
 
-    return (PlayerStatsChangeRecorder)this._statsRecorder;
+    return (PlayerStatsChangeRecorder) this._statsRecorder;
   }
 
   public int getHoursInGame() {
@@ -8037,7 +8037,7 @@ public class Player extends Playable implements PlayerGroup {
 
   public void displayReceiveDamageMessage(Creature attacker, int damage) {
     if (attacker != this) {
-      this.sendPacket((new SystemMessage(36)).addName(attacker).addNumber((long)damage));
+      this.sendPacket((new SystemMessage(36)).addName(attacker).addNumber((long) damage));
     }
 
   }
@@ -8117,8 +8117,8 @@ public class Player extends Playable implements PlayerGroup {
     Iterator var1 = this.getEffectList().getAllEffects().iterator();
 
     Effect e;
-    while(var1.hasNext()) {
-      e = (Effect)var1.next();
+    while (var1.hasNext()) {
+      e = (Effect) var1.next();
       if (!e.getSkill().isOffensive() && !e.getSkill().isNewbie() && e.isCancelable() && !e.getSkill().isPreservedOnDeath()) {
         this.sendPacket((new SystemMessage(749)).addSkillName(e.getSkill().getId(), e.getSkill().getLevel()));
         e.exit();
@@ -8128,8 +8128,8 @@ public class Player extends Playable implements PlayerGroup {
     if (this.getPet() != null) {
       var1 = this.getPet().getEffectList().getAllEffects().iterator();
 
-      while(var1.hasNext()) {
-        e = (Effect)var1.next();
+      while (var1.hasNext()) {
+        e = (Effect) var1.next();
         if (!e.getSkill().isOffensive() && !e.getSkill().isNewbie() && e.isCancelable() && !e.getSkill().isPreservedOnDeath()) {
           e.exit();
         }
@@ -8186,7 +8186,7 @@ public class Player extends Playable implements PlayerGroup {
       offline.setInt(1, this.getObjectId());
       rs = offline.executeQuery();
 
-      while(rs.next()) {
+      while (rs.next()) {
         int id = rs.getInt("id");
         long reuse = rs.getLong("reuse");
         this._instancesReuses.put(id, reuse);
@@ -8201,7 +8201,6 @@ public class Player extends Playable implements PlayerGroup {
 
   public Reflection getActiveReflection() {
     Reflection[] var1 = ReflectionManager.getInstance().getAll();
-    int var2 = var1.length;
 
     for (Reflection r : var1) {
       if (r != null && ArrayUtils.contains(r.getVisitors(), this.getObjectId())) {
@@ -8280,7 +8279,7 @@ public class Player extends Playable implements PlayerGroup {
     String[] var2 = actions;
     int var3 = actions.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
+    for (int var4 = 0; var4 < var3; ++var4) {
       String action = var2[var4];
       this._blockedActions.remove(action);
     }
@@ -8345,7 +8344,7 @@ public class Player extends Playable implements PlayerGroup {
     }
 
     private void tryOffloadedMove() {
-      Player player = (Player)this.getActor();
+      Player player = (Player) this.getActor();
       Player.MoveToLocationOffloadData mtlOffloadData;
       if (player != null && (mtlOffloadData = player._mtlOffloadData.get()) != null && player._mtlOffloadData.compareAndSet(mtlOffloadData, null)) {
         player.moveToLocation(mtlOffloadData.getDest(), mtlOffloadData.getIndent(), mtlOffloadData.isPathfind());

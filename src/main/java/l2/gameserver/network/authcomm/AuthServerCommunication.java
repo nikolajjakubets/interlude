@@ -5,6 +5,12 @@
 
 package l2.gameserver.network.authcomm;
 
+import l2.gameserver.Config;
+import l2.gameserver.ThreadPoolManager;
+import l2.gameserver.network.authcomm.gs2as.AuthRequest;
+import l2.gameserver.network.l2.GameClient;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -13,30 +19,18 @@ import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import l2.gameserver.Config;
-import l2.gameserver.ThreadPoolManager;
-import l2.gameserver.network.authcomm.gs2as.AuthRequest;
-import l2.gameserver.network.l2.GameClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class AuthServerCommunication extends Thread {
-  private static final Logger _log = LoggerFactory.getLogger(AuthServerCommunication.class);
   private static final AuthServerCommunication instance = new AuthServerCommunication();
   private final Map<String, GameClient> waitingClients = new HashMap<>();
   private final Map<String, GameClient> authedClients = new HashMap<>();
-  private final ReadWriteLock lock = new ReentrantReadWriteLock();
   private final Lock readLock;
   private final Lock writeLock;
   private final ByteBuffer readBuffer;
@@ -49,29 +43,30 @@ public class AuthServerCommunication extends Thread {
   private boolean shutdown;
   private boolean restart;
 
-  public static final AuthServerCommunication getInstance() {
+  public static AuthServerCommunication getInstance() {
     return instance;
   }
 
   private AuthServerCommunication() {
-    this.readLock = this.lock.readLock();
-    this.writeLock = this.lock.writeLock();
+    ReadWriteLock lock = new ReentrantReadWriteLock();
+    this.readLock = lock.readLock();
+    this.writeLock = lock.writeLock();
     this.readBuffer = ByteBuffer.allocate(65536).order(ByteOrder.LITTLE_ENDIAN);
     this.writeBuffer = ByteBuffer.allocate(65536).order(ByteOrder.LITTLE_ENDIAN);
-    this.sendQueue = new ArrayDeque();
+    this.sendQueue = new ArrayDeque<>();
     this.sendLock = new ReentrantLock();
     this.isPengingWrite = new AtomicBoolean();
 
     try {
       this.selector = Selector.open();
-    } catch (IOException var2) {
-      _log.error("", var2);
+    } catch (IOException e) {
+      log.error("init: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     }
 
   }
 
   private void connect() throws IOException {
-    _log.info("Connecting to authserver on " + Config.GAME_SERVER_LOGIN_HOST + ":" + Config.GAME_SERVER_LOGIN_PORT);
+    log.info("Connecting to authserver on " + Config.GAME_SERVER_LOGIN_HOST + ":" + Config.GAME_SERVER_LOGIN_PORT);
     SocketChannel channel = SocketChannel.open();
     channel.configureBlocking(false);
     this.key = channel.register(this.selector, 8);
@@ -88,7 +83,8 @@ public class AuthServerCommunication extends Thread {
           this.sendQueue.add(packet);
           wakeUp = this.enableWriteInterest();
           break label50;
-        } catch (CancelledKeyException var7) {
+        } catch (CancelledKeyException e) {
+          log.error("sendPacket: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         } finally {
           this.sendLock.unlock();
         }
@@ -145,12 +141,11 @@ public class AuthServerCommunication extends Thread {
           int selected = this.selector.select(5000L);
           elapsed = System.currentTimeMillis() - elapsed;
           if (selected == 0 && elapsed < 5000L) {
-            Iterator keyIter = this.selector.keys().iterator();
 
-            while(keyIter.hasNext()) {
-              key = (SelectionKey)keyIter.next();
+            for (SelectionKey selectionKey : this.selector.keys()) {
+              key = selectionKey;
               if (key.isValid()) {
-                SocketChannel channel = (SocketChannel)key.channel();
+                SocketChannel channel = (SocketChannel) key.channel();
                 if (channel != null && (key.interestOps() & 8) != 0) {
                   this.connect(key);
                   break label80;
@@ -170,13 +165,13 @@ public class AuthServerCommunication extends Thread {
                 key = (SelectionKey)iterator.next();
                 iterator.remove();
                 opts = key.readyOps();
-                switch(opts) {
-                  case 8:
-                    this.connect(key);
-                    break label80;
+                if (opts == 8) {
+                  this.connect(key);
+                  break label80;
                 }
               }
-            } catch (CancelledKeyException var11) {
+            } catch (CancelledKeyException e) {
+              log.error("run: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
               break;
             }
           }
@@ -207,19 +202,21 @@ public class AuthServerCommunication extends Thread {
                   this.read(key);
               }
             }
-          } catch (CancelledKeyException var12) {
+          } catch (CancelledKeyException e) {
+            log.error("run: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
             break;
           }
         }
       } catch (IOException var13) {
-        _log.error("AuthServer I/O error: " + var13.getMessage());
+        log.error("AuthServer I/O error: " + var13.getMessage());
       }
 
       this.close();
 
       try {
         Thread.sleep(5000L);
-      } catch (InterruptedException var10) {
+      } catch (InterruptedException e) {
+        log.error("run: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
       }
     }
 
@@ -284,7 +281,7 @@ public class AuthServerCommunication extends Thread {
       int var5 = 0;
 
       SendablePacket sp;
-      while(var5++ < 64 && (sp = (SendablePacket)this.sendQueue.poll()) != null) {
+      while (var5++ < 64 && (sp = this.sendQueue.poll()) != null) {
         int headerPos = buf.position();
         buf.position(headerPos + 2);
         sp.write();
@@ -348,7 +345,8 @@ public class AuthServerCommunication extends Thread {
         this.key.channel().close();
         this.key.cancel();
       }
-    } catch (IOException var10) {
+    } catch (IOException e) {
+      log.error("connect: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     }
 
     this.writeLock.lock();
@@ -380,7 +378,7 @@ public class AuthServerCommunication extends Thread {
 
     GameClient var2;
     try {
-      var2 = (GameClient)this.waitingClients.put(client.getLogin(), client);
+      var2 = this.waitingClients.put(client.getLogin(), client);
     } finally {
       this.writeLock.unlock();
     }
@@ -393,7 +391,7 @@ public class AuthServerCommunication extends Thread {
 
     GameClient var2;
     try {
-      var2 = (GameClient)this.waitingClients.remove(account);
+      var2 = this.waitingClients.remove(account);
     } finally {
       this.writeLock.unlock();
     }
@@ -406,7 +404,7 @@ public class AuthServerCommunication extends Thread {
 
     GameClient var2;
     try {
-      var2 = (GameClient)this.authedClients.put(client.getLogin(), client);
+      var2 = this.authedClients.put(client.getLogin(), client);
     } finally {
       this.writeLock.unlock();
     }
@@ -419,7 +417,7 @@ public class AuthServerCommunication extends Thread {
 
     GameClient var2;
     try {
-      var2 = (GameClient)this.authedClients.remove(login);
+      var2 = this.authedClients.remove(login);
     } finally {
       this.writeLock.unlock();
     }
@@ -432,7 +430,7 @@ public class AuthServerCommunication extends Thread {
 
     GameClient var2;
     try {
-      var2 = (GameClient)this.authedClients.get(login);
+      var2 = this.authedClients.get(login);
     } finally {
       this.readLock.unlock();
     }
@@ -446,11 +444,11 @@ public class AuthServerCommunication extends Thread {
     GameClient var2;
     try {
       if (client.isAuthed()) {
-        var2 = (GameClient)this.authedClients.remove(client.getLogin());
+        var2 = this.authedClients.remove(client.getLogin());
         return var2;
       }
 
-      var2 = (GameClient)this.waitingClients.remove(client.getSessionKey());
+      var2 = this.waitingClients.remove(client.getSessionKey());
     } finally {
       this.writeLock.unlock();
     }
@@ -463,7 +461,7 @@ public class AuthServerCommunication extends Thread {
 
     String[] var1;
     try {
-      var1 = (String[])this.authedClients.keySet().toArray(new String[this.authedClients.size()]);
+      var1 = this.authedClients.keySet().toArray(new String[0]);
     } finally {
       this.readLock.unlock();
     }

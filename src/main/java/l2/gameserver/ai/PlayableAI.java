@@ -19,9 +19,11 @@ import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.components.SystemMsg;
 import l2.gameserver.network.l2.s2c.MyTargetSelected;
 import l2.gameserver.utils.Location;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.ScheduledFuture;
 
+@Slf4j
 public class PlayableAI extends CharacterAI {
   private volatile int thinking = 0;
   protected Object _intention_arg0 = null;
@@ -241,12 +243,10 @@ public class PlayableAI extends CharacterAI {
               this.thinkInteract();
               return;
             default:
-              return;
           }
         }
-      } catch (Exception var6) {
-        _log.error("", var6);
-        return;
+      } catch (Exception e) {
+        log.error("onEvtThink: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
       } finally {
         --this.thinking;
       }
@@ -378,13 +378,11 @@ public class PlayableAI extends CharacterAI {
           int dist = (int) (!incZ ? actor.getDistance(target) : actor.getDistance3D(target)) - collisions;
           boolean useActAsCastRange = target.isDoor();
           int castRange = Math.max(16, actor.getMagicalAttackRange(this._skill));
-          boolean canSee = false;
-          switch (this._skill.getSkillType()) {
-            case TAKECASTLE:
-              canSee = true;
-              break;
-            default:
-              canSee = GeoEngine.canSeeTarget(actor, target, actor.isFlying());
+          boolean canSee;
+          if (this._skill.getSkillType() == SkillType.TAKECASTLE) {
+            canSee = true;
+          } else {
+            canSee = GeoEngine.canSeeTarget(actor, target, actor.isFlying());
           }
 
           boolean noRangeSkill = this._skill.getCastRange() == 32767;

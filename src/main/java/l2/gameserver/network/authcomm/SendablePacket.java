@@ -5,12 +5,12 @@
 
 package l2.gameserver.network.authcomm;
 
-import java.nio.ByteBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.nio.ByteBuffer;
+
+@Slf4j
 public abstract class SendablePacket extends l2.commons.net.nio.SendablePacket<AuthServerCommunication> {
-  private static final Logger _log = LoggerFactory.getLogger(SendablePacket.class);
 
   public SendablePacket() {
   }
@@ -26,8 +26,8 @@ public abstract class SendablePacket extends l2.commons.net.nio.SendablePacket<A
   public boolean write() {
     try {
       this.writeImpl();
-    } catch (Exception var2) {
-      _log.error("", var2);
+    } catch (Exception e) {
+      log.error("write: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     }
 
     return true;

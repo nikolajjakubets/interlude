@@ -5,8 +5,6 @@
 
 package l2.gameserver.handler.admincommands.impl;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import l2.commons.lang.StatsUtils;
 import l2.gameserver.Config;
 import l2.gameserver.GameTimeController;
@@ -15,19 +13,24 @@ import l2.gameserver.handler.admincommands.IAdminCommandHandler;
 import l2.gameserver.model.GameObjectsStorage;
 import l2.gameserver.model.Player;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+@Slf4j
 public class AdminShutdown implements IAdminCommandHandler {
   public AdminShutdown() {
   }
 
   public boolean useAdminCommand(Enum comm, String[] wordList, String fullString, Player activeChar) {
-    AdminShutdown.Commands command = (AdminShutdown.Commands)comm;
+    AdminShutdown.Commands command = (AdminShutdown.Commands) comm;
     if (!activeChar.getPlayerAccess().CanRestart) {
       return false;
     } else {
       try {
-        switch(command) {
+        switch (command) {
           case admin_server_shutdown:
             Shutdown.getInstance().schedule(NumberUtils.toInt(wordList[1], -1), 0);
             break;
@@ -37,7 +40,8 @@ public class AdminShutdown implements IAdminCommandHandler {
           case admin_server_abort:
             Shutdown.getInstance().cancel();
         }
-      } catch (Exception var7) {
+      } catch (Exception e) {
+        log.error("useAdminCommand: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         this.sendHtmlForm(activeChar);
       }
 
@@ -87,12 +91,12 @@ public class AdminShutdown implements IAdminCommandHandler {
     activeChar.sendPacket(adminReply);
   }
 
-  private static enum Commands {
+  private enum Commands {
     admin_server_shutdown,
     admin_server_restart,
     admin_server_abort;
 
-    private Commands() {
+    Commands() {
     }
   }
 }

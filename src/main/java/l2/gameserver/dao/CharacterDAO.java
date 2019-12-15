@@ -5,12 +5,6 @@
 
 package l2.gameserver.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Iterator;
 import l2.commons.dbutils.DbUtils;
 import l2.commons.listener.Listener;
 import l2.commons.listener.ListenerList;
@@ -21,11 +15,17 @@ import l2.gameserver.listener.game.OnCharacterDeleteListener;
 import l2.gameserver.model.Player;
 import l2.gameserver.tables.LevelUpTable;
 import l2.gameserver.utils.Log;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Iterator;
+
+@Slf4j
 public class CharacterDAO {
-  private static final Logger LOG = LoggerFactory.getLogger(CharacterDAO.class);
   private static final CharacterDAO INSTANCE = new CharacterDAO();
   private static final String INSERT_CHARACTE = "INSERT INTO `characters` (    `account_name`,  `obj_Id`, `char_name`, `face`, `hairStyle`, `hairColor`, `sex`, `karma`,    `pvpkills`, `pkkills`, `clanid`, `createtime`, `deletetime`, `title`, `accesslevel`,  `online`,    `leaveclan`, `deleteclan`, `nochannel`, `pledge_type`, `pledge_rank`, `lvl_joined_academy`, `apprentice` ) VALUES (     ?, ?, ?, ?, ?, ?, ?, ?,     ?, ?, ?, ?, ?, ?, ?, ?,     ?, ?, ?, ?, ?, ?, ? )";
   private static final String INSERT_SUBCLASS = "INSERT INTO `character_subclasses` (    `char_obj_id`, `class_id`, `exp`, `sp`, `curHp`, `curMp`, `curCp`,     `maxHp`, `maxMp`, `maxCp`, `level`, `active`, `isBase`, `death_penalty`) VALUES (    ?, ?, ?, ?, ?, ?, ?,     ?, ?, ?, ?, ?, ?, ? )";
@@ -53,13 +53,10 @@ public class CharacterDAO {
         charItemObjId = (Integer)var3.next();
         int itemObjId = charItemObjId;
         boolean someOtherHaveIt = false;
-        if (!someOtherHaveIt) {
-          ItemsDAO.getInstance().delete(itemObjId);
-        }
+        ItemsDAO.getInstance().delete(itemObjId);
       }
 
       Connection conn = null;
-      charItemObjId = null;
 
       try {
         conn = DatabaseFactory.getInstance().getConnection();
@@ -129,7 +126,7 @@ public class CharacterDAO {
         CharacterVariablesDAO.getInstance().deleteVars0(conn, objid);
         this.getCharacterDeleteListenerList().onCharacterDelete(objid);
       } catch (SQLException var10) {
-        LOG.error("Can't delete character", var10);
+        log.error("Can't delete character", var10);
       } finally {
         DbUtils.closeQuietly(conn);
         Log.add("Character " + objid + " deleted.", "chardelete");
@@ -189,13 +186,12 @@ public class CharacterDAO {
       statement.executeUpdate();
       return true;
     } catch (Exception var9) {
-      LOG.error("Can't store character", var9);
-      var5 = false;
+      log.error("Can't store character", var9);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
 
-    return var5;
+    return false;
   }
 
   public int getObjectIdByName(String name) {
@@ -213,7 +209,7 @@ public class CharacterDAO {
         result = rset.getInt(1);
       }
     } catch (Exception var10) {
-      LOG.error("Can't get character object id by name" + var10, var10);
+      log.error("Can't get character object id by name" + var10, var10);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -236,7 +232,7 @@ public class CharacterDAO {
         result = rset.getString(1);
       }
     } catch (Exception var10) {
-      LOG.error("Can't get char name by id" + var10, var10);
+      log.error("Can't get char name by id" + var10, var10);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -259,7 +255,7 @@ public class CharacterDAO {
         number = rset.getInt(1);
       }
     } catch (Exception var10) {
-      LOG.error("Can't get amount of the account characters", var10);
+      log.error("Can't get amount of the account characters", var10);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -267,24 +263,23 @@ public class CharacterDAO {
     return number;
   }
 
-  public class CharacterDeleteListenerList extends ListenerList<GameServer> {
+  public static class CharacterDeleteListenerList extends ListenerList<GameServer> {
     public CharacterDeleteListenerList() {
     }
 
     public void onCharacterDelete(int charObjId) {
       try {
         if (!this.getListeners().isEmpty()) {
-          Iterator var2 = this.getListeners().iterator();
 
-          while(var2.hasNext()) {
-            Listener<GameServer> listener = (Listener)var2.next();
-            if (listener instanceof OnCharacterDeleteListener) {
-              ((OnCharacterDeleteListener)listener).onCharacterDelate(charObjId);
+          for (Listener<GameServer> gameServerListener : this.getListeners()) {
+            if (gameServerListener instanceof OnCharacterDeleteListener) {
+              ((OnCharacterDeleteListener) gameServerListener).onCharacterDelate(charObjId);
             }
           }
         }
-      } catch (Exception var4) {
-        CharacterDAO.LOG.warn("Character delete listener", var4);
+      } catch (Exception e) {
+        log.error("onCharacterDelete: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+        CharacterDAO.log.warn("Character delete listener", e);
       }
 
     }

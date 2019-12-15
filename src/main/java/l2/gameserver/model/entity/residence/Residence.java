@@ -26,8 +26,7 @@ import l2.gameserver.network.l2.s2c.SystemMessage2;
 import l2.gameserver.templates.StatsSet;
 import l2.gameserver.utils.Location;
 import l2.gameserver.utils.ReflectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,8 +38,8 @@ import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public abstract class Residence implements JdbcEntity {
-  private static final Logger _log = LoggerFactory.getLogger(Residence.class);
   public static final long CYCLE_TIME = 3600000L;
   protected final int _id;
   protected final String _name;
@@ -207,7 +206,7 @@ public abstract class Residence implements JdbcEntity {
         this.startAutoTaskForFunction(function);
       }
     } catch (Exception var8) {
-      _log.warn("Residence: loadFunctions(): " + var8, var8);
+      log.warn("Residence: loadFunctions(): " + var8, var8);
     } finally {
       DbUtils.closeQuietly(con, statement, rs);
     }
@@ -284,7 +283,7 @@ public abstract class Residence implements JdbcEntity {
             function.setLvl(level);
           }
         } catch (Exception var15) {
-          _log.warn("Exception: SiegeUnit.updateFunctions(int type, int lvl, int lease, long rate, long time, boolean addNew): " + var15);
+          log.warn("Exception: SiegeUnit.updateFunctions(int type, int lvl, int lease, long rate, long time, boolean addNew): " + var15);
         } finally {
           DbUtils.closeQuietly(con, statement);
         }
@@ -305,7 +304,7 @@ public abstract class Residence implements JdbcEntity {
       statement.setInt(2, type);
       statement.execute();
     } catch (Exception var8) {
-      _log.warn("Exception: removeFunctions(int type): " + var8);
+      log.warn("Exception: removeFunctions(int type): " + var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }

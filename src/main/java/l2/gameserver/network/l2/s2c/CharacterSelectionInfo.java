@@ -14,8 +14,7 @@ import l2.gameserver.model.items.Inventory;
 import l2.gameserver.tables.CharTemplateTable;
 import l2.gameserver.templates.PlayerTemplate;
 import l2.gameserver.utils.AutoBan;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -23,8 +22,8 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class CharacterSelectionInfo extends L2GameServerPacket {
-  private static final Logger _log = LoggerFactory.getLogger(CharacterSelectionInfo.class);
   private String _loginName;
   private int _sessionId;
   private CharSelectInfoPackage[] _characterPackages;
@@ -136,7 +135,7 @@ public class CharacterSelectionInfo extends L2GameServerPacket {
         }
       }
     } catch (Exception var10) {
-      _log.error("could not restore charinfo:", var10);
+      log.error("could not restore charinfo:", var10);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -158,7 +157,7 @@ public class CharacterSelectionInfo extends L2GameServerPacket {
       for (rset = statement.executeQuery(); rset.next(); classId = rset.getInt("class_id")) {
       }
     } catch (Exception var9) {
-      _log.error("could not restore base class id:", var9);
+      log.error("could not restore base class id:", var9);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -181,7 +180,7 @@ public class CharacterSelectionInfo extends L2GameServerPacket {
       boolean female = chardata.getInt("sex") == 1;
       PlayerTemplate templ = CharTemplateTable.getInstance().getTemplate(baseClassId, female);
       if (templ == null) {
-        _log.error("restoreChar fail | templ == null | objectId: " + objectId + " | classid: " + baseClassId + " | female: " + female);
+        log.error("restoreChar fail | templ == null | objectId: " + objectId + " | classid: " + baseClassId + " | female: " + female);
         return null;
       }
 
@@ -239,8 +238,8 @@ public class CharacterSelectionInfo extends L2GameServerPacket {
       if (charInfopackage.getAccessLevel() < 0 && !AutoBan.isBanned(objectId)) {
         charInfopackage.setAccessLevel(0);
       }
-    } catch (Exception var13) {
-      _log.error("", var13);
+    } catch (Exception e) {
+      log.error("restoreChar: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     }
 
     return charInfopackage;

@@ -5,8 +5,6 @@
 
 package l2.gameserver;
 
-import java.util.Calendar;
-import java.util.Iterator;
 import l2.commons.listener.Listener;
 import l2.commons.listener.ListenerList;
 import l2.commons.threading.RunnableImpl;
@@ -16,8 +14,12 @@ import l2.gameserver.listener.game.OnStartListener;
 import l2.gameserver.model.GameObjectsStorage;
 import l2.gameserver.model.Player;
 import l2.gameserver.network.l2.s2c.ClientSetTime;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Calendar;
+import java.util.Iterator;
 
 public class GameTimeController {
   private static final Logger _log = LoggerFactory.getLogger(GameTimeController.class);
@@ -110,7 +112,8 @@ public class GameTimeController {
     return this.listenerEngine.remove(listener);
   }
 
-  protected class GameTimeListenerList extends ListenerList<GameServer> {
+  @Slf4j
+  protected static class GameTimeListenerList extends ListenerList<GameServer> {
     protected GameTimeListenerList() {
     }
 
@@ -121,28 +124,28 @@ public class GameTimeController {
         Listener listener = (Listener)var1.next();
 
         try {
-          if (OnDayNightChangeListener.class.isInstance(listener)) {
+          if (listener instanceof OnDayNightChangeListener) {
             ((OnDayNightChangeListener)listener).onDay();
           }
-        } catch (Exception var4) {
-          GameTimeController._log.warn("Exception during day change", var4);
+        } catch (Exception e) {
+          log.error("onDay: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+          GameTimeController._log.warn("Exception during day change", e);
         }
       }
 
     }
 
     public void onNight() {
-      Iterator var1 = this.getListeners().iterator();
 
-      while(var1.hasNext()) {
-        Listener listener = (Listener)var1.next();
+      for (Listener<GameServer> gameServerListener : this.getListeners()) {
 
         try {
-          if (OnDayNightChangeListener.class.isInstance(listener)) {
-            ((OnDayNightChangeListener)listener).onNight();
+          if (gameServerListener instanceof OnDayNightChangeListener) {
+            ((OnDayNightChangeListener) gameServerListener).onNight();
           }
-        } catch (Exception var4) {
-          GameTimeController._log.warn("Exception during night change", var4);
+        } catch (Exception e) {
+          log.error("onNight: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+          GameTimeController._log.warn("Exception during night change", e);
         }
       }
 
@@ -162,10 +165,8 @@ public class GameTimeController {
 
       ThreadPoolManager.getInstance().execute(new RunnableImpl() {
         public void runImpl() throws Exception {
-          Iterator var1 = GameObjectsStorage.getAllPlayersForIterate().iterator();
 
-          while(var1.hasNext()) {
-            Player player = (Player)var1.next();
+          for (Player player : GameObjectsStorage.getAllPlayersForIterate()) {
             player.checkDayNightMessages();
             player.sendPacket(new ClientSetTime());
           }

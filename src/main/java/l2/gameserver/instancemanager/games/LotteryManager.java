@@ -5,11 +5,6 @@
 
 package l2.gameserver.instancemanager.games;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Calendar;
 import l2.commons.dbutils.DbUtils;
 import l2.commons.threading.RunnableImpl;
 import l2.commons.util.Rnd;
@@ -20,14 +15,19 @@ import l2.gameserver.cache.Msg;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.network.l2.s2c.SystemMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Calendar;
+
+@Slf4j
 public class LotteryManager {
   public static final long SECOND = 1000L;
   public static final long MINUTE = 60000L;
   private static LotteryManager _instance;
-  private static final Logger _log = LoggerFactory.getLogger(LotteryManager.class);
   private static final String INSERT_LOTTERY = "INSERT INTO games(id, idnr, enddate, prize, newprize) VALUES (?, ?, ?, ?, ?)";
   private static final String UPDATE_PRICE = "UPDATE games SET prize=?, newprize=? WHERE id = 1 AND idnr = ?";
   private static final String UPDATE_LOTTERY = "UPDATE games SET finished=1, prize=?, newprize=?, number1=?, number2=?, prize1=?, prize2=?, prize3=? WHERE id=1 AND idnr=?";
@@ -64,7 +64,7 @@ public class LotteryManager {
       statement.setInt(3, this.getId());
       statement.execute();
     } catch (SQLException var8) {
-      _log.warn("Lottery: Could not increase current lottery prize: " + var8);
+      log.error("Lottery: Could not increase current lottery prize: " + var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -96,8 +96,7 @@ public class LotteryManager {
       this._enddate = rset.getLong("enddate");
       if (this._enddate <= System.currentTimeMillis() + 120000L) {
         (new LotteryManager.finishLottery()).run();
-        var4 = false;
-        return var4;
+        return false;
       }
 
       if (this._enddate <= System.currentTimeMillis()) {
@@ -113,7 +112,7 @@ public class LotteryManager {
 
       var4 = false;
     } catch (SQLException var8) {
-      _log.warn("Lottery: Could not restore lottery data: " + var8);
+      log.error("Lottery: Could not restore lottery data: " + var8);
       return true;
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
@@ -124,7 +123,7 @@ public class LotteryManager {
 
   private void announceLottery() {
     if (Config.SERVICES_ALLOW_LOTTERY) {
-      _log.info("Lottery: Starting ticket sell for lottery #" + this.getId() + ".");
+      log.info("Lottery: Starting ticket sell for lottery #" + this.getId() + ".");
     }
 
     this._isSellingTickets = true;
@@ -165,7 +164,7 @@ public class LotteryManager {
       statement.setInt(5, this.getPrize());
       statement.execute();
     } catch (SQLException var7) {
-      _log.warn("Lottery: Could not store new lottery data: " + var7);
+      log.error("Lottery: Could not store new lottery data: " + var7);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -178,18 +177,18 @@ public class LotteryManager {
 
     int nr;
     int val;
-    for(nr = 1; enchant > 0; ++nr) {
+    for (nr = 1; enchant > 0; ++nr) {
       val = enchant / 2;
-      if ((double)val != (double)enchant / 2.0D) {
+      if ((double) val != (double) enchant / 2.0D) {
         res[id++] = nr;
       }
 
       enchant /= 2;
     }
 
-    for(nr = 17; type2 > 0; ++nr) {
+    for (nr = 17; type2 > 0; ++nr) {
       val = type2 / 2;
-      if ((double)val != (double)type2 / 2.0D) {
+      if ((double) val != (double) type2 / 2.0D) {
         res[id++] = nr;
       }
 
@@ -220,14 +219,14 @@ public class LotteryManager {
 
         int count = 0;
 
-        for(int i = 1; i <= 16; ++i) {
+        for (int i = 1; i <= 16; ++i) {
           int val = curenchant / 2;
-          if ((double)val != (double)curenchant / 2.0D) {
+          if ((double) val != (double) curenchant / 2.0D) {
             ++count;
           }
 
           int val2 = curtype2 / 2;
-          if ((double)val2 != (double)curtype2 / 2.0D) {
+          if ((double) val2 != (double) curtype2 / 2.0D) {
             ++count;
           }
 
@@ -235,7 +234,7 @@ public class LotteryManager {
           curtype2 = val2;
         }
 
-        switch(count) {
+        switch (count) {
           case 0:
             break;
           case 1:
@@ -258,7 +257,7 @@ public class LotteryManager {
         }
       }
     } catch (SQLException var17) {
-      _log.warn("Lottery: Could not check lottery ticket #" + id + ": " + var17);
+      log.error("Lottery: Could not check lottery ticket #" + id + ": " + var17);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -304,7 +303,7 @@ public class LotteryManager {
 
     public void runImpl() throws Exception {
       if (Config.SERVICES_ALLOW_LOTTERY) {
-        _log.info("Lottery: Ending lottery #" + LotteryManager.this.getId() + ".");
+        log.info("Lottery: Ending lottery #" + LotteryManager.this.getId() + ".");
       }
 
       int[] luckynums = new int[5];
@@ -312,14 +311,14 @@ public class LotteryManager {
 
       int enchant;
       int count1;
-      for(enchant = 0; enchant < 5; ++enchant) {
+      for (enchant = 0; enchant < 5; ++enchant) {
         boolean found = true;
 
-        while(found) {
+        while (found) {
           luckynum = Rnd.get(20) + 1;
           found = false;
 
-          for(count1 = 0; count1 < enchant; ++count1) {
+          for (count1 = 0; count1 < enchant; ++count1) {
             if (luckynums[count1] == luckynum) {
               found = true;
             }
@@ -330,22 +329,22 @@ public class LotteryManager {
       }
 
       if (Config.SERVICES_ALLOW_LOTTERY) {
-        _log.info("Lottery: The lucky numbers are " + luckynums[0] + ", " + luckynums[1] + ", " + luckynums[2] + ", " + luckynums[3] + ", " + luckynums[4] + ".");
+        log.info("Lottery: The lucky numbers are " + luckynums[0] + ", " + luckynums[1] + ", " + luckynums[2] + ", " + luckynums[3] + ", " + luckynums[4] + ".");
       }
 
       enchant = 0;
       int type2 = 0;
 
-      for(count1 = 0; count1 < 5; ++count1) {
+      for (count1 = 0; count1 < 5; ++count1) {
         if (luckynums[count1] < 17) {
-          enchant = (int)((double)enchant + Math.pow(2.0D, (double)(luckynums[count1] - 1)));
+          enchant = (int) ((double) enchant + Math.pow(2.0D, (double) (luckynums[count1] - 1)));
         } else {
-          type2 = (int)((double)type2 + Math.pow(2.0D, (double)(luckynums[count1] - 17)));
+          type2 = (int) ((double) type2 + Math.pow(2.0D, (double) (luckynums[count1] - 17)));
         }
       }
 
       if (Config.SERVICES_ALLOW_LOTTERY) {
-        _log.info("Lottery: Encoded lucky numbers are " + enchant + ", " + type2);
+        log.info("Lottery: Encoded lucky numbers are " + enchant + ", " + type2);
       }
 
       count1 = 0;
@@ -368,7 +367,7 @@ public class LotteryManager {
         rset = statement.executeQuery();
 
         label453:
-        while(true) {
+        while (true) {
           do {
             if (!rset.next()) {
               break label453;
@@ -376,18 +375,18 @@ public class LotteryManager {
 
             curenchant = rset.getInt("enchant") & enchant;
             prize1 = rset.getInt("damaged") & type2;
-          } while(curenchant == 0 && prize1 == 0);
+          } while (curenchant == 0 && prize1 == 0);
 
           prize2 = 0;
 
-          for(prize3 = 1; prize3 <= 16; ++prize3) {
+          for (prize3 = 1; prize3 <= 16; ++prize3) {
             newprize = curenchant / 2;
-            if ((double)newprize != (double)curenchant / 2.0D) {
+            if ((double) newprize != (double) curenchant / 2.0D) {
               ++prize2;
             }
 
             int val2 = prize1 / 2;
-            if ((double)val2 != (double)prize1 / 2.0D) {
+            if ((double) val2 != (double) prize1 / 2.0D) {
               ++prize2;
             }
 
@@ -406,7 +405,7 @@ public class LotteryManager {
           }
         }
       } catch (SQLException var30) {
-        _log.warn("Lottery: Could restore lottery data: " + var30);
+        log.warn("Lottery: Could restore lottery data: " + var30);
       } finally {
         DbUtils.closeQuietly(con, statement, rset);
       }
@@ -416,15 +415,15 @@ public class LotteryManager {
       prize2 = 0;
       prize3 = 0;
       if (count1 > 0) {
-        prize1 = (int)((double)(LotteryManager.this.getPrize() - curenchant) * Config.SERVICES_LOTTERY_5_NUMBER_RATE / (double)count1);
+        prize1 = (int) ((double) (LotteryManager.this.getPrize() - curenchant) * Config.SERVICES_LOTTERY_5_NUMBER_RATE / (double) count1);
       }
 
       if (count2 > 0) {
-        prize2 = (int)((double)(LotteryManager.this.getPrize() - curenchant) * Config.SERVICES_LOTTERY_4_NUMBER_RATE / (double)count2);
+        prize2 = (int) ((double) (LotteryManager.this.getPrize() - curenchant) * Config.SERVICES_LOTTERY_4_NUMBER_RATE / (double) count2);
       }
 
       if (count3 > 0) {
-        prize3 = (int)((double)(LotteryManager.this.getPrize() - curenchant) * Config.SERVICES_LOTTERY_3_NUMBER_RATE / (double)count3);
+        prize3 = (int) ((double) (LotteryManager.this.getPrize() - curenchant) * Config.SERVICES_LOTTERY_3_NUMBER_RATE / (double) count3);
       }
 
       if (prize1 == 0 && prize2 == 0 && prize3 == 0) {
@@ -434,7 +433,7 @@ public class LotteryManager {
       }
 
       if (Config.SERVICES_ALLOW_LOTTERY) {
-        _log.info("Lottery: Jackpot for next lottery is " + newprize + ".");
+        log.info("Lottery: Jackpot for next lottery is " + newprize + ".");
       }
 
       SystemMessage sm;
@@ -464,7 +463,7 @@ public class LotteryManager {
         statement.setInt(8, LotteryManager.this.getId());
         statement.execute();
       } catch (SQLException var28) {
-        _log.warn("Lottery: Could not store finished lottery data: " + var28);
+        log.warn("Lottery: Could not store finished lottery data: " + var28);
       } finally {
         DbUtils.closeQuietly(con, statement);
       }
@@ -481,7 +480,7 @@ public class LotteryManager {
 
     public void runImpl() throws Exception {
       if (Config.SERVICES_ALLOW_LOTTERY) {
-        _log.info("Lottery: Stopping ticket sell for lottery #" + LotteryManager.this.getId() + ".");
+        log.info("Lottery: Stopping ticket sell for lottery #" + LotteryManager.this.getId() + ".");
       }
 
       LotteryManager.this._isSellingTickets = false;

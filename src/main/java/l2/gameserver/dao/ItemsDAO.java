@@ -5,26 +5,25 @@
 
 package l2.gameserver.dao;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.data.xml.holder.ItemHolder;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.base.Element;
 import l2.gameserver.model.items.ItemInstance;
-import l2.gameserver.model.items.ItemStateFlags;
 import l2.gameserver.model.items.ItemInstance.ItemLocation;
+import l2.gameserver.model.items.ItemStateFlags;
 import l2.gameserver.templates.item.ItemTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.LinkedList;
+
+@Slf4j
 public class ItemsDAO {
-  private static final Logger _log = LoggerFactory.getLogger(ItemsDAO.class);
   private static final ItemsDAO _instance = new ItemsDAO();
   private static final String SQLP_GET_ITEM = "{CALL `lip_GetItem`(?)}";
   private static final String SQLP_LOAD_ITEMS_BY_OWNER = "{CALL `lip_LoadItemsByOwner`(?)}";
@@ -35,7 +34,7 @@ public class ItemsDAO {
   public ItemsDAO() {
   }
 
-  public static final ItemsDAO getInstance() {
+  public static ItemsDAO getInstance() {
     return _instance;
   }
 
@@ -51,7 +50,7 @@ public class ItemsDAO {
         cstmt.execute();
         item.getItemStateFlag().set(ItemStateFlags.STATE_CHANGED, false);
       } catch (SQLException var8) {
-        _log.error("Exception while store item", var8);
+        log.error("Exception while store item", var8);
       } finally {
         DbUtils.closeQuietly(conn, cstmt);
       }
@@ -66,10 +65,8 @@ public class ItemsDAO {
     try {
       conn = DatabaseFactory.getInstance().getConnection();
       cstmt = conn.prepareCall("{CALL `lip_StoreItem`(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}");
-      Iterator var4 = items.iterator();
 
-      while(var4.hasNext()) {
-        ItemInstance item = (ItemInstance)var4.next();
+      for (ItemInstance item : items) {
         if (item.getItemStateFlag().get(ItemStateFlags.STATE_CHANGED)) {
           this.store0(item, cstmt);
           cstmt.execute();
@@ -77,7 +74,7 @@ public class ItemsDAO {
         }
       }
     } catch (SQLException var9) {
-      _log.error("Exception while store items", var9);
+      log.error("Exception while store items", var9);
     } finally {
       DbUtils.closeQuietly(conn, cstmt);
     }
@@ -135,16 +132,14 @@ public class ItemsDAO {
     try {
       conn = DatabaseFactory.getInstance().getConnection();
       cStmt = conn.prepareCall("{CALL `lip_DeleteItem`(?)}");
-      Iterator var4 = items.iterator();
 
-      while(var4.hasNext()) {
-        ItemInstance item = (ItemInstance)var4.next();
+      for (ItemInstance item : items) {
         cStmt.setInt(1, item.getObjectId());
         cStmt.execute();
         item.getItemStateFlag().set(ItemStateFlags.STATE_CHANGED, false);
       }
     } catch (SQLException var9) {
-      _log.error("Exception while deleting items", var9);
+      log.error("Exception while deleting items", var9);
     } finally {
       DbUtils.closeQuietly(conn, cStmt);
     }
@@ -161,7 +156,7 @@ public class ItemsDAO {
       cStmt.setInt(1, itemObjectId);
       cStmt.execute();
     } catch (SQLException var8) {
-      _log.error("Exception while deleting item", var8);
+      log.error("Exception while deleting item", var8);
     } finally {
       DbUtils.closeQuietly(conn, cStmt);
     }
@@ -179,7 +174,7 @@ public class ItemsDAO {
       cStmt.execute();
       item.getItemStateFlag().set(ItemStateFlags.STATE_CHANGED, false);
     } catch (SQLException var8) {
-      _log.error("Exception while deleting item", var8);
+      log.error("Exception while deleting item", var8);
     } finally {
       DbUtils.closeQuietly(conn, cStmt);
     }
@@ -194,7 +189,7 @@ public class ItemsDAO {
     int itemTypeId = rset.getInt("item_type");
     ItemTemplate itemTemplate = ItemHolder.getInstance().getTemplate(itemTypeId);
     if (itemTemplate == null) {
-      _log.error("Not defined itemTypeId " + itemTypeId + " for [" + ownerObjId + "]");
+      log.error("Not defined itemTypeId " + itemTypeId + " for [" + ownerObjId + "]");
       return null;
     } else {
       item.setItemId(itemTypeId);
@@ -235,7 +230,7 @@ public class ItemsDAO {
   }
 
   public Collection<ItemInstance> loadItemsByOwnerIdAndLoc(int ownerId, ItemLocation baseLocation) {
-    LinkedList<ItemInstance> result = new LinkedList();
+    LinkedList<ItemInstance> result = new LinkedList<>();
     Connection conn = null;
     CallableStatement cStmt = null;
     ResultSet rSet = null;
@@ -254,7 +249,7 @@ public class ItemsDAO {
         }
       }
     } catch (SQLException var11) {
-      _log.error("Exception while load items", var11);
+      log.error("Exception while load items", var11);
     } finally {
       DbUtils.closeQuietly(conn, cStmt, rSet);
     }
@@ -262,11 +257,11 @@ public class ItemsDAO {
     return result;
   }
 
-  public Collection<Integer> loadItemObjectIdsByOwner(int ownerId) {
+  public LinkedList loadItemObjectIdsByOwner(int ownerId) {
     Connection conn = null;
     CallableStatement cStmt = null;
     ResultSet rSet = null;
-    LinkedList result = new LinkedList();
+    var result = new LinkedList<>();
 
     try {
       conn = DatabaseFactory.getInstance().getConnection();
@@ -278,7 +273,7 @@ public class ItemsDAO {
         result.add(rSet.getInt("item_id"));
       }
     } catch (SQLException var10) {
-      _log.error("Exception while load items", var10);
+      log.error("Exception while load items", var10);
     } finally {
       DbUtils.closeQuietly(conn, cStmt, rSet);
     }
@@ -301,7 +296,7 @@ public class ItemsDAO {
         result = this.load0(rSet);
       }
     } catch (SQLException var10) {
-      _log.error("Exception while load items", var10);
+      log.error("Exception while load items", var10);
     } finally {
       DbUtils.closeQuietly(conn, cStmt, rSet);
     }

@@ -5,12 +5,6 @@
 
 package l2.gameserver.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.Iterator;
-import java.util.List;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.Effect;
@@ -23,12 +17,18 @@ import l2.gameserver.skills.effects.EffectTemplate;
 import l2.gameserver.stats.Env;
 import l2.gameserver.tables.SkillTable;
 import l2.gameserver.utils.SqlBatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Iterator;
+import java.util.List;
+
+@Slf4j
 public class EffectsDAO {
   private static final int SUMMON_SKILL_OFFSET = 100000;
-  private static final Logger _log = LoggerFactory.getLogger(EffectsDAO.class);
   private static final EffectsDAO _instance = new EffectsDAO();
 
   EffectsDAO() {
@@ -43,19 +43,19 @@ public class EffectsDAO {
     int id;
     if (playable.isPlayer()) {
       objectId = playable.getObjectId();
-      id = ((Player)playable).getActiveClassId();
+      id = ((Player) playable).getActiveClassId();
     } else {
       if (!playable.isSummon()) {
         return;
       }
 
       objectId = playable.getPlayer().getObjectId();
-      id = ((SummonInstance)playable).getEffectIdentifier() + 100000;
+      id = ((SummonInstance) playable).getEffectIdentifier() + 100000;
     }
 
     Connection con = null;
-    PreparedStatement statement = null;
-    ResultSet rset = null;
+    PreparedStatement statement;
+    ResultSet rset;
 
     try {
       con = DatabaseFactory.getInstance().getConnection();
@@ -64,7 +64,7 @@ public class EffectsDAO {
       statement.setInt(2, id);
       rset = statement.executeQuery();
 
-      while(true) {
+      while (true) {
         int effectCount;
         long effectCurTime;
         long duration;
@@ -86,13 +86,10 @@ public class EffectsDAO {
           effectCurTime = rset.getLong("effect_cur_time");
           duration = rset.getLong("duration");
           skill = SkillTable.getInstance().getInfo(skillId, skillLvl);
-        } while(skill == null);
+        } while (skill == null);
 
-        EffectTemplate[] var15 = skill.getEffectTemplates();
-        int var16 = var15.length;
 
-        for(int var17 = 0; var17 < var16; ++var17) {
-          EffectTemplate et = var15[var17];
+        for (EffectTemplate et : skill.getEffectTemplates()) {
           if (et != null) {
             Env env = new Env(playable, playable, skill);
             Effect effect = et.getEffect(env);
@@ -105,7 +102,7 @@ public class EffectsDAO {
         }
       }
     } catch (Exception var24) {
-      _log.error("Could not restore active effects data!", var24);
+      log.error("Could not restore active effects data!", var24);
     } finally {
       DbUtils.closeQuietly(con);
     }
@@ -123,7 +120,7 @@ public class EffectsDAO {
       statement.setInt(2, 100000 + skillId);
       statement.execute();
     } catch (Exception var9) {
-      _log.error("Could not delete effects active effects data!" + var9, var9);
+      log.error("Could not delete effects active effects data!" + var9, var9);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -135,14 +132,14 @@ public class EffectsDAO {
     int id;
     if (playable.isPlayer()) {
       objectId = playable.getObjectId();
-      id = ((Player)playable).getActiveClassId();
+      id = ((Player) playable).getActiveClassId();
     } else {
       if (!playable.isSummon()) {
         return;
       }
 
       objectId = playable.getPlayer().getObjectId();
-      id = ((SummonInstance)playable).getEffectIdentifier() + 100000;
+      id = ((SummonInstance) playable).getEffectIdentifier() + 100000;
     }
 
     List<Effect> effects = playable.getEffectList().getAllEffects();
@@ -157,7 +154,7 @@ public class EffectsDAO {
         SqlBatch b = new SqlBatch("INSERT IGNORE INTO `character_effects_save` (`object_id`,`skill_id`,`skill_level`,`effect_count`,`effect_cur_time`,`duration`,`order`,`id`) VALUES");
         Iterator var10 = effects.iterator();
 
-        while(true) {
+        while (true) {
           Effect effect;
           do {
             do {
@@ -172,12 +169,12 @@ public class EffectsDAO {
                       return;
                     }
 
-                    effect = (Effect)var10.next();
-                  } while(effect == null);
-                } while(!effect.isInUse());
-              } while(effect.getSkill().isToggle());
-            } while(effect.getEffectType() == EffectType.HealOverTime);
-          } while(effect.getEffectType() == EffectType.CombatPointHealOverTime);
+                    effect = (Effect) var10.next();
+                  } while (effect == null);
+                } while (!effect.isInUse());
+              } while (effect.getSkill().isToggle());
+            } while (effect.getEffectType() == EffectType.HealOverTime);
+          } while (effect.getEffectType() == EffectType.CombatPointHealOverTime);
 
           StringBuilder sb;
           if (effect.isSaveable()) {
@@ -193,7 +190,7 @@ public class EffectsDAO {
             b.write(sb.toString());
           }
 
-          while((effect = effect.getNext()) != null && effect.isSaveable()) {
+          while ((effect = effect.getNext()) != null && effect.isSaveable()) {
             sb = new StringBuilder("(");
             sb.append(objectId).append(",");
             sb.append(effect.getSkill().getId()).append(",");
@@ -209,7 +206,7 @@ public class EffectsDAO {
           ++order;
         }
       } catch (Exception var15) {
-        _log.error("Could not store active effects data!", var15);
+        log.error("Could not store active effects data!", var15);
       } finally {
         DbUtils.closeQuietly(con, statement);
       }

@@ -111,10 +111,13 @@ public class AdminSpawn implements IAdminCommandHandler {
             if (!aiName.equalsIgnoreCase("npc")) {
               aiConstructor = Class.forName("l2.gameserver.ai." + aiName).getConstructors()[0];
             }
-          } catch (Exception var34) {
+          } catch (Exception e) {
+            log.error("useAdminCommand: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+
             try {
               aiConstructor = ((Class) Scripts.getInstance().getClasses().get("ai." + aiName)).getConstructors()[0];
-            } catch (Exception var33) {
+            } catch (Exception ee) {
+              log.error("useAdminCommand: eMessage={}, eClause={} eClass={}", ee.getMessage(), ee.getCause(), ee.getClass());
               activeChar.sendMessage("This type AI not found.");
               return false;
             }
@@ -123,8 +126,8 @@ public class AdminSpawn implements IAdminCommandHandler {
           if (aiConstructor != null) {
             try {
               target.setAI((CharacterAI) aiConstructor.newInstance(target));
-            } catch (Exception var32) {
-              var32.printStackTrace();
+            } catch (Exception e) {
+              log.error("useAdminCommand: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
             }
 
             target.getAI().startAITask();

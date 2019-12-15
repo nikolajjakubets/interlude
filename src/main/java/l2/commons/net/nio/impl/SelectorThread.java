@@ -5,8 +5,7 @@
 
 package l2.commons.net.nio.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -17,8 +16,8 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
+@Slf4j
 public class SelectorThread<T extends MMOClient> extends Thread {
-  private static final Logger _log = LoggerFactory.getLogger(SelectorThread.class);
   private final Selector _selector = Selector.open();
   private final IPacketHandler<T> _packetHandler;
   private final IMMOExecutor<T> _executor;
@@ -143,7 +142,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
                       }
                     }
                   } catch (CancelledKeyException e) {
-                    _log.error("readPacket: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
+                    log.error("readPacket: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
                   }
                 }
               }
@@ -152,17 +151,17 @@ public class SelectorThread<T extends MMOClient> extends Thread {
             try {
               Thread.sleep(this._sc.SLEEP_TIME);
             } catch (InterruptedException e) {
-              _log.error("readPacket: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
+              log.error("readPacket: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
             }
             break;
           }
         } catch (IOException var14) {
-          _log.error("Error in " + this.getName(), var14);
+          log.error("Error in " + this.getName(), var14);
 
           try {
             Thread.sleep(1000L);
           } catch (InterruptedException e) {
-            _log.error("readPacket: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
+            log.error("readPacket: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
           }
         }
       }
@@ -172,7 +171,8 @@ public class SelectorThread<T extends MMOClient> extends Thread {
   protected void finishConnection(SelectionKey key) {
     try {
       ((SocketChannel) key.channel()).finishConnect();
-    } catch (IOException var5) {
+    } catch (IOException e) {
+      log.error("finishConnection: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
       MMOConnection<T> con = (MMOConnection) key.attachment();
       T client = con.getClient();
       client.getConnection().onForcedDisconnection();
@@ -202,7 +202,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
         }
       }
     } catch (IOException var7) {
-      _log.error("Error in " + this.getName(), var7);
+      log.error("Error in " + this.getName(), var7);
     }
 
   }
@@ -217,13 +217,13 @@ public class SelectorThread<T extends MMOClient> extends Thread {
       }
 
       if (buf.position() == buf.limit()) {
-        _log.error("Read buffer exhausted for client : " + con.getClient() + ", try to adjust buffer size, current : " + buf.capacity() + ", primary : " + (buf == this.READ_BUFFER) + ". Closing connection.");
+        log.error("Read buffer exhausted for client : " + con.getClient() + ", try to adjust buffer size, current : " + buf.capacity() + ", primary : " + (buf == this.READ_BUFFER) + ". Closing connection.");
         this.closeConnectionImpl(con);
       } else {
         try {
           result = con.getReadableByteChannel().read(buf);
         } catch (IOException e) {
-          _log.error("readPacket: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
+          log.error("readPacket: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
         }
 
         if (result > 0) {
@@ -257,7 +257,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
       if (buf.remaining() > this._sc.HEADER_SIZE) {
         int size = buf.getShort() & '\uffff';
         if (size <= this._sc.HEADER_SIZE || size > this._sc.PACKET_SIZE) {
-          _log.error("Incorrect packet size : " + size + "! Client : " + con.getClient() + ". Closing connection.");
+          log.error("Incorrect packet size : " + size + "! Client : " + con.getClient() + ". Closing connection.");
           this.closeConnectionImpl(con);
           return false;
         }
@@ -279,7 +279,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
       }
 
       if (pos == buf.capacity()) {
-        _log.warn("Read buffer exhausted for client : " + con.getClient() + ", try to adjust buffer size, current : " + buf.capacity() + ", primary : " + (buf == this.READ_BUFFER) + ".");
+        log.warn("Read buffer exhausted for client : " + con.getClient() + ", try to adjust buffer size, current : " + buf.capacity() + ", primary : " + (buf == this.READ_BUFFER) + ".");
       }
 
       if (buf == this.READ_BUFFER) {
@@ -332,7 +332,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
     try {
       result = con.getWritableChannel().write(this.DIRECT_WRITE_BUFFER);
     } catch (IOException e) {
-      _log.error("writePacket: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
+      log.error("writePacket: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
     }
 
     if (result >= 0) {
@@ -388,7 +388,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
 
           this.DIRECT_WRITE_BUFFER.put(this.WRITE_BUFFER);
         } catch (Exception var7) {
-          _log.error("Error in " + this.getName(), var7);
+          log.error("Error in " + this.getName(), var7);
           break;
         }
       }
@@ -454,7 +454,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
       try {
         con.close();
       } catch (IOException e) {
-        _log.error("closeConnectionImpl: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
+        log.error("closeConnectionImpl: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
       } finally {
         con.releaseBuffers();
         con.clearQueues();
@@ -484,7 +484,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
       try {
         key.channel().close();
       } catch (IOException e) {
-        _log.error("closeAllChannels: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
+        log.error("closeAllChannels: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
       }
     }
 
@@ -496,7 +496,7 @@ public class SelectorThread<T extends MMOClient> extends Thread {
     try {
       this.getSelector().close();
     } catch (IOException e) {
-      _log.error("closeSelectorThread: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
+      log.error("closeSelectorThread: exception eMessage={}, eClause={}", e.getMessage(), e.getCause());
     }
 
   }

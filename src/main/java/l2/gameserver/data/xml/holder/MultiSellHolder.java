@@ -6,12 +6,6 @@
 package l2.gameserver.data.xml.holder;
 
 import gnu.trove.TIntObjectHashMap;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import javax.xml.parsers.DocumentBuilderFactory;
 import l2.gameserver.Config;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.base.MultiSellEntry;
@@ -22,13 +16,19 @@ import l2.gameserver.network.l2.s2c.MultiSellList;
 import l2.gameserver.scripts.Functions;
 import l2.gameserver.templates.item.ItemTemplate;
 import l2.gameserver.utils.XMLUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
+@Slf4j
 public class MultiSellHolder {
-  private static final Logger _log = LoggerFactory.getLogger(MultiSellHolder.class);
   private static MultiSellHolder _instance = new MultiSellHolder();
   private static final String NODE_PRODUCTION = "production";
   private static final String NODE_INGRIDIENT = "ingredient";
@@ -39,7 +39,7 @@ public class MultiSellHolder {
   }
 
   public MultiSellHolder.MultiSellListContainer getList(int id) {
-    return (MultiSellHolder.MultiSellListContainer)this.entries.get(id);
+    return this.entries.get(id);
   }
 
   public MultiSellHolder() {
@@ -58,13 +58,13 @@ public class MultiSellHolder {
   private void hashFiles(String dirname, List<File> hash) {
     File dir = new File(Config.DATAPACK_ROOT, "data/" + dirname);
     if (!dir.exists()) {
-      _log.info("Dir " + dir.getAbsolutePath() + " not exists");
+      log.info("Dir " + dir.getAbsolutePath() + " not exists");
     } else {
       File[] files = dir.listFiles();
       File[] var5 = files;
       int var6 = files.length;
 
-      for(int var7 = 0; var7 < var6; ++var7) {
+      for (int var7 = 0; var7 < var6; ++var7) {
         File f = var5[var7];
         if (f.getName().endsWith(".xml")) {
           hash.add(f);
@@ -78,7 +78,7 @@ public class MultiSellHolder {
 
   public void addMultiSellListContainer(int id, MultiSellHolder.MultiSellListContainer list) {
     if (this.entries.containsKey(id)) {
-      _log.warn("MultiSell redefined: " + id);
+      log.warn("MultiSell redefined: " + id);
     }
 
     list.setListId(id);
@@ -94,7 +94,7 @@ public class MultiSellHolder {
   }
 
   public MultiSellHolder.MultiSellListContainer remove(int id) {
-    return (MultiSellHolder.MultiSellListContainer)this.entries.remove(id);
+    return this.entries.remove(id);
   }
 
   public void parseFile(File f) {
@@ -104,7 +104,7 @@ public class MultiSellHolder {
     try {
       id = Integer.parseInt(f.getName().replaceAll(".xml", ""));
     } catch (Exception var7) {
-      _log.error("Error loading file " + f, var7);
+      log.error("Error loading file " + f, var7);
       return;
     }
 
@@ -116,14 +116,14 @@ public class MultiSellHolder {
       factory.setIgnoringComments(true);
       doc = factory.newDocumentBuilder().parse(f);
     } catch (Exception var6) {
-      _log.error("Error loading file " + f, var6);
+      log.error("Error loading file " + f, var6);
       return;
     }
 
     try {
       this.addMultiSellListContainer(id, this.parseDocument(doc, id));
     } catch (Exception var5) {
-      _log.error("Error in file " + f, var5);
+      log.error("Error in file " + f, var5);
     }
 
   }
@@ -133,8 +133,8 @@ public class MultiSellHolder {
     this.hashFiles("multisell", files);
     Iterator var2 = files.iterator();
 
-    while(var2.hasNext()) {
-      File f = (File)var2.next();
+    while (var2.hasNext()) {
+      File f = (File) var2.next();
       this.parseFile(f);
     }
 
@@ -144,9 +144,9 @@ public class MultiSellHolder {
     MultiSellHolder.MultiSellListContainer list = new MultiSellHolder.MultiSellListContainer();
     int entId = 1;
 
-    for(Node n = doc.getFirstChild(); n != null; n = n.getNextSibling()) {
+    for (Node n = doc.getFirstChild(); n != null; n = n.getNextSibling()) {
       if ("list".equalsIgnoreCase(n.getNodeName())) {
-        for(Node d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
+        for (Node d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
           if ("item".equalsIgnoreCase(d.getNodeName())) {
             MultiSellEntry e = this.parseEntry(d, id);
             if (e != null) {
@@ -169,7 +169,7 @@ public class MultiSellHolder {
   protected MultiSellEntry parseEntry(Node n, int multiSellId) {
     MultiSellEntry entry = new MultiSellEntry();
 
-    for(Node d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
+    for (Node d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
       int id;
       long count;
       MultiSellIngredient mi;
@@ -254,22 +254,22 @@ public class MultiSellHolder {
     }
 
     if (!entry.getIngredients().isEmpty() && !entry.getProduction().isEmpty()) {
-      if (entry.getIngredients().size() == 1 && entry.getProduction().size() == 1 && ((MultiSellIngredient)entry.getIngredients().get(0)).getItemId() == 57) {
-        ItemTemplate item = ItemHolder.getInstance().getTemplate(((MultiSellIngredient)entry.getProduction().get(0)).getItemId());
+      if (entry.getIngredients().size() == 1 && entry.getProduction().size() == 1 && entry.getIngredients().get(0).getItemId() == 57) {
+        ItemTemplate item = ItemHolder.getInstance().getTemplate(entry.getProduction().get(0).getItemId());
         if (item == null) {
-          _log.warn("MultiSell [" + multiSellId + "] Production [" + ((MultiSellIngredient)entry.getProduction().get(0)).getItemId() + "] not found!");
+          log.warn("MultiSell [" + multiSellId + "] Production [" + entry.getProduction().get(0).getItemId() + "] not found!");
           return null;
         }
 
-        long refPrice = ((MultiSellIngredient)entry.getProduction().get(0)).getItemCount() * (long)item.getReferencePrice();
-        if (refPrice > ((MultiSellIngredient)entry.getIngredients().get(0)).getItemCount()) {
-          _log.warn("MultiSell [" + multiSellId + "] Production '" + item.getName() + "' [" + ((MultiSellIngredient)entry.getProduction().get(0)).getItemId() + "] price is lower than referenced | " + refPrice + " > " + ((MultiSellIngredient)entry.getIngredients().get(0)).getItemCount());
+        long refPrice = entry.getProduction().get(0).getItemCount() * (long) item.getReferencePrice();
+        if (refPrice > entry.getIngredients().get(0).getItemCount()) {
+          log.warn("MultiSell [" + multiSellId + "] Production '" + item.getName() + "' [" + entry.getProduction().get(0).getItemId() + "] price is lower than referenced | " + refPrice + " > " + entry.getIngredients().get(0).getItemCount());
         }
       }
 
       return entry;
     } else {
-      _log.warn("MultiSell [" + multiSellId + "] is empty!");
+      log.warn("MultiSell [" + multiSellId + "] is empty!");
       return null;
     }
   }
@@ -279,11 +279,11 @@ public class MultiSellHolder {
       String[] a = s.split(":");
 
       try {
-        long id = (long)Integer.parseInt(a[0]);
+        long id = Integer.parseInt(a[0]);
         long count = a.length > 1 ? Long.parseLong(a[1]) : 1L;
         return new long[]{id, count};
-      } catch (Exception var6) {
-        _log.error("", var6);
+      } catch (Exception e) {
+        log.error("parseItemIdAndCount: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         return null;
       }
     } else {
@@ -301,8 +301,8 @@ public class MultiSellHolder {
         long[] production;
         if ((ingredient = parseItemIdAndCount(a[0])) != null && (production = parseItemIdAndCount(a[1])) != null) {
           MultiSellEntry entry = new MultiSellEntry();
-          entry.addIngredient(new MultiSellIngredient((int)ingredient[0], ingredient[1]));
-          entry.addProduct(new MultiSellIngredient((int)production[0], production[1]));
+          entry.addIngredient(new MultiSellIngredient((int) ingredient[0], ingredient[1]));
+          entry.addProduct(new MultiSellIngredient((int) production[0], production[1]));
           return entry;
         } else {
           return null;
@@ -317,17 +317,17 @@ public class MultiSellHolder {
     int[] var5 = Config.ALT_DISABLED_MULTISELL;
     int var6 = var5.length;
 
-    for(int var7 = 0; var7 < var6; ++var7) {
+    for (int var7 = 0; var7 < var6; ++var7) {
       int i = var5[var7];
       if (i == listId) {
-        player.sendMessage(new CustomMessage("common.MultisellForbidden", player, new Object[0]));
+        player.sendMessage(new CustomMessage("common.MultisellForbidden", player));
         return;
       }
     }
 
     MultiSellHolder.MultiSellListContainer list = this.getList(listId);
     if (list == null) {
-      player.sendMessage(new CustomMessage("common.NoMultisell", player, new Object[0]));
+      player.sendMessage(new CustomMessage("common.NoMultisell", player));
     } else {
       this.SeparateAndSend(list, player, taxRate);
     }
@@ -341,8 +341,8 @@ public class MultiSellHolder {
     player.setMultisell(list);
 
     MultiSellEntry e;
-    for(Iterator var7 = list.getEntries().iterator(); var7.hasNext(); temp.addEntry(e)) {
-      e = (MultiSellEntry)var7.next();
+    for (Iterator var7 = list.getEntries().iterator(); var7.hasNext(); temp.addEntry(e)) {
+      e = (MultiSellEntry) var7.next();
       if (temp.getEntries().size() == Config.MULTISELL_SIZE) {
         player.sendPacket(new MultiSellList(temp, page, 0));
         ++page;
@@ -372,10 +372,10 @@ public class MultiSellHolder {
     ItemInstance[] items = player.getInventory().getItems();
     Iterator var11 = container.getEntries().iterator();
 
-    while(true) {
+    while (true) {
       label172:
-      while(var11.hasNext()) {
-        MultiSellEntry origEntry = (MultiSellEntry)var11.next();
+      while (var11.hasNext()) {
+        MultiSellEntry origEntry = (MultiSellEntry) var11.next();
         MultiSellEntry ent = origEntry.clone();
         Object ingridients;
         if (!notax && taxRate > 0.0D) {
@@ -384,34 +384,34 @@ public class MultiSellHolder {
           ingridients = new ArrayList(ent.getIngredients().size() + 1);
           Iterator var19 = ent.getIngredients().iterator();
 
-          while(var19.hasNext()) {
-            MultiSellIngredient i = (MultiSellIngredient)var19.next();
+          while (var19.hasNext()) {
+            MultiSellIngredient i = (MultiSellIngredient) var19.next();
             if (i.getItemId() == 57) {
               adena += i.getItemCount();
-              tax += (double)i.getItemCount() * taxRate;
+              tax += (double) i.getItemCount() * taxRate;
             } else {
-              ((List)ingridients).add(i);
+              ((List) ingridients).add(i);
               if (i.getItemId() == -200) {
-                tax += (double)(i.getItemCount() / 120L * 1000L) * taxRate * 100.0D;
+                tax += (double) (i.getItemCount() / 120L * 1000L) * taxRate * 100.0D;
               }
 
               if (i.getItemId() >= 1) {
                 ItemTemplate item = ItemHolder.getInstance().getTemplate(i.getItemId());
                 if (item.isStackable()) {
-                  tax += (double)((long)item.getReferencePrice() * i.getItemCount()) * taxRate;
+                  tax += (double) ((long) item.getReferencePrice() * i.getItemCount()) * taxRate;
                 }
               }
             }
           }
 
-          adena = Math.round((double)adena + tax);
+          adena = Math.round((double) adena + tax);
           if (adena > 0L) {
-            ((List)ingridients).add(new MultiSellIngredient(57, adena));
+            ((List) ingridients).add(new MultiSellIngredient(57, adena));
           }
 
           ent.setTax(Math.round(tax));
           ent.getIngredients().clear();
-          ent.getIngredients().addAll((Collection)ingridients);
+          ent.getIngredients().addAll((Collection) ingridients);
         } else {
           ingridients = ent.getIngredients();
         }
@@ -420,10 +420,10 @@ public class MultiSellHolder {
           list.entries.add(ent);
         } else {
           List<Integer> itms = new ArrayList<>();
-          Iterator var16 = ((List)ingridients).iterator();
+          Iterator var16 = ((List) ingridients).iterator();
 
-          while(true) {
-            while(true) {
+          while (true) {
+            while (true) {
               ItemTemplate template;
               MultiSellIngredient ingredient;
               do {
@@ -432,26 +432,26 @@ public class MultiSellHolder {
                     continue label172;
                   }
 
-                  ingredient = (MultiSellIngredient)var16.next();
+                  ingredient = (MultiSellIngredient) var16.next();
                   template = ingredient.getItemId() <= 0 ? null : ItemHolder.getInstance().getTemplate(ingredient.getItemId());
-                } while(ingredient.getItemId() > 0 && !nokey && !template.isEquipment());
-              } while(ingredient.getItemId() == 12374);
+                } while (ingredient.getItemId() > 0 && !nokey && !template.isEquipment());
+              } while (ingredient.getItemId() == 12374);
 
               if (ingredient.getItemId() == -200) {
-                if (!itms.contains(ingredient.getItemId()) && player.getClan() != null && (long)player.getClan().getReputationScore() >= ingredient.getItemCount()) {
+                if (!itms.contains(ingredient.getItemId()) && player.getClan() != null && (long) player.getClan().getReputationScore() >= ingredient.getItemCount()) {
                   itms.add(ingredient.getItemId());
                 }
               } else if (ingredient.getItemId() == -100) {
-                if (!itms.contains(ingredient.getItemId()) && (long)player.getPcBangPoints() >= ingredient.getItemCount()) {
+                if (!itms.contains(ingredient.getItemId()) && (long) player.getPcBangPoints() >= ingredient.getItemCount()) {
                   itms.add(ingredient.getItemId());
                 }
               } else {
                 ItemInstance[] var28 = items;
                 int var29 = items.length;
 
-                for(int var30 = 0; var30 < var29; ++var30) {
+                for (int var30 = 0; var30 < var29; ++var30) {
                   ItemInstance item = var28[var30];
-                  if (item.getItemId() == ingredient.getItemId() && item.canBeExchanged(player) && !itms.contains(enchant ? (long)ingredient.getItemId() + (long)ingredient.getItemEnchant() * 100000L : (long)ingredient.getItemId()) && item.getEnchantLevel() >= ingredient.getItemEnchant()) {
+                  if (item.getItemId() == ingredient.getItemId() && item.canBeExchanged(player) && !itms.contains(enchant ? (long) ingredient.getItemId() + (long) ingredient.getItemEnchant() * 100000L : (long) ingredient.getItemId()) && item.getEnchantLevel() >= ingredient.getItemEnchant()) {
                     if (item.isStackable() && item.getCount() < ingredient.getItemCount()) {
                       break;
                     }
@@ -461,16 +461,16 @@ public class MultiSellHolder {
 
                     Iterator var24;
                     MultiSellIngredient ig;
-                    for(var24 = ent.getProduction().iterator(); var24.hasNext(); possibleEntry.addProduct(ig)) {
-                      ig = (MultiSellIngredient)var24.next();
+                    for (var24 = ent.getProduction().iterator(); var24.hasNext(); possibleEntry.addProduct(ig)) {
+                      ig = (MultiSellIngredient) var24.next();
                       if (enchant && template.canBeEnchanted(true)) {
                         ig.setItemEnchant(item.getEnchantLevel());
                         ig.setItemAttributes(item.getAttributes().clone());
                       }
                     }
 
-                    for(var24 = ((List)ingridients).iterator(); var24.hasNext(); possibleEntry.addIngredient(ig)) {
-                      ig = (MultiSellIngredient)var24.next();
+                    for (var24 = ((List) ingridients).iterator(); var24.hasNext(); possibleEntry.addIngredient(ig)) {
+                      ig = (MultiSellIngredient) var24.next();
                       if (enchant && ig.getItemId() > 0 && ItemHolder.getInstance().getTemplate(ig.getItemId()).canBeEnchanted(true)) {
                         ig.setItemEnchant(item.getEnchantLevel());
                         ig.setItemAttributes(item.getAttributes().clone());

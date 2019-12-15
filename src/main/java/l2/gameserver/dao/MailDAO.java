@@ -13,12 +13,11 @@ import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.model.mail.Mail;
 import l2.gameserver.model.mail.Mail.SenderType;
+import lombok.extern.slf4j.Slf4j;
 import org.ehcache.Cache;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -31,8 +30,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * Запрос на удаление полученных сообщений. Удалить можно только письмо без вложения.
  * Отсылается при нажатии на "delete" в списке полученных писем.
  */
+@Slf4j
 public class MailDAO implements JdbcDAO<Integer, Mail> {
-  private static final Logger _log = LoggerFactory.getLogger(MailDAO.class);
   private static final String RESTORE_MAIL = "SELECT sender_id, sender_name, receiver_id, receiver_name, expire_time, topic, body, price, type, unread FROM mail WHERE message_id = ?";
   private static final String STORE_MAIL = "INSERT INTO mail(sender_id, sender_name, receiver_id, receiver_name, expire_time, topic, body, price, type, unread) VALUES (?,?,?,?,?,?,?,?,?,?)";
   private static final String UPDATE_MAIL = "UPDATE mail SET sender_id = ?, sender_name = ?, receiver_id = ?, receiver_name = ?, expire_time = ?, topic = ?, body = ?, price = ?, type = ?, unread = ? WHERE message_id = ?";
@@ -260,7 +259,7 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
         messageIds.add(rset.getInt(1));
       }
     } catch (SQLException var11) {
-      _log.error("Error while restore mail of owner : " + ownerId, var11);
+      log.error("Error while restore mail of owner : " + ownerId, var11);
       messageIds.clear();
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
@@ -282,7 +281,7 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
       statement.setBoolean(3, sent);
       return statement.execute();
     } catch (SQLException var11) {
-      _log.error("Error while deleting mail of owner : " + ownerId, var11);
+      log.error("Error while deleting mail of owner : " + ownerId, var11);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -355,7 +354,7 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
         messageIds.add(rset.getInt(1));
       }
     } catch (SQLException var10) {
-      _log.error("Error while restore expired mail!", var10);
+      log.error("Error while restore expired mail!", var10);
       messageIds.clear();
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
@@ -377,7 +376,7 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
         }
         return mail;
       } catch (SQLException var5) {
-        _log.error("Error while restoring mail : " + id, var5);
+        log.error("Error while restoring mail : " + id, var5);
         return null;
       }
     }
@@ -406,7 +405,7 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
         this.save0(mail);
         mail.setJdbcState(JdbcEntityState.STORED);
       } catch (SQLException var3) {
-        _log.error("Error while saving mail!", var3);
+        log.error("Error while saving mail!", var3);
         return;
       }
 
@@ -420,7 +419,7 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
         this.update0(mail);
         mail.setJdbcState(JdbcEntityState.STORED);
       } catch (SQLException var3) {
-        _log.error("Error while updating mail : " + mail.getMessageId(), var3);
+        log.error("Error while updating mail : " + mail.getMessageId(), var3);
         return;
       }
       this.cache.putIfAbsent(mail.getMessageId(), mail);
@@ -442,7 +441,7 @@ public class MailDAO implements JdbcDAO<Integer, Mail> {
         this.delete0(mail);
         mail.setJdbcState(JdbcEntityState.DELETED);
       } catch (SQLException var3) {
-        _log.error("Error while deleting mail : " + mail.getMessageId(), var3);
+        log.error("Error while deleting mail : " + mail.getMessageId(), var3);
         return;
       }
 

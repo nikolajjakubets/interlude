@@ -61,12 +61,11 @@ import l2.gameserver.templates.item.WeaponTemplate;
 import l2.gameserver.templates.item.WeaponTemplate.WeaponType;
 import l2.gameserver.utils.Location;
 import l2.gameserver.utils.PositionUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.napile.primitive.maps.IntObjectMap;
 import org.napile.primitive.maps.impl.CHashIntObjectMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,8 +77,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+@Slf4j
 public abstract class Creature extends GameObject {
-  private static final Logger _log = LoggerFactory.getLogger(Creature.class);
   public static final double HEADINGS_IN_PI = 10430.378350470453D;
   private Skill _castingSkill;
   private long _castInterruptTime;
@@ -849,8 +848,8 @@ public abstract class Creature extends GameObject {
         skill.useSkill(this, targets);
         break;
       }
-    } catch (Exception var12) {
-      _log.error("", var12);
+    } catch (Exception e) {
+      log.error("callSkill: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     }
 
   }
@@ -859,10 +858,8 @@ public abstract class Creature extends GameObject {
     if (this._triggers != null) {
       Set<TriggerInfo> SkillsOnSkillAttack = this._triggers.get(type);
       if (SkillsOnSkillAttack != null) {
-        Iterator var8 = SkillsOnSkillAttack.iterator();
 
-        while(var8.hasNext()) {
-          TriggerInfo t = (TriggerInfo)var8.next();
+        for (TriggerInfo t : SkillsOnSkillAttack) {
           if (t.getSkill() != ex) {
             this.useTriggerSkill(target == null ? this.getTarget() : target, null, t, owner, damage);
           }
@@ -3500,8 +3497,8 @@ public abstract class Creature extends GameObject {
 
     try {
       super.spawnMe(loc);
-    } catch (Exception var3) {
-      var3.printStackTrace();
+    } catch (Exception e) {
+      log.error("spawnMe: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     }
 
   }

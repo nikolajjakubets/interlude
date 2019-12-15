@@ -1,10 +1,13 @@
 package l2.commons.dbutils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+@Slf4j
 public class DbUtils {
     public DbUtils() {
     }
@@ -38,7 +41,8 @@ public class DbUtils {
     public static void closeQuietly(Connection conn) {
         try {
             close(conn);
-        } catch (SQLException var2) {
+        } catch (SQLException e) {
+          log.error("closeQuietly: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         }
 
     }
@@ -77,7 +81,8 @@ public class DbUtils {
     public static void closeQuietly(ResultSet rs) {
         try {
             close(rs);
-        } catch (SQLException var2) {
+        } catch (SQLException e) {
+          log.error("closeQuietly: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         }
 
     }
@@ -85,7 +90,8 @@ public class DbUtils {
     public static void closeQuietly(Statement stmt) {
         try {
             close(stmt);
-        } catch (SQLException var2) {
+        } catch (SQLException e) {
+          log.error("closeQuietly: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         }
 
     }

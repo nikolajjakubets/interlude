@@ -5,18 +5,18 @@
 
 package l2.gameserver.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import l2.commons.collections.MultiValueSet;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.utils.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+@Slf4j
 public class CharacterVariablesDAO {
-  private static final Logger _log = LoggerFactory.getLogger(CharacterVariablesDAO.class);
   private static final CharacterVariablesDAO _instance = new CharacterVariablesDAO();
   private static final String GET_VAR = "SELECT value FROM character_variables WHERE obj_id=? AND type=? AND name=?";
   private static final String SET_VAR = "REPLACE INTO character_variables (obj_id, type, name, value, expire_time) VALUES (?,?,?,?,?)";
@@ -43,7 +43,7 @@ public class CharacterVariablesDAO {
 
     try {
       con = DatabaseFactory.getInstance().getConnection();
-      statement = con.prepareStatement("SELECT value FROM character_variables WHERE obj_id=? AND type=? AND name=?");
+      statement = con.prepareStatement(GET_VAR);
       statement.setInt(1, objectId);
       statement.setString(2, type);
       statement.setString(3, name);
@@ -52,7 +52,7 @@ public class CharacterVariablesDAO {
         value = Strings.stripSlashes(rs.getString("value"));
       }
     } catch (Exception var12) {
-      _log.error("CharacterVariablesDAO.getVar(int,String,String): " + var12, var12);
+      log.error("CharacterVariablesDAO.getVar(int,String,String): " + var12, var12);
     } finally {
       DbUtils.closeQuietly(con, statement, rs);
     }
@@ -70,7 +70,7 @@ public class CharacterVariablesDAO {
 
     try {
       con = DatabaseFactory.getInstance().getConnection();
-      statement = con.prepareStatement("REPLACE INTO character_variables (obj_id, type, name, value, expire_time) VALUES (?,?,?,?,?)");
+      statement = con.prepareStatement(SET_VAR);
       statement.setInt(1, objectId);
       statement.setString(2, type);
       statement.setString(3, name);
@@ -78,7 +78,7 @@ public class CharacterVariablesDAO {
       statement.setLong(5, expiration);
       statement.execute();
     } catch (Exception var13) {
-      _log.error("CharacterVariablesDAO.setVar(int,String,String,String,long): " + var13, var13);
+      log.error("CharacterVariablesDAO.setVar(int,String,String,String,long): " + var13, var13);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -95,13 +95,13 @@ public class CharacterVariablesDAO {
 
     try {
       con = DatabaseFactory.getInstance().getConnection();
-      statement = con.prepareStatement("DELETE FROM character_variables WHERE obj_id=? AND type=? AND name=? LIMIT 1");
+      statement = con.prepareStatement(DELETE_VAR);
       statement.setInt(1, objectId);
       statement.setString(2, type);
       statement.setString(3, name);
       statement.execute();
     } catch (Exception var10) {
-      _log.error("CharacterVariablesDAO.deleteVar(int,String,String): " + var10, var10);
+      log.error("CharacterVariablesDAO.deleteVar(int,String,String): " + var10, var10);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -114,11 +114,11 @@ public class CharacterVariablesDAO {
 
     try {
       con = DatabaseFactory.getInstance().getConnection();
-      statement = con.prepareStatement("DELETE FROM character_variables WHERE obj_id=?");
+      statement = con.prepareStatement(DELETE_VARS);
       statement.setInt(1, objectId);
       statement.execute();
     } catch (Exception var8) {
-      _log.error("CharacterVariablesDAO.deleteVar(int): " + var8, var8);
+      log.error("CharacterVariablesDAO.deleteVar(int): " + var8, var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -129,11 +129,11 @@ public class CharacterVariablesDAO {
     PreparedStatement statement = null;
 
     try {
-      statement = con.prepareStatement("DELETE FROM character_variables WHERE obj_id=?");
+      statement = con.prepareStatement(DELETE_VARS);
       statement.setInt(1, objectId);
       statement.execute();
     } catch (Exception var8) {
-      _log.error("CharacterVariablesDAO.deleteVar(int): " + var8, var8);
+      log.error("CharacterVariablesDAO.deleteVar(int): " + var8, var8);
     } finally {
       DbUtils.closeQuietly(statement);
     }
@@ -147,7 +147,7 @@ public class CharacterVariablesDAO {
 
     try {
       con = DatabaseFactory.getInstance().getConnection();
-      statement = con.prepareStatement("SELECT name,value FROM character_variables WHERE obj_id=?");
+      statement = con.prepareStatement(LOAD_VARS);
       statement.setInt(1, objectId);
       rs = statement.executeQuery();
 
@@ -157,7 +157,7 @@ public class CharacterVariablesDAO {
         vars.put(name, value);
       }
     } catch (Exception var11) {
-      _log.error("CharacterVariablesDAO.loadVariables(int,MultiValueSet<String>): " + var11, var11);
+      log.error("CharacterVariablesDAO.loadVariables(int,MultiValueSet<String>): " + var11, var11);
     } finally {
       DbUtils.closeQuietly(con, statement, rs);
     }

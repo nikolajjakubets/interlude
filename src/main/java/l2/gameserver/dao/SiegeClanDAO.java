@@ -5,26 +5,29 @@
 
 package l2.gameserver.dao;
 
+import l2.commons.dbutils.DbUtils;
+import l2.gameserver.database.DatabaseFactory;
+import l2.gameserver.model.entity.events.objects.SiegeClanObject;
+import l2.gameserver.model.entity.residence.Residence;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import l2.commons.dbutils.DbUtils;
-import l2.gameserver.database.DatabaseFactory;
-import l2.gameserver.model.entity.events.objects.SiegeClanObject;
-import l2.gameserver.model.entity.residence.Residence;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class SiegeClanDAO {
   public static final String SELECT_SQL_QUERY = "SELECT clan_id, param, date FROM siege_clans WHERE residence_id=? AND type=? ORDER BY date";
   public static final String INSERT_SQL_QUERY = "INSERT INTO siege_clans(residence_id, clan_id, param, type, date) VALUES (?, ?, ?, ?, ?)";
   public static final String UPDATE_SQL_QUERY = "UPDATE siege_clans SET type=?, param=? WHERE residence_id=? AND clan_id=?";
   public static final String DELETE_SQL_QUERY = "DELETE FROM siege_clans WHERE residence_id=? AND clan_id=? AND type=?";
   public static final String DELETE_SQL_QUERY2 = "DELETE FROM siege_clans WHERE residence_id=?";
-  private static final Logger _log = LoggerFactory.getLogger(SiegeClanDAO.class);
+  private static final Logger log = LoggerFactory.getLogger(SiegeClanDAO.class);
   private static final SiegeClanDAO _instance = new SiegeClanDAO();
 
   public SiegeClanDAO() {
@@ -54,18 +57,18 @@ public class SiegeClanDAO {
         long date = rset.getLong("date");
         SiegeClanObject object = residence.getSiegeEvent().newSiegeClan(name, clanId, param, date);
         if (object != null) {
-          ((List)siegeClans).add(object);
+          siegeClans.add(object);
         } else {
-          _log.info("SiegeClanDAO#load(Residence, String): null clan: " + clanId + "; residence: " + residence.getId());
+          log.info("SiegeClanDAO#load(Residence, String): null clan: " + clanId + "; residence: " + residence.getId());
         }
       }
     } catch (Exception var16) {
-      _log.warn("SiegeClanDAO#load(Residence, String): " + var16, var16);
+      log.warn("SiegeClanDAO#load(Residence, String): " + var16, var16);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
 
-    return (List)siegeClans;
+    return siegeClans;
   }
 
   public void insert(Residence residence, SiegeClanObject siegeClan) {
@@ -82,7 +85,7 @@ public class SiegeClanDAO {
       statement.setLong(5, siegeClan.getDate());
       statement.execute();
     } catch (Exception var9) {
-      _log.warn("SiegeClanDAO#insert(Residence, SiegeClan): " + var9, var9);
+      log.warn("SiegeClanDAO#insert(Residence, SiegeClan): " + var9, var9);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -101,7 +104,7 @@ public class SiegeClanDAO {
       statement.setString(3, siegeClan.getType());
       statement.execute();
     } catch (Exception var9) {
-      _log.warn("SiegeClanDAO#delete(Residence, SiegeClan): " + var9, var9);
+      log.warn("SiegeClanDAO#delete(Residence, SiegeClan): " + var9, var9);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -118,7 +121,7 @@ public class SiegeClanDAO {
       statement.setInt(1, residence.getId());
       statement.execute();
     } catch (Exception var8) {
-      _log.warn("SiegeClanDAO#delete(Residence): " + var8, var8);
+      log.warn("SiegeClanDAO#delete(Residence): " + var8, var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -138,7 +141,7 @@ public class SiegeClanDAO {
       statement.setInt(4, siegeClan.getObjectId());
       statement.execute();
     } catch (Exception var9) {
-      _log.warn("SiegeClanDAO#update(Residence, SiegeClan): " + var9, var9);
+      log.warn("SiegeClanDAO#update(Residence, SiegeClan): " + var9, var9);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }

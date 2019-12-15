@@ -5,10 +5,6 @@
 
 package l2.gameserver;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Timer;
-import java.util.TimerTask;
 import l2.commons.net.nio.impl.SelectorThread;
 import l2.commons.time.cron.SchedulingPattern;
 import l2.commons.time.cron.SchedulingPattern.InvalidPatternException;
@@ -21,19 +17,21 @@ import l2.gameserver.model.GameObjectsStorage;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.entity.SevenSigns;
 import l2.gameserver.model.entity.SevenSignsFestival.SevenSignsFestival;
-import l2.gameserver.model.entity.oly.HeroController;
-import l2.gameserver.model.entity.oly.NoblesController;
-import l2.gameserver.model.entity.oly.OlyController;
-import l2.gameserver.model.entity.oly.ParticipantPool;
-import l2.gameserver.model.entity.oly.StadiumPool;
+import l2.gameserver.model.entity.oly.*;
 import l2.gameserver.model.entity.residence.Residence;
 import l2.gameserver.network.authcomm.AuthServerCommunication;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.scripts.Scripts;
 import l2.gameserver.utils.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.Timer;
+import java.util.TimerTask;
+
+@Slf4j
 public class Shutdown extends Thread {
   private static final Logger _log = LoggerFactory.getLogger(Shutdown.class);
   public static final int SHUTDOWN = 0;
@@ -80,11 +78,12 @@ public class Shutdown extends Thread {
     SchedulingPattern cronTime;
     try {
       cronTime = new SchedulingPattern(time);
-    } catch (InvalidPatternException var5) {
+    } catch (InvalidPatternException e) {
+      log.error("schedule: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
       return;
     }
 
-    int seconds = (int)(cronTime.next(System.currentTimeMillis()) / 1000L - System.currentTimeMillis() / 1000L);
+    int seconds = (int) (cronTime.next(System.currentTimeMillis()) / 1000L - System.currentTimeMillis() / 1000L);
     this.schedule(seconds, shutdownMode);
   }
 
@@ -113,30 +112,27 @@ public class Shutdown extends Thread {
         StadiumPool.getInstance().FreeStadiums();
         OlyController.getInstance().shutdown();
         System.out.println("Olympiad System: Oly cleaned and data saved!");
-      } catch (Exception var9) {
-        var9.printStackTrace();
+      } catch (Exception e) {
+        log.error("run: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
       }
     }
 
     try {
       System.out.println("Shutting down thread pool...");
       ThreadPoolManager.getInstance().shutdown();
-    } catch (Exception var8) {
-      var8.printStackTrace();
+    } catch (Exception e) {
+      log.error("run: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     }
 
     System.out.println("Shutting down selector...");
     if (GameServer.getInstance() != null) {
       SelectorThread[] var1 = GameServer.getInstance().getSelectorThreads();
-      int var2 = var1.length;
 
-      for(int var3 = 0; var3 < var2; ++var3) {
-        SelectorThread st = var1[var3];
-
+      for (SelectorThread st : var1) {
         try {
           st.shutdown();
-        } catch (Exception var7) {
-          var7.printStackTrace();
+        } catch (Exception e) {
+          log.error("run: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         }
       }
     }
@@ -144,8 +140,9 @@ public class Shutdown extends Thread {
     try {
       System.out.println("Shutting down database communication...");
       DatabaseFactory.getInstance().shutdown();
-    } catch (Exception var6) {
-      var6.printStackTrace();
+    } catch (Exception e) {
+      log.error("run: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+
     }
 
     System.out.println("Shutdown finished.");
@@ -157,76 +154,78 @@ public class Shutdown extends Thread {
         SevenSignsFestival.getInstance().saveFestivalData(false);
         System.out.println("SevenSignsFestival: Data saved.");
       }
-    } catch (Exception var9) {
-      var9.printStackTrace();
+    } catch (Exception e) {
+      log.error("saveData: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+
     }
 
     try {
       SevenSigns.getInstance().saveSevenSignsData(0, true);
       System.out.println("SevenSigns: Data saved.");
-    } catch (Exception var8) {
-      var8.printStackTrace();
+    } catch (Exception e) {
+      log.error("saveData: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+
     }
 
     if (Config.ALLOW_WEDDING) {
       try {
         CoupleManager.getInstance().store();
         System.out.println("CoupleManager: Data saved.");
-      } catch (Exception var7) {
-        var7.printStackTrace();
+      } catch (Exception e) {
+        log.error("saveData: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+
       }
     }
 
     try {
       FishingChampionShipManager.getInstance().shutdown();
       System.out.println("FishingChampionShipManager: Data saved.");
-    } catch (Exception var6) {
-      var6.printStackTrace();
+    } catch (Exception e) {
+      log.error("saveData: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+
     }
 
     try {
       HeroController.getInstance().saveHeroes();
       System.out.println("Hero: Data saved.");
-    } catch (Exception var5) {
-      var5.printStackTrace();
+    } catch (Exception e) {
+      log.error("saveData: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+
     }
 
     try {
       Collection<Residence> residences = ResidenceHolder.getInstance().getResidences();
-      Iterator var2 = residences.iterator();
 
-      while(var2.hasNext()) {
-        Residence residence = (Residence)var2.next();
+      for (Residence residence : residences) {
         residence.update();
       }
 
       System.out.println("Residences: Data saved.");
-    } catch (Exception var10) {
-      var10.printStackTrace();
+    } catch (Exception e) {
+      log.error("saveData: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+
     }
 
     if (Config.ALLOW_CURSED_WEAPONS) {
       try {
         CursedWeaponsManager.getInstance().saveData();
         System.out.println("CursedWeaponsManager: Data saved,");
-      } catch (Exception var4) {
-        var4.printStackTrace();
+      } catch (Exception e) {
+        log.error("saveData: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
+
       }
     }
 
   }
 
   private void disconnectAllPlayers() {
-    Iterator var1 = GameObjectsStorage.getAllPlayersForIterate().iterator();
 
-    while(var1.hasNext()) {
-      Player player = (Player)var1.next();
-
+    for (Player player : GameObjectsStorage.getAllPlayersForIterate()) {
       try {
         player.logout();
-      } catch (Exception var4) {
+      } catch (Exception e) {
+        log.error("disconnectAllPlayers: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         System.out.println("Error while disconnecting: " + player + "!");
-        var4.printStackTrace();
       }
     }
 
@@ -237,9 +236,9 @@ public class Shutdown extends Thread {
     }
 
     public void run() {
-      switch(Shutdown.this.shutdownCounter) {
+      switch (Shutdown.this.shutdownCounter) {
         case 0:
-          switch(Shutdown.this.shutdownMode) {
+          switch (Shutdown.this.shutdownMode) {
             case 0:
               Runtime.getRuntime().exit(0);
               break;
@@ -263,7 +262,7 @@ public class Shutdown extends Thread {
         case 600:
         case 900:
         case 1800:
-          switch(Shutdown.this.shutdownMode) {
+          switch (Shutdown.this.shutdownMode) {
             case 0:
               Announcements.getInstance().announceByCustomMessage("THE_SERVER_WILL_BE_COMING_DOWN_IN_S1_MINUTES", new String[]{String.valueOf(Shutdown.this.shutdownCounter / 60)});
               break;

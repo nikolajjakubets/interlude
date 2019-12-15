@@ -5,18 +5,18 @@
 
 package l2.gameserver.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import l2.commons.dao.JdbcEntityState;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.entity.residence.ClanHall;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+@Slf4j
 public class ClanHallDAO {
-  private static final Logger _log = LoggerFactory.getLogger(ClanHallDAO.class);
   private static final ClanHallDAO _instance = new ClanHallDAO();
   public static final String SELECT_SQL_QUERY = "SELECT siege_date, own_date, last_siege_date, auction_desc, auction_length, auction_min_bid, cycle, paid_cycle FROM clanhall WHERE id = ?";
   public static final String UPDATE_SQL_QUERY = "UPDATE clanhall SET siege_date=?, last_siege_date=?, own_date=?, auction_desc=?, auction_length=?, auction_min_bid=?, cycle=?, paid_cycle=? WHERE id=?";
@@ -49,7 +49,7 @@ public class ClanHallDAO {
         clanHall.setPaidCycle(rset.getInt("paid_cycle"));
       }
     } catch (Exception var9) {
-      _log.error("ClanHallDAO.select(ClanHall):" + var9, var9);
+      log.error("ClanHallDAO.select(ClanHall):" + var9, var9);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -81,7 +81,7 @@ public class ClanHallDAO {
       statement.setInt(9, c.getId());
       statement.execute();
     } catch (Exception var8) {
-      _log.warn("ClanHallDAO#update0(ClanHall): " + var8, var8);
+      log.error("ClanHallDAO#update0(ClanHall): " + var8, var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
