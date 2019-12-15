@@ -25,7 +25,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Slf4j
 public class GameServerManager {
     private static final GameServerManager INSTANCE = new GameServerManager();
-    private final Map<Integer, GameServer> gameServers = new TreeMap<Integer, GameServer>();
+  private final Map<Integer, GameServer> gameServers = new TreeMap<>();
     private final Map<Integer, List<ProxyServer>> gameServerProxys = new TreeMap<Integer, List<ProxyServer>>();
     private final Map<Integer, ProxyServer> _proxyServers = new TreeMap<Integer, ProxyServer>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -69,7 +69,7 @@ public class GameServerManager {
                 this.gameServers.put(id, gs);
             }
         } catch (Exception e) {
-            log.error("restore: eMessage={}, eClass={}", e.getMessage(), e.getClass());
+          log.error("loadGameServers: eMessage={}, eClass={}", e.getMessage(), e.getClass());
         } finally {
             DbUtils.closeQuietly(con, statement, rset);
         }
@@ -94,12 +94,9 @@ public class GameServerManager {
                 }
 
                 ps.setProxyPort(psc.getProxyPort());
-                List<ProxyServer> proxyList = this.gameServerProxys.get(ps.getOrigServerId());
-                if (proxyList == null) {
-                    this.gameServerProxys.put(ps.getOrigServerId(), proxyList = new LinkedList<ProxyServer>());
-                }
+              List<ProxyServer> proxyList = this.gameServerProxys.computeIfAbsent(ps.getOrigServerId(), k -> new LinkedList<>());
 
-                proxyList.add(ps);
+              proxyList.add(ps);
                 this._proxyServers.put(ps.getProxyServerId(), ps);
             }
         }
@@ -118,14 +115,14 @@ public class GameServerManager {
     public GameServer[] getGameServers() {
         this._readLock.lock();
 
-        GameServer[] var1;
+      GameServer[] gameServerListForResponse;
         try {
-            var1 = this.gameServers.values().toArray(new GameServer[0]);
+          gameServerListForResponse = this.gameServers.values().toArray(new GameServer[0]);
         } finally {
             this._readLock.unlock();
         }
 
-        return var1;
+      return gameServerListForResponse;
     }
 
     public GameServer getGameServerById(int id) {

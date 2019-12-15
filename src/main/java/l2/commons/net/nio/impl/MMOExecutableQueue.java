@@ -21,7 +21,7 @@ public class MMOExecutableQueue<T extends MMOClient> implements Queue<Receivable
 
     public MMOExecutableQueue(IMMOExecutor<T> executor) {
         this._executor = executor;
-        this._queue = new ArrayDeque();
+      this._queue = new ArrayDeque<>();
     }
 
     public void run() {
@@ -118,25 +118,25 @@ public class MMOExecutableQueue<T extends MMOClient> implements Queue<Receivable
 
     public ReceivablePacket<T> remove() {
         synchronized(this._queue) {
-            return (ReceivablePacket)this._queue.remove();
+          return this._queue.remove();
         }
     }
 
     public ReceivablePacket<T> poll() {
         synchronized(this._queue) {
-            return (ReceivablePacket)this._queue.poll();
+          return this._queue.poll();
         }
     }
 
     public ReceivablePacket<T> element() {
         synchronized(this._queue) {
-            return (ReceivablePacket)this._queue.element();
+          return this._queue.element();
         }
     }
 
     public ReceivablePacket<T> peek() {
         synchronized(this._queue) {
-            return (ReceivablePacket)this._queue.peek();
+          return this._queue.peek();
         }
     }
 }

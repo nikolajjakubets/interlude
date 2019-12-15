@@ -16,7 +16,7 @@ public class PlayerInGame extends ReceivablePacket {
     protected void runImpl() {
         GameServer gs = this.getGameServer();
         if (gs.isAuthed()) {
-            gs.addAccount(this.account);
+          gs.addAccount();
         }
     }
 }

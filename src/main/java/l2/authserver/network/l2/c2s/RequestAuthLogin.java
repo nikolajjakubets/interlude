@@ -84,12 +84,16 @@ public class RequestAuthLogin extends L2LoginClientPacket {
     if (!IpBanManager.getInstance().tryLogin(client.getIpAddress(), passwordCorrect)) {
       client.closeNow(false);
     } else if (!passwordCorrect) {
+      log.warn("runImpl: REASON_USER_OR_PASS_WRONG");
       client.close(LoginFailReason.REASON_USER_OR_PASS_WRONG);
     } else if (account.getAccessLevel() < 0) {
+      log.warn("runImpl: REASON_ACCESS_FAILED");
       client.close(LoginFailReason.REASON_ACCESS_FAILED);
     } else if (account.getBanExpire() > currentTime) {
+      log.warn("runImpl: user is banned");
       client.close(LoginFailReason.REASON_ACCESS_FAILED);
     } else if (!account.isAllowedIP(client.getIpAddress())) {
+      log.warn("runImpl: REASON_ATTEMPTED_RESTRICTED_IP");
       client.close(LoginFailReason.REASON_ATTEMPTED_RESTRICTED_IP);
     } else {
       account.setLastAccess(currentTime);
