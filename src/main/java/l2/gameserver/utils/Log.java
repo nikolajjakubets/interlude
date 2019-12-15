@@ -227,7 +227,7 @@ public class Log {
         sb.append("Event: ").append(paramId);
     }
 
-    _logItems.info(sb.toString());
+    _logItems.debug(sb.toString());
   }
 
   public static void LogPetition(Player fromChar, Integer Petition_type, String Petition_text) {
