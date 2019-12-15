@@ -1,10 +1,10 @@
 package l2.authserver.network.l2;
 
 import l2.authserver.network.l2.L2LoginClient.LoginClientState;
-import l2.authserver.network.l2.c2s.AuthGameGuard;
-import l2.authserver.network.l2.c2s.RequestAuthLogin;
-import l2.authserver.network.l2.c2s.RequestServerList;
-import l2.authserver.network.l2.c2s.RequestServerLogin;
+import l2.authserver.network.l2.request.AuthGameGuard;
+import l2.authserver.network.l2.request.RequestAuthLogin;
+import l2.authserver.network.l2.request.RequestServerList;
+import l2.authserver.network.l2.request.RequestServerLogin;
 import l2.commons.net.nio.impl.IPacketHandler;
 import l2.commons.net.nio.impl.ReceivablePacket;
 

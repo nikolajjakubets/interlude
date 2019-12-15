@@ -96,7 +96,7 @@ public class GameServer {
     this.setOnline(false);
   }
 
-  public String getName() {
+  public String getServerName() {
     return Config.SERVER_NAMES.get(this.getId());
   }
 

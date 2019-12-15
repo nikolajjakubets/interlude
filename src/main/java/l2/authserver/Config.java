@@ -43,7 +43,7 @@ public class Config {
   public static boolean AUTO_CREATE_ACCOUNTS;
   public static String ANAME_TEMPLATE;
   public static String APASSWD_TEMPLATE;
-  public static final Map<Integer, String> SERVER_NAMES = new HashMap<Integer, String>();
+  public static final Map<Integer, String> SERVER_NAMES = new HashMap<>();
   public static final long LOGIN_TIMEOUT = 60000L;
   public static int LOGIN_TRY_BEFORE_BAN;
   public static long LOGIN_TRY_TIMEOUT;

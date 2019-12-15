@@ -21,7 +21,7 @@ public class PingResponse extends ReceivablePacket {
             gameServer.getConnection().onPingResponse();
             long diff = System.currentTimeMillis() - this.serverTime;
             if (Math.abs(diff) > 999L) {
-                log.warn("runImpl: GameServerId={}  serverName={}", gameServer.getId(), gameServer.getName());
+              log.warn("runImpl: GameServerId={}  serverName={}", gameServer.getId(), gameServer.getServerName());
                 log.warn("runImpl: time offset ={} ms ] ", diff);
             }
 

@@ -1,4 +1,4 @@
-package l2.authserver.network.l2.c2s;
+package l2.authserver.network.l2.request;
 
 import l2.authserver.Config;
 import l2.authserver.IpBanManager;

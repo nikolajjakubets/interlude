@@ -1,4 +1,4 @@
-package l2.authserver.network.l2.c2s;
+package l2.authserver.network.l2.request;
 
 import l2.authserver.network.l2.L2LoginClient;
 import l2.commons.net.nio.impl.ReceivablePacket;

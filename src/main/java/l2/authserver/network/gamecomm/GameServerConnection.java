@@ -102,7 +102,7 @@ public class GameServerConnection {
 
             this.isPengingWrite.set(false);
             if (this.gameServer != null && this.gameServer.isAuthed()) {
-                log.info("Connection with gameserver " + this.gameServer.getId() + " [" + this.gameServer.getName() + "] lost.");
+              log.info("Connection with gameserver " + this.gameServer.getId() + " [" + this.gameServer.getServerName() + "] lost.");
                 log.info("Setting gameserver down. All proxies will be down as well.");
                 this.gameServer.setDown();
             }
@@ -154,7 +154,7 @@ public class GameServerConnection {
 
         public void runImpl() {
             if (Config.GAME_SERVER_PING_RETRY > 0 && GameServerConnection.this._pingRetry > Config.GAME_SERVER_PING_RETRY) {
-                _log.warn("Gameserver " + GameServerConnection.this.gameServer.getId() + " [" + GameServerConnection.this.gameServer.getName() + "] : ping timeout!");
+              _log.warn("Gameserver " + GameServerConnection.this.gameServer.getId() + " [" + GameServerConnection.this.gameServer.getServerName() + "] : ping timeout!");
                 GameServerConnection.this.closeNow();
             } else {
                 GameServerConnection.this._pingRetry++;

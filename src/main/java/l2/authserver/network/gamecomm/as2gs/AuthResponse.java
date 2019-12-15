@@ -9,7 +9,7 @@ public class AuthResponse extends SendablePacket {
 
     public AuthResponse(GameServer gs) {
         this.serverId = gs.getId();
-        this.name = gs.getName();
+      this.name = gs.getServerName();
     }
 
     protected void writeImpl() {
