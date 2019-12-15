@@ -5,12 +5,6 @@
 
 package l2.gameserver.model.instances;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import l2.commons.geometry.Shape;
 import l2.commons.listener.Listener;
 import l2.commons.threading.RunnableImpl;
@@ -29,17 +23,20 @@ import l2.gameserver.model.World;
 import l2.gameserver.model.entity.SevenSigns;
 import l2.gameserver.model.entity.events.impl.SiegeEvent;
 import l2.gameserver.model.items.ItemInstance;
-import l2.gameserver.network.l2.s2c.DoorInfo;
-import l2.gameserver.network.l2.s2c.DoorStatusUpdate;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
-import l2.gameserver.network.l2.s2c.MyTargetSelected;
-import l2.gameserver.network.l2.s2c.ValidateLocation;
+import l2.gameserver.network.l2.s2c.*;
 import l2.gameserver.scripts.Events;
 import l2.gameserver.templates.DoorTemplate;
 import l2.gameserver.templates.DoorTemplate.DoorType;
 import l2.gameserver.templates.item.WeaponTemplate;
 import l2.gameserver.utils.Location;
 import l2.gameserver.utils.Log;
+
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class DoorInstance extends Creature implements GeoCollision {
   private boolean _open = true;
@@ -102,7 +99,7 @@ public final class DoorInstance extends Creature implements GeoCollision {
 
   public boolean isAttackable(Creature attacker) {
     if (attacker != null && !this.isOpen()) {
-      SiegeEvent siegeEvent = (SiegeEvent)this.getEvent(SiegeEvent.class);
+      SiegeEvent siegeEvent = this.getEvent(SiegeEvent.class);
       return !this.isInvul();
     } else {
       return false;
@@ -193,7 +190,7 @@ public final class DoorInstance extends Creature implements GeoCollision {
   }
 
   public boolean openMe() {
-    return this.openMe((Player)null, true);
+    return this.openMe(null, true);
   }
 
   public boolean openMe(Player opener, boolean autoClose) {
@@ -234,7 +231,7 @@ public final class DoorInstance extends Creature implements GeoCollision {
   }
 
   public boolean closeMe() {
-    return this.closeMe((Player)null, true);
+    return this.closeMe(null, true);
   }
 
   public boolean closeMe(Player closer, boolean autoOpen) {
@@ -270,12 +267,10 @@ public final class DoorInstance extends Creature implements GeoCollision {
       }
 
       this.getAI().onEvtClose(closer);
-      Iterator var8 = this.getListeners().getListeners().iterator();
 
-      while(var8.hasNext()) {
-        Listener<Creature> l = (Listener)var8.next();
-        if (l instanceof OnOpenCloseListener) {
-          ((OnOpenCloseListener)l).onClose(this);
+      for (Listener<Creature> creatureListener : this.getListeners().getListeners()) {
+        if (creatureListener instanceof OnOpenCloseListener) {
+          ((OnOpenCloseListener) creatureListener).onClose(this);
         }
       }
 
@@ -296,7 +291,7 @@ public final class DoorInstance extends Creature implements GeoCollision {
       this._openLock.unlock();
     }
 
-    SiegeEvent siegeEvent = (SiegeEvent)this.getEvent(SiegeEvent.class);
+    SiegeEvent siegeEvent = this.getEvent(SiegeEvent.class);
     if (siegeEvent != null && siegeEvent.isInProgress()) {
       Log.add(this.toString(), this.getDoorType() + " destroyed by " + killer + ", " + siegeEvent);
     }
@@ -320,8 +315,8 @@ public final class DoorInstance extends Creature implements GeoCollision {
 
   protected void onSpawn() {
     super.onSpawn();
-    this.setCurrentHpMp((double)this.getMaxHp(), (double)this.getMaxMp(), true);
-    this.closeMe((Player)null, true);
+    this.setCurrentHpMp(this.getMaxHp(), this.getMaxMp(), true);
+    this.closeMe(null, true);
   }
 
   protected void onDespawn() {
@@ -376,7 +371,7 @@ public final class DoorInstance extends Creature implements GeoCollision {
       return true;
     } else {
       SiegeEvent<?, ?> siegeEvent = (SiegeEvent)this.getEvent(SiegeEvent.class);
-      return siegeEvent != null && siegeEvent.isInProgress() ? false : super.isInvul();
+      return (siegeEvent == null || !siegeEvent.isInProgress()) && super.isInvul();
     }
   }
 
@@ -470,9 +465,9 @@ public final class DoorInstance extends Creature implements GeoCollision {
 
     public void runImpl() throws Exception {
       if (this._open) {
-        DoorInstance.this.openMe((Player)null, true);
+        DoorInstance.this.openMe(null, true);
       } else {
-        DoorInstance.this.closeMe((Player)null, true);
+        DoorInstance.this.closeMe(null, true);
       }
 
     }

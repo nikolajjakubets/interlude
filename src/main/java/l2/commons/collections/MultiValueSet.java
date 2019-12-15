@@ -114,9 +114,9 @@ public class MultiValueSet<T> extends HashMap<T, Object> {
   }
 
   public int[] getIntegerArray(T key) {
-    Object val = this.get(key);
+    var val = this.get(key);
     if (val instanceof int[]) {
-      return (int[]) ((int[]) val);
+      return (int[]) val;
     } else if (val instanceof Number) {
       return new int[]{((Number) val).intValue()};
     } else if (!(val instanceof String)) {
