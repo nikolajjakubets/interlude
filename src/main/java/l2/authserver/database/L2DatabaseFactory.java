@@ -14,6 +14,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static l2.authserver.Config.*;
+
 @Slf4j
 public class L2DatabaseFactory extends BaseDataConnectionFactory {
   private static L2DatabaseFactory l2DatabaseFactory;
@@ -31,25 +33,23 @@ public class L2DatabaseFactory extends BaseDataConnectionFactory {
   }
 
   private static ConnectionPoolDataSource makeConnectionPoolDataSource() {
-    MysqlConnectionPoolDataSource ds = new MysqlConnectionPoolDataSource();
-    ds.setServerName("localhost");
-    ds.setPort(3306);
-    ds.setDatabaseName("l2_interlude");
-    ds.setUser("root");
+    var mysqlDB = new MysqlConnectionPoolDataSource();
+    mysqlDB.setServerName(DATABASE_HOST);
+    mysqlDB.setPort(DATABASE_PORT);
+    mysqlDB.setDatabaseName(DATABASE_NAME);
+    mysqlDB.setUser(DATABASE_USER);
     try {
-      ds.setPasswordCharacterEncoding("UTF-8");
-      ds.setPassword("1234");
-      ds.setAutoReconnect(true);
-      ds.setServerTimezone("UTC");
+      mysqlDB.setPasswordCharacterEncoding("UTF-8");
+      mysqlDB.setPassword(DATABASE_PASS);
+      mysqlDB.setAutoReconnect(true);
+      mysqlDB.setServerTimezone("UTC");
 //        ds.setAutoReconnectForConnectionPools(true);
-      ds.setAutoReconnectForPools(true);
+      mysqlDB.setAutoReconnectForPools(true);
     } catch (SQLException e) {
       e.printStackTrace();
       log.error("makeConnectionPoolDataSource: eMessage={}, eCause={}", e.getMessage(), e.getCause());
     }
-//        ds.setUseUnicode(true);
-//        ds.setEncoding("UTF-8");
-    return ds;
+    return mysqlDB;
   }
 
   protected void testDB() throws SQLException {
@@ -69,7 +69,6 @@ public class L2DatabaseFactory extends BaseDataConnectionFactory {
         } catch (SQLException e) {
           log.error("addTestTask: eMessage={}, eClass={}, eCause={}", e.getMessage(), e.getClass(), this.getClass().getSimpleName());
         }
-
       }
     }, 240000L, 240000L);
   }
