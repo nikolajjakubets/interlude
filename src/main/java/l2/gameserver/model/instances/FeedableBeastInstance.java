@@ -7,8 +7,6 @@ package l2.gameserver.model.instances;
 
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntObjectHashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import l2.commons.threading.RunnableImpl;
 import l2.commons.util.Rnd;
 import l2.gameserver.ThreadPoolManager;
@@ -18,15 +16,16 @@ import l2.gameserver.idfactory.IdFactory;
 import l2.gameserver.model.Creature;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.quest.QuestState;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.SocialAction;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.utils.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Slf4j
 public class FeedableBeastInstance extends MonsterInstance {
-  private static final Logger _log = LoggerFactory.getLogger(NpcInstance.class);
   private static int GOLDEN_SPICE = 0;
   private static int CRYSTAL_SPICE = 1;
   private static int SKILL_GOLDEN_SPICE = 2188;
@@ -51,7 +50,7 @@ public class FeedableBeastInstance extends MonsterInstance {
   public int getItemIdBySkillId(int skillId) {
 //    int itemId = false;
     short itemId;
-    switch(skillId) {
+    switch (skillId) {
       case 2188:
         itemId = 6643;
         break;
@@ -121,12 +120,12 @@ public class FeedableBeastInstance extends MonsterInstance {
 
   public MonsterInstance spawn(int npcId, int x, int y, int z) {
     try {
-      MonsterInstance monster = (MonsterInstance)NpcHolder.getInstance().getTemplate(npcId).getInstanceConstructor().newInstance(IdFactory.getInstance().getNextId(), NpcHolder.getInstance().getTemplate(npcId));
+      MonsterInstance monster = (MonsterInstance) NpcHolder.getInstance().getTemplate(npcId).getInstanceConstructor().newInstance(IdFactory.getInstance().getNextId(), NpcHolder.getInstance().getTemplate(npcId));
       monster.setSpawnedLoc(new Location(x, y, z));
       monster.spawnMe(monster.getSpawnedLoc());
       return monster;
     } catch (Exception var6) {
-      _log.error("Could not spawn Npc " + npcId, var6);
+      log.error("Could not spawn Npc " + npcId, var6);
       return null;
     }
   }
@@ -213,23 +212,23 @@ public class FeedableBeastInstance extends MonsterInstance {
     growthCapableMobs.put(21505, new FeedableBeastInstance.growthInfo(2, new int[][]{new int[0], {21507, 16016}}, 25));
 
     Integer i;
-    for(i = 16013; i <= 16018; i = i + 1) {
+    for (i = 16013; i <= 16018; i = i + 1) {
       tamedBeasts.add(i);
     }
 
-    for(i = 16013; i <= 16019; i = i + 1) {
+    for (i = 16013; i <= 16019; i = i + 1) {
       feedableBeasts.add(i);
     }
 
-    for(i = 21451; i <= 21507; i = i + 1) {
+    for (i = 21451; i <= 21507; i = i + 1) {
       feedableBeasts.add(i);
     }
 
-    for(i = 21824; i <= 21829; i = i + 1) {
+    for (i = 21824; i <= 21829; i = i + 1) {
       feedableBeasts.add(i);
     }
 
-    feedInfo = new ConcurrentHashMap();
+    feedInfo = new ConcurrentHashMap<>();
   }
 
   public static class AggrPlayer extends RunnableImpl {

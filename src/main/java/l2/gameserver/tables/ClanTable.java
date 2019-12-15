@@ -5,17 +5,6 @@
 
 package l2.gameserver.tables;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.Config;
 import l2.gameserver.cache.Msg;
@@ -29,22 +18,27 @@ import l2.gameserver.model.pledge.Alliance;
 import l2.gameserver.model.pledge.Clan;
 import l2.gameserver.model.pledge.SubUnit;
 import l2.gameserver.model.pledge.UnitMember;
-import l2.gameserver.network.l2.components.IStaticPacket;
 import l2.gameserver.network.l2.components.SystemMsg;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.PledgeShowMemberListDeleteAll;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.network.l2.s2c.SystemMessage2;
 import l2.gameserver.utils.SiegeUtils;
 import l2.gameserver.utils.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Slf4j
 public class ClanTable {
-  private static final Logger _log = LoggerFactory.getLogger(ClanTable.class);
   private static ClanTable _instance;
-  private final Map<Integer, Clan> _clans = new ConcurrentHashMap();
-  private final Map<Integer, Alliance> _alliances = new ConcurrentHashMap();
+  private final Map<Integer, Clan> _clans = new ConcurrentHashMap<>();
+  private final Map<Integer, Alliance> _alliances = new ConcurrentHashMap<>();
   private Clan _npcClan;
   private static final List<Skill> FULL_CLAN_SKILLS = Arrays.asList(SkillTable.getInstance().getInfo(370, 3), SkillTable.getInstance().getInfo(373, 3), SkillTable.getInstance().getInfo(379, 3), SkillTable.getInstance().getInfo(391, 1), SkillTable.getInstance().getInfo(371, 3), SkillTable.getInstance().getInfo(374, 3), SkillTable.getInstance().getInfo(376, 3), SkillTable.getInstance().getInfo(377, 3), SkillTable.getInstance().getInfo(383, 3), SkillTable.getInstance().getInfo(380, 3), SkillTable.getInstance().getInfo(382, 3), SkillTable.getInstance().getInfo(384, 3), SkillTable.getInstance().getInfo(385, 3), SkillTable.getInstance().getInfo(386, 3), SkillTable.getInstance().getInfo(387, 3), SkillTable.getInstance().getInfo(388, 3), SkillTable.getInstance().getInfo(390, 3), SkillTable.getInstance().getInfo(372, 3), SkillTable.getInstance().getInfo(375, 3), SkillTable.getInstance().getInfo(378, 3), SkillTable.getInstance().getInfo(381, 3), SkillTable.getInstance().getInfo(389, 3));
 
@@ -57,11 +51,11 @@ public class ClanTable {
   }
 
   public Clan[] getClans() {
-    return (Clan[])this._clans.values().toArray(new Clan[this._clans.size()]);
+    return this._clans.values().toArray(new Clan[0]);
   }
 
   public Alliance[] getAlliances() {
-    return (Alliance[])this._alliances.values().toArray(new Alliance[this._alliances.size()]);
+    return this._alliances.values().toArray(new Alliance[0]);
   }
 
   private ClanTable() {
@@ -75,7 +69,7 @@ public class ClanTable {
     if (clanId <= 0) {
       return null;
     } else {
-      return Config.ALT_NPC_CLAN == clanId ? this._npcClan : (Clan)this._clans.get(clanId);
+      return Config.ALT_NPC_CLAN == clanId ? this._npcClan : this._clans.get(clanId);
     }
   }
 
@@ -91,7 +85,7 @@ public class ClanTable {
       Clan[] var2 = this.getClans();
       int var3 = var2.length;
 
-      for(int var4 = 0; var4 < var3; ++var4) {
+      for (int var4 = 0; var4 < var3; ++var4) {
         Clan clan = var2[var4];
         if (clan != null && clan.isAnyMember(charId)) {
           return clan;
@@ -103,7 +97,7 @@ public class ClanTable {
   }
 
   public Alliance getAlliance(int allyId) {
-    return allyId <= 0 ? null : (Alliance)this._alliances.get(allyId);
+    return allyId <= 0 ? null : this._alliances.get(allyId);
   }
 
   public Alliance getAllianceByCharId(int charId) {
@@ -132,30 +126,30 @@ public class ClanTable {
       statement = con.prepareStatement("SELECT clan_id FROM clan_data");
       result = statement.executeQuery();
 
-      while(result.next()) {
+      while (result.next()) {
         clanIds.add(result.getInt("clan_id"));
       }
     } catch (Exception var10) {
-      _log.warn("Error while restoring clans!!! " + var10);
+      log.warn("Error while restoring clans!!! " + var10);
     } finally {
       DbUtils.closeQuietly(con, statement, result);
     }
 
     Iterator var5 = clanIds.iterator();
 
-    while(var5.hasNext()) {
-      int clanId = (Integer)var5.next();
+    while (var5.hasNext()) {
+      int clanId = (Integer) var5.next();
       Clan clan = Clan.restore(clanId);
       if (clan == null) {
-        _log.warn("Error while restoring clanId: " + clanId);
+        log.warn("Error while restoring clanId: " + clanId);
       } else if (clan.getAllSize() <= 0) {
-        _log.warn("membersCount = 0 for clanId: " + clanId);
+        log.warn("membersCount = 0 for clanId: " + clanId);
       } else if (clan.getLeader() == null) {
-        _log.warn("Not found leader for clanId: " + clanId);
+        log.warn("Not found leader for clanId: " + clanId);
       } else {
         this._clans.put(clan.getClanId(), clan);
         if (Config.ALT_NPC_CLAN > 0) {
-          this._npcClan = (Clan)this._clans.get(Config.ALT_NPC_CLAN);
+          this._npcClan = this._clans.get(Config.ALT_NPC_CLAN);
         }
       }
     }
@@ -173,24 +167,21 @@ public class ClanTable {
       statement = con.prepareStatement("SELECT ally_id FROM ally_data");
       result = statement.executeQuery();
 
-      while(result.next()) {
+      while (result.next()) {
         allyIds.add(result.getInt("ally_id"));
       }
     } catch (Exception var10) {
-      _log.warn("Error while restoring allies!!! " + var10);
+      log.warn("Error while restoring allies!!! " + var10);
     } finally {
       DbUtils.closeQuietly(con, statement, result);
     }
 
-    Iterator var5 = allyIds.iterator();
-
-    while(var5.hasNext()) {
-      int allyId = (Integer)var5.next();
+    for (int allyId : allyIds) {
       Alliance ally = new Alliance(allyId);
       if (ally.getMembersCount() <= 0) {
-        _log.warn("membersCount = 0 for allyId: " + allyId);
+        log.warn("membersCount = 0 for allyId: " + allyId);
       } else if (ally.getLeader() == null) {
-        _log.warn("Not found leader for allyId: " + allyId);
+        log.warn("Not found leader for allyId: " + allyId);
       } else {
         this._alliances.put(ally.getAllyId(), ally);
       }
@@ -210,8 +201,8 @@ public class ClanTable {
           return null;
         }
 
-        clan = (Clan)var2.next();
-      } while(!clan.getName().equalsIgnoreCase(clanName));
+        clan = (Clan) var2.next();
+      } while (!clan.getName().equalsIgnoreCase(clanName));
 
       return clan;
     }
@@ -229,8 +220,8 @@ public class ClanTable {
           return null;
         }
 
-        ally = (Alliance)var2.next();
-      } while(!ally.getAllyName().equalsIgnoreCase(allyName));
+        ally = (Alliance) var2.next();
+      } while (!ally.getAllyName().equalsIgnoreCase(allyName));
 
       return ally;
     }
@@ -258,10 +249,10 @@ public class ClanTable {
       if (Config.FULL_CLAN_SKILLS_ON_CREATE) {
         Iterator var6 = FULL_CLAN_SKILLS.iterator();
 
-        while(var6.hasNext()) {
-          Skill aNewClanSkill = (Skill)var6.next();
+        while (var6.hasNext()) {
+          Skill aNewClanSkill = (Skill) var6.next();
           clan.addSkill(aNewClanSkill, true);
-          clan.broadcastToOnlineMembers(new L2GameServerPacket[]{(new SystemMessage2(SystemMsg.THE_CLAN_SKILL_S1_HAS_BEEN_ADDED)).addSkillName(aNewClanSkill)});
+          clan.broadcastToOnlineMembers((new SystemMessage2(SystemMsg.THE_CLAN_SKILL_S1_HAS_BEEN_ADDED)).addSkillName(aNewClanSkill));
         }
       }
 
@@ -281,11 +272,11 @@ public class ClanTable {
 
     Iterator var6 = clan.getOnlineMembers(0).iterator();
 
-    while(var6.hasNext()) {
-      Player clanMember = (Player)var6.next();
-      clanMember.setClan((Clan)null);
+    while (var6.hasNext()) {
+      Player clanMember = (Player) var6.next();
+      clanMember.setClan(null);
       clanMember.setTitle("");
-      clanMember.sendPacket(new IStaticPacket[]{PledgeShowMemberListDeleteAll.STATIC, Msg.YOU_HAVE_RECENTLY_BEEN_DISMISSED_FROM_A_CLAN_YOU_ARE_NOT_ALLOWED_TO_JOIN_ANOTHER_CLAN_FOR_24_HOURS});
+      clanMember.sendPacket(PledgeShowMemberListDeleteAll.STATIC, Msg.YOU_HAVE_RECENTLY_BEEN_DISMISSED_FROM_A_CLAN_YOU_ARE_NOT_ALLOWED_TO_JOIN_ANOTHER_CLAN_FOR_24_HOURS);
       clanMember.broadcastCharInfo();
       clanMember.setLeaveClanTime(curtime);
     }
@@ -343,7 +334,7 @@ public class ClanTable {
       statement.execute();
       deleted = true;
     } catch (Exception var12) {
-      _log.warn("could not dissolve clan:" + var12);
+      log.warn("could not dissolve clan:" + var12);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -364,8 +355,8 @@ public class ClanTable {
       player.getClan().setAllyId(alliance.getAllyId());
       Iterator var5 = player.getClan().getOnlineMembers(0).iterator();
 
-      while(var5.hasNext()) {
-        Player temp = (Player)var5.next();
+      while (var5.hasNext()) {
+        Player temp = (Player) var5.next();
         temp.broadcastCharInfo();
       }
     }
@@ -378,11 +369,11 @@ public class ClanTable {
     Clan[] var3 = player.getAlliance().getMembers();
     int var4 = var3.length;
 
-    for(int var5 = 0; var5 < var4; ++var5) {
+    for (int var5 = 0; var5 < var4; ++var5) {
       Clan member = var3[var5];
       member.setAllyId(0);
       member.broadcastClanStatus(false, true, false);
-      member.broadcastToOnlineMembers(new L2GameServerPacket[]{Msg.YOU_HAVE_WITHDRAWN_FROM_THE_ALLIANCE});
+      member.broadcastToOnlineMembers(Msg.YOU_HAVE_WITHDRAWN_FROM_THE_ALLIANCE);
       member.setLeavedAlly();
     }
 
@@ -406,7 +397,7 @@ public class ClanTable {
       statement.setInt(1, allyId);
       statement.execute();
     } catch (Exception var8) {
-      _log.warn("could not dissolve clan:" + var8);
+      log.warn("could not dissolve clan:" + var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -428,13 +419,13 @@ public class ClanTable {
       statement.setInt(2, clan2.getClanId());
       statement.execute();
     } catch (Exception var9) {
-      _log.warn("could not store clan war data:" + var9);
+      log.warn("could not store clan war data:" + var9);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
 
-    clan1.broadcastToOnlineMembers(new L2GameServerPacket[]{(new SystemMessage(1562)).addString(clan2.getName())});
-    clan2.broadcastToOnlineMembers(new L2GameServerPacket[]{(new SystemMessage(1561)).addString(clan1.getName())});
+    clan1.broadcastToOnlineMembers((new SystemMessage(1562)).addString(clan2.getName()));
+    clan2.broadcastToOnlineMembers((new SystemMessage(1561)).addString(clan1.getName()));
   }
 
   public void stopClanWar(Clan clan1, Clan clan2) {
@@ -452,13 +443,13 @@ public class ClanTable {
       statement.setInt(2, clan2.getClanId());
       statement.execute();
     } catch (Exception var9) {
-      _log.warn("could not delete war data:" + var9);
+      log.warn("could not delete war data:" + var9);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
 
-    clan1.broadcastToOnlineMembers(new L2GameServerPacket[]{(new SystemMessage(1567)).addString(clan2.getName())});
-    clan2.broadcastToOnlineMembers(new L2GameServerPacket[]{(new SystemMessage(1566)).addString(clan1.getName())});
+    clan1.broadcastToOnlineMembers((new SystemMessage(1567)).addString(clan2.getName()));
+    clan2.broadcastToOnlineMembers((new SystemMessage(1566)).addString(clan1.getName()));
   }
 
   private void restoreWars() {
@@ -471,7 +462,7 @@ public class ClanTable {
       statement = con.prepareStatement("SELECT clan1, clan2 FROM clan_wars");
       rset = statement.executeQuery();
 
-      while(rset.next()) {
+      while (rset.next()) {
         Clan clan1 = this.getClan(rset.getInt("clan1"));
         Clan clan2 = this.getClan(rset.getInt("clan2"));
         if (clan1 != null && clan2 != null) {
@@ -480,8 +471,8 @@ public class ClanTable {
         }
       }
     } catch (Exception var9) {
-      _log.warn("could not restore clan wars data:");
-      _log.error("", var9);
+      log.warn("could not restore clan wars data:");
+      log.error("", var9);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -493,7 +484,7 @@ public class ClanTable {
     Clan[] var3 = this.getClans();
     int var4 = var3.length;
 
-    for(int var5 = 0; var5 < var4; ++var5) {
+    for (int var5 = 0; var5 < var4; ++var5) {
       Clan clan = var3[var5];
       if (clan.getDisbandEndTime() > 0L && clan.getDisbandEndTime() < currentTime) {
         this.dissolveClan(clan);

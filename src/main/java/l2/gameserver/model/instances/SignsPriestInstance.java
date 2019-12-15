@@ -13,7 +13,6 @@ import l2.gameserver.model.entity.SevenSigns;
 import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.model.pledge.Clan;
 import l2.gameserver.network.l2.components.CustomMessage;
-import l2.gameserver.network.l2.components.IStaticPacket;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.network.l2.s2c.SystemMessage2;
@@ -21,14 +20,13 @@ import l2.gameserver.scripts.Functions;
 import l2.gameserver.tables.ClanTable;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.utils.ItemFunctions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Calendar;
 import java.util.StringTokenizer;
 
+@Slf4j
 public class SignsPriestInstance extends NpcInstance {
-  private static final Logger _log = LoggerFactory.getLogger(SignsPriestInstance.class);
 
   public SignsPriestInstance(int objectId, NpcTemplate template) {
     super(objectId, template);
@@ -38,7 +36,7 @@ public class SignsPriestInstance extends NpcInstance {
     String filename = "seven_signs/";
     filename = filename + (isDescription ? "desc_" + val : "signs_" + val);
     filename = filename + (suffix != null ? "_" + suffix + ".htm" : ".htm");
-    this.showChatWindow(player, filename, new Object[0]);
+    this.showChatWindow(player, filename);
   }
 
   private boolean getPlayerAllyHasCastle(Player player) {
@@ -50,11 +48,8 @@ public class SignsPriestInstance extends NpcInstance {
         int allyId = playerClan.getAllyId();
         if (allyId != 0) {
           Clan[] clanList = ClanTable.getInstance().getClans();
-          Clan[] var5 = clanList;
-          int var6 = clanList.length;
 
-          for(int var7 = 0; var7 < var6; ++var7) {
-            Clan clan = var5[var7];
+          for (Clan clan : clanList) {
             if (clan.getAllyId() == allyId && clan.getCastle() > 0) {
               return true;
             }
@@ -72,7 +67,7 @@ public class SignsPriestInstance extends NpcInstance {
         super.onBypassFeedback(player, command);
         if (command.startsWith("SevenSignsDesc")) {
           int val = Integer.parseInt(command.substring(15));
-          this.showChatWindow(player, val, (String)null, true);
+          this.showChatWindow(player, val, null, true);
         } else if (command.startsWith("SevenSigns")) {
           int cabal = 0;
 //          int stoneType = false;
@@ -89,7 +84,8 @@ public class SignsPriestInstance extends NpcInstance {
             } catch (Exception var54) {
               try {
                 cabal = Integer.parseInt(command.substring(13, 14).trim());
-              } catch (Exception var53) {
+              } catch (Exception e) {
+                log.error("onBypassFeedback: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
               }
             }
           }
@@ -97,7 +93,7 @@ public class SignsPriestInstance extends NpcInstance {
           long redContribCount;
           long ancientAdenaReward;
           int stoneType;
-          switch(val) {
+          switch (val) {
             case 2:
               if (!player.getInventory().validateCapacity(1L)) {
                 player.sendPacket(Msg.YOUR_INVENTORY_IS_FULL);
@@ -122,17 +118,17 @@ public class SignsPriestInstance extends NpcInstance {
               int newSeal = Integer.parseInt(command.substring(15));
               int oldCabal = SevenSigns.getInstance().getPlayerCabal(player);
               if (oldCabal != 0) {
-                player.sendMessage((new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.AlreadyMember", player, new Object[0])).addString(SevenSigns.getCabalName(cabal)));
+                player.sendMessage((new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.AlreadyMember", player)).addString(SevenSigns.getCabalName(cabal)));
                 return;
               }
 
               if (player.getClassId().level() == 0) {
-                player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.YouAreNewbie", player, new Object[0]));
+                player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.YouAreNewbie", player));
               } else {
                 if (Config.ALT_GAME_REQUIRE_CASTLE_DAWN) {
                   if (this.getPlayerAllyHasCastle(player)) {
                     if (cabal == 1) {
-                      player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.CastleOwning", player, new Object[0]));
+                      player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.CastleOwning", player));
                       return;
                     }
                   } else if (cabal == 2) {
@@ -147,9 +143,9 @@ public class SignsPriestInstance extends NpcInstance {
 
                     if (!allowJoinDawn) {
                       if (Config.ALT_GAME_ALLOW_ADENA_DAWN) {
-                        player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.CastleOwningCertificate", player, new Object[0]));
+                        player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.CastleOwningCertificate", player));
                       } else {
-                        player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.CastleOwningCertificate2", player, new Object[0]));
+                        player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.CastleOwningCertificate2", player));
                       }
 
                       return;
@@ -164,7 +160,7 @@ public class SignsPriestInstance extends NpcInstance {
                   player.sendPacket(Msg.YOU_WILL_PARTICIPATE_IN_THE_SEVEN_SIGNS_AS_A_MEMBER_OF_THE_REVOLUTIONARIES_OF_DUSK);
                 }
 
-                switch(newSeal) {
+                switch (newSeal) {
                   case 1:
                     player.sendPacket(Msg.YOUVE_CHOSEN_TO_FIGHT_FOR_THE_SEAL_OF_AVARICE_DURING_THIS_QUEST_EVENT_PERIOD);
                     break;
@@ -185,7 +181,7 @@ public class SignsPriestInstance extends NpcInstance {
             case 15:
             case 16:
             default:
-              this.showChatWindow(player, val, (String)null, false);
+              this.showChatWindow(player, val, null, false);
               break;
             case 6:
               stoneType = Integer.parseInt(command.substring(13));
@@ -203,7 +199,7 @@ public class SignsPriestInstance extends NpcInstance {
                 redContribCount = 0L;
                 long greenContribCount = 0L;
                 long blueContribCount = 0L;
-                switch(stoneType) {
+                switch (stoneType) {
                   case 1:
                     blueContribCount = (SevenSigns.MAXIMUM_PLAYER_CONTRIB - contribScore) / 3L;
                     if (blueContribCount > blueStoneCount) {
@@ -257,7 +253,7 @@ public class SignsPriestInstance extends NpcInstance {
                 }
 
                 if (!stonesFound) {
-                  player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.DontHaveAnySSType", player, new Object[0]));
+                  player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.DontHaveAnySSType", player));
                   return;
                 }
 
@@ -265,19 +261,18 @@ public class SignsPriestInstance extends NpcInstance {
                 SystemMessage sm = new SystemMessage(1267);
                 sm.addNumber(contribScore);
                 player.sendPacket(sm);
-                this.showChatWindow(player, 6, (String)null, false);
+                this.showChatWindow(player, 6, null, false);
               }
               break;
             case 7:
-              redContribCount = 0L;
 
               try {
                 redContribCount = Long.parseLong(command.substring(13).trim());
               } catch (NumberFormatException var51) {
-                player.sendMessage(new CustomMessage("common.IntegerAmount", player, new Object[0]));
+                player.sendMessage(new CustomMessage("common.IntegerAmount", player));
                 return;
-              } catch (StringIndexOutOfBoundsException var52) {
-                player.sendMessage(new CustomMessage("common.IntegerAmount", player, new Object[0]));
+              } catch (StringIndexOutOfBoundsException e) {
+                player.sendMessage(new CustomMessage("common.IntegerAmount", player));
                 return;
               }
 
@@ -303,9 +298,9 @@ public class SignsPriestInstance extends NpcInstance {
                 }
 
                 ancientAdena = ItemFunctions.createItem(5575);
-                ancientAdena.setCount((long)ancientAdenaReward);
+                ancientAdena.setCount(ancientAdenaReward);
                 player.getInventory().addItem(ancientAdena);
-                player.sendPacket(SystemMessage2.obtainItems(5575, (long)ancientAdenaReward, 0));
+                player.sendPacket(SystemMessage2.obtainItems(5575, ancientAdenaReward, 0));
                 this.showChatWindow(player, 9, "a", false);
               }
               break;
@@ -332,7 +327,7 @@ public class SignsPriestInstance extends NpcInstance {
 
                 player.teleToLocation(x, y, z);
               } catch (Exception var50) {
-                _log.warn("SevenSigns: Error occurred while teleporting player: " + var50);
+                log.warn("SevenSigns: Error occurred while teleporting player: " + var50);
               }
               break;
             case 17:
@@ -371,10 +366,10 @@ public class SignsPriestInstance extends NpcInstance {
                   player.getInventory().addItem(ancientAdena);
                   player.sendPacket(SystemMessage2.obtainItems(5575, adenaReward, 0));
                 } else {
-                  player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.DontHaveAnySS", player, new Object[0]));
+                  player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.DontHaveAnySS", player));
                 }
               } else {
-                switch(stoneType) {
+                switch (stoneType) {
                   case 1:
                     stoneColor = "blue";
                     stoneId = 6360;
@@ -407,7 +402,7 @@ public class SignsPriestInstance extends NpcInstance {
                   html.setHtml(content);
                   player.sendPacket(html);
                 } else {
-                  _log.warn("Problem with HTML text seven_signs/signs_17.htm: " + path);
+                  log.warn("Problem with HTML text seven_signs/signs_17.htm: " + path);
                 }
               }
               break;
@@ -418,18 +413,18 @@ public class SignsPriestInstance extends NpcInstance {
               try {
                 convertCount = Long.parseLong(command.substring(19).trim());
               } catch (Exception var55) {
-                player.sendMessage(new CustomMessage("common.IntegerAmount", player, new Object[0]));
+                player.sendMessage(new CustomMessage("common.IntegerAmount", player));
                 break;
               }
 
               ItemInstance convertItem = player.getInventory().getItemByItemId(convertStoneId);
               if (convertItem == null) {
-                player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.DontHaveAnySSType", player, new Object[0]));
+                player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.DontHaveAnySSType", player));
               } else {
                 long totalCount = convertItem.getCount();
                 ancientAdenaReward = 0L;
                 if (convertCount <= totalCount && convertCount > 0L) {
-                  switch(convertStoneId) {
+                  switch (convertStoneId) {
                     case 6360:
                       ancientAdenaReward = SevenSigns.calcAncientAdenaReward(convertCount, 0L, 0L);
                       break;
@@ -444,10 +439,10 @@ public class SignsPriestInstance extends NpcInstance {
                     ancientAdena = ItemFunctions.createItem(5575);
                     ancientAdena.setCount(ancientAdenaReward);
                     player.getInventory().addItem(ancientAdena);
-                    player.sendPacket(new IStaticPacket[]{SystemMessage2.removeItems(convertStoneId, convertCount), SystemMessage2.obtainItems(5575, ancientAdenaReward, 0)});
+                    player.sendPacket(SystemMessage2.removeItems(convertStoneId, convertCount), SystemMessage2.obtainItems(5575, ancientAdenaReward, 0));
                   }
                 } else {
-                  player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.DontHaveSSAmount", player, new Object[0]));
+                  player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2SignsPriestInstance.DontHaveSSAmount", player));
                 }
               }
               break;
@@ -459,28 +454,28 @@ public class SignsPriestInstance extends NpcInstance {
             case 20:
               StringBuilder contentBuffer = new StringBuilder("<html><body><font color=\"LEVEL\">[Seal Status]</font><br>");
 
-              for(int i = 1; i < 4; ++i) {
+              for (int i = 1; i < 4; ++i) {
                 int sealOwner = SevenSigns.getInstance().getSealOwner(i);
                 if (sealOwner != 0) {
-                  contentBuffer.append("[" + SevenSigns.getSealName(i, false) + ": " + SevenSigns.getCabalName(sealOwner) + "]<br>");
+                  contentBuffer.append("[").append(SevenSigns.getSealName(i, false)).append(": ").append(SevenSigns.getCabalName(sealOwner)).append("]<br>");
                 } else {
-                  contentBuffer.append("[" + SevenSigns.getSealName(i, false) + ": Nothingness]<br>");
+                  contentBuffer.append("[").append(SevenSigns.getSealName(i, false)).append(": Nothingness]<br>");
                 }
               }
 
-              contentBuffer.append("<a action=\"bypass -h npc_" + this.getObjectId() + "_SevenSigns 3 " + cabal + "\">Go back.</a></body></html>");
+              contentBuffer.append("<a action=\"bypass -h npc_").append(this.getObjectId()).append("_SevenSigns 3 ").append(cabal).append("\">Go back.</a></body></html>");
               NpcHtmlMessage html2 = new NpcHtmlMessage(player, this);
               html2.setHtml(contentBuffer.toString());
               player.sendPacket(html2);
               break;
             case 21:
               if (player.getLevel() < 60) {
-                this.showChatWindow(player, 20, (String)null, false);
+                this.showChatWindow(player, 20, null, false);
                 return;
               }
 
               if (player.getVarInt("bmarketadena", 0) >= 500000) {
-                this.showChatWindow(player, 21, (String)null, false);
+                this.showChatWindow(player, 21, null, false);
                 return;
               }
 
@@ -493,9 +488,9 @@ public class SignsPriestInstance extends NpcInstance {
               eh.set(12, 59);
               eh.set(13, 59);
               if (System.currentTimeMillis() > sh.getTimeInMillis() && System.currentTimeMillis() < eh.getTimeInMillis()) {
-                this.showChatWindow(player, 23, (String)null, false);
+                this.showChatWindow(player, 23, null, false);
               } else {
-                this.showChatWindow(player, 22, (String)null, false);
+                this.showChatWindow(player, 22, null, false);
               }
           }
         }
@@ -514,7 +509,7 @@ public class SignsPriestInstance extends NpcInstance {
     boolean isSealValidationPeriod = SevenSigns.getInstance().isSealValidationPeriod();
     int compWinner = SevenSigns.getInstance().getCabalHighestScore();
     label86:
-    switch(npcId) {
+    switch (npcId) {
       case 31078:
       case 31079:
       case 31080:
@@ -526,7 +521,7 @@ public class SignsPriestInstance extends NpcInstance {
       case 31692:
       case 31694:
       case 31997:
-        switch(playerCabal) {
+        switch (playerCabal) {
           case 1:
             if (isSealValidationPeriod) {
               filename = filename + "dawn_priest_3b.htm";
@@ -572,7 +567,7 @@ public class SignsPriestInstance extends NpcInstance {
       case 31693:
       case 31695:
       case 31998:
-        switch(playerCabal) {
+        switch (playerCabal) {
           case 1:
             if (isSealValidationPeriod) {
               if (compWinner == 1) {
@@ -612,7 +607,7 @@ public class SignsPriestInstance extends NpcInstance {
         break;
       case 31113:
         if (!player.isGM()) {
-          switch(compWinner) {
+          switch (compWinner) {
             case 1:
               if (playerCabal != compWinner || playerCabal != sealAvariceOwner) {
                 filename = filename + "mammmerch_2.htm";
@@ -631,7 +626,7 @@ public class SignsPriestInstance extends NpcInstance {
         break;
       case 31126:
         if (!player.isGM()) {
-          switch(compWinner) {
+          switch (compWinner) {
             case 1:
               if (playerCabal != compWinner || playerCabal != sealGnosisOwner) {
                 filename = filename + "mammblack_2.htm";

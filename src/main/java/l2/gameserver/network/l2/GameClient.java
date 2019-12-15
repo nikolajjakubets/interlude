@@ -29,22 +29,20 @@ import l2.gameserver.network.l2.c2s.L2GameClientPacket;
 import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
 import l2.gameserver.network.l2.s2c.RequestNetPing;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
+@Slf4j
 public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
-  private static final Logger _log = LoggerFactory.getLogger(GameClient.class);
   public static final String NO_IP = "?.?.?.?";
   public GameCrypt _crypt = null;
   public GameClient.GameClientState _state;
@@ -120,8 +118,8 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
         statement = con.prepareStatement("UPDATE characters SET deletetime=0 WHERE obj_id=?");
         statement.setInt(1, objid);
         statement.execute();
-      } catch (Exception var9) {
-        _log.error("", var9);
+      } catch (Exception e) {
+        log.error("markRestoredChar: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
       } finally {
         DbUtils.closeQuietly(con, statement);
       }
@@ -146,7 +144,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
         statement.setInt(2, objid);
         statement.execute();
       } catch (Exception var9) {
-        _log.error("data error on update deletime char:", var9);
+        log.error("data error on update deletime char:", var9);
       } finally {
         DbUtils.closeQuietly(con, statement);
       }
@@ -154,7 +152,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
     }
   }
 
-  public void deleteCharacterInSlot(int charslot) throws Exception {
+  public void deleteCharacterInSlot(int charslot) {
     if (this._activeChar == null) {
       int objid = this.getObjectIdForSlot(charslot);
       if (objid != -1) {
@@ -198,7 +196,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
       if (character != null) {
         this.setActiveChar(character);
       } else {
-        _log.warn("could not restore obj_id: " + objectId + " in slot:" + charslot);
+        log.warn("could not restore obj_id: " + objectId + " in slot:" + charslot);
       }
 
       return character;
@@ -209,7 +207,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
     if (charslot >= 0 && charslot < this._charSlotMapping.size()) {
       return this._charSlotMapping.get(charslot);
     } else {
-      _log.warn(this.getLogin() + " tried to modify Character in slot " + charslot + " but no characters exits at that slot.");
+      log.warn(this.getLogin() + " tried to modify Character in slot " + charslot + " but no characters exits at that slot.");
       return -1;
     }
   }
@@ -350,7 +348,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
     List<String> bypassStorage = this.getStoredBypasses(bbs);
     if (bpType != BypassType.ENCODED && bpType != BypassType.ENCODED_BBS) {
       if (bpType != BypassType.SIMPLE && bpType != BypassType.SIMPLE_BBS) {
-        _log.warn("Direct access to bypass: " + bypass + " / " + this.toString());
+        log.warn("Direct access to bypass: " + bypass + " / " + this.toString());
         return null;
       } else {
         return (new DecodedBypass(bypass, bbs)).trim();
@@ -464,7 +462,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
 
   public void onPacketReadFail() {
     if (this._failedPackets++ >= 10) {
-      _log.warn("Too many client packet fails, connection closed : " + this);
+      log.warn("Too many client packet fails, connection closed : " + this);
       this.closeNow(true);
     }
 
@@ -472,7 +470,7 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> {
 
   public void onUnknownPacket() {
     if (this._unknownPackets++ >= 10) {
-      _log.warn("Too many client unknown packets, connection closed : " + this);
+      log.warn("Too many client unknown packets, connection closed : " + this);
       this.closeNow(true);
     }
 

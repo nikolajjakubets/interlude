@@ -5,25 +5,21 @@
 
 package l2.gameserver.model.actor.instances.player;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.actor.instances.player.Macro.L2MacroCmd;
 import l2.gameserver.network.l2.s2c.SendMacroList;
 import l2.gameserver.utils.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.*;
+
+@Slf4j
 public class MacroList {
-  private static final Logger _log = LoggerFactory.getLogger(MacroList.class);
   private final Player player;
   private final Map<Integer, Macro> _macroses = new HashMap<>();
   private int _revision;
@@ -40,22 +36,22 @@ public class MacroList {
   }
 
   public Macro[] getAllMacroses() {
-    return (Macro[])this._macroses.values().toArray(new Macro[this._macroses.size()]);
+    return this._macroses.values().toArray(new Macro[0]);
   }
 
   public Macro getMacro(int id) {
-    return (Macro)this._macroses.get(id - 1);
+    return this._macroses.get(id - 1);
   }
 
   public void registerMacro(Macro macro) {
     if (macro.id == 0) {
-      for(macro.id = this._macroId++; this._macroses.get(macro.id) != null; macro.id = this._macroId++) {
+      for (macro.id = this._macroId++; this._macroses.get(macro.id) != null; macro.id = this._macroId++) {
       }
 
       this._macroses.put(macro.id, macro);
       this.registerMacroInDb(macro);
     } else {
-      Macro old = (Macro)this._macroses.put(macro.id, macro);
+      Macro old = this._macroses.put(macro.id, macro);
       if (old != null) {
         this.deleteMacroFromDb(old);
       }
@@ -67,7 +63,7 @@ public class MacroList {
   }
 
   public void deleteMacro(int id) {
-    Macro toRemove = (Macro)this._macroses.get(id);
+    Macro toRemove = this._macroses.get(id);
     if (toRemove != null) {
       this.deleteMacroFromDb(toRemove);
     }
@@ -80,13 +76,10 @@ public class MacroList {
     ++this._revision;
     Macro[] all = this.getAllMacroses();
     if (all.length == 0) {
-      this.player.sendPacket(new SendMacroList(this._revision, all.length, (Macro)null));
+      this.player.sendPacket(new SendMacroList(this._revision, all.length, null));
     } else {
-      Macro[] var2 = all;
-      int var3 = all.length;
 
-      for(int var4 = 0; var4 < var3; ++var4) {
-        Macro m = var2[var4];
+      for (Macro m : all) {
         this.player.sendPacket(new SendMacroList(this._revision, all.length, m));
       }
     }
@@ -107,11 +100,8 @@ public class MacroList {
       statement.setString(5, macro.descr);
       statement.setString(6, macro.acronym);
       StringBuilder sb = new StringBuilder();
-      L2MacroCmd[] var5 = macro.commands;
-      int var6 = var5.length;
 
-      for(int var7 = 0; var7 < var6; ++var7) {
-        L2MacroCmd cmd = var5[var7];
+      for (L2MacroCmd cmd : macro.commands) {
         sb.append(cmd.type).append(',');
         sb.append(cmd.d1).append(',');
         sb.append(cmd.d2);
@@ -125,7 +115,7 @@ public class MacroList {
       statement.setString(7, sb.toString());
       statement.execute();
     } catch (Exception var12) {
-      _log.error("could not store macro: " + macro.toString(), var12);
+      log.error("could not store macro: " + macro.toString(), var12);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -143,7 +133,7 @@ public class MacroList {
       statement.setInt(2, macro.id);
       statement.execute();
     } catch (Exception var8) {
-      _log.error("could not delete macro:", var8);
+      log.error("could not delete macro:", var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -162,7 +152,7 @@ public class MacroList {
       statement.setInt(1, this.player.getObjectId());
       rset = statement.executeQuery();
 
-      while(rset.next()) {
+      while (rset.next()) {
         int id = rset.getInt("id");
         int icon = rset.getInt("icon");
         String name = Strings.stripSlashes(rset.getString("name"));
@@ -171,7 +161,7 @@ public class MacroList {
         List<L2MacroCmd> commands = new ArrayList<>();
         StringTokenizer st1 = new StringTokenizer(rset.getString("commands"), ";");
 
-        while(st1.hasMoreTokens()) {
+        while (st1.hasMoreTokens()) {
           StringTokenizer st = new StringTokenizer(st1.nextToken(), ",");
           int type = Integer.parseInt(st.nextToken());
           int d1 = Integer.parseInt(st.nextToken());
@@ -185,11 +175,11 @@ public class MacroList {
           commands.add(mcmd);
         }
 
-        Macro m = new Macro(id, icon, name, descr, acronym, (L2MacroCmd[])commands.toArray(new L2MacroCmd[commands.size()]));
+        Macro m = new Macro(id, icon, name, descr, acronym, commands.toArray(new L2MacroCmd[0]));
         this._macroses.put(m.id, m);
       }
     } catch (Exception var20) {
-      _log.error("could not restore shortcuts:", var20);
+      log.error("could not restore shortcuts:", var20);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }

@@ -5,18 +5,19 @@
 
 package l2.gameserver.tables;
 
+import l2.commons.dbutils.DbUtils;
+import l2.gameserver.database.DatabaseFactory;
+import l2.gameserver.model.Creature;
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import l2.commons.dbutils.DbUtils;
-import l2.gameserver.database.DatabaseFactory;
-import l2.gameserver.model.Creature;
 
+@Slf4j
 public class LevelUpTable {
-  private static Logger _log = Logger.getLogger(LevelUpTable.class.getName());
   private static LevelUpTable _instance;
   private int _maxLvl;
   private int _maxClassID;
@@ -24,7 +25,7 @@ public class LevelUpTable {
   private double[] _cp_table;
   private double[] _mp_table;
 
-  public static final LevelUpTable getInstance() {
+  public static LevelUpTable getInstance() {
     if (_instance == null) {
       _instance = new LevelUpTable();
     }
@@ -64,13 +65,14 @@ public class LevelUpTable {
       stmt = conn.createStatement();
 
       int idx;
-      for(rset = stmt.executeQuery("SELECT `class_id`,`lvl`,`hp`,`cp`,`mp` FROM `lvlupgain`"); rset.next(); this._mp_table[idx] = rset.getDouble("mp")) {
+      for (rset = stmt.executeQuery("SELECT `class_id`,`lvl`,`hp`,`cp`,`mp` FROM `lvlupgain`"); rset.next(); this._mp_table[idx] = rset.getDouble("mp")) {
         idx = this.getIdx(rset.getInt("lvl"), rset.getInt("class_id"));
         this._hp_table[idx] = rset.getDouble("hp");
         this._cp_table[idx] = rset.getDouble("cp");
       }
-    } catch (SQLException var9) {
-      _log.log(Level.SEVERE, "Can't load lvlupgain table ", var9);
+    } catch (SQLException e) {
+      log.error("Can't load lvlupgain table " + Level.SEVERE);
+      log.error("closeQuietly: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(conn, stmt, rset);
     }

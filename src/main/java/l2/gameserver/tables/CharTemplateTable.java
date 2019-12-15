@@ -15,12 +15,11 @@ import l2.gameserver.model.base.ClassId;
 import l2.gameserver.model.base.Experience;
 import l2.gameserver.templates.PlayerTemplate;
 import l2.gameserver.templates.StatsSet;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -32,8 +31,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.*;
 
+@Slf4j
 public class CharTemplateTable {
-  private static final Logger _log = LoggerFactory.getLogger(CharTemplateTable.class);
   private static CharTemplateTable _instance;
   private Map<Integer, PlayerTemplate> _templates = new HashMap<>();
   private Map<ClassId, List<ShortCut>> _shortCuts;
@@ -56,7 +55,7 @@ public class CharTemplateTable {
       statement = con.prepareStatement("SELECT * FROM class_list, char_templates WHERE class_list.id = char_templates.classId ORDER BY class_list.id");
       rset = statement.executeQuery();
 
-      while(rset.next()) {
+      while (rset.next()) {
         StatsSet set = new StatsSet();
         ClassId classId = ClassId.VALUES[rset.getInt("class_list.id")];
         set.set("classId", rset.getInt("class_list.id"));
@@ -85,12 +84,10 @@ public class CharTemplateTable {
         set.set("baseRunSpd", rset.getInt("char_templates.run_spd"));
         set.set("baseShldDef", 0);
         set.set("baseShldRate", 0);
-        switch(set.getInteger("raceId")) {
-          case 3:
-            set.set("baseAtkRange", 25);
-            break;
-          default:
-            set.set("baseAtkRange", 20);
+        if (set.getInteger("raceId") == 3) {
+          set.set("baseAtkRange", 25);
+        } else {
+          set.set("baseAtkRange", 20);
         }
 
         set.set("baseExp", Experience.getExpForLevel(rset.getInt("char_templates.level")));
@@ -103,7 +100,7 @@ public class CharTemplateTable {
         PlayerTemplate ct = new PlayerTemplate(set);
 
         int x;
-        for(x = 1; x < 15; ++x) {
+        for (x = 1; x < 15; ++x) {
           if (rset.getInt("char_templates.items" + x) != 0) {
             ct.addItem(rset.getInt("char_templates.items" + x));
           }
@@ -115,7 +112,7 @@ public class CharTemplateTable {
         set.set("collision_height", rset.getDouble("char_templates.f_col_h"));
         ct = new PlayerTemplate(set);
 
-        for(x = 1; x < 15; ++x) {
+        for (x = 1; x < 15; ++x) {
           int itemId = rset.getInt("char_templates.items" + x);
           if (itemId != 0) {
             ct.addItem(itemId);
@@ -124,13 +121,13 @@ public class CharTemplateTable {
 
         this._templates.put(ct.classId.getId() | 256, ct);
       }
-    } catch (Exception var12) {
-      _log.error("", var12);
+    } catch (Exception e) {
+      log.error("CharTemplateTable: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
 
-    _log.info("CharTemplateTable: Loaded " + this._templates.size() + " Character Templates.");
+    log.info("CharTemplateTable: Loaded " + this._templates.size() + " Character Templates.");
     this._shortCuts = parseShortCuts(new File(Config.DATAPACK_ROOT, "data/character_shortcuts.xml"));
   }
 
@@ -144,11 +141,11 @@ public class CharTemplateTable {
       key = classId | 256;
     }
 
-    return (PlayerTemplate)this._templates.get(key);
+    return this._templates.get(key);
   }
 
   public List<ShortCut> getShortCuts(ClassId classId) {
-    List<ShortCut> result = (List)this._shortCuts.get(classId);
+    List<ShortCut> result = this._shortCuts.get(classId);
     return result == null ? Collections.emptyList() : result;
   }
 
@@ -159,43 +156,41 @@ public class CharTemplateTable {
   private static Map<ClassId, List<ShortCut>> parseShortCuts(final File file) {
     Map<ClassId, List<ShortCut>> result = new HashMap<>();
     if (!file.exists()) {
-      _log.warn("File " + file.getAbsolutePath() + " not exists");
+      log.warn("File " + file.getAbsolutePath() + " not exists");
       return Collections.emptyMap();
     } else {
       SAXReader reader = new SAXReader();
       reader.setValidation(true);
       reader.setErrorHandler(new ErrorHandler() {
         public void warning(SAXParseException exception) throws SAXException {
-          CharTemplateTable._log.warn("File: " + file.getName() + ":" + exception.getLineNumber() + " warning: " + exception.getMessage());
+          CharTemplateTable.log.warn("File: " + file.getName() + ":" + exception.getLineNumber() + " warning: " + exception.getMessage());
         }
 
         public void error(SAXParseException exception) throws SAXException {
-          CharTemplateTable._log.error("File: " + file.getName() + ":" + exception.getLineNumber() + " error: " + exception.getMessage());
+          CharTemplateTable.log.error("File: " + file.getName() + ":" + exception.getLineNumber() + " error: " + exception.getMessage());
         }
 
         public void fatalError(SAXParseException exception) throws SAXException {
-          CharTemplateTable._log.error("File: " + file.getName() + ":" + exception.getLineNumber() + " fatal: " + exception.getMessage());
+          CharTemplateTable.log.error("File: " + file.getName() + ":" + exception.getLineNumber() + " fatal: " + exception.getMessage());
         }
       });
       reader.setEntityResolver(new SimpleDTDEntityResolver(new File(file.getParentFile(), FilenameUtils.removeExtension(file.getName()) + ".dtd")));
-      FileInputStream fis = null;
 
-      try {
-        fis = new FileInputStream(file);
+      try (FileInputStream fis = new FileInputStream(file)) {
         Document document = reader.read(fis);
         Element rootElement = document.getRootElement();
         Iterator iterator = rootElement.elementIterator();
 
-        while(true) {
-          while(true) {
+        while (true) {
+          while (true) {
             Element listElement;
             do {
               if (!iterator.hasNext()) {
                 return result;
               }
 
-              listElement = (Element)iterator.next();
-            } while(!"shortcut".equals(listElement.getName()));
+              listElement = (Element) iterator.next();
+            } while (!"shortcut".equals(listElement.getName()));
 
             ClassId classId = null;
             String classIdStr = listElement.attributeValue("classId");
@@ -229,35 +224,20 @@ public class CharTemplateTable {
               ClassId[] var34 = ClassId.VALUES;
               int var19 = var34.length;
 
-              for(int var20 = 0; var20 < var19; ++var20) {
-                ClassId cId = var34[var20];
-                List<ShortCut> shortCuts = (List)result.get(cId);
-                if (shortCuts == null) {
-                  result.put(cId, shortCuts = new ArrayList<>());
-                }
+              for (ClassId cId : var34) {
+                List<ShortCut> shortCuts = result.computeIfAbsent(cId, k -> new ArrayList<>());
 
-                ((List)shortCuts).add(shortCut);
+                shortCuts.add(shortCut);
               }
             } else {
-              List<ShortCut> shortCuts = (List)result.get(classId);
-              if (shortCuts == null) {
-                result.put(classId, shortCuts = new ArrayList<>());
-              }
+              List<ShortCut> shortCuts = result.computeIfAbsent(classId, k -> new ArrayList<>());
 
-              ((List)shortCuts).add(shortCut);
+              shortCuts.add(shortCut);
             }
           }
         }
       } catch (Exception var31) {
-        _log.warn("Exception: " + var31, var31);
-      } finally {
-        if (fis != null) {
-          try {
-            fis.close();
-          } catch (Exception var30) {
-          }
-        }
-
+        log.warn("Exception: " + var31, var31);
       }
 
       return result;

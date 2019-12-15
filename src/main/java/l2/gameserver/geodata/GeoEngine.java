@@ -14,8 +14,7 @@ import l2.gameserver.geodata.GeoOptimizer.GeoBlocksMatchFinder;
 import l2.gameserver.model.GameObject;
 import l2.gameserver.model.World;
 import l2.gameserver.utils.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +23,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -33,8 +31,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 public class GeoEngine {
-  private static final Logger _log = LoggerFactory.getLogger(GeoEngine.class);
   public static final byte EAST = 1;
   public static final byte WEST = 2;
   public static final byte SOUTH = 4;
@@ -130,7 +128,7 @@ public class GeoEngine {
     if (target == null) {
       return false;
     } else {
-      return !(target instanceof GeoCollision) && !actor.equals(target) ? canSeeCoord(actor, target.getX(), target.getY(), target.getZ() + (int)target.getColHeight() + 64, air) : true;
+      return target instanceof GeoCollision || actor.equals(target) || canSeeCoord(actor, target.getX(), target.getY(), target.getZ() + (int) target.getColHeight() + 64, air);
     }
   }
 
@@ -165,19 +163,14 @@ public class GeoEngine {
       }
 
       if (ty > y) {
-        if ((NSWE & 4) == 0) {
-          return false;
-        }
-      } else if (ty < y && (NSWE & 8) == 0) {
-        return false;
-      }
+        return (NSWE & 4) != 0;
+      } else return ty >= y || (NSWE & 8) != 0;
 
-      return true;
     }
   }
 
   public static String geoXYZ2Str(int _x, int _y, int _z) {
-    return "(" + String.valueOf((_x << 4) + World.MAP_MIN_X + 8) + " " + ((_y << 4) + World.MAP_MIN_Y + 8) + " " + _z + ")";
+    return "(" + ((_x << 4) + World.MAP_MIN_X + 8) + " " + ((_y << 4) + World.MAP_MIN_Y + 8) + " " + _z + ")";
   }
 
   public static String NSWE2Str(byte nswe) {
@@ -792,7 +785,7 @@ public class GeoEngine {
         return false;
       } else {
         short temp_layer_h = (short)((short)(temp_layer & '\ufff0') >> 1);
-        return Math.abs(temp_layer_h - hexth) < Config.MAX_Z_DIFF && Math.abs(temp_layer_h - h) < Config.MAX_Z_DIFF ? checkNSWE((byte)(temp_layer & 15), x, y, nextx, nexty) : false;
+        return (Math.abs(temp_layer_h - hexth) < Config.MAX_Z_DIFF && Math.abs(temp_layer_h - h) < Config.MAX_Z_DIFF) && checkNSWE((byte) (temp_layer & 15), x, y, nextx, nexty);
       }
     }
   }
@@ -941,7 +934,7 @@ public class GeoEngine {
           layer_count = block[index];
           ++index;
           if (layer_count > 0 && layer_count <= MAX_LAYERS) {
-            for(result[0] = (short)layer_count; layer_count > 0; index += 2) {
+            for (result[0] = layer_count; layer_count > 0; index += 2) {
               result[layer_count] = makeShort(block[index + 1], block[index]);
               --layer_count;
             }
@@ -951,7 +944,7 @@ public class GeoEngine {
             return;
           }
         default:
-          _log.error("GeoEngine: Unknown block type");
+          log.error("GeoEngine: Unknown block type");
       }
     }
   }
@@ -1015,7 +1008,7 @@ public class GeoEngine {
             return (short)z;
           }
         default:
-          _log.error("GeoEngine: Unknown blockType");
+          log.error("GeoEngine: Unknown blockType");
           return z;
       }
     }
@@ -1085,7 +1078,7 @@ public class GeoEngine {
             return 15;
           }
         default:
-          _log.error("GeoEngine: Unknown block type.");
+          log.error("GeoEngine: Unknown block type.");
           return 15;
       }
     }
@@ -1168,7 +1161,7 @@ public class GeoEngine {
             return;
           }
         default:
-          _log.error("GeoEngine: Unknown block type.");
+          log.error("GeoEngine: Unknown block type.");
           result[0] = z;
           result[1] = 15;
       }
@@ -1223,17 +1216,15 @@ public class GeoEngine {
 
   public static void load() {
     if (Config.ALLOW_GEODATA) {
-      _log.info("GeoEngine: Loading Geodata...");
+      log.info("GeoEngine: Loading Geodata...");
       File f = new File(Config.DATAPACK_ROOT, "geodata");
       if (f.exists() && f.isDirectory()) {
         int counter = 0;
         Pattern p = Pattern.compile(Config.GEOFILES_PATTERN);
         List<File> geoFiles = new ArrayList<>();
         File[] var4 = f.listFiles();
-        int var5 = var4.length;
 
-        for(int var6 = 0; var6 < var5; ++var6) {
-          File q = var4[var6];
+        for (File q : var4) {
           if (!q.isDirectory()) {
             String fn = q.getName();
             Matcher m = p.matcher(fn);
@@ -1243,7 +1234,7 @@ public class GeoEngine {
           }
         }
 
-        Collections.sort(geoFiles, NaturalOrderComparator.FILE_NAME_COMPARATOR);
+        geoFiles.sort(NaturalOrderComparator.FILE_NAME_COMPARATOR);
 
         for(Iterator var10 = geoFiles.iterator(); var10.hasNext(); ++counter) {
           File q = (File)var10.next();
@@ -1256,13 +1247,13 @@ public class GeoEngine {
           LoadGeodata(rx, ry, 0);
         }
 
-        _log.info("GeoEngine: Loaded " + counter + " map(s), max layers: " + MAX_LAYERS);
+        log.info("GeoEngine: Loaded " + counter + " map(s), max layers: " + MAX_LAYERS);
         if (Config.COMPACT_GEO) {
           compact();
         }
 
       } else {
-        _log.info("GeoEngine: Files missing, loading aborted.");
+        log.info("GeoEngine: Files missing, loading aborted.");
       }
     }
   }
@@ -1272,7 +1263,7 @@ public class GeoEngine {
     int iy = ry - Config.GEO_Y_FIRST;
     String geoName = geoFile.getName();
     if (ix >= 0 && iy >= 0 && ix <= (World.MAP_MAX_X >> 15) + Math.abs(World.MAP_MIN_X >> 15) && iy <= (World.MAP_MAX_Y >> 15) + Math.abs(World.MAP_MIN_Y >> 15)) {
-      _log.info("GeoEngine: Loading: " + geoName);
+      log.info("GeoEngine: Loading: " + geoName);
 
       try {
         FileChannel inChannel = (new RandomAccessFile(geoFile, "r")).getChannel();
@@ -1294,7 +1285,7 @@ public class GeoEngine {
           inChannel.read(buf);
           buf.rewind();
 
-          for(byte key = (byte)(checkSum >> 24 & 255 ^ checkSum >> 16 & 255 ^ checkSum >> 8 & 255 ^ checkSum >> 0 & 255); buf.hasRemaining(); checkSum -= key = buf.get(buf.position() - 1)) {
+          for (byte key = (byte) (checkSum >> 24 & 255 ^ checkSum >> 16 & 255 ^ checkSum >> 8 & 255 ^ checkSum & 255); buf.hasRemaining(); checkSum -= key = buf.get(buf.position() - 1)) {
             buf.put(buf.position(), (byte)(buf.get() ^ key));
           }
 
@@ -1305,17 +1296,17 @@ public class GeoEngine {
         }
 
         rawgeo[ix][iy] = buf;
-        if (size >= 196608 && checkSum == 0) {
+        if (size >= 196608) {
           return true;
         } else {
           throw new RuntimeException("Invalid geodata : " + geoName + "!");
         }
       } catch (IOException var11) {
-        _log.error("", var11);
+        log.error("", var11);
         return false;
       }
     } else {
-      _log.info("GeoEngine: File " + geoName + " was not loaded!!! ");
+      log.info("GeoEngine: File " + geoName + " was not loaded!!! ");
       return false;
     }
   }
@@ -1398,9 +1389,7 @@ public class GeoEngine {
         if (regIndex == -1) {
           byte[][][] resizedRegion = new byte[(regIndex = region.length) + 1][][];
 
-          for(int i = 0; i < region.length; ++i) {
-            resizedRegion[i] = region[i];
-          }
+          System.arraycopy(region, 0, resizedRegion, 0, region.length);
 
           geodata[ix][iy] = resizedRegion;
         }
@@ -1419,7 +1408,7 @@ public class GeoEngine {
         int iy = (geoIndex & '\uff00') >> 8;
         int regIndex = geoIndex & 255;
         synchronized(geodata) {
-          geodata[ix][iy][regIndex] = (byte[][])null;
+          geodata[ix][iy][regIndex] = null;
         }
       }
     }
@@ -1716,10 +1705,10 @@ public class GeoEngine {
           total += 65536L;
           BlockLink[] links = GeoOptimizer.loadBlockMatches("geodata/matches/" + (mapX + Config.GEO_X_FIRST) + "_" + (mapY + Config.GEO_Y_FIRST) + ".matches");
           if (links != null) {
-            for(int i = 0; i < links.length; ++i) {
-              byte[][][] link_region = geodata[links[i].linkMapX][links[i].linkMapY];
+            for (BlockLink link : links) {
+              byte[][][] link_region = geodata[link.linkMapX][link.linkMapY];
               if (link_region != null) {
-                link_region[links[i].linkBlockIndex][0] = geodata[mapX][mapY][links[i].blockIndex][0];
+                link_region[link.linkBlockIndex][0] = geodata[mapX][mapY][link.blockIndex][0];
                 ++optimized;
               }
             }
@@ -1728,7 +1717,7 @@ public class GeoEngine {
       }
     }
 
-    _log.info(String.format("GeoEngine: - Compacted %d of %d blocks...", optimized, total));
+    log.info(String.format("GeoEngine: - Compacted %d of %d blocks...", optimized, total));
   }
 
   public static boolean equalsData(byte[] a1, byte[] a2) {
@@ -1750,7 +1739,7 @@ public class GeoEngine {
   }
 
   private static void initChecksums() {
-    _log.info("GeoEngine: - Generating Checksums...");
+    log.info("GeoEngine: - Generating Checksums...");
     (new File(Config.DATAPACK_ROOT, "geodata/checksum")).mkdirs();
     ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     GeoOptimizer.checkSums = new int[World.WORLD_SIZE_X][World.WORLD_SIZE_Y][];
@@ -1766,13 +1755,13 @@ public class GeoEngine {
     try {
       executor.awaitTermination(9223372036854775807L, TimeUnit.SECONDS);
     } catch (InterruptedException var3) {
-      _log.error("", var3);
+      log.error("", var3);
     }
 
   }
 
   private static void initBlockMatches(int maxScanRegions) {
-    _log.info("GeoEngine: Generating Block Matches...");
+    log.info("GeoEngine: Generating Block Matches...");
     (new File(Config.DATAPACK_ROOT, "geodata/matches")).mkdirs();
     ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
@@ -1787,7 +1776,7 @@ public class GeoEngine {
     try {
       executor.awaitTermination(9223372036854775807L, TimeUnit.SECONDS);
     } catch (InterruptedException var4) {
-      _log.error("", var4);
+      log.error("", var4);
     }
 
   }
@@ -1811,7 +1800,7 @@ public class GeoEngine {
   public static void unload() {
     for(int mapX = 0; mapX < World.WORLD_SIZE_X; ++mapX) {
       for(int mapY = 0; mapY < World.WORLD_SIZE_Y; ++mapY) {
-        geodata[mapX][mapY] = (byte[][][])null;
+        geodata[mapX][mapY] = null;
       }
     }
 

@@ -5,26 +5,25 @@
 
 package l2.gameserver.model.actor.instances.player;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.Player;
 import l2.gameserver.network.l2.s2c.ExAutoSoulShot;
 import l2.gameserver.network.l2.s2c.ShortCutInit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Slf4j
 public class ShortCutList {
-  private static final Logger _log = LoggerFactory.getLogger(ShortCutList.class);
   private final Player player;
-  private Map<Integer, ShortCut> _shortCuts = new ConcurrentHashMap();
+  private Map<Integer, ShortCut> _shortCuts = new ConcurrentHashMap<>();
 
   public ShortCutList(Player owner) {
     this.player = owner;
@@ -35,10 +34,8 @@ public class ShortCutList {
   }
 
   public void validate() {
-    Iterator var1 = this._shortCuts.values().iterator();
 
-    while(var1.hasNext()) {
-      ShortCut sc = (ShortCut)var1.next();
+    for (ShortCut sc : this._shortCuts.values()) {
       if (sc.getType() == 1 && this.player.getInventory().getItemByObjectId(sc.getId()) == null) {
         this.deleteShortCut(sc.getSlot(), sc.getPage());
       }
@@ -47,7 +44,7 @@ public class ShortCutList {
   }
 
   public ShortCut getShortCut(int slot, int page) {
-    ShortCut sc = (ShortCut)this._shortCuts.get(slot + page * 12);
+    ShortCut sc = this._shortCuts.get(slot + page * 12);
     if (sc != null && sc.getType() == 1 && this.player.getInventory().getItemByObjectId(sc.getId()) == null) {
       this.player.sendPacket(Msg.THERE_ARE_NO_MORE_ITEMS_IN_THE_SHORTCUT);
       this.deleteShortCut(sc.getSlot(), sc.getPage());
@@ -58,7 +55,7 @@ public class ShortCutList {
   }
 
   public void registerShortCut(ShortCut shortcut) {
-    ShortCut oldShortCut = (ShortCut)this._shortCuts.put(shortcut.getSlot() + 12 * shortcut.getPage(), shortcut);
+    ShortCut oldShortCut = this._shortCuts.put(shortcut.getSlot() + 12 * shortcut.getPage(), shortcut);
     this.registerShortCutInDb(shortcut, oldShortCut);
   }
 
@@ -83,7 +80,7 @@ public class ShortCutList {
       statement.setInt(8, this.player.getActiveClassId());
       statement.execute();
     } catch (Exception var9) {
-      _log.error("could not store shortcuts:", var9);
+      log.error("could not store shortcuts:", var9);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -103,7 +100,7 @@ public class ShortCutList {
       statement.setInt(4, this.player.getActiveClassId());
       statement.execute();
     } catch (Exception var8) {
-      _log.error("could not delete shortcuts:", var8);
+      log.error("could not delete shortcuts:", var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -111,15 +108,13 @@ public class ShortCutList {
   }
 
   public void deleteShortCut(int slot, int page) {
-    ShortCut old = (ShortCut)this._shortCuts.remove(slot + page * 12);
+    ShortCut old = this._shortCuts.remove(slot + page * 12);
     if (old != null) {
       this.deleteShortCutFromDb(old);
       if (old.getType() == 2) {
         this.player.sendPacket(new ShortCutInit(this.player));
-        Iterator var4 = this.player.getAutoSoulShot().iterator();
 
-        while(var4.hasNext()) {
-          int shotId = (Integer)var4.next();
+        for (int shotId : this.player.getAutoSoulShot()) {
           this.player.sendPacket(new ExAutoSoulShot(shotId, true));
         }
       }
@@ -128,10 +123,8 @@ public class ShortCutList {
   }
 
   public void deleteShortCutByObjectId(int objectId) {
-    Iterator var2 = this._shortCuts.values().iterator();
 
-    while(var2.hasNext()) {
-      ShortCut shortcut = (ShortCut)var2.next();
+    for (ShortCut shortcut : this._shortCuts.values()) {
       if (shortcut != null && shortcut.getType() == 1 && shortcut.getId() == objectId) {
         this.deleteShortCut(shortcut.getSlot(), shortcut.getPage());
       }
@@ -140,10 +133,8 @@ public class ShortCutList {
   }
 
   public void deleteShortCutBySkillId(int skillId) {
-    Iterator var2 = this._shortCuts.values().iterator();
 
-    while(var2.hasNext()) {
-      ShortCut shortcut = (ShortCut)var2.next();
+    for (ShortCut shortcut : this._shortCuts.values()) {
       if (shortcut != null && shortcut.getType() == 2 && shortcut.getId() == skillId) {
         this.deleteShortCut(shortcut.getSlot(), shortcut.getPage());
       }
@@ -164,7 +155,7 @@ public class ShortCutList {
       statement.setInt(2, this.player.getActiveClassId());
       rset = statement.executeQuery();
 
-      while(rset.next()) {
+      while (rset.next()) {
         int slot = rset.getInt("slot");
         int page = rset.getInt("page");
         int type = rset.getInt("type");
@@ -174,7 +165,7 @@ public class ShortCutList {
         this._shortCuts.put(slot + page * 12, new ShortCut(slot, page, type, id, level, character_type));
       }
     } catch (Exception var13) {
-      _log.error("could not store shortcuts:", var13);
+      log.error("could not store shortcuts:", var13);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }

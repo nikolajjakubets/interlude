@@ -5,19 +5,22 @@
 
 package l2.gameserver.model.base;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.NoSuchElementException;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import l2.gameserver.Config;
 import l2.gameserver.model.Creature;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.util.NoSuchElementException;
+
+@Slf4j
 public enum BaseStats {
   STR {
     public final int getStat(Creature actor) {
@@ -89,7 +92,7 @@ public enum BaseStats {
   private static final double[] CONbonus = new double[100];
   private static final double[] MENbonus = new double[100];
 
-  private BaseStats() {
+  BaseStats() {
   }
 
   public int getStat(Creature actor) {
@@ -104,13 +107,10 @@ public enum BaseStats {
     return 2.0D - Math.sqrt(this.calcBonus(actor));
   }
 
-  public static final BaseStats valueOfXml(String name) {
+  public static BaseStats valueOfXml(String name) {
     name = name.intern();
-    BaseStats[] var1 = VALUES;
-    int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      BaseStats s = var1[var3];
+    for (BaseStats s : VALUES) {
       if (s.toString().equalsIgnoreCase(name)) {
         if (s == NONE) {
           return null;
@@ -132,82 +132,78 @@ public enum BaseStats {
 
     try {
       doc = factory.newDocumentBuilder().parse(file);
-    } catch (SAXException var10) {
-      _log.error("", var10);
-    } catch (IOException var11) {
-      _log.error("", var11);
-    } catch (ParserConfigurationException var12) {
-      _log.error("", var12);
+    } catch (SAXException | IOException | ParserConfigurationException e) {
+      log.error("static init: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     }
 
     if (doc != null) {
-      for(Node z = doc.getFirstChild(); z != null; z = z.getNextSibling()) {
-        for(Node n = z.getFirstChild(); n != null; n = n.getNextSibling()) {
+      for (Node z = doc.getFirstChild(); z != null; z = z.getNextSibling()) {
+        for (Node n = z.getFirstChild(); n != null; n = n.getNextSibling()) {
           int i;
           double val;
           Node d;
           String node;
           if (n.getNodeName().equalsIgnoreCase("str_bonus")) {
-            for(d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
+            for (d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
               node = d.getNodeName();
               if (node.equalsIgnoreCase("set")) {
                 i = Integer.parseInt(d.getAttributes().getNamedItem("attribute").getNodeValue());
-                val = (double)Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
+                val = Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
                 STRbonus[i] = (100.0D + val) / 100.0D;
               }
             }
           }
 
           if (n.getNodeName().equalsIgnoreCase("int_bonus")) {
-            for(d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
+            for (d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
               node = d.getNodeName();
               if (node.equalsIgnoreCase("set")) {
                 i = Integer.parseInt(d.getAttributes().getNamedItem("attribute").getNodeValue());
-                val = (double)Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
+                val = Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
                 INTbonus[i] = (100.0D + val) / 100.0D;
               }
             }
           }
 
           if (n.getNodeName().equalsIgnoreCase("con_bonus")) {
-            for(d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
+            for (d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
               node = d.getNodeName();
               if (node.equalsIgnoreCase("set")) {
                 i = Integer.parseInt(d.getAttributes().getNamedItem("attribute").getNodeValue());
-                val = (double)Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
+                val = Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
                 CONbonus[i] = (100.0D + val) / 100.0D;
               }
             }
           }
 
           if (n.getNodeName().equalsIgnoreCase("men_bonus")) {
-            for(d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
+            for (d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
               node = d.getNodeName();
               if (node.equalsIgnoreCase("set")) {
                 i = Integer.parseInt(d.getAttributes().getNamedItem("attribute").getNodeValue());
-                val = (double)Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
+                val = Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
                 MENbonus[i] = (100.0D + val) / 100.0D;
               }
             }
           }
 
           if (n.getNodeName().equalsIgnoreCase("dex_bonus")) {
-            for(d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
+            for (d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
               node = d.getNodeName();
               if (node.equalsIgnoreCase("set")) {
                 i = Integer.parseInt(d.getAttributes().getNamedItem("attribute").getNodeValue());
-                val = (double)Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
+                val = Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
                 DEXbonus[i] = (100.0D + val) / 100.0D;
               }
             }
           }
 
           if (n.getNodeName().equalsIgnoreCase("wit_bonus")) {
-            for(d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
+            for (d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
               node = d.getNodeName();
               if (node.equalsIgnoreCase("set")) {
                 i = Integer.parseInt(d.getAttributes().getNamedItem("attribute").getNodeValue());
-                val = (double)Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
+                val = Integer.parseInt(d.getAttributes().getNamedItem("val").getNodeValue());
                 WITbonus[i] = (100.0D + val) / 100.0D;
               }
             }

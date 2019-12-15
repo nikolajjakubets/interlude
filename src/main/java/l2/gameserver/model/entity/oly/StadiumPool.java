@@ -5,20 +5,20 @@
 
 package l2.gameserver.model.entity.oly;
 
-import java.util.ArrayDeque;
 import l2.gameserver.utils.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayDeque;
+
+@Slf4j
 public class StadiumPool {
-  private static final Logger _log = LoggerFactory.getLogger(StadiumPool.class);
   private static StadiumPool _instance;
   public static final int REFLECTION_COUNT = 22;
   private static final StadiumPool.StadiumTemplate[] OLY_STADIA_TEMPLATES = new StadiumPool.StadiumTemplate[]{new StadiumPool.StadiumTemplate(147, new Location(-20814, -21189, -3030))};
-  private ArrayDeque<Stadium> _freeStadiums = new ArrayDeque();
+  private ArrayDeque<Stadium> _freeStadiums = new ArrayDeque<>();
   private Stadium[] _allStadiums = new Stadium[22];
 
-  public static final StadiumPool getInstance() {
+  public static StadiumPool getInstance() {
     if (_instance == null) {
       _instance = new StadiumPool();
     }
@@ -37,11 +37,7 @@ public class StadiumPool {
     int cnt = 0;
 
     for(int i = 0; i < 22 / OLY_STADIA_TEMPLATES.length; ++i) {
-      StadiumPool.StadiumTemplate[] var3 = OLY_STADIA_TEMPLATES;
-      int var4 = var3.length;
-
-      for(int var5 = 0; var5 < var4; ++var5) {
-        StadiumPool.StadiumTemplate st = var3[var5];
+      for (StadiumTemplate st : OLY_STADIA_TEMPLATES) {
         Stadium stadium = new Stadium(cnt, st.zid, st.oloc);
         this._allStadiums[cnt] = stadium;
         this._freeStadiums.addLast(stadium);
@@ -49,7 +45,7 @@ public class StadiumPool {
       }
     }
 
-    _log.info("OlyStadiumPool: allocated " + cnt + " stadiums.");
+    log.info("OlyStadiumPool: allocated " + cnt + " stadiums.");
   }
 
   public void FreeStadiums() {
@@ -61,7 +57,7 @@ public class StadiumPool {
     }
 
     this._freeStadiums.clear();
-    _log.info("OlyStadiumPool: stadiums cleared.");
+    log.info("OlyStadiumPool: stadiums cleared.");
   }
 
   public boolean isStadiumAvailable() {
@@ -71,7 +67,7 @@ public class StadiumPool {
   public synchronized Stadium pollStadium() {
     Stadium stadium = (Stadium)this._freeStadiums.pollFirst();
     if (!stadium.isFree()) {
-      _log.warn("Poll used stadium");
+      log.warn("Poll used stadium");
       Thread.dumpStack();
       stadium = (Stadium)this._freeStadiums.pollFirst();
     }
@@ -82,7 +78,7 @@ public class StadiumPool {
 
   public synchronized void putStadium(Stadium stadium) {
     if (stadium.isFree()) {
-      _log.warn("Put free stadium");
+      log.warn("Put free stadium");
       Thread.dumpStack();
     }
 

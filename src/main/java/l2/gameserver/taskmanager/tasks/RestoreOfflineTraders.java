@@ -5,10 +5,6 @@
 
 package l2.gameserver.taskmanager.tasks;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Iterator;
 import l2.commons.dbutils.DbUtils;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.Config;
@@ -16,11 +12,14 @@ import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.World;
 import l2.gameserver.skills.AbnormalEffect;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+@Slf4j
 public class RestoreOfflineTraders extends RunnableImpl {
-  private static final Logger _log = LoggerFactory.getLogger(RestoreOfflineTraders.class);
 
   public RestoreOfflineTraders() {
   }
@@ -35,9 +34,9 @@ public class RestoreOfflineTraders extends RunnableImpl {
       con = DatabaseFactory.getInstance().getConnection();
       int objectId;
       if (Config.SERVICES_OFFLINE_TRADE_SECONDS_TO_KICK > 0L) {
-        objectId = (int)(System.currentTimeMillis() / 1000L - Config.SERVICES_OFFLINE_TRADE_SECONDS_TO_KICK);
+        objectId = (int) (System.currentTimeMillis() / 1000L - Config.SERVICES_OFFLINE_TRADE_SECONDS_TO_KICK);
         statement = con.prepareStatement("DELETE FROM character_variables WHERE name = 'offline' AND value < ?");
-        statement.setLong(1, (long)objectId);
+        statement.setLong(1, (long) objectId);
         statement.executeUpdate();
         DbUtils.close(statement);
       }
@@ -49,8 +48,8 @@ public class RestoreOfflineTraders extends RunnableImpl {
       rset = statement.executeQuery();
 
       label145:
-      while(true) {
-        while(true) {
+      while (true) {
+        while (true) {
           int expireTimeSecs;
           Player p;
           do {
@@ -61,7 +60,7 @@ public class RestoreOfflineTraders extends RunnableImpl {
             objectId = rset.getInt("obj_id");
             expireTimeSecs = rset.getInt("value");
             p = Player.restore(objectId);
-          } while(p == null);
+          } while (p == null);
 
           if (p.isDead()) {
             p.kick();
@@ -82,19 +81,17 @@ public class RestoreOfflineTraders extends RunnableImpl {
             }
 
             if (Config.SERVICES_OFFLINE_TRADE_SECONDS_TO_KICK > 0L) {
-              p.startKickTask((Config.SERVICES_OFFLINE_TRADE_SECONDS_TO_KICK + (long)expireTimeSecs - System.currentTimeMillis() / 1000L) * 1000L);
+              p.startKickTask((Config.SERVICES_OFFLINE_TRADE_SECONDS_TO_KICK + (long) expireTimeSecs - System.currentTimeMillis() / 1000L) * 1000L);
             }
 
             if (Config.SERVICES_TRADE_ONLY_FAR) {
-              Iterator var8 = World.getAroundPlayers(p, Config.SERVICES_TRADE_RADIUS, 200).iterator();
 
-              while(var8.hasNext()) {
-                Player player = (Player)var8.next();
+              for (Player player : World.getAroundPlayers(p, Config.SERVICES_TRADE_RADIUS, 200)) {
                 if (player.isInStoreMode()) {
                   if (player.isInOfflineMode()) {
                     player.setOfflineMode(false);
                     player.kick();
-                    _log.warn("Offline trader: " + player + " kicked.");
+                    log.warn("Offline trader: " + player + " kicked.");
                   } else {
                     player.setPrivateStoreType(0);
                   }
@@ -107,11 +104,11 @@ public class RestoreOfflineTraders extends RunnableImpl {
         }
       }
     } catch (Exception var13) {
-      _log.error("Error while restoring offline traders!", var13);
+      log.error("Error while restoring offline traders!", var13);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
 
-    _log.info("Restored " + count + " offline traders");
+    log.info("Restored " + count + " offline traders");
   }
 }

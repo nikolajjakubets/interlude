@@ -5,25 +5,24 @@
 
 package l2.gameserver.model.entity.residence;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.Config;
 import l2.gameserver.dao.ClanDataDAO;
 import l2.gameserver.dao.ClanHallDAO;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.instancemanager.PlayerMessageStack;
-import l2.gameserver.model.Player;
 import l2.gameserver.model.entity.events.impl.ClanHallAuctionEvent;
 import l2.gameserver.model.pledge.Clan;
 import l2.gameserver.model.pledge.UnitMember;
 import l2.gameserver.network.l2.components.SystemMsg;
 import l2.gameserver.templates.StatsSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+@Slf4j
 public class ClanHall extends Residence {
-  private static final Logger _log = LoggerFactory.getLogger(ClanHall.class);
   private int _auctionLength;
   private long _auctionMinBid;
   private String _auctionDescription = "";
@@ -35,9 +34,9 @@ public class ClanHall extends Residence {
   public ClanHall(StatsSet set) {
     super(set);
     this._grade = set.getInteger("grade", 0);
-    this._rentalFee = (long)set.getInteger("rental_fee", 0);
-    this._minBid = (long)set.getInteger("min_bid", 0);
-    this._deposit = (long)set.getInteger("deposit", 0);
+    this._rentalFee = set.getInteger("rental_fee", 0);
+    this._minBid = set.getInteger("min_bid", 0);
+    this._deposit = set.getInteger("deposit", 0);
   }
 
   public void init() {
@@ -103,7 +102,7 @@ public class ClanHall extends Residence {
         clan.broadcastClanStatus(false, true, false);
       }
     } catch (Exception var8) {
-      _log.warn("Exception: updateOwnerInDB(L2Clan clan): " + var8, var8);
+      log.warn("Exception: updateOwnerInDB(L2Clan clan): " + var8, var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -166,10 +165,10 @@ public class ClanHall extends Residence {
         if (member.isOnline()) {
           member.getPlayer().sendPacket(SystemMsg.THE_CLAN_HALL_FEE_IS_ONE_WEEK_OVERDUE_THEREFORE_THE_CLAN_HALL_OWNERSHIP_HAS_BEEN_REVOKED);
         } else {
-          PlayerMessageStack.getInstance().mailto(member.getObjectId(), SystemMsg.THE_CLAN_HALL_FEE_IS_ONE_WEEK_OVERDUE_THEREFORE_THE_CLAN_HALL_OWNERSHIP_HAS_BEEN_REVOKED.packet((Player)null));
+          PlayerMessageStack.getInstance().mailto(member.getObjectId(), SystemMsg.THE_CLAN_HALL_FEE_IS_ONE_WEEK_OVERDUE_THEREFORE_THE_CLAN_HALL_OWNERSHIP_HAS_BEEN_REVOKED.packet(null));
         }
 
-        this.changeOwner((Clan)null);
+        this.changeOwner(null);
       }
     }
 

@@ -16,11 +16,10 @@ import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.components.IStaticPacket;
 import l2.gameserver.templates.item.ItemTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class L2GameServerPacket extends SendablePacket<GameClient> implements IStaticPacket {
-  private static final Logger _log = LoggerFactory.getLogger(L2GameServerPacket.class);
 
   public L2GameServerPacket() {
   }
@@ -28,10 +27,9 @@ public abstract class L2GameServerPacket extends SendablePacket<GameClient> impl
   public final boolean write() {
     try {
       this.writeImpl();
-      boolean var1 = true;
-      return var1;
+      return true;
     } catch (Exception var5) {
-      _log.error("Client: " + this.getClient() + " - Failed writing: " + this.getType() + " - Server Version: " + GameServer.getInstance().getVersion().getRevisionNumber(), var5);
+      log.error("Client: " + this.getClient() + " - Failed writing: " + this.getType() + " - Server Version: " + GameServer.getInstance().getVersion().getRevisionNumber(), var5);
       return false;
     } finally {
       ;
@@ -54,11 +52,7 @@ public abstract class L2GameServerPacket extends SendablePacket<GameClient> impl
       this.getByteBuffer().putInt(values.length);
     }
 
-    int[] var3 = values;
-    int var4 = values.length;
-
-    for(int var5 = 0; var5 < var4; ++var5) {
-      int value = var3[var5];
+    for (int value : values) {
       this.getByteBuffer().putInt(value);
     }
 
@@ -76,7 +70,7 @@ public abstract class L2GameServerPacket extends SendablePacket<GameClient> impl
     this.writeH(item.getTemplate().getType1());
     this.writeD(item.getObjectId());
     this.writeD(item.getItemId());
-    this.writeD((int)count);
+    this.writeD((int) count);
     this.writeH(item.getTemplate().getType2ForPackets());
     this.writeH(item.getBlessed());
     this.writeH(item.isEquipped() ? 1 : 0);
@@ -96,7 +90,7 @@ public abstract class L2GameServerPacket extends SendablePacket<GameClient> impl
     this.writeH(item.getItem().getType1());
     this.writeD(item.getObjectId());
     this.writeD(item.getItemId());
-    this.writeD((int)count);
+    this.writeD((int) count);
     this.writeH(item.getItem().getType2ForPackets());
     this.writeH(item.getCustomType1());
     this.writeH(item.isEquipped() ? 1 : 0);
@@ -127,11 +121,8 @@ public abstract class L2GameServerPacket extends SendablePacket<GameClient> impl
         } else if (i.isArmor()) {
           this.writeH(-1);
           this.writeH(0);
-          Element[] var7 = Element.VALUES;
-          int var4 = var7.length;
 
-          for(int var5 = 0; var5 < var4; ++var5) {
-            Element e = var7[var5];
+          for (Element e : Element.VALUES) {
             this.writeH(item.getItemAttributes().getValue(e) + i.getBaseAttributeValue(e));
           }
         } else {

@@ -5,37 +5,21 @@
 
 package l2.gameserver.network.telnet;
 
+import l2.gameserver.Config;
+import l2.gameserver.network.telnet.commands.TelnetServer;
+import l2.gameserver.network.telnet.commands.*;
+import lombok.extern.slf4j.Slf4j;
+import org.jboss.netty.channel.*;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import l2.gameserver.Config;
-import l2.gameserver.network.telnet.commands.TelnetBan;
-import l2.gameserver.network.telnet.commands.TelnetConfig;
-import l2.gameserver.network.telnet.commands.TelnetDebug;
-import l2.gameserver.network.telnet.commands.TelnetPerfomance;
-import l2.gameserver.network.telnet.commands.TelnetSay;
-import l2.gameserver.network.telnet.commands.TelnetServer;
-import l2.gameserver.network.telnet.commands.TelnetStatus;
-import l2.gameserver.network.telnet.commands.TelnetWorld;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelFutureListener;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class TelnetServerHandler extends SimpleChannelUpstreamHandler implements TelnetCommandHolder {
-  private static final Logger _log = LoggerFactory.getLogger(TelnetServerHandler.class);
   private static final Pattern COMMAND_ARGS_PATTERN = Pattern.compile("\"([^\"]*)\"|([^\\s]+)");
-  private Set<TelnetCommand> _commands = new LinkedHashSet();
+  private Set<TelnetCommand> _commands = new LinkedHashSet<>();
 
   public TelnetServerHandler() {
     this._commands.add(new TelnetCommand("help", new String[]{"h"}) {
@@ -50,10 +34,8 @@ public class TelnetServerHandler extends SimpleChannelUpstreamHandler implements
         } else {
           StringBuilder sb = new StringBuilder();
           sb.append("Available commands:\n");
-          Iterator var3 = TelnetServerHandler.this._commands.iterator();
 
-          while(var3.hasNext()) {
-            TelnetCommand cmd = (TelnetCommand)var3.next();
+          for (TelnetCommand cmd : TelnetServerHandler.this._commands) {
             sb.append(cmd.getCommand()).append("\n");
           }
 
@@ -72,12 +54,8 @@ public class TelnetServerHandler extends SimpleChannelUpstreamHandler implements
   }
 
   public void addHandler(TelnetCommandHolder handler) {
-    Iterator var2 = handler.getCommands().iterator();
 
-    while(var2.hasNext()) {
-      TelnetCommand cmd = (TelnetCommand)var2.next();
-      this._commands.add(cmd);
-    }
+    this._commands.addAll(handler.getCommands());
 
   }
 
@@ -94,8 +72,8 @@ public class TelnetServerHandler extends SimpleChannelUpstreamHandler implements
         return null;
       }
 
-      cmd = (TelnetCommand)var2.next();
-    } while(!cmd.equals(command));
+      cmd = (TelnetCommand) var2.next();
+    } while (!cmd.equals(command));
 
     return cmd;
   }
@@ -115,10 +93,9 @@ public class TelnetServerHandler extends SimpleChannelUpstreamHandler implements
   }
 
   public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-    StringBuilder sb = new StringBuilder();
-    sb.append("Welcome to L2 GameServer telnet console.\n");
-    sb.append("It is " + new Date() + " now.\n");
-    e.getChannel().write(sb.toString().replaceAll("\n", "\r\n"));
+    String sb = "Welcome to L2 GameServer telnet console.\n" +
+      "It is " + new Date() + " now.\n";
+    e.getChannel().write(sb.replaceAll("\n", "\r\n"));
     if (!Config.TELNET_PASSWORD.isEmpty()) {
       e.getChannel().write("Password:");
       ctx.setAttachment(Boolean.FALSE);
@@ -130,7 +107,7 @@ public class TelnetServerHandler extends SimpleChannelUpstreamHandler implements
   }
 
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-    String request = (String)e.getMessage();
+    String request = (String) e.getMessage();
     String response = null;
     boolean close = false;
     if (Boolean.FALSE.equals(ctx.getAttachment())) {
@@ -156,14 +133,14 @@ public class TelnetServerHandler extends SimpleChannelUpstreamHandler implements
 
         ArrayList args;
         String arg;
-        for(args = new ArrayList<>(); m.find(); args.add(arg)) {
+        for (args = new ArrayList<>(); m.find(); args.add(arg)) {
           arg = m.group(1);
           if (arg == null) {
             arg = m.group(0);
           }
         }
 
-        response = this.tryHandleCommand(command, (String[])args.toArray(new String[args.size()]));
+        response = this.tryHandleCommand(command, (String[]) args.toArray(new String[0]));
       }
     }
 
@@ -178,7 +155,7 @@ public class TelnetServerHandler extends SimpleChannelUpstreamHandler implements
     if (e.getCause() instanceof IOException) {
       e.getChannel().close();
     } else {
-      _log.error("", e.getCause());
+      log.error("exceptionCaught: eMessage={}, eClause={} eClass={}", ctx.getName(), e.getCause(), e.getClass());
     }
 
   }

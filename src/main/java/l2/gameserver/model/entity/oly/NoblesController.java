@@ -5,30 +5,20 @@
 
 package l2.gameserver.model.entity.oly;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.Config;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.base.ClassId;
 import l2.gameserver.utils.Log;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+@Slf4j
 public class NoblesController {
-  private static final Logger _log = LoggerFactory.getLogger(NoblesController.class);
   private static NoblesController _instance;
   private static final String GET_ALL_NOBLES = "SELECT `char_id`,`class_id`,`char_name`,`points_current`,`points_past`,`points_pre_past`,`class_free_cnt`,`class_based_cnt`,`team_cnt`,`comp_win`,`comp_loose`,`comp_done` FROM `oly_nobles`";
   private static final String SAVE_NOBLE = "REPLACE INTO `oly_nobles`(`char_id`,`class_id`,`char_name`,`points_current`,`points_past`,`points_pre_past`,`class_free_cnt`,`class_based_cnt`,`team_cnt`,`comp_win`,`comp_loose`,`comp_done`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
@@ -66,8 +56,8 @@ public class NoblesController {
         return null;
       }
 
-      nr = (NoblesController.NobleRecord)var2.next();
-    } while(nr == null || nr.char_id != object_id);
+      nr = (NoblesController.NobleRecord) var2.next();
+    } while (nr == null || nr.char_id != object_id);
 
     return nr;
   }
@@ -81,8 +71,8 @@ public class NoblesController {
         return;
       }
 
-      nr = (NoblesController.NobleRecord)var3.next();
-    } while(nr == null || nr.char_id != object_id);
+      nr = (NoblesController.NobleRecord) var3.next();
+    } while (nr == null || nr.char_id != object_id);
 
     nr.char_name = newname;
     this.SaveNobleRecord(nr);
@@ -101,17 +91,15 @@ public class NoblesController {
         return -1;
       }
 
-      nr = (NoblesController.NobleRecord)var2.next();
-    } while(nr == null || nr.char_id != object_id);
+      nr = (NoblesController.NobleRecord) var2.next();
+    } while (nr == null || nr.char_id != object_id);
 
     return nr.points_current;
   }
 
   public void setPointsOf(int object_id, int points) {
-    Iterator var3 = this._nobleses.iterator();
 
-    while(var3.hasNext()) {
-      NoblesController.NobleRecord nr = (NoblesController.NobleRecord)var3.next();
+    for (NobleRecord nr : this._nobleses) {
       if (nr != null && nr.char_id == object_id) {
         nr.points_current = points;
         this.SaveNobleRecord(nr);
@@ -122,10 +110,8 @@ public class NoblesController {
 
   public synchronized void removeNoble(Player noble) {
     NoblesController.NobleRecord nobleRecord = null;
-    Iterator var3 = this._nobleses.iterator();
 
-    while(var3.hasNext()) {
-      NoblesController.NobleRecord nobleRecord2 = (NoblesController.NobleRecord)var3.next();
+    for (NobleRecord nobleRecord2 : this._nobleses) {
       if (nobleRecord2.char_id == noble.getObjectId()) {
         nobleRecord = nobleRecord2;
       }
@@ -134,7 +120,6 @@ public class NoblesController {
     if (nobleRecord != null) {
       Connection conn = null;
       PreparedStatement pstmt = null;
-      Object rset = null;
 
       try {
         conn = DatabaseFactory.getInstance().getConnection();
@@ -143,21 +128,19 @@ public class NoblesController {
         pstmt.executeUpdate();
         this._nobleses.remove(nobleRecord);
       } catch (SQLException var10) {
-        _log.warn("NoblesController: Can't remove nobleses ", var10);
+        log.warn("NoblesController: Can't remove nobleses ", var10);
       } finally {
-        DbUtils.closeQuietly(conn, pstmt, (ResultSet)rset);
+        DbUtils.closeQuietly(conn, pstmt, null);
       }
 
     }
   }
 
   public synchronized void addNoble(Player noble) {
-    synchronized(this._nobleses) {
+    synchronized (this._nobleses) {
       NoblesController.NobleRecord nr = null;
-      Iterator var4 = this._nobleses.iterator();
 
-      while(var4.hasNext()) {
-        NoblesController.NobleRecord nr2 = (NoblesController.NobleRecord)var4.next();
+      for (NobleRecord nr2 : this._nobleses) {
         if (nr2.char_id == noble.getObjectId()) {
           nr = nr2;
         }
@@ -170,7 +153,7 @@ public class NoblesController {
           ClassId[] var12 = ClassId.values();
           int var6 = var12.length;
 
-          for(int var7 = 0; var7 < var6; ++var7) {
+          for (int var7 = 0; var7 < var6; ++var7) {
             ClassId id = var12[var7];
             if (id.level() == 3 && id.getParent(0).getId() == classId) {
               classId = id.getId();
@@ -187,7 +170,7 @@ public class NoblesController {
       }
 
       if (noble.getBaseClassId() != nr.class_id) {
-        _log.warn("OlympiadController: " + noble.getName() + " got base class " + noble.getBaseClassId() + " but " + nr.class_id + " class nobless");
+        log.warn("OlympiadController: " + noble.getName() + " got base class " + noble.getBaseClassId() + " but " + nr.class_id + " class nobless");
         nr.class_id = nr.class_id;
       }
 
@@ -210,17 +193,17 @@ public class NoblesController {
       stmt = conn.createStatement();
       rset = stmt.executeQuery("SELECT `char_id`,`class_id`,`char_name`,`points_current`,`points_past`,`points_pre_past`,`class_free_cnt`,`class_based_cnt`,`team_cnt`,`comp_win`,`comp_loose`,`comp_done` FROM `oly_nobles`");
 
-      while(rset.next()) {
+      while (rset.next()) {
         NoblesController.NobleRecord nr = new NoblesController.NobleRecord(rset.getInt("char_id"), rset.getInt("class_id"), rset.getString("char_name"), rset.getInt("points_current"), rset.getInt("points_past"), rset.getInt("points_pre_past"), rset.getInt("class_free_cnt"), rset.getInt("class_based_cnt"), rset.getInt("team_cnt"), rset.getInt("comp_win"), rset.getInt("comp_loose"), rset.getInt("comp_done"));
         this._nobleses.add(nr);
       }
     } catch (SQLException var8) {
-      _log.warn("NoblesController: Can't load nobleses ", var8);
+      log.warn("NoblesController: Can't load nobleses ", var8);
     } finally {
       DbUtils.closeQuietly(conn, stmt, rset);
     }
 
-    _log.info("NoblesController: loaded " + this._nobleses.size() + " nobleses.");
+    log.info("NoblesController: loaded " + this._nobleses.size() + " nobleses.");
   }
 
   public void SaveNobleses() {
@@ -232,8 +215,8 @@ public class NoblesController {
       pstmt = con.prepareStatement("REPLACE INTO `oly_nobles`(`char_id`,`class_id`,`char_name`,`points_current`,`points_past`,`points_pre_past`,`class_free_cnt`,`class_based_cnt`,`team_cnt`,`comp_win`,`comp_loose`,`comp_done`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
       Iterator var3 = this._nobleses.iterator();
 
-      while(var3.hasNext()) {
-        NoblesController.NobleRecord noble = (NoblesController.NobleRecord)var3.next();
+      while (var3.hasNext()) {
+        NoblesController.NobleRecord noble = (NoblesController.NobleRecord) var3.next();
         pstmt.setInt(1, noble.char_id);
         pstmt.setInt(2, noble.class_id);
         pstmt.setString(3, noble.char_name);
@@ -249,7 +232,7 @@ public class NoblesController {
         pstmt.executeUpdate();
       }
     } catch (Exception var8) {
-      _log.warn("Oly: can't save nobleses : ", var8);
+      log.warn("Oly: can't save nobleses : ", var8);
       var8.printStackTrace();
     } finally {
       DbUtils.closeQuietly(con, pstmt);
@@ -278,7 +261,7 @@ public class NoblesController {
       pstmt.setInt(12, noble.comp_done);
       pstmt.executeUpdate();
     } catch (Exception var8) {
-      _log.warn("Oly: can't save noble " + noble.char_name, var8);
+      log.warn("Oly: can't save noble " + noble.char_name, var8);
       var8.printStackTrace();
     } finally {
       DbUtils.closeQuietly(con, pstmt);
@@ -287,11 +270,11 @@ public class NoblesController {
   }
 
   public void TransactNewSeason() {
-    _log.info("NoblesController: Cleanuping last period.");
+    log.info("NoblesController: Cleanuping last period.");
 
     NoblesController.NobleRecord nr;
-    for(Iterator var1 = this._nobleses.iterator(); var1.hasNext(); nr.points_current = Config.OLY_DEFAULT_POINTS) {
-      nr = (NoblesController.NobleRecord)var1.next();
+    for (Iterator var1 = this._nobleses.iterator(); var1.hasNext(); nr.points_current = Config.OLY_DEFAULT_POINTS) {
+      nr = (NoblesController.NobleRecord) var1.next();
       Log.add(String.format("NoblesController: %s(%d) new season clean. points_current=%d|points_past=%d|points_pre_past=%d|comp_done=%d", nr.char_name, nr.char_id, nr.points_current, nr.points_past, nr.points_pre_past, nr.comp_done), "olympiad");
       if (nr.comp_done >= Config.OLY_MIN_NOBLE_COMPS) {
         nr.points_past = nr.points_current;
@@ -314,8 +297,8 @@ public class NoblesController {
 
   public void AddWeaklyBonus() {
     NoblesController.NobleRecord nr;
-    for(Iterator var1 = this._nobleses.iterator(); var1.hasNext(); nr.team_cnt = 0) {
-      nr = (NoblesController.NobleRecord)var1.next();
+    for (Iterator var1 = this._nobleses.iterator(); var1.hasNext(); nr.team_cnt = 0) {
+      nr = (NoblesController.NobleRecord) var1.next();
       nr.points_current += Config.OLY_WBONUS_POINTS;
       nr.class_based_cnt = 0;
       nr.class_free_cnt = 0;
@@ -329,31 +312,31 @@ public class NoblesController {
     ArrayList<String> result = new ArrayList<>();
     Iterator var4 = this._nobleses.iterator();
 
-    while(var4.hasNext()) {
-      NoblesController.NobleRecord nr = (NoblesController.NobleRecord)var4.next();
+    while (var4.hasNext()) {
+      NoblesController.NobleRecord nr = (NoblesController.NobleRecord) var4.next();
       if (nr.class_id == cid && nr.points_pre_past > 0) {
         tmp.add(nr);
       }
     }
 
-    NoblesController.NobleRecord[] leader = (NoblesController.NobleRecord[])tmp.toArray(new NoblesController.NobleRecord[tmp.size()]);
+    NoblesController.NobleRecord[] leader = tmp.toArray(new NobleRecord[tmp.size()]);
     Arrays.sort(leader, NRCmp);
 
-    for(int i = 0; i < leader.length && i < 15; ++i) {
+    for (int i = 0; i < leader.length && i < 15; ++i) {
       if (leader[i] != null) {
         result.add(leader[i].char_name);
       }
     }
 
-    return (String[])result.toArray(new String[result.size()]);
+    return result.toArray(new String[result.size()]);
   }
 
   public int getPlayerClassRank(int cid, int playerId) {
     ArrayList<NoblesController.NobleRecord> tmp = new ArrayList<>();
     Iterator var4 = this._nobleses.iterator();
 
-    while(var4.hasNext()) {
-      NoblesController.NobleRecord nr = (NoblesController.NobleRecord)var4.next();
+    while (var4.hasNext()) {
+      NoblesController.NobleRecord nr = (NoblesController.NobleRecord) var4.next();
       if (nr.class_id == cid) {
         tmp.add(nr);
       }
@@ -361,8 +344,8 @@ public class NoblesController {
 
     Collections.sort(tmp, NRCmp);
 
-    for(int i = 0; i < tmp.size(); ++i) {
-      if (tmp.get(i) != null && ((NoblesController.NobleRecord)tmp.get(i)).char_id == playerId) {
+    for (int i = 0; i < tmp.size(); ++i) {
+      if (tmp.get(i) != null && tmp.get(i).char_id == playerId) {
         return i;
       }
     }
@@ -371,13 +354,13 @@ public class NoblesController {
   }
 
   public synchronized void ComputeRanks() {
-    _log.info("NoblesController: Computing ranks.");
-    NoblesController.NobleRecord[] rank_nobleses = (NoblesController.NobleRecord[])this._nobleses.toArray(new NoblesController.NobleRecord[this._nobleses.size()]);
+    log.info("NoblesController: Computing ranks.");
+    NoblesController.NobleRecord[] rank_nobleses = this._nobleses.toArray(new NobleRecord[this._nobleses.size()]);
     Arrays.sort(rank_nobleses, NRCmp);
-    int rank0 = (int)Math.round((double)rank_nobleses.length * 0.01D);
-    int rank1 = (int)Math.round((double)rank_nobleses.length * 0.1D);
-    int rank2 = (int)Math.round((double)rank_nobleses.length * 0.25D);
-    int rank3 = (int)Math.round((double)rank_nobleses.length * 0.5D);
+    int rank0 = (int) Math.round((double) rank_nobleses.length * 0.01D);
+    int rank1 = (int) Math.round((double) rank_nobleses.length * 0.1D);
+    int rank2 = (int) Math.round((double) rank_nobleses.length * 0.25D);
+    int rank3 = (int) Math.round((double) rank_nobleses.length * 0.5D);
     if (rank0 == 0) {
       rank0 = 1;
       ++rank1;
@@ -386,26 +369,26 @@ public class NoblesController {
     }
 
     int i;
-    for(i = 0; i <= rank0 && i < rank_nobleses.length; ++i) {
+    for (i = 0; i <= rank0 && i < rank_nobleses.length; ++i) {
       rank_nobleses[i].rank = 0;
     }
 
-    while(i <= rank1 && i < rank_nobleses.length) {
+    while (i <= rank1 && i < rank_nobleses.length) {
       rank_nobleses[i].rank = 1;
       ++i;
     }
 
-    while(i <= rank2 && i < rank_nobleses.length) {
+    while (i <= rank2 && i < rank_nobleses.length) {
       rank_nobleses[i].rank = 2;
       ++i;
     }
 
-    while(i <= rank3 && i < rank_nobleses.length) {
+    while (i <= rank3 && i < rank_nobleses.length) {
       rank_nobleses[i].rank = 3;
       ++i;
     }
 
-    while(i < rank_nobleses.length) {
+    while (i < rank_nobleses.length) {
       rank_nobleses[i].rank = 4;
       ++i;
     }

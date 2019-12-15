@@ -14,14 +14,13 @@ import l2.gameserver.stats.Env;
 import l2.gameserver.stats.StatTemplate;
 import l2.gameserver.stats.conditions.Condition;
 import l2.gameserver.templates.StatsSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Iterator;
 import java.util.List;
 
+@Slf4j
 public final class EffectTemplate extends StatTemplate {
-  private static final Logger _log = LoggerFactory.getLogger(EffectTemplate.class);
   public static final EffectTemplate[] EMPTY_ARRAY = new EffectTemplate[0];
   public static final String NO_STACK = "none";
   public static final String HP_RECOVER_CAST = "HpRecoverCast";
@@ -51,10 +50,10 @@ public final class EffectTemplate extends StatTemplate {
   public EffectTemplate(StatsSet set) {
     this._value = set.getDouble("value");
     this._count = set.getInteger("count", 1) < 0 ? 2147483647 : set.getInteger("count", 1);
-    this._period = (long)Math.min(2147483647, 1000 * (set.getInteger("time", 1) < 0 ? 2147483647 : set.getInteger("time", 1)));
-    this._abnormalEffect = (AbnormalEffect)set.getEnum("abnormal", AbnormalEffect.class);
-    this._abnormalEffect2 = (AbnormalEffect)set.getEnum("abnormal2", AbnormalEffect.class);
-    this._abnormalEffect3 = (AbnormalEffect)set.getEnum("abnormal3", AbnormalEffect.class);
+    this._period = (long) Math.min(2147483647, 1000 * (set.getInteger("time", 1) < 0 ? 2147483647 : set.getInteger("time", 1)));
+    this._abnormalEffect = (AbnormalEffect) set.getEnum("abnormal", AbnormalEffect.class);
+    this._abnormalEffect2 = (AbnormalEffect) set.getEnum("abnormal2", AbnormalEffect.class);
+    this._abnormalEffect3 = (AbnormalEffect) set.getEnum("abnormal3", AbnormalEffect.class);
     this._stackType = set.getString("stackType", "none");
     this._stackType2 = set.getString("stackType2", "none");
     this._stackOrder = set.getInteger("stackOrder", this._stackType.equals("none") && this._stackType2.equals("none") ? 1 : 0);
@@ -67,7 +66,7 @@ public final class EffectTemplate extends StatTemplate {
     this._isOffensive = set.isSet("isOffensive") ? set.getBool("isOffensive") : null;
     this._displayId = set.getInteger("displayId", 0);
     this._displayLevel = set.getInteger("displayLevel", 0);
-    this._effectType = (EffectType)set.getEnum("name", EffectType.class);
+    this._effectType = (EffectType) set.getEnum("name", EffectType.class);
     this._chance = set.getInteger("chance", 2147483647);
     this._paramSet = set;
   }
@@ -78,8 +77,8 @@ public final class EffectTemplate extends StatTemplate {
     } else {
       try {
         return this._effectType.makeEffect(env, this);
-      } catch (Exception var3) {
-        _log.error("", var3);
+      } catch (Exception e) {
+        log.error("getEffect: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         return null;
       }
     }
@@ -110,8 +109,8 @@ public final class EffectTemplate extends StatTemplate {
         return null;
       }
 
-      ef = (Effect)var2.next();
-    } while(ef == null || !EffectList.checkStackType(ef.getTemplate(), this));
+      ef = (Effect) var2.next();
+    } while (ef == null || !EffectList.checkStackType(ef.getTemplate(), this));
 
     return ef;
   }

@@ -6,19 +6,13 @@
 package l2.gameserver.templates.npc;
 
 import gnu.trove.TIntObjectHashMap;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import l2.commons.util.TroveUtils;
 import l2.gameserver.ai.CharacterAI;
 import l2.gameserver.idfactory.IdFactory;
 import l2.gameserver.model.Skill;
-import l2.gameserver.model.TeleportLocation;
 import l2.gameserver.model.Skill.SkillTargetType;
 import l2.gameserver.model.Skill.SkillType;
+import l2.gameserver.model.TeleportLocation;
 import l2.gameserver.model.base.ClassId;
 import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.model.instances.RaidBossInstance;
@@ -31,12 +25,14 @@ import l2.gameserver.scripts.Scripts;
 import l2.gameserver.skills.effects.EffectTemplate;
 import l2.gameserver.templates.CharTemplate;
 import l2.gameserver.templates.StatsSet;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
+import java.util.*;
+
+@Slf4j
 public final class NpcTemplate extends CharTemplate {
-  private static final Logger _log = LoggerFactory.getLogger(NpcTemplate.class);
   public static final Constructor<?> DEFAULT_TYPE_CONSTRUCTOR = NpcInstance.class.getConstructors()[0];
   public static final Constructor<?> DEFAULT_AI_CONSTRUCTOR = CharacterAI.class.getConstructors()[0];
   public final int npcId;
@@ -136,7 +132,7 @@ public final class NpcTemplate extends CharTemplate {
     try {
       return this._constructorType.newInstance(IdFactory.getInstance().getNextId(), this);
     } catch (Exception var2) {
-      _log.error("Unable to create instance of NPC " + this.npcId, var2);
+      log.error("Unable to create instance of NPC " + this.npcId, var2);
       return null;
     }
   }
@@ -145,7 +141,7 @@ public final class NpcTemplate extends CharTemplate {
     try {
       return this._constructorAI.newInstance(npc);
     } catch (Exception var3) {
-      _log.error("Unable to create ai of NPC " + this.npcId, var3);
+      log.error("Unable to create ai of NPC " + this.npcId, var3);
       return new CharacterAI(npc);
     }
   }
@@ -160,14 +156,14 @@ public final class NpcTemplate extends CharTemplate {
     }
 
     if (classType == null) {
-      _log.error("Not found type class for type: " + type + ". NpcId: " + this.npcId);
+      log.error("Not found type class for type: " + type + ". NpcId: " + this.npcId);
     } else {
       this._classType = classType;
       this._constructorType = (Constructor<NpcInstance>) this._classType.getConstructors()[0];
     }
 
     if (this._classType.isAnnotationPresent(Deprecated.class)) {
-      _log.error("Npc type: " + type + ", is deprecated. NpcId: " + this.npcId);
+      log.error("Npc type: " + type + ", is deprecated. NpcId: " + this.npcId);
     }
 
     this.isRaid = this.isInstanceOf(RaidBossInstance.class) && !this.isInstanceOf(ReflectionBossInstance.class);
@@ -183,14 +179,14 @@ public final class NpcTemplate extends CharTemplate {
     }
 
     if (classAI == null) {
-      _log.error("Not found ai class for ai: " + ai + ". NpcId: " + this.npcId);
+      log.error("Not found ai class for ai: " + ai + ". NpcId: " + this.npcId);
     } else {
       this._classAI = classAI;
       this._constructorAI = (Constructor<CharacterAI>) this._classAI.getConstructors()[0];
     }
 
     if (this._classAI.isAnnotationPresent(Deprecated.class)) {
-      _log.error("Ai type: " + ai + ", is deprecated. NpcId: " + this.npcId);
+      log.error("Ai type: " + ai + ", is deprecated. NpcId: " + this.npcId);
     }
 
   }

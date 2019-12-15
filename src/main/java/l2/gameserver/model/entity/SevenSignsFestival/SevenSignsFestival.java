@@ -5,15 +5,6 @@
 
 package l2.gameserver.model.entity.SevenSignsFestival;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.GameObjectsStorage;
@@ -22,17 +13,24 @@ import l2.gameserver.model.Player;
 import l2.gameserver.model.base.Experience;
 import l2.gameserver.model.entity.SevenSigns;
 import l2.gameserver.model.pledge.Clan;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.PledgeShowInfoUpdate;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.scripts.Functions;
 import l2.gameserver.tables.ClanTable;
 import l2.gameserver.templates.StatsSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Slf4j
 public class SevenSignsFestival {
-  private static final Logger _log = LoggerFactory.getLogger(SevenSignsFestival.class);
   private static SevenSignsFestival _instance;
   private static final SevenSigns _signsInstance = SevenSigns.getInstance();
   public static final int FESTIVAL_MANAGER_START = 120000;
@@ -210,7 +208,7 @@ public class SevenSignsFestival {
           i += 5;
         }
 
-        Map<Integer, StatsSet> tempData = (Map)this._festivalData.get(cycle);
+        Map<Integer, StatsSet> tempData = this._festivalData.get(cycle);
         if (tempData == null) {
           tempData = new TreeMap<>();
         }
@@ -223,21 +221,21 @@ public class SevenSignsFestival {
       StringBuilder query = new StringBuilder("SELECT festival_cycle, ");
 
       for(i = 0; i < 4; ++i) {
-        query.append("accumulated_bonus" + String.valueOf(i) + ", ");
+        query.append("accumulated_bonus" + i + ", ");
       }
 
-      query.append("accumulated_bonus" + String.valueOf(4) + " ");
+      query.append("accumulated_bonus" + 4 + " ");
       query.append("FROM seven_signs_status");
       statement = con.prepareStatement(query.toString());
       rset = statement.executeQuery();
 
       while(rset.next()) {
         for(i = 0; i < 5; ++i) {
-          _accumulatedBonuses[i] = (long)rset.getInt("accumulated_bonus" + String.valueOf(i));
+          _accumulatedBonuses[i] = rset.getInt("accumulated_bonus" + i);
         }
       }
     } catch (SQLException var12) {
-      _log.error("SevenSignsFestival: Failed to load configuration: " + var12);
+      log.error("SevenSignsFestival: Failed to load configuration: " + var12);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -253,14 +251,10 @@ public class SevenSignsFestival {
       con = DatabaseFactory.getInstance().getConnection();
       statement = con.prepareStatement("UPDATE seven_signs_festival SET date=?, score=?, members=?, names=? WHERE cycle=? AND cabal=? AND festivalId=?");
       statement2 = con.prepareStatement("INSERT INTO seven_signs_festival (festivalId, cabal, cycle, date, score, members, names) VALUES (?,?,?,?,?,?,?)");
-      Iterator var5 = this._festivalData.values().iterator();
 
-      while(var5.hasNext()) {
-        Map<Integer, StatsSet> currCycleData = (Map)var5.next();
-        Iterator var7 = currCycleData.values().iterator();
+      for (Map<Integer, StatsSet> integerStatsSetMap : this._festivalData.values()) {
 
-        while(var7.hasNext()) {
-          StatsSet festivalDat = (StatsSet)var7.next();
+        for (StatsSet festivalDat : integerStatsSetMap.values()) {
           int festivalCycle = festivalDat.getInteger("cycle");
           int festivalId = festivalDat.getInteger("festivalId");
           String cabal = SevenSigns.getCabalShortName(festivalDat.getInteger("cabal"));
@@ -285,7 +279,7 @@ public class SevenSignsFestival {
         }
       }
     } catch (Exception var16) {
-      _log.error("SevenSignsFestival: Failed to save configuration!", var16);
+      log.error("SevenSignsFestival: Failed to save configuration!", var16);
     } finally {
       DbUtils.closeQuietly(statement2);
       DbUtils.closeQuietly(con, statement);
@@ -302,11 +296,8 @@ public class SevenSignsFestival {
       StatsSet overallData = this.getOverallHighestScoreData(i);
       if (overallData != null) {
         String[] partyMembers = overallData.getString("members").split(",");
-        String[] var4 = partyMembers;
-        int var5 = partyMembers.length;
 
-        for(int var6 = 0; var6 < var5; ++var6) {
-          String partyMemberId = var4[var6];
+        for (String partyMemberId : partyMembers) {
           this.addReputationPointsForPartyMemberClan(partyMemberId);
         }
       }
@@ -322,7 +313,7 @@ public class SevenSignsFestival {
         SystemMessage sm = new SystemMessage(1775);
         sm.addName(player);
         sm.addNumber(100);
-        player.getClan().broadcastToOnlineMembers(new L2GameServerPacket[]{sm});
+        player.getClan().broadcastToOnlineMembers(sm);
       }
     } else {
       Connection con = null;
@@ -340,17 +331,17 @@ public class SevenSignsFestival {
             Clan clan = ClanTable.getInstance().getClan(clanId);
             if (clan != null) {
               clan.incReputation(100, true, "SevenSignsFestival");
-              clan.broadcastToOnlineMembers(new L2GameServerPacket[]{new PledgeShowInfoUpdate(clan)});
+              clan.broadcastToOnlineMembers(new PledgeShowInfoUpdate(clan));
               SystemMessage sm = new SystemMessage(1775);
               sm.addString(rset.getString("char_name"));
               sm.addNumber(100);
-              clan.broadcastToOnlineMembers(new L2GameServerPacket[]{sm});
+              clan.broadcastToOnlineMembers(sm);
             }
           }
         }
       } catch (Exception var12) {
-        _log.warn("could not get clan name of " + playerId + ": " + var12);
-        _log.error("", var12);
+        log.warn("could not get clan name of " + playerId + ": " + var12);
+        log.error("", var12);
       } finally {
         DbUtils.closeQuietly(con, statement, rset);
       }
@@ -390,14 +381,12 @@ public class SevenSignsFestival {
 
     this._festivalData.put(_signsInstance.getCurrentCycle(), newData);
     this.saveFestivalData(updateSettings);
-    Iterator var7 = GameObjectsStorage.getAllPlayers().iterator();
 
-    while(var7.hasNext()) {
-      Player onlinePlayer = (Player)var7.next();
+    for (Player onlinePlayer : GameObjectsStorage.getAllPlayers()) {
       Functions.removeItem(onlinePlayer, 5901, Functions.getItemCount(onlinePlayer, 5901));
     }
 
-    _log.info("SevenSignsFestival: Reinitialized engine for next competition period.");
+    log.info("SevenSignsFestival: Reinitialized engine for next competition period.");
   }
 
   public boolean isFestivalInitialized() {
@@ -427,17 +416,17 @@ public class SevenSignsFestival {
     try {
       currData = (StatsSet)((Map)this._festivalData.get(_signsInstance.getCurrentCycle())).get(offsetId);
     } catch (Exception var6) {
-      _log.info("SSF: Error while getting scores");
-      _log.info("oracle=" + oracle + " festivalId=" + festivalId + " offsetId" + offsetId + " _signsCycle" + _signsInstance.getCurrentCycle());
-      _log.info("_festivalData=" + this._festivalData.toString());
-      _log.error("", var6);
+      log.info("SSF: Error while getting scores");
+      log.info("oracle=" + oracle + " festivalId=" + festivalId + " offsetId" + offsetId + " _signsCycle" + _signsInstance.getCurrentCycle());
+      log.info("_festivalData=" + this._festivalData.toString());
+      log.error("", var6);
     }
 
     if (currData == null) {
       currData = new StatsSet();
       currData.set("score", 0);
       currData.set("members", "");
-      _log.warn("SevenSignsFestival: Data missing for " + SevenSigns.getCabalName(oracle) + ", FestivalID = " + festivalId + " (Current Cycle " + _signsInstance.getCurrentCycle() + ")");
+      log.warn("SevenSignsFestival: Data missing for " + SevenSigns.getCabalName(oracle) + ", FestivalID = " + festivalId + " (Current Cycle " + _signsInstance.getCurrentCycle() + ")");
     }
 
     return currData;
@@ -446,14 +435,10 @@ public class SevenSignsFestival {
   public StatsSet getOverallHighestScoreData(int festivalId) {
     StatsSet result = null;
     int highestScore = 0;
-    Iterator var4 = this._festivalData.values().iterator();
 
-    while(var4.hasNext()) {
-      Map<Integer, StatsSet> currCycleData = (Map)var4.next();
-      Iterator var6 = currCycleData.values().iterator();
+    for (Map<Integer, StatsSet> integerStatsSetMap : this._festivalData.values()) {
 
-      while(var6.hasNext()) {
-        StatsSet currFestData = (StatsSet)var6.next();
+      for (StatsSet currFestData : integerStatsSetMap.values()) {
         int currFestID = currFestData.getInteger("festivalId");
         int festivalScore = currFestData.getInteger("score");
         if (currFestID == festivalId && festivalScore > highestScore) {
@@ -549,11 +534,8 @@ public class SevenSignsFestival {
         add = draw_count > 0L ? draw_score / draw_count : 0L;
         String[] members = membersString.split(",");
         long count = (_accumulatedBonuses[i] + add) / (long)members.length;
-        String[] var14 = members;
-        int var15 = members.length;
 
-        for(int var16 = 0; var16 < var15; ++var16) {
-          String pIdStr = var14[var16];
+        for (String pIdStr : members) {
           SevenSigns.getInstance().addPlayerStoneContrib(Integer.parseInt(pIdStr), 0L, 0L, count / 10L);
         }
       }

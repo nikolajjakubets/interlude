@@ -5,16 +5,17 @@
 
 package l2.gameserver.network.l2.s2c;
 
+import l2.gameserver.model.Player;
+import lombok.extern.slf4j.Slf4j;
+
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
-import l2.gameserver.model.Player;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class ShowBoard extends L2GameServerPacket {
-  private static final Logger _log = LoggerFactory.getLogger(ShowBoard.class);
-  private static final Charset BBS_CHARSET = Charset.forName("UTF-16LE");
+  private static final Charset BBS_CHARSET = StandardCharsets.UTF_16LE;
   private String _htmlCode;
   private String _id;
   private List<String> _arg;
@@ -25,12 +26,12 @@ public class ShowBoard extends L2GameServerPacket {
     byte[] htmlBytes = html.getBytes(BBS_CHARSET);
     if (htmlBytes.length < 8180) {
       player.sendPacket(new ShowBoard(html, "101", player, false));
-      player.sendPacket(new ShowBoard((String)null, "102", player, false));
-      player.sendPacket(new ShowBoard((String)null, "103", player, false));
+      player.sendPacket(new ShowBoard(null, "102", player, false));
+      player.sendPacket(new ShowBoard(null, "103", player, false));
     } else if (htmlBytes.length < 16360) {
       player.sendPacket(new ShowBoard(new String(htmlBytes, 0, 8180, BBS_CHARSET), "101", player, false));
       player.sendPacket(new ShowBoard(new String(htmlBytes, 8180, htmlBytes.length - 8180, BBS_CHARSET), "102", player, false));
-      player.sendPacket(new ShowBoard((String)null, "103", player, false));
+      player.sendPacket(new ShowBoard(null, "103", player, false));
     } else {
       player.sendPacket(new ShowBoard(new String(htmlBytes, 0, 8180, BBS_CHARSET), "101", player, false));
       player.sendPacket(new ShowBoard(new String(htmlBytes, 8180, htmlBytes.length - 8180, BBS_CHARSET), "102", player, false));
@@ -42,7 +43,7 @@ public class ShowBoard extends L2GameServerPacket {
   private ShowBoard(String htmlCode, String id, Player player, boolean encodeBypasses) {
     this._addFav = "";
     if (htmlCode != null && htmlCode.length() > 8192) {
-      _log.warn("Html '" + htmlCode + "' is too long! this will crash the client!");
+      log.warn("Html '" + htmlCode + "' is too long! this will crash the client!");
       this._htmlCode = "<html><body>Html was too long</body></html>";
     } else {
       this._id = id;

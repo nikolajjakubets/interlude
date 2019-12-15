@@ -5,10 +5,6 @@
 
 package l2.gameserver.network.l2.c2s;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import l2.commons.lang.ArrayUtils;
 import l2.gameserver.Config;
 import l2.gameserver.cache.ItemInfoCache;
@@ -24,21 +20,22 @@ import l2.gameserver.model.chat.chatfilter.ChatFilter;
 import l2.gameserver.model.chat.chatfilter.ChatMsg;
 import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.model.matching.MatchingRoom;
-import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.components.ChatType;
 import l2.gameserver.network.l2.components.CustomMessage;
-import l2.gameserver.network.l2.components.IStaticPacket;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.Say2;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.utils.Log;
 import l2.gameserver.utils.MapUtils;
 import l2.gameserver.utils.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@Slf4j
 public class Say2C extends L2GameClientPacket {
-  private static final Logger _log = LoggerFactory.getLogger(Say2C.class);
   private static final Pattern EX_ITEM_LINK_PATTERN = Pattern.compile("[\b]\tType=[0-9]+[\\s]+\tID=([0-9]+)[\\s]+\tColor=[0-9]+[\\s]+\tUnderline=[0-9]+[\\s]+\tTitle=\u001b(.[^\u001b]*)[^\b]");
   private static final Pattern SKIP_ITEM_LINK_PATTERN = Pattern.compile("[\b]\tType=[0-9]+(.[^\b]*)[\b]");
   private String _text;
@@ -63,7 +60,7 @@ public class Say2C extends L2GameClientPacket {
           String[] lines = this._text.split("\n");
           this._text = "";
 
-          for(int i = 0; i < lines.length; ++i) {
+          for (int i = 0; i < lines.length; ++i) {
             lines[i] = lines[i].trim();
             if (lines[i].length() != 0) {
               if (this._text.length() > 0) {
@@ -99,12 +96,12 @@ public class Say2C extends L2GameClientPacket {
             int var6 = var5.length;
 
             label309:
-            for(objectId = 0; objectId < var6; ++objectId) {
+            for (objectId = 0; objectId < var6; ++objectId) {
               ChatFilter f = var5[objectId];
               if (f.isMatch(activeChar, this._type, this._text, receiver)) {
-                switch(f.getAction()) {
+                switch (f.getAction()) {
                   case 1:
-                    activeChar.updateNoChannel((long)Integer.parseInt(f.getValue()) * 1000L);
+                    activeChar.updateNoChannel((long) Integer.parseInt(f.getValue()) * 1000L);
                     break label309;
                   case 2:
                     activeChar.sendMessage(new CustomMessage(f.getValue(), activeChar));
@@ -132,7 +129,7 @@ public class Say2C extends L2GameClientPacket {
           if (!this._text.isEmpty()) {
             Matcher m = EX_ITEM_LINK_PATTERN.matcher(this._text);
 
-            while(m.find()) {
+            while (m.find()) {
               objectId = Integer.parseInt(m.group(1));
               ItemInstance item = activeChar.getInventory().getItemByObjectId(objectId);
               if (item == null) {
@@ -149,7 +146,7 @@ public class Say2C extends L2GameClientPacket {
               StringBuilder sb = new StringBuilder();
               int end = 0;
 
-              while(m.find()) {
+              while (m.find()) {
                 sb.append(Strings.fromTranslit(this._text.substring(end, end = m.start()), translit.equals("tl") ? 1 : 2));
                 sb.append(this._text, end, end = m.end());
               }
@@ -161,7 +158,7 @@ public class Say2C extends L2GameClientPacket {
             Player player;
             Iterator var26;
             label277:
-            switch(this._type) {
+            switch (this._type) {
               case TELL:
                 if (receiver == null) {
                   activeChar.sendPacket((new SystemMessage(3)).addString(this._target));
@@ -293,8 +290,8 @@ public class Say2C extends L2GameClientPacket {
                 if (activeChar.isHero() || activeChar.getPlayerAccess().CanAnnounce || activeChar.getPvpKills() >= Config.PVP_COUNT_TO_CHAT && Config.PVP_HERO_CHAT_SYSTEM) {
                   var26 = GameObjectsStorage.getAllPlayersForIterate().iterator();
 
-                  while(var26.hasNext()) {
-                    player = (Player)var26.next();
+                  while (var26.hasNext()) {
+                    player = (Player) var26.next();
                     if (!player.isInBlockList(activeChar) && !player.isBlockAll()) {
                       player.sendPacket(cs);
                     }
@@ -317,12 +314,12 @@ public class Say2C extends L2GameClientPacket {
 
                 var26 = GameObjectsStorage.getAllPlayersForIterate().iterator();
 
-                while(true) {
+                while (true) {
                   if (!var26.hasNext()) {
                     break label277;
                   }
 
-                  player = (Player)var26.next();
+                  player = (Player) var26.next();
                   if (!player.isInBlockList(activeChar) && !player.isBlockAll() && player.getBattlefieldChatId() == activeChar.getBattlefieldChatId()) {
                     player.sendPacket(cs);
                   }
@@ -334,11 +331,11 @@ public class Say2C extends L2GameClientPacket {
                 }
                 break;
               default:
-                _log.warn("Character " + activeChar.getName() + " used unknown chat type: " + this._type.ordinal() + ".");
+                log.warn("Character " + activeChar.getName() + " used unknown chat type: " + this._type.ordinal() + ".");
             }
 
             Log.LogChat(this._type.name(), activeChar.getName(), this._target, this._text, 0);
-            activeChar.getMessageBucket().addLast(new ChatMsg(this._type, receiver == null ? 0 : receiver.getObjectId(), this._text.hashCode(), (int)(currentTimeMillis / 1000L)));
+            activeChar.getMessageBucket().addLast(new ChatMsg(this._type, receiver == null ? 0 : receiver.getObjectId(), this._text.hashCode(), (int) (currentTimeMillis / 1000L)));
           }
         }
       } else {
@@ -353,7 +350,7 @@ public class Say2C extends L2GameClientPacket {
     int offset = Config.SHOUT_OFFSET;
     Iterator var5 = GameObjectsStorage.getAllPlayersForIterate().iterator();
 
-    while(true) {
+    while (true) {
       Player player;
       int tx;
       int ty;
@@ -366,15 +363,15 @@ public class Say2C extends L2GameClientPacket {
                   return;
                 }
 
-                player = (Player)var5.next();
-              } while(player == activeChar);
-            } while(activeChar.getReflection() != player.getReflection());
-          } while(player.isBlockAll());
-        } while(player.isInBlockList(activeChar));
+                player = (Player) var5.next();
+              } while (player == activeChar);
+            } while (activeChar.getReflection() != player.getReflection());
+          } while (player.isBlockAll());
+        } while (player.isInBlockList(activeChar));
 
         tx = MapUtils.regionX(player);
         ty = MapUtils.regionY(player);
-      } while((tx < rx - offset || tx > rx + offset || ty < ry - offset || ty > ry + offset) && !activeChar.isInRangeZ(player, Config.CHAT_RANGE));
+      } while ((tx < rx - offset || tx > rx + offset || ty < ry - offset || ty > ry + offset) && !activeChar.isInRangeZ(player, Config.CHAT_RANGE));
 
       player.sendPacket(cs);
     }

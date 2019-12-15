@@ -6,9 +6,6 @@
 package l2.gameserver.tables;
 
 import gnu.trove.TIntObjectHashMap;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.Creature;
@@ -16,11 +13,14 @@ import l2.gameserver.model.PetData;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.Summon;
 import l2.gameserver.model.items.ItemInstance;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+@Slf4j
 public class PetDataTable {
-  private static final Logger _log = LoggerFactory.getLogger(PetDataTable.class);
   private static final PetDataTable _instance = new PetDataTable();
   public static final int PET_WOLF_ID = 12077;
   public static final int HATCHLING_WIND_ID = 12311;
@@ -45,9 +45,9 @@ public class PetDataTable {
   public static final int FENRIR_WOLF_ID = 16041;
   public static final int WFENRIR_WOLF_ID = 16042;
   public static final int GUARDIANS_STRIDER_ID = 16068;
-  private final TIntObjectHashMap<PetData> _pets = new TIntObjectHashMap();
+  private final TIntObjectHashMap<PetData> _pets = new TIntObjectHashMap<>();
 
-  public static final PetDataTable getInstance() {
+  public static PetDataTable getInstance() {
     return _instance;
   }
 
@@ -61,8 +61,8 @@ public class PetDataTable {
 
   public PetData getInfo(int petNpcId, int level) {
     PetData result;
-    for(result = null; result == null && level < 100; ++level) {
-      result = (PetData)this._pets.get(petNpcId * 100 + level);
+    for (result = null; result == null && level < 100; ++level) {
+      result = this._pets.get(petNpcId * 100 + level);
     }
 
     return result;
@@ -78,7 +78,7 @@ public class PetDataTable {
       statement = con.prepareStatement("SELECT id, level, exp, hp, mp, patk, pdef, matk, mdef, acc, evasion, crit, speed, atk_speed, cast_speed, max_meal, battle_meal, normal_meal, loadMax, hpregen, mpregen FROM pet_data");
       rset = statement.executeQuery();
 
-      while(rset.next()) {
+      while (rset.next()) {
         PetData petData = new PetData();
         petData.setID(rset.getInt("id"));
         petData.setLevel(rset.getInt("level"));
@@ -108,13 +108,13 @@ public class PetDataTable {
         petData.setAddFed(getAddFed(petData.getID()));
         this._pets.put(petData.getID() * 100 + petData.getLevel(), petData);
       }
-    } catch (Exception var9) {
-      _log.error("", var9);
+    } catch (Exception e) {
+      log.error("closeQuietly: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
 
-    _log.info("PetDataTable: Loaded " + this._pets.size() + " pets.");
+    log.info("PetDataTable: Loaded " + this._pets.size() + " pets.");
   }
 
   public static void deletePet(ItemInstance item, Creature owner) {
@@ -128,7 +128,7 @@ public class PetDataTable {
       statement = con.prepareStatement("SELECT objId FROM pets WHERE item_obj_id=?");
       statement.setInt(1, item.getObjectId());
 
-      for(rset = statement.executeQuery(); rset.next(); petObjectId = rset.getInt("objId")) {
+      for (rset = statement.executeQuery(); rset.next(); petObjectId = rset.getInt("objId")) {
       }
 
       DbUtils.close(statement, rset);
@@ -146,7 +146,7 @@ public class PetDataTable {
       statement.setInt(1, item.getObjectId());
       statement.execute();
     } catch (Exception var11) {
-      _log.error("could not restore pet objectid:", var11);
+      log.error("could not restore pet objectid:", var11);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -164,7 +164,7 @@ public class PetDataTable {
       statement = con.prepareStatement("SELECT objId FROM pets WHERE item_obj_id=?");
       statement.setInt(1, oldItem.getObjectId());
 
-      for(rset = statement.executeQuery(); rset.next(); petObjectId = rset.getInt("objId")) {
+      for (rset = statement.executeQuery(); rset.next(); petObjectId = rset.getInt("objId")) {
       }
 
       if (owner != null) {
@@ -178,11 +178,9 @@ public class PetDataTable {
           player.setMount(0, 0, 0);
         }
 
-        return;
       }
     } catch (Exception var11) {
-      _log.error("could not restore pet objectid:", var11);
-      return;
+      log.error("could not restore pet objectid:", var11);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -191,10 +189,8 @@ public class PetDataTable {
 
   public static int getControlItemId(int npcId) {
     PetDataTable.L2Pet[] var1 = PetDataTable.L2Pet.values();
-    int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      PetDataTable.L2Pet pet = var1[var3];
+    for (L2Pet pet : var1) {
       if (pet.getNpcId() == npcId) {
         return pet.getControlItemId();
       }
@@ -205,10 +201,8 @@ public class PetDataTable {
 
   public static int getFoodId(int npcId) {
     PetDataTable.L2Pet[] var1 = PetDataTable.L2Pet.values();
-    int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      PetDataTable.L2Pet pet = var1[var3];
+    for (L2Pet pet : var1) {
       if (pet.getNpcId() == npcId) {
         return pet.getFoodId();
       }
@@ -219,10 +213,8 @@ public class PetDataTable {
 
   public static boolean isMountable(int npcId) {
     PetDataTable.L2Pet[] var1 = PetDataTable.L2Pet.values();
-    int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      PetDataTable.L2Pet pet = var1[var3];
+    for (L2Pet pet : var1) {
       if (pet.getNpcId() == npcId) {
         return pet.isMountable();
       }
@@ -233,10 +225,8 @@ public class PetDataTable {
 
   public static int getMinLevel(int npcId) {
     PetDataTable.L2Pet[] var1 = PetDataTable.L2Pet.values();
-    int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      PetDataTable.L2Pet pet = var1[var3];
+    for (L2Pet pet : var1) {
       if (pet.getNpcId() == npcId) {
         return pet.getMinLevel();
       }
@@ -247,10 +237,8 @@ public class PetDataTable {
 
   public static int getAddFed(int npcId) {
     PetDataTable.L2Pet[] var1 = PetDataTable.L2Pet.values();
-    int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      PetDataTable.L2Pet pet = var1[var3];
+    for (L2Pet pet : var1) {
       if (pet.getNpcId() == npcId) {
         return pet.getAddFed();
       }
@@ -261,10 +249,8 @@ public class PetDataTable {
 
   public static double getExpPenalty(int npcId) {
     PetDataTable.L2Pet[] var1 = PetDataTable.L2Pet.values();
-    int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      PetDataTable.L2Pet pet = var1[var3];
+    for (L2Pet pet : var1) {
       if (pet.getNpcId() == npcId) {
         return pet.getExpPenalty();
       }
@@ -275,10 +261,8 @@ public class PetDataTable {
 
   public static int getSoulshots(int npcId) {
     PetDataTable.L2Pet[] var1 = PetDataTable.L2Pet.values();
-    int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      PetDataTable.L2Pet pet = var1[var3];
+    for (L2Pet pet : var1) {
       if (pet.getNpcId() == npcId) {
         return pet.getSoulshots();
       }
@@ -289,10 +273,8 @@ public class PetDataTable {
 
   public static int getSpiritshots(int npcId) {
     PetDataTable.L2Pet[] var1 = PetDataTable.L2Pet.values();
-    int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      PetDataTable.L2Pet pet = var1[var3];
+    for (L2Pet pet : var1) {
       if (pet.getNpcId() == npcId) {
         return pet.getSpiritshots();
       }
@@ -303,10 +285,8 @@ public class PetDataTable {
 
   public static int getSummonId(ItemInstance item) {
     PetDataTable.L2Pet[] var1 = PetDataTable.L2Pet.values();
-    int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      PetDataTable.L2Pet pet = var1[var3];
+    for (L2Pet pet : var1) {
       if (pet.getControlItemId() == item.getItemId()) {
         return pet.getNpcId();
       }
@@ -319,10 +299,8 @@ public class PetDataTable {
     int[] items = new int[PetDataTable.L2Pet.values().length];
     int i = 0;
     PetDataTable.L2Pet[] var2 = PetDataTable.L2Pet.values();
-    int var3 = var2.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
-      PetDataTable.L2Pet pet = var2[var4];
+    for (L2Pet pet : var2) {
       items[i++] = pet.getControlItemId();
     }
 
@@ -331,10 +309,8 @@ public class PetDataTable {
 
   public static boolean isPetControlItem(ItemInstance item) {
     PetDataTable.L2Pet[] var1 = PetDataTable.L2Pet.values();
-    int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      PetDataTable.L2Pet pet = var1[var3];
+    for (L2Pet pet : var1) {
       if (pet.getControlItemId() == item.getItemId()) {
         return true;
       }
@@ -344,7 +320,7 @@ public class PetDataTable {
   }
 
   public static boolean isBabyPet(int id) {
-    switch(id) {
+    switch (id) {
       case 12780:
       case 12781:
       case 12782:
@@ -355,7 +331,7 @@ public class PetDataTable {
   }
 
   public static boolean isImprovedBabyPet(int id) {
-    switch(id) {
+    switch (id) {
       case 16034:
       case 16035:
       case 16036:
@@ -370,7 +346,7 @@ public class PetDataTable {
   }
 
   public static boolean isHatchling(int id) {
-    switch(id) {
+    switch (id) {
       case 12311:
       case 12312:
       case 12313:
@@ -381,7 +357,7 @@ public class PetDataTable {
   }
 
   public static boolean isStrider(int id) {
-    switch(id) {
+    switch (id) {
       case 12526:
       case 12527:
       case 12528:
@@ -396,7 +372,7 @@ public class PetDataTable {
   }
 
   public static boolean isGWolf(int id) {
-    switch(id) {
+    switch (id) {
       case 16025:
       case 16037:
       case 16041:
@@ -407,7 +383,7 @@ public class PetDataTable {
     }
   }
 
-  public static enum L2Pet {
+  public enum L2Pet {
     WOLF(12077, 2375, 2515, false, 1, 12, 0.3D, 2, 2),
     HATCHLING_WIND(12311, 3500, 4038, false, 1, 12, 0.3D, 2, 2),
     HATCHLING_STAR(12312, 3501, 4038, false, 1, 12, 0.3D, 2, 2),
@@ -431,7 +407,7 @@ public class PetDataTable {
     private final int _soulshots;
     private final int _spiritshots;
 
-    private L2Pet(int npcId, int controlItemId, int foodId, boolean isMountabe, int minLevel, int addFed, double expPenalty, int soulshots, int spiritshots) {
+    L2Pet(int npcId, int controlItemId, int foodId, boolean isMountabe, int minLevel, int addFed, double expPenalty, int soulshots, int spiritshots) {
       this._npcId = npcId;
       this._controlItemId = controlItemId;
       this._foodId = foodId;

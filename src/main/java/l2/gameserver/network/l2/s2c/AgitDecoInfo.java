@@ -6,11 +6,10 @@
 package l2.gameserver.network.l2.s2c;
 
 import l2.gameserver.model.entity.residence.ClanHall;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AgitDecoInfo extends L2GameServerPacket {
-  private static final Logger _log = LoggerFactory.getLogger(AgitDecoInfo.class);
   private static int[] _buff = new int[]{0, 1, 1, 1, 2, 2, 2, 2, 2, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2};
   private static int[] _itCr8 = new int[]{0, 1, 2, 2};
   private int _id;
@@ -55,7 +54,7 @@ public class AgitDecoInfo extends L2GameServerPacket {
   }
 
   private static int getHpRecovery(int percent) {
-    switch(percent) {
+    switch (percent) {
       case 0:
         return 0;
       case 20:
@@ -74,13 +73,13 @@ public class AgitDecoInfo extends L2GameServerPacket {
       case 300:
         return 2;
       default:
-        _log.warn("Unsupported percent " + percent + " in hp recovery");
+        log.warn("Unsupported percent " + percent + " in hp recovery");
         return 0;
     }
   }
 
   private static int getMpRecovery(int percent) {
-    switch(percent) {
+    switch (percent) {
       case 0:
         return 0;
       case 5:
@@ -96,13 +95,13 @@ public class AgitDecoInfo extends L2GameServerPacket {
       case 50:
         return 2;
       default:
-        _log.warn("Unsupported percent " + percent + " in mp recovery");
+        log.warn("Unsupported percent " + percent + " in mp recovery");
         return 0;
     }
   }
 
   private static int getExpRecovery(int percent) {
-    switch(percent) {
+    switch (percent) {
       case 0:
         return 0;
       case 5:
@@ -118,7 +117,7 @@ public class AgitDecoInfo extends L2GameServerPacket {
       case 50:
         return 2;
       default:
-        _log.warn("Unsupported percent " + percent + " in exp recovery");
+        log.warn("Unsupported percent " + percent + " in exp recovery");
         return 0;
     }
   }

@@ -5,31 +5,27 @@
 
 package l2.gameserver.taskmanager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledFuture;
 import l2.commons.dbutils.DbUtils;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.ThreadPoolManager;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.taskmanager.tasks.RecommendationUpdateTask;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+
+@Slf4j
 public final class TaskManager {
-  private static final Logger _log = LoggerFactory.getLogger(TaskManager.class);
   private static TaskManager _instance;
   static final String[] SQL_STATEMENTS = new String[]{"SELECT id,task,type,last_activation,param1,param2,param3 FROM global_tasks", "UPDATE global_tasks SET last_activation=? WHERE id=?", "SELECT id FROM global_tasks WHERE task=?", "INSERT INTO global_tasks (task,type,last_activation,param1,param2,param3) VALUES(?,?,?,?,?,?)"};
-  private final Map<String, Task> _tasks = new ConcurrentHashMap();
+  private final Map<String, Task> _tasks = new ConcurrentHashMap<>();
   final List<TaskManager.ExecutedTask> _currentTasks = new ArrayList<>();
 
   public static TaskManager getInstance() {
@@ -81,8 +77,7 @@ public final class TaskManager {
         }
       }
     } catch (Exception var10) {
-      _log.error("error while loading Global Task table " + var10);
-      _log.error("", var10);
+      log.error("error while loading Global Task table " + var10);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -116,9 +111,9 @@ public final class TaskManager {
               return true;
             }
 
-            _log.info("Task " + task.getId() + " is obsoleted.");
+            log.info("Task " + task.getId() + " is obsoleted.");
           } catch (Exception e) {
-            _log.error("launchTask: eMessage={}, eClause={}", e.getMessage(), e.getClass());
+            log.error("launchTask: eMessage={}, eClause={}", e.getMessage(), e.getClass());
           }
         } else if (type == TaskTypes.TYPE_SPECIAL) {
           ScheduledFuture<?> result = task.getTask().launchSpecial(task);
@@ -130,7 +125,7 @@ public final class TaskManager {
           interval = Long.parseLong(task.getParams()[0]) * 86400000L;
           String[] hour = task.getParams()[1].split(":");
           if (hour.length != 3) {
-            _log.warn("Task " + task.getId() + " has incorrect parameters");
+            log.warn("Task " + task.getId() + " has incorrect parameters");
             return false;
           }
 
@@ -143,7 +138,7 @@ public final class TaskManager {
             min.set(Calendar.MINUTE, Integer.parseInt(hour[1]));
             min.set(Calendar.SECOND, Integer.parseInt(hour[2]));
           } catch (Exception var11) {
-            _log.warn("Bad parameter on task " + task.getId() + ": " + var11.getMessage());
+            log.warn("Bad parameter on task " + task.getId() + ": " + var11.getMessage());
             return false;
           }
 
@@ -188,10 +183,9 @@ public final class TaskManager {
         statement.execute();
       }
 
-      boolean var11 = true;
-      return var11;
+      return true;
     } catch (SQLException var15) {
-      _log.warn("cannot add the unique task: " + var15.getMessage());
+      log.warn("cannot add the unique task: " + var15.getMessage());
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -217,10 +211,9 @@ public final class TaskManager {
       statement.setString(5, param2);
       statement.setString(6, param3);
       statement.execute();
-      boolean var9 = true;
-      return var9;
+      return true;
     } catch (SQLException var13) {
-      _log.warn("cannot add the task:\t" + var13.getMessage());
+      log.warn("cannot add the task:\t" + var13.getMessage());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -257,7 +250,7 @@ public final class TaskManager {
         statement.setInt(2, this._id);
         statement.executeUpdate();
       } catch (SQLException var7) {
-        _log.warn("cannot updated the Global Task " + this._id + ": " + var7.getMessage());
+        log.warn("cannot updated the Global Task " + this._id + ": " + var7.getMessage());
       } finally {
         DbUtils.closeQuietly(con, statement);
       }

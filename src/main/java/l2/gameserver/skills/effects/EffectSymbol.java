@@ -13,20 +13,18 @@ import l2.gameserver.model.*;
 import l2.gameserver.model.Skill.SkillTargetType;
 import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.model.instances.SymbolInstance;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.MagicSkillLaunched;
 import l2.gameserver.stats.Env;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.utils.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+@Slf4j
 public final class EffectSymbol extends Effect {
-  private static final Logger _log = LoggerFactory.getLogger(EffectSymbol.class);
   private NpcInstance _symbol = null;
 
   public EffectSymbol(Env env, EffectTemplate template) {
@@ -35,12 +33,12 @@ public final class EffectSymbol extends Effect {
 
   public boolean checkCondition() {
     if (this.getSkill().getTargetType() != SkillTargetType.TARGET_SELF) {
-      _log.error("Symbol skill with target != self, id = " + this.getSkill().getId());
+      log.error("Symbol skill with target != self, id = " + this.getSkill().getId());
       return false;
     } else {
       Skill skill = this.getSkill().getFirstAddedSkill();
       if (skill == null) {
-        _log.error("Not implemented symbol skill, id = " + this.getSkill().getId());
+        log.error("Not implemented symbol skill, id = " + this.getSkill().getId());
         return false;
       } else {
         return super.checkCondition();
@@ -53,9 +51,9 @@ public final class EffectSymbol extends Effect {
     Skill skill = this.getSkill().getFirstAddedSkill();
     skill.setMagicType(this.getSkill().getMagicType());
     Location loc = this._effected.getLoc();
-    if (this._effected.isPlayer() && ((Player)this._effected).getGroundSkillLoc() != null) {
-      loc = ((Player)this._effected).getGroundSkillLoc();
-      ((Player)this._effected).setGroundSkillLoc((Location)null);
+    if (this._effected.isPlayer() && ((Player) this._effected).getGroundSkillLoc() != null) {
+      loc = ((Player) this._effected).getGroundSkillLoc();
+      ((Player) this._effected).setGroundSkillLoc(null);
     }
 
     NpcTemplate template = NpcHolder.getInstance().getTemplate(this._skill.getSymbolId());
@@ -95,7 +93,7 @@ public final class EffectSymbol extends Effect {
           effector.reduceCurrentMp(mpConsume, effector);
           Iterator var6 = World.getAroundCharacters(symbol, this.getSkill().getSkillRadius(), 200).iterator();
 
-          while(true) {
+          while (true) {
             Creature cha;
             do {
               do {
@@ -105,16 +103,16 @@ public final class EffectSymbol extends Effect {
                       return true;
                     }
 
-                    cha = (Creature)var6.next();
-                  } while(cha.isDoor());
-                } while(cha.getEffectList().getEffectsBySkill(skill) != null);
-              } while(skill.checkTarget(effector, cha, cha, false, false) != null);
-            } while(skill.isOffensive() && !GeoEngine.canSeeTarget(symbol, cha, false));
+                    cha = (Creature) var6.next();
+                  } while (cha.isDoor());
+                } while (cha.getEffectList().getEffectsBySkill(skill) != null);
+              } while (skill.checkTarget(effector, cha, cha, false, false) != null);
+            } while (skill.isOffensive() && !GeoEngine.canSeeTarget(symbol, cha, false));
 
-            List<Creature> targets = new ArrayList(1);
+            List<Creature> targets = new ArrayList<>(1);
             targets.add(cha);
             effector.callSkill(skill, targets, true);
-            effector.broadcastPacket(new L2GameServerPacket[]{new MagicSkillLaunched(symbol, this.getSkill().getDisplayId(), this.getSkill().getDisplayLevel(), cha)});
+            effector.broadcastPacket(new MagicSkillLaunched(symbol, this.getSkill().getDisplayId(), this.getSkill().getDisplayLevel(), cha));
           }
         }
       } else {

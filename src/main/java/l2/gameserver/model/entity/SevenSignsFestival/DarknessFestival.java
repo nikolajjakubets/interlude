@@ -5,8 +5,6 @@
 
 package l2.gameserver.model.entity.SevenSignsFestival;
 
-import java.util.Iterator;
-import java.util.concurrent.Future;
 import l2.commons.threading.RunnableImpl;
 import l2.commons.util.Rnd;
 import l2.gameserver.ThreadPoolManager;
@@ -22,9 +20,13 @@ import l2.gameserver.network.l2.components.CustomMessage;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.utils.Location;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Future;
+
+@Slf4j
 public class DarknessFestival extends Reflection {
   private static final Logger _log = LoggerFactory.getLogger(DarknessFestival.class);
   public static final int FESTIVAL_LENGTH = 1080000;
@@ -56,10 +58,8 @@ public class DarknessFestival extends Reflection {
 
     party.setReflection(this);
     this.setReturnLoc(party.getPartyLeader().getLoc());
-    Iterator var4 = party.getPartyMembers().iterator();
 
-    while(var4.hasNext()) {
-      Player p = (Player)var4.next();
+    for (Player p : party.getPartyMembers()) {
       p.setVar("backCoords", p.getLoc().toXYZString(), -1L);
       p.getEffectList().stopAllEffects();
       p.teleToLocation(Location.findPointToStay(this._startLocation.loc, 20, 100, this.getGeoIndex()), this);
@@ -74,15 +74,15 @@ public class DarknessFestival extends Reflection {
       npcSpawn.setReflection(this);
       this.addSpawn(npcSpawn);
       npcSpawn.doSpawn(true);
-    } catch (Exception var6) {
-      _log.error("", var6);
+    } catch (Exception e) {
+      log.error("closeQuietly: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     }
 
     this.sendMessageToParticipants("The festival will begin in 1 minute.");
   }
 
   private void scheduleNext() {
-    switch(this.currentState) {
+    switch (this.currentState) {
       case 0:
         this.currentState = 60000;
         this._spawnTimerTask = ThreadPoolManager.getInstance().schedule(new RunnableImpl() {
@@ -116,8 +116,8 @@ public class DarknessFestival extends Reflection {
   }
 
   public void spawnFestivalMonsters(int respawnDelay, int spawnType) {
-    int[][] spawns = (int[][])null;
-    switch(spawnType) {
+    int[][] spawns = null;
+    switch (spawnType) {
       case 0:
       case 1:
         spawns = this._cabal == 2 ? FestivalSpawn.FESTIVAL_DAWN_PRIMARY_SPAWNS[this._levelRange] : FestivalSpawn.FESTIVAL_DUSK_PRIMARY_SPAWNS[this._levelRange];
@@ -130,11 +130,8 @@ public class DarknessFestival extends Reflection {
     }
 
     if (spawns != null) {
-      int[][] var4 = spawns;
-      int var5 = spawns.length;
 
-      for(int var6 = 0; var6 < var5; ++var6) {
-        int[] element = var4[var6];
+      for (int[] element : spawns) {
         FestivalSpawn currSpawn = new FestivalSpawn(element);
         NpcTemplate npcTemplate = NpcHolder.getInstance().getTemplate(currSpawn.npcId);
         SimpleSpawner npcSpawn = new SimpleSpawner(npcTemplate);
@@ -144,7 +141,7 @@ public class DarknessFestival extends Reflection {
         npcSpawn.setAmount(1);
         npcSpawn.setRespawnDelay(respawnDelay);
         npcSpawn.startRespawn();
-        FestivalMonsterInstance festivalMob = (FestivalMonsterInstance)npcSpawn.doSpawn(true);
+        FestivalMonsterInstance festivalMob = (FestivalMonsterInstance) npcSpawn.doSpawn(true);
         if (spawnType == 1) {
           festivalMob.setOfferingBonus(2);
         } else if (spawnType == 3) {
@@ -179,15 +176,14 @@ public class DarknessFestival extends Reflection {
         ItemInstance bloodOfferings = player.getInventory().getItemByItemId(5901);
         long offeringCount = bloodOfferings == null ? 0L : bloodOfferings.getCount();
         if (player.getInventory().destroyItem(bloodOfferings)) {
-          long offeringScore = offeringCount * 1L;
-          boolean isHighestScore = SevenSignsFestival.getInstance().setFinalScore(this.getParty(), this._cabal, this._levelRange, offeringScore);
-          player.sendPacket((new SystemMessage(1267)).addNumber(offeringScore));
+          boolean isHighestScore = SevenSignsFestival.getInstance().setFinalScore(this.getParty(), this._cabal, this._levelRange, offeringCount);
+          player.sendPacket((new SystemMessage(1267)).addNumber(offeringCount));
           this.sendCustomMessageToParticipants("l2p.gameserver.model.entity.SevenSignsFestival.Ended");
           if (isHighestScore) {
             this.sendMessageToParticipants("Your score is highest!");
           }
         } else {
-          player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2FestivalGuideInstance.BloodOfferings", player, new Object[0]));
+          player.sendMessage(new CustomMessage("l2p.gameserver.model.instances.L2FestivalGuideInstance.BloodOfferings", player));
         }
       }
 
@@ -196,21 +192,17 @@ public class DarknessFestival extends Reflection {
   }
 
   private void sendMessageToParticipants(String s) {
-    Iterator var2 = this.getPlayers().iterator();
 
-    while(var2.hasNext()) {
-      Player p = (Player)var2.next();
+    for (Player p : this.getPlayers()) {
       p.sendMessage(s);
     }
 
   }
 
   private void sendCustomMessageToParticipants(String s) {
-    Iterator var2 = this.getPlayers().iterator();
 
-    while(var2.hasNext()) {
-      Player p = (Player)var2.next();
-      p.sendMessage(new CustomMessage(s, p, new Object[0]));
+    for (Player p : this.getPlayers()) {
+      p.sendMessage(new CustomMessage(s, p));
     }
 
   }

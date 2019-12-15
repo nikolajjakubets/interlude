@@ -5,8 +5,6 @@
 
 package l2.gameserver.model.items;
 
-import java.util.Comparator;
-import java.util.Iterator;
 import l2.commons.listener.Listener;
 import l2.commons.listener.ListenerList;
 import l2.gameserver.data.xml.holder.ItemHolder;
@@ -15,14 +13,15 @@ import l2.gameserver.model.Playable;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.items.ItemInstance.ItemLocation;
 import l2.gameserver.model.items.listeners.StatsListener;
-import l2.gameserver.templates.item.ItemTemplate;
 import l2.gameserver.templates.item.EtcItemTemplate.EtcItemType;
+import l2.gameserver.templates.item.ItemTemplate;
 import l2.gameserver.templates.item.WeaponTemplate.WeaponType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Comparator;
+
+@Slf4j
 public abstract class Inventory extends ItemContainer {
-  private static final Logger _log = LoggerFactory.getLogger(Inventory.class);
   public static final int PAPERDOLL_UNDER = 0;
   public static final int PAPERDOLL_REAR = 1;
   public static final int PAPERDOLL_LEAR = 2;
@@ -333,7 +332,7 @@ public abstract class Inventory extends ItemContainer {
         pdollSlot = 15;
         break;
       default:
-        _log.warn("Requested invalid body slot: " + bodySlot + ", Item: " + item + ", ownerId: '" + this.getOwnerId() + "'");
+        log.warn("Requested invalid body slot: " + bodySlot + ", Item: " + item + ", ownerId: '" + this.getOwnerId() + "'");
         return;
     }
 
@@ -489,7 +488,7 @@ public abstract class Inventory extends ItemContainer {
         this.setPaperdollItem(16, item);
         break;
       default:
-        _log.warn("unknown body slot:" + bodySlot + " for item id: " + item.getItemId());
+        log.warn("unknown body slot:" + bodySlot + " for item id: " + item.getItemId());
         return;
     }
 
@@ -513,9 +512,8 @@ public abstract class Inventory extends ItemContainer {
     this.readLock();
 
     try {
-      for(int i = 0; i < this._items.size(); ++i) {
-        ItemInstance item = this._items.get(i);
-        weight = (int)((long)weight + (long)item.getTemplate().getWeight() * item.getCount());
+      for (ItemInstance item : this._items) {
+        weight = (int) ((long) weight + (long) item.getTemplate().getWeight() * item.getCount());
       }
     } finally {
       this.readUnlock();
@@ -671,21 +669,17 @@ public abstract class Inventory extends ItemContainer {
     }
 
     public void onEquip(int slot, ItemInstance item) {
-      Iterator var3 = this.getListeners().iterator();
 
-      while(var3.hasNext()) {
-        Listener<Playable> listener = (Listener)var3.next();
-        ((OnEquipListener)listener).onEquip(slot, item, Inventory.this.getActor());
+      for (Listener<Playable> playableListener : this.getListeners()) {
+        ((OnEquipListener) playableListener).onEquip(slot, item, Inventory.this.getActor());
       }
 
     }
 
     public void onUnequip(int slot, ItemInstance item) {
-      Iterator var3 = this.getListeners().iterator();
 
-      while(var3.hasNext()) {
-        Listener<Playable> listener = (Listener)var3.next();
-        ((OnEquipListener)listener).onUnequip(slot, item, Inventory.this.getActor());
+      for (Listener<Playable> playableListener : this.getListeners()) {
+        ((OnEquipListener) playableListener).onUnequip(slot, item, Inventory.this.getActor());
       }
 
     }

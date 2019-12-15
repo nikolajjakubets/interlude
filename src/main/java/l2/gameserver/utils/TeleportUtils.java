@@ -15,11 +15,10 @@ import l2.gameserver.model.entity.Reflection;
 import l2.gameserver.model.pledge.Clan;
 import l2.gameserver.templates.mapregion.RestartArea;
 import l2.gameserver.templates.mapregion.RestartPoint;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class TeleportUtils {
-  private static final Logger _log = LoggerFactory.getLogger(TeleportUtils.class);
   public static final Location DEFAULT_RESTART = new Location(17817, 170079, -3530);
 
   private TeleportUtils() {
@@ -60,14 +59,14 @@ public class TeleportUtils {
       return player.getRestartPoint();
     }
 
-    RestartArea ra = (RestartArea)MapRegionManager.getInstance().getRegionData(RestartArea.class, from);
+    RestartArea ra = MapRegionManager.getInstance().getRegionData(RestartArea.class, from);
     if (ra != null) {
-      RestartPoint rp = (RestartPoint)ra.getRestartPoint().get(player.getRace());
-      Location restartPoint = (Location)Rnd.get(rp.getRestartPoints());
-      Location PKrestartPoint = (Location)Rnd.get(rp.getPKrestartPoints());
+      RestartPoint rp = ra.getRestartPoint().get(player.getRace());
+      Location restartPoint = Rnd.get(rp.getRestartPoints());
+      Location PKrestartPoint = Rnd.get(rp.getPKrestartPoints());
       return player.getKarma() > 1 ? PKrestartPoint : restartPoint;
     } else {
-      _log.warn("Cannot find restart location from coordinates: " + from + "!");
+      log.warn("Cannot find restart location from coordinates: " + from + "!");
       return DEFAULT_RESTART;
     }
   }

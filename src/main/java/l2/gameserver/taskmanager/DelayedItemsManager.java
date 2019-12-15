@@ -5,10 +5,6 @@
 
 package l2.gameserver.taskmanager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import l2.commons.dbutils.DbUtils;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.ThreadPoolManager;
@@ -17,17 +13,21 @@ import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.GameObjectsStorage;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.items.ItemInstance;
-import l2.gameserver.model.items.PcInventory;
 import l2.gameserver.model.items.ItemInstance.ItemLocation;
+import l2.gameserver.model.items.PcInventory;
 import l2.gameserver.network.l2.components.CustomMessage;
 import l2.gameserver.network.l2.s2c.SystemMessage2;
 import l2.gameserver.utils.ItemFunctions;
 import l2.gameserver.utils.Log;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+@Slf4j
 public class DelayedItemsManager extends RunnableImpl {
-  private static final Logger _log = LoggerFactory.getLogger(DelayedItemsManager.class);
   private static DelayedItemsManager _instance;
   private static final Object _lock = new Object();
   private int last_payment_id = 0;
@@ -46,8 +46,8 @@ public class DelayedItemsManager extends RunnableImpl {
     try {
       con = DatabaseFactory.getInstance().getConnection();
       this.last_payment_id = this.get_last_payment_id(con);
-    } catch (Exception var6) {
-      _log.error("", var6);
+    } catch (Exception e) {
+      log.error("closeQuietly: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con);
     }
@@ -66,8 +66,8 @@ public class DelayedItemsManager extends RunnableImpl {
       if (rset.next()) {
         result = rset.getInt("last");
       }
-    } catch (Exception var9) {
-      _log.error("", var9);
+    } catch (Exception e) {
+      log.error("get_last_payment_id: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(st, rset);
     }
@@ -76,7 +76,7 @@ public class DelayedItemsManager extends RunnableImpl {
   }
 
   public void runImpl() throws Exception {
-    Player player = null;
+    Player player;
     Connection con = null;
     PreparedStatement st = null;
     ResultSet rset = null;
@@ -85,12 +85,12 @@ public class DelayedItemsManager extends RunnableImpl {
       con = DatabaseFactory.getInstance().getConnection();
       int last_payment_id_temp = this.get_last_payment_id(con);
       if (last_payment_id_temp != this.last_payment_id) {
-        synchronized(_lock) {
+        synchronized (_lock) {
           st = con.prepareStatement("SELECT DISTINCT owner_id FROM items_delayed WHERE payment_status=0 AND payment_id > ?");
           st.setInt(1, this.last_payment_id);
           rset = st.executeQuery();
 
-          while(rset.next()) {
+          while (rset.next()) {
             if ((player = GameObjectsStorage.getPlayer(rset.getInt("owner_id"))) != null) {
               this.loadDelayed(player, true);
             }
@@ -100,7 +100,7 @@ public class DelayedItemsManager extends RunnableImpl {
         }
       }
     } catch (Exception var13) {
-      _log.error("", var13);
+      log.error("", var13);
     } finally {
       DbUtils.closeQuietly(con, st, rset);
     }
@@ -122,7 +122,7 @@ public class DelayedItemsManager extends RunnableImpl {
         PreparedStatement st = null;
         PreparedStatement st_delete = null;
         ResultSet rset = null;
-        synchronized(_lock) {
+        synchronized (_lock) {
           try {
             con = DatabaseFactory.getInstance().getConnection();
             st = con.prepareStatement("SELECT * FROM items_delayed WHERE owner_id=? AND payment_status=0");
@@ -130,7 +130,7 @@ public class DelayedItemsManager extends RunnableImpl {
             rset = st.executeQuery();
             st_delete = con.prepareStatement("UPDATE items_delayed SET payment_status=1 WHERE payment_id=?");
 
-            while(rset.next()) {
+            while (rset.next()) {
               int ITEM_ID = rset.getInt("item_id");
               long ITEM_COUNT = rset.getLong("count");
               int ITEM_ENCHANT = rset.getInt("enchant_level");
@@ -139,7 +139,7 @@ public class DelayedItemsManager extends RunnableImpl {
               boolean stackable = ItemHolder.getInstance().getTemplate(ITEM_ID).isStackable();
               boolean success = false;
 
-              for(int i = 0; (long)i < (stackable ? 1L : ITEM_COUNT); ++i) {
+              for (int i = 0; (long) i < (stackable ? 1L : ITEM_COUNT); ++i) {
                 ItemInstance item = ItemFunctions.createItem(ITEM_ID);
                 if (item.isStackable()) {
                   item.setCount(ITEM_COUNT);
@@ -152,7 +152,7 @@ public class DelayedItemsManager extends RunnableImpl {
                 if (ITEM_COUNT > 0L) {
                   ItemInstance newItem = inv.addItem(item);
                   if (newItem == null) {
-                    _log.warn("Unable to delayed create item " + ITEM_ID + " request " + PAYMENT_ID);
+                    log.warn("Unable to delayed create item " + ITEM_ID + " request " + PAYMENT_ID);
                     continue;
                   }
                 }
@@ -173,7 +173,7 @@ public class DelayedItemsManager extends RunnableImpl {
               }
             }
           } catch (Exception var27) {
-            _log.error("Could not load delayed items for player " + player + "!", var27);
+            log.error("Could not load delayed items for player " + player + "!", var27);
           } finally {
             DbUtils.closeQuietly(st_delete);
             DbUtils.closeQuietly(con, st, rset);
@@ -199,7 +199,7 @@ public class DelayedItemsManager extends RunnableImpl {
       pstmt.setString(5, desc);
       pstmt.executeUpdate();
     } catch (SQLException var12) {
-      _log.error("Could not add delayed items " + itemTypeId + " " + amount + "(+" + enchant + ") for objId " + ownerObjId + " desc \"" + desc + "\" !", var12);
+      log.error("Could not add delayed items " + itemTypeId + " " + amount + "(+" + enchant + ") for objId " + ownerObjId + " desc \"" + desc + "\" !", var12);
     } finally {
       DbUtils.closeQuietly(con, pstmt);
     }

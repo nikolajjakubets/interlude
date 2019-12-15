@@ -5,19 +5,19 @@
 
 package l2.gameserver.model.pledge;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.Iterator;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.Player;
 import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.NickNameChanged;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.Iterator;
+
+@Slf4j
 public class UnitMember {
-  private static final Logger _log = LoggerFactory.getLogger(UnitMember.class);
   private Player _player;
   private Clan _clan;
   private String _name;
@@ -129,8 +129,8 @@ public class UnitMember {
         statement.setString(1, title);
         statement.setInt(2, this.getObjectId());
         statement.execute();
-      } catch (Exception var9) {
-        _log.error("", var9);
+      } catch (Exception e) {
+        log.error("closeQuietly: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
       } finally {
         DbUtils.closeQuietly(con, statement);
       }
@@ -169,7 +169,7 @@ public class UnitMember {
       statement.setInt(2, this.getObjectId());
       statement.execute();
     } catch (Exception var7) {
-      _log.error("", var7);
+      log.error("", var7);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -218,8 +218,8 @@ public class UnitMember {
       statement.setInt(1, this._powerGrade);
       statement.setInt(2, this.getObjectId());
       statement.execute();
-    } catch (Exception var7) {
-      _log.error("", var7);
+    } catch (Exception e) {
+      log.error("updatePowerGrade: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -252,8 +252,8 @@ public class UnitMember {
       statement.setInt(1, this._apprentice);
       statement.setInt(2, this.getObjectId());
       statement.execute();
-    } catch (Exception var7) {
-      _log.error("", var7);
+    } catch (Exception e) {
+      log.error("updateApprentice: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -281,8 +281,8 @@ public class UnitMember {
           return 0;
         }
 
-        element = (UnitMember)var2.next();
-      } while(element.getApprentice() != id);
+        element = (UnitMember) var2.next();
+      } while (element.getApprentice() != id);
 
       return element.getObjectId();
     }
@@ -319,8 +319,8 @@ public class UnitMember {
         return 0;
       }
 
-      pledge = (SubUnit)var1.next();
-    } while(pledge.getLeaderObjectId() != this.getObjectId());
+      pledge = (SubUnit) var1.next();
+    } while (pledge.getLeaderObjectId() != this.getObjectId());
 
     return pledge.getType();
   }

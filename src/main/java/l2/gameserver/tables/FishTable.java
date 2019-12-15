@@ -6,26 +6,26 @@
 package l2.gameserver.tables;
 
 import gnu.trove.TIntObjectHashMap;
+import l2.commons.dbutils.DbUtils;
+import l2.gameserver.database.DatabaseFactory;
+import l2.gameserver.model.reward.RewardData;
+import l2.gameserver.templates.FishTemplate;
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import l2.commons.dbutils.DbUtils;
-import l2.gameserver.database.DatabaseFactory;
-import l2.gameserver.model.reward.RewardData;
-import l2.gameserver.templates.FishTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class FishTable {
-  private static final Logger _log = LoggerFactory.getLogger(FishTable.class);
   private static final FishTable _instance = new FishTable();
   private TIntObjectHashMap<List<FishTemplate>> _fishes;
   private TIntObjectHashMap<List<RewardData>> _fishRewards;
 
-  public static final FishTable getInstance() {
+  public static FishTable getInstance() {
     return _instance;
   }
 
@@ -38,8 +38,8 @@ public class FishTable {
   }
 
   private void load() {
-    this._fishes = new TIntObjectHashMap();
-    this._fishRewards = new TIntObjectHashMap();
+    this._fishes = new TIntObjectHashMap<>();
+    this._fishRewards = new TIntObjectHashMap<>();
     int count = 0;
     Connection con = null;
     PreparedStatement statement = null;
@@ -75,7 +75,7 @@ public class FishTable {
       }
 
       DbUtils.close(statement, resultSet);
-      _log.info("FishTable: Loaded " + count + " fishes.");
+      log.info("FishTable: Loaded " + count + " fishes.");
       count = 0;
       statement = con.prepareStatement("SELECT fishid, rewardid, min, max, chance FROM fishreward ORDER BY fishid");
 
@@ -94,9 +94,9 @@ public class FishTable {
         ((List)rewards).add(reward);
       }
 
-      _log.info("FishTable: Loaded " + count + " fish rewards.");
+      log.info("FishTable: Loaded " + count + " fish rewards.");
     } catch (Exception var21) {
-      _log.error("", var21);
+      log.error("", var21);
     } finally {
       DbUtils.closeQuietly(con, statement, resultSet);
     }
@@ -111,7 +111,7 @@ public class FishTable {
     List<FishTemplate> result = new ArrayList<>();
     List<FishTemplate> fishs = this._fishes.get(group);
     if (fishs == null) {
-      _log.warn("No fishes defined for group : " + group + "!");
+      log.warn("No fishes defined for group : " + group + "!");
       return null;
     } else {
       Iterator var6 = fishs.iterator();
@@ -124,7 +124,7 @@ public class FishTable {
       }
 
       if (result.isEmpty()) {
-        _log.warn("No fishes for group : " + group + " type: " + type + " level: " + lvl + "!");
+        log.warn("No fishes for group : " + group + " type: " + type + " level: " + lvl + "!");
       }
 
       return result;
@@ -134,11 +134,11 @@ public class FishTable {
   public List<RewardData> getFishReward(int fishid) {
     List<RewardData> result = this._fishRewards.get(fishid);
     if (this._fishRewards == null) {
-      _log.warn("No fish rewards defined for fish id: " + fishid + "!");
+      log.warn("No fish rewards defined for fish id: " + fishid + "!");
       return null;
     } else {
       if (result.isEmpty()) {
-        _log.warn("No fish rewards for fish id: " + fishid + "!");
+        log.warn("No fish rewards for fish id: " + fishid + "!");
       }
 
       return result;

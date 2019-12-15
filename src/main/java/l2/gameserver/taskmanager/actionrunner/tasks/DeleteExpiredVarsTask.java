@@ -5,6 +5,14 @@
 
 package l2.gameserver.taskmanager.actionrunner.tasks;
 
+import l2.commons.dbutils.DbUtils;
+import l2.gameserver.database.DatabaseFactory;
+import l2.gameserver.database.mysql;
+import l2.gameserver.model.GameObjectsStorage;
+import l2.gameserver.model.Player;
+import l2.gameserver.utils.Strings;
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,16 +20,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import l2.commons.dbutils.DbUtils;
-import l2.gameserver.database.DatabaseFactory;
-import l2.gameserver.database.mysql;
-import l2.gameserver.model.GameObjectsStorage;
-import l2.gameserver.model.Player;
-import l2.gameserver.utils.Strings;
-import org.apache.log4j.Logger;
 
+@Slf4j
 public class DeleteExpiredVarsTask extends AutomaticTask {
-  private static final Logger _log = Logger.getLogger(DeleteExpiredVarsTask.class);
 
   public DeleteExpiredVarsTask() {
   }
@@ -39,13 +40,13 @@ public class DeleteExpiredVarsTask extends AutomaticTask {
       query.setLong(1, System.currentTimeMillis());
       rs = query.executeQuery();
 
-      while(rs.next()) {
+      while (rs.next()) {
         String name = rs.getString("name");
         String obj_id = Strings.stripSlashes(rs.getString("obj_id"));
         varMap.put(Integer.parseInt(obj_id), name);
       }
-    } catch (Exception var12) {
-      _log.error("", var12);
+    } catch (Exception e) {
+      log.error("closeQuietly: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, query, rs);
     }
@@ -53,14 +54,14 @@ public class DeleteExpiredVarsTask extends AutomaticTask {
     if (!varMap.isEmpty()) {
       Iterator var14 = varMap.entrySet().iterator();
 
-      while(true) {
-        while(var14.hasNext()) {
-          Entry<Integer, String> entry = (Entry)var14.next();
-          Player player = GameObjectsStorage.getPlayer((Integer)entry.getKey());
+      while (true) {
+        while (var14.hasNext()) {
+          Entry<Integer, String> entry = (Entry) var14.next();
+          Player player = GameObjectsStorage.getPlayer(entry.getKey());
           if (player != null && player.isOnline()) {
-            player.unsetVar((String)entry.getValue());
+            player.unsetVar(entry.getValue());
           } else {
-            mysql.set("DELETE FROM `character_variables` WHERE `obj_id`=? AND `type`='user-var' AND `name`=? LIMIT 1", new Object[]{entry.getKey(), entry.getValue()});
+            mysql.set("DELETE FROM `character_variables` WHERE `obj_id`=? AND `type`='user-var' AND `name`=? LIMIT 1", entry.getKey(), entry.getValue());
           }
         }
 

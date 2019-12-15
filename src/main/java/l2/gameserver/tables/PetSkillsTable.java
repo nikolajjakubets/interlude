@@ -6,22 +6,21 @@
 package l2.gameserver.tables;
 
 import gnu.trove.TIntObjectHashMap;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.SkillLearn;
 import l2.gameserver.model.Summon;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
 public class PetSkillsTable {
-  private static final Logger _log = LoggerFactory.getLogger(PetSkillsTable.class);
-  private TIntObjectHashMap<List<SkillLearn>> _skillTrees = new TIntObjectHashMap();
+  private TIntObjectHashMap<List<SkillLearn>> _skillTrees = new TIntObjectHashMap<>();
   private static PetSkillsTable _instance = new PetSkillsTable();
 
   public static PetSkillsTable getInstance() {
@@ -50,7 +49,7 @@ public class PetSkillsTable {
       con = DatabaseFactory.getInstance().getConnection();
       statement = con.prepareStatement("SELECT * FROM pets_skills ORDER BY templateId");
 
-      for(rset = statement.executeQuery(); rset.next(); ++count) {
+      for (rset = statement.executeQuery(); rset.next(); ++count) {
         npcId = rset.getInt("templateId");
         int id = rset.getInt("skillId");
         int lvl = rset.getInt("skillLvl");
@@ -64,12 +63,12 @@ public class PetSkillsTable {
         list.add(skillLearn);
       }
     } catch (Exception var14) {
-      _log.error("Error while creating pet skill tree (Pet ID " + npcId + ")", var14);
+      log.error("Error while creating pet skill tree (Pet ID " + npcId + ")", var14);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
 
-    _log.info("PetSkillsTable: Loaded " + count + " skills.");
+    log.info("PetSkillsTable: Loaded " + count + " skills.");
   }
 
   public int getAvailableLevel(Summon cha, int skillId) {
@@ -78,10 +77,8 @@ public class PetSkillsTable {
       return 0;
     } else {
       int lvl = 0;
-      Iterator var5 = skills.iterator();
 
-      while(var5.hasNext()) {
-        SkillLearn temp = (SkillLearn)var5.next();
+      for (SkillLearn temp : skills) {
         if (temp.getId() == skillId) {
           if (temp.getLevel() == 0) {
             if (cha.getLevel() < 70) {

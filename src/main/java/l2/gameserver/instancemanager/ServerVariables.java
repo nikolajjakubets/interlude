@@ -5,17 +5,17 @@
 
 package l2.gameserver.instancemanager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.templates.StatsSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+@Slf4j
 public class ServerVariables {
-  private static final Logger _log = LoggerFactory.getLogger(ServerVariables.class);
   private static StatsSet server_vars = null;
 
   public ServerVariables() {
@@ -40,11 +40,11 @@ public class ServerVariables {
       statement = con.prepareStatement("SELECT * FROM server_variables");
       rs = statement.executeQuery();
 
-      while(rs.next()) {
+      while (rs.next()) {
         server_vars.set(rs.getString("name"), rs.getString("value"));
       }
-    } catch (Exception var7) {
-      _log.error("", var7);
+    } catch (Exception e) {
+      log.error("LoadFromDB: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement, rs);
     }
@@ -68,8 +68,8 @@ public class ServerVariables {
         statement.setString(2, value);
         statement.execute();
       }
-    } catch (Exception var7) {
-      _log.error("", var7);
+    } catch (Exception e) {
+      log.error("SaveToDB: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }

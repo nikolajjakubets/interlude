@@ -5,74 +5,11 @@
 
 package l2.gameserver.skills;
 
-import java.io.File;
-import java.util.StringTokenizer;
-import javax.xml.parsers.DocumentBuilderFactory;
 import l2.gameserver.model.Skill;
 import l2.gameserver.skills.effects.EffectTemplate;
 import l2.gameserver.stats.StatTemplate;
 import l2.gameserver.stats.Stats;
-import l2.gameserver.stats.conditions.Condition;
-import l2.gameserver.stats.conditions.ConditionClanPlayerMinPledgeRank;
-import l2.gameserver.stats.conditions.ConditionFirstEffectSuccess;
-import l2.gameserver.stats.conditions.ConditionGameTime;
-import l2.gameserver.stats.conditions.ConditionHasSkill;
-import l2.gameserver.stats.conditions.ConditionLogicAnd;
-import l2.gameserver.stats.conditions.ConditionLogicNot;
-import l2.gameserver.stats.conditions.ConditionLogicOr;
-import l2.gameserver.stats.conditions.ConditionPlayerAgathion;
-import l2.gameserver.stats.conditions.ConditionPlayerChargesMax;
-import l2.gameserver.stats.conditions.ConditionPlayerChargesMin;
-import l2.gameserver.stats.conditions.ConditionPlayerClassId;
-import l2.gameserver.stats.conditions.ConditionPlayerClassIsMage;
-import l2.gameserver.stats.conditions.ConditionPlayerCubic;
-import l2.gameserver.stats.conditions.ConditionPlayerGender;
-import l2.gameserver.stats.conditions.ConditionPlayerHasBuff;
-import l2.gameserver.stats.conditions.ConditionPlayerHasBuffId;
-import l2.gameserver.stats.conditions.ConditionPlayerInTeam;
-import l2.gameserver.stats.conditions.ConditionPlayerInstanceZone;
-import l2.gameserver.stats.conditions.ConditionPlayerIsHero;
-import l2.gameserver.stats.conditions.ConditionPlayerMaxLevel;
-import l2.gameserver.stats.conditions.ConditionPlayerMaxPK;
-import l2.gameserver.stats.conditions.ConditionPlayerMinLevel;
-import l2.gameserver.stats.conditions.ConditionPlayerMinMaxDamage;
-import l2.gameserver.stats.conditions.ConditionPlayerOlympiad;
-import l2.gameserver.stats.conditions.ConditionPlayerPercentCp;
-import l2.gameserver.stats.conditions.ConditionPlayerPercentHp;
-import l2.gameserver.stats.conditions.ConditionPlayerPercentMp;
-import l2.gameserver.stats.conditions.ConditionPlayerRace;
-import l2.gameserver.stats.conditions.ConditionPlayerRiding;
-import l2.gameserver.stats.conditions.ConditionPlayerSkillMinSeed;
-import l2.gameserver.stats.conditions.ConditionPlayerState;
-import l2.gameserver.stats.conditions.ConditionPlayerSummonSiegeGolem;
-import l2.gameserver.stats.conditions.ConditionSlotItemId;
-import l2.gameserver.stats.conditions.ConditionTargetAggro;
-import l2.gameserver.stats.conditions.ConditionTargetCastleDoor;
-import l2.gameserver.stats.conditions.ConditionTargetClan;
-import l2.gameserver.stats.conditions.ConditionTargetDirection;
-import l2.gameserver.stats.conditions.ConditionTargetForbiddenClassId;
-import l2.gameserver.stats.conditions.ConditionTargetHasBuff;
-import l2.gameserver.stats.conditions.ConditionTargetHasBuffId;
-import l2.gameserver.stats.conditions.ConditionTargetHasForbiddenSkill;
-import l2.gameserver.stats.conditions.ConditionTargetInTheSameParty;
-import l2.gameserver.stats.conditions.ConditionTargetMob;
-import l2.gameserver.stats.conditions.ConditionTargetMobId;
-import l2.gameserver.stats.conditions.ConditionTargetNpcClass;
-import l2.gameserver.stats.conditions.ConditionTargetPercentCp;
-import l2.gameserver.stats.conditions.ConditionTargetPercentHp;
-import l2.gameserver.stats.conditions.ConditionTargetPercentMp;
-import l2.gameserver.stats.conditions.ConditionTargetPlayable;
-import l2.gameserver.stats.conditions.ConditionTargetPlayer;
-import l2.gameserver.stats.conditions.ConditionTargetPlayerNotMe;
-import l2.gameserver.stats.conditions.ConditionTargetPlayerRace;
-import l2.gameserver.stats.conditions.ConditionTargetRace;
-import l2.gameserver.stats.conditions.ConditionTargetSummon;
-import l2.gameserver.stats.conditions.ConditionUsingArmor;
-import l2.gameserver.stats.conditions.ConditionUsingBlowSkill;
-import l2.gameserver.stats.conditions.ConditionUsingItemType;
-import l2.gameserver.stats.conditions.ConditionUsingSkill;
-import l2.gameserver.stats.conditions.ConditionZoneName;
-import l2.gameserver.stats.conditions.ConditionZoneType;
+import l2.gameserver.stats.conditions.*;
 import l2.gameserver.stats.conditions.ConditionGameTime.CheckGameTime;
 import l2.gameserver.stats.conditions.ConditionPlayerRiding.CheckPlayerRiding;
 import l2.gameserver.stats.conditions.ConditionPlayerState.CheckPlayerState;
@@ -84,16 +21,19 @@ import l2.gameserver.templates.StatsSet;
 import l2.gameserver.templates.item.ArmorTemplate.ArmorType;
 import l2.gameserver.templates.item.WeaponTemplate.WeaponType;
 import l2.gameserver.utils.PositionUtils.TargetDirection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.util.StringTokenizer;
+
+@Slf4j
 /** @deprecated */
 @Deprecated
 abstract class DocumentBase {
-  private static final Logger _log = LoggerFactory.getLogger(DocumentBase.class);
   private File file;
 
   DocumentBase(File file) {
@@ -108,7 +48,7 @@ abstract class DocumentBase {
       factory.setIgnoringComments(true);
       doc = factory.newDocumentBuilder().parse(this.file);
     } catch (Exception var4) {
-      _log.error("Error loading file " + this.file, var4);
+      log.error("Error loading file " + this.file, var4);
       return null;
     }
 
@@ -116,7 +56,7 @@ abstract class DocumentBase {
       this.parseDocument(doc);
       return doc;
     } catch (Exception var3) {
-      _log.error("Error in file " + this.file, var3);
+      log.error("Error in file " + this.file, var3);
       return null;
     }
   }
@@ -130,7 +70,7 @@ abstract class DocumentBase {
   protected void parseTemplate(Node n, StatTemplate template) {
     n = n.getFirstChild();
     if (n != null) {
-      for(; n != null; n = n.getNextSibling()) {
+      for (; n != null; n = n.getNextSibling()) {
         if (n.getNodeType() != 3) {
           String nodeName = n.getNodeName();
           if (EFunction.VALUES_BY_LOWER_NAME.containsKey(nodeName.toLowerCase())) {
@@ -147,14 +87,14 @@ abstract class DocumentBase {
             }
 
             if ("def".equalsIgnoreCase(nodeName)) {
-              EffectTemplate effectTemplate = (EffectTemplate)template;
+              EffectTemplate effectTemplate = (EffectTemplate) template;
               StatsSet effectTemplateParamsSet = effectTemplate.getParam();
-              Skill skill = (Skill)effectTemplateParamsSet.getObject("object");
+              Skill skill = (Skill) effectTemplateParamsSet.getObject("object");
               this.parseBeanSet(n, effectTemplateParamsSet, skill.getLevel());
             } else {
               Condition cond = this.parseCondition(n);
               if (cond != null) {
-                ((EffectTemplate)template).attachCond(cond);
+                ((EffectTemplate) template).attachCond(cond);
               }
             }
           }
@@ -165,7 +105,7 @@ abstract class DocumentBase {
   }
 
   protected void parseTrigger(Node n, StatTemplate template) {
-    for(n = n.getFirstChild(); n != null; n = n.getNextSibling()) {
+    for (n = n.getFirstChild(); n != null; n = n.getNextSibling()) {
       if ("trigger".equalsIgnoreCase(n.getNodeName())) {
         NamedNodeMap map = n.getAttributes();
         int id = this.parseNumber(map.getNamedItem("id").getNodeValue()).intValue();
@@ -175,7 +115,7 @@ abstract class DocumentBase {
         TriggerInfo trigger = new TriggerInfo(id, level, t, chance);
         template.addTrigger(trigger);
 
-        for(Node n2 = n.getFirstChild(); n2 != null; n2 = n2.getNextSibling()) {
+        for (Node n2 = n.getFirstChild(); n2 != null; n2 = n2.getNextSibling()) {
           Condition condition = this.parseCondition(n.getFirstChild());
           if (condition != null) {
             trigger.addCondition(condition);
@@ -289,20 +229,20 @@ abstract class DocumentBase {
     EffectTemplate lt = new EffectTemplate(set);
     this.parseTemplate(n, lt);
 
-    for(Node n1 = n.getFirstChild(); n1 != null; n1 = n1.getNextSibling()) {
+    for (Node n1 = n.getFirstChild(); n1 != null; n1 = n1.getNextSibling()) {
       if ("triggers".equalsIgnoreCase(n1.getNodeName())) {
         this.parseTrigger(n1, lt);
       }
     }
 
     if (template instanceof Skill) {
-      ((Skill)template).attach(lt);
+      ((Skill) template).attach(lt);
     }
 
   }
 
   protected Condition parseCondition(Node n) {
-    while(n != null && n.getNodeType() != 1) {
+    while (n != null && n.getNodeType() != 1) {
       n = n.getNextSibling();
     }
 
@@ -334,14 +274,14 @@ abstract class DocumentBase {
   protected Condition parseLogicAnd(Node n) {
     ConditionLogicAnd cond = new ConditionLogicAnd();
 
-    for(n = n.getFirstChild(); n != null; n = n.getNextSibling()) {
+    for (n = n.getFirstChild(); n != null; n = n.getNextSibling()) {
       if (n.getNodeType() == 1) {
         cond.add(this.parseCondition(n));
       }
     }
 
     if (cond._conditions == null || cond._conditions.length == 0) {
-      _log.error("Empty <and> condition in " + this.file);
+      log.error("Empty <and> condition in " + this.file);
     }
 
     return cond;
@@ -350,27 +290,27 @@ abstract class DocumentBase {
   protected Condition parseLogicOr(Node n) {
     ConditionLogicOr cond = new ConditionLogicOr();
 
-    for(n = n.getFirstChild(); n != null; n = n.getNextSibling()) {
+    for (n = n.getFirstChild(); n != null; n = n.getNextSibling()) {
       if (n.getNodeType() == 1) {
         cond.add(this.parseCondition(n));
       }
     }
 
     if (cond._conditions == null || cond._conditions.length == 0) {
-      _log.error("Empty <or> condition in " + this.file);
+      log.error("Empty <or> condition in " + this.file);
     }
 
     return cond;
   }
 
   protected Condition parseLogicNot(Node n) {
-    for(n = n.getFirstChild(); n != null; n = n.getNextSibling()) {
+    for (n = n.getFirstChild(); n != null; n = n.getNextSibling()) {
       if (n.getNodeType() == 1) {
         return new ConditionLogicNot(this.parseCondition(n));
       }
     }
 
-    _log.error("Empty <not> condition in " + this.file);
+    log.error("Empty <not> condition in " + this.file);
     return null;
   }
 
@@ -378,7 +318,7 @@ abstract class DocumentBase {
     Condition cond = null;
     NamedNodeMap attrs = n.getAttributes();
 
-    for(int i = 0; i < attrs.getLength(); ++i) {
+    for (int i = 0; i < attrs.getLength(); ++i) {
       Node a = attrs.item(i);
       String nodeName = a.getNodeName();
       if ("race".equalsIgnoreCase(nodeName)) {
@@ -504,7 +444,7 @@ abstract class DocumentBase {
     }
 
     if (cond == null) {
-      _log.error("Unrecognized <player> condition in " + this.file);
+      log.error("Unrecognized <player> condition in " + this.file);
     }
 
     return cond;
@@ -514,7 +454,7 @@ abstract class DocumentBase {
     Condition cond = null;
     NamedNodeMap attrs = n.getAttributes();
 
-    for(int i = 0; i < attrs.getLength(); ++i) {
+    for (int i = 0; i < attrs.getLength(); ++i) {
       Node a = attrs.item(i);
       String nodeName = a.getNodeName();
       String nodeValue = a.getNodeValue();
@@ -582,7 +522,7 @@ abstract class DocumentBase {
     }
 
     if (cond == null) {
-      _log.error("Unrecognized <target> condition in " + this.file);
+      log.error("Unrecognized <target> condition in " + this.file);
     }
 
     return cond;
@@ -592,7 +532,7 @@ abstract class DocumentBase {
     Condition cond = null;
     NamedNodeMap attrs = n.getAttributes();
 
-    for(int i = 0; i < attrs.getLength(); ++i) {
+    for (int i = 0; i < attrs.getLength(); ++i) {
       Node a = attrs.item(i);
       String nodeName = a.getNodeName();
       String nodeValue = a.getNodeValue();
@@ -619,15 +559,15 @@ abstract class DocumentBase {
         long mask = 0L;
         StringTokenizer st = new StringTokenizer(nodeValue, ",");
 
-        while(true) {
+        while (true) {
           label68:
-          while(st.hasMoreTokens()) {
+          while (st.hasMoreTokens()) {
             String item = st.nextToken().trim();
             WeaponType[] var12 = WeaponType.VALUES;
             int var13 = var12.length;
 
             int var14;
-            for(var14 = 0; var14 < var13; ++var14) {
+            for (var14 = 0; var14 < var13; ++var14) {
               WeaponType wt = var12[var14];
               if (wt.toString().equalsIgnoreCase(item)) {
                 mask |= wt.mask();
@@ -638,7 +578,7 @@ abstract class DocumentBase {
             ArmorType[] var20 = ArmorType.VALUES;
             var13 = var20.length;
 
-            for(var14 = 0; var14 < var13; ++var14) {
+            for (var14 = 0; var14 < var13; ++var14) {
               ArmorType at = var20[var14];
               if (at.toString().equalsIgnoreCase(item)) {
                 mask |= at.mask();
@@ -646,7 +586,7 @@ abstract class DocumentBase {
               }
             }
 
-            _log.error("Invalid item kind: \"" + item + "\" in " + this.file);
+            log.error("Invalid item kind: \"" + item + "\" in " + this.file);
           }
 
           if (mask != 0L) {
@@ -658,7 +598,7 @@ abstract class DocumentBase {
     }
 
     if (cond == null) {
-      _log.error("Unrecognized <using> condition in " + this.file);
+      log.error("Unrecognized <using> condition in " + this.file);
     }
 
     return cond;
@@ -668,7 +608,7 @@ abstract class DocumentBase {
     Condition cond = null;
     NamedNodeMap attrs = n.getAttributes();
 
-    for(int i = 0; i < attrs.getLength(); ++i) {
+    for (int i = 0; i < attrs.getLength(); ++i) {
       Node a = attrs.item(i);
       String nodeName = a.getNodeName();
       String nodeValue = a.getNodeValue();
@@ -683,7 +623,7 @@ abstract class DocumentBase {
     }
 
     if (cond == null) {
-      _log.error("Unrecognized <has> condition in " + this.file);
+      log.error("Unrecognized <has> condition in " + this.file);
     }
 
     return cond;
@@ -693,7 +633,7 @@ abstract class DocumentBase {
     Condition cond = null;
     NamedNodeMap attrs = n.getAttributes();
 
-    for(int i = 0; i < attrs.getLength(); ++i) {
+    for (int i = 0; i < attrs.getLength(); ++i) {
       Node a = attrs.item(i);
       if ("night".equalsIgnoreCase(a.getNodeName())) {
         boolean val = Boolean.parseBoolean(a.getNodeValue());
@@ -702,7 +642,7 @@ abstract class DocumentBase {
     }
 
     if (cond == null) {
-      _log.error("Unrecognized <game> condition in " + this.file);
+      log.error("Unrecognized <game> condition in " + this.file);
     }
 
     return cond;
@@ -712,7 +652,7 @@ abstract class DocumentBase {
     Condition cond = null;
     NamedNodeMap attrs = n.getAttributes();
 
-    for(int i = 0; i < attrs.getLength(); ++i) {
+    for (int i = 0; i < attrs.getLength(); ++i) {
       Node a = attrs.item(i);
       if ("type".equalsIgnoreCase(a.getNodeName())) {
         cond = this.joinAnd(cond, new ConditionZoneType(a.getNodeValue()));
@@ -722,7 +662,7 @@ abstract class DocumentBase {
     }
 
     if (cond == null) {
-      _log.error("Unrecognized <zone> condition in " + this.file);
+      log.error("Unrecognized <zone> condition in " + this.file);
     }
 
     return cond;
@@ -790,7 +730,7 @@ abstract class DocumentBase {
     if (cond == null) {
       return c;
     } else if (cond instanceof ConditionLogicAnd) {
-      ((ConditionLogicAnd)cond).add(c);
+      ((ConditionLogicAnd) cond).add(c);
       return cond;
     } else {
       ConditionLogicAnd and = new ConditionLogicAnd();

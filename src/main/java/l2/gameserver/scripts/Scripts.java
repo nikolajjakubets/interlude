@@ -10,6 +10,7 @@ import l2.commons.compiler.MemoryClassLoader;
 import l2.gameserver.Config;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.quest.Quest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -17,8 +18,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,8 +30,8 @@ import java.util.Map.Entry;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
+@Slf4j
 public class Scripts {
-  private static final Logger _log = LoggerFactory.getLogger(Scripts.class);
   private static final Scripts _instance = new Scripts();
   public static final Map<Integer, List<Scripts.ScriptClassAndMethod>> dialogAppends = new HashMap<>();
   public static final Map<String, Scripts.ScriptClassAndMethod> onAction = new HashMap<>();
@@ -50,7 +49,7 @@ public class Scripts {
   }
 
   private void load() {
-    _log.info("Scripts: Loading...");
+    log.info("Scripts: Loading...");
     List<Class<?>> classes = new ArrayList<>();
     boolean result = false;
     File f = new File("scripts.jar");
@@ -75,7 +74,7 @@ public class Scripts {
 
         result = true;
       } catch (Exception var12) {
-        _log.error("Fail to load scripts.jar!", var12);
+        log.error("Fail to load scripts.jar!", var12);
         classes.clear();
       } finally {
         IOUtils.closeQuietly(stream);
@@ -87,10 +86,10 @@ public class Scripts {
     }
 
     if (!result) {
-      _log.error("Scripts: Failed loading scripts!");
+      log.error("Scripts: Failed loading scripts!");
       Runtime.getRuntime().exit(0);
     } else {
-      _log.info("Scripts: Loaded " + classes.size() + " classes.");
+      log.info("Scripts: Loaded " + classes.size() + " classes.");
 
       for (Class<?> clazz : classes) {
         this._classes.put(clazz.getName(), clazz);
@@ -100,7 +99,7 @@ public class Scripts {
   }
 
   private void loadExt() {
-    _log.info("loadExt: Extensions: Loading...");
+    log.info("loadExt: Extensions: Loading...");
     List<Class<?>> classes = new ArrayList<>();
     boolean result = false;
     File[] extFiles = (new File(".")).listFiles(pathname -> pathname.getName().endsWith(".ext.jar"));
@@ -108,7 +107,7 @@ public class Scripts {
     if (extFiles != null) {
       i = extFiles.length;
     }else {
-      _log.error("loadExt: Extensions: error load!, extFiles empty");
+      log.error("loadExt: Extensions: error load!, extFiles empty");
     }
 
     for(int var6 = 0; var6 < i; ++var6) {
@@ -133,7 +132,7 @@ public class Scripts {
 
           result = true;
         } catch (Exception var16) {
-          _log.error("Failed to load \"" + extFile + "\"!", var16);
+          log.error("Failed to load \"" + extFile + "\"!", var16);
           classes.clear();
         } finally {
           IOUtils.closeQuietly(stream);
@@ -145,7 +144,7 @@ public class Scripts {
       this.load(classes, "");
     }
 
-    _log.info("Extensions: Loaded " + classes.size() + " extension classes.");
+    log.info("Extensions: Loaded " + classes.size() + " extension classes.");
 
     for(i = 0; i < classes.size(); ++i) {
       Class<?> clazz = classes.get(i);
@@ -169,23 +168,23 @@ public class Scripts {
         try {
           ((ScriptFile) clazz.newInstance()).onLoad();
         } catch (Exception e) {
-          _log.error("Scripts: Failed running " + clazz.getName() + ".onLoad()", e);
+          log.error("Scripts: Failed running " + clazz.getName() + ".onLoad()", e);
         }
     }
   }
 
   public boolean reload() {
-    _log.info("Scripts: Reloading...");
+    log.info("Scripts: Reloading...");
     return this.reload("");
   }
 
   public boolean reload(String target) {
     List<Class<?>> classes = new ArrayList<>();
     if (!this.load(classes, target)) {
-      _log.error("Scripts: Failed reloading script(s): " + target + "!");
+      log.error("Scripts: Failed reloading script(s): " + target + "!");
       return false;
     } else {
-      _log.info("Scripts: Reloaded " + classes.size() + " classes.");
+      log.info("Scripts: Reloaded " + classes.size() + " classes.");
 
       for (Class<?> clazz : classes) {
         Class<?> prevClazz = this._classes.put(clazz.getName(), clazz);
@@ -194,7 +193,7 @@ public class Scripts {
             try {
               ((ScriptFile) prevClazz.newInstance()).onReload();
             } catch (Exception var7) {
-              _log.error("Scripts: Failed running " + prevClazz.getName() + ".onReload()", var7);
+              log.error("Scripts: Failed running " + prevClazz.getName() + ".onReload()", var7);
             }
           }
 
@@ -206,7 +205,7 @@ public class Scripts {
             try {
               ((ScriptFile) clazz.newInstance()).onLoad();
             } catch (Exception var8) {
-              _log.error("Scripts: Failed running " + clazz.getName() + ".onLoad()", var8);
+              log.error("Scripts: Failed running " + clazz.getName() + ".onLoad()", var8);
             }
           }
 
@@ -225,7 +224,7 @@ public class Scripts {
         try {
           ((ScriptFile) clazz.newInstance()).onShutdown();
         } catch (Exception var4) {
-          _log.error("Scripts: Failed running " + clazz.getName() + ".onShutdown()", var4);
+          log.error("Scripts: Failed running " + clazz.getName() + ".onShutdown()", var4);
         }
       }
     }
@@ -262,7 +261,7 @@ public class Scripts {
               }
             } catch (ClassNotFoundException var13) {
               success = false;
-              _log.error("Scripts: Can't load script class: " + name, var13);
+              log.error("Scripts: Can't load script class: " + name, var13);
             }
           }
         }
@@ -277,7 +276,6 @@ public class Scripts {
   private void addHandlers(Class<?> clazz) {
     try {
       Method[] var2 = clazz.getMethods();
-      int var3 = var2.length;
 
       for (Method method : var2) {
         if (method.getName().contains("DialogAppend_")) {
@@ -297,7 +295,7 @@ public class Scripts {
         }
       }
     } catch (Exception var8) {
-      _log.error("", var8);
+      log.error("", var8);
     }
 
   }
@@ -357,7 +355,7 @@ public class Scripts {
         onActionShift.remove(nameToRemove);
       }
     } catch (Exception e) {
-      _log.error("removeHandlers: eMessage={}, eClause={}", e.getMessage(), e.getClass());
+      log.error("removeHandlers: eMessage={}, eClause={}", e.getMessage(), e.getClass());
     }
 
   }
@@ -393,14 +391,14 @@ public class Scripts {
   public Object callScripts(Player caller, String className, String methodName, Object[] args, Map<String, Object> variables) {
     Class<?> clazz = this._classes.get(className);
     if (clazz == null) {
-      _log.error("Script class " + className + " not found!");
+      log.error("Script class " + className + " not found!");
       return null;
     } else {
       Object o;
       try {
         o = clazz.newInstance();
       } catch (Exception var13) {
-        _log.error("Scripts: Failed creating instance of " + clazz.getName(), var13);
+        log.error("Scripts: Failed creating instance of " + clazz.getName(), var13);
         return null;
       }
 
@@ -414,7 +412,7 @@ public class Scripts {
           try {
             FieldUtils.writeField(o, (String)param.getKey(), param.getValue());
           } catch (Exception var12) {
-            _log.error("Scripts: Failed setting fields for " + clazz.getName(), var12);
+            log.error("Scripts: Failed setting fields for " + clazz.getName(), var12);
           }
         }
       }
@@ -427,7 +425,7 @@ public class Scripts {
             FieldUtils.writeField(fieldSelf, o, caller.getRef());
           }
         } catch (Exception var11) {
-          _log.error("Scripts: Failed setting field for " + clazz.getName(), var11);
+          log.error("Scripts: Failed setting field for " + clazz.getName(), var11);
         }
       }
 
@@ -442,11 +440,11 @@ public class Scripts {
 
         ret = MethodUtils.invokeMethod(o, methodName, args, parameterTypes);
       } catch (NoSuchMethodException var14) {
-        _log.error("Scripts: No such method " + clazz.getName() + "." + methodName + "()!");
+        log.error("Scripts: No such method " + clazz.getName() + "." + methodName + "()!");
       } catch (InvocationTargetException var15) {
-        _log.error("Scripts: Error while calling " + clazz.getName() + "." + methodName + "()", var15.getTargetException());
+        log.error("Scripts: Error while calling " + clazz.getName() + "." + methodName + "()", var15.getTargetException());
       } catch (Exception var16) {
-        _log.error("Scripts: Failed calling " + clazz.getName() + "." + methodName + "()", var16);
+        log.error("Scripts: Failed calling " + clazz.getName() + "." + methodName + "()", var16);
       }
 
       return ret;

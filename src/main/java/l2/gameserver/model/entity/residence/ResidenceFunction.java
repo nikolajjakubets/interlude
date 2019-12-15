@@ -5,21 +5,21 @@
 
 package l2.gameserver.model.entity.residence;
 
+import l2.commons.dbutils.DbUtils;
+import l2.gameserver.database.DatabaseFactory;
+import l2.gameserver.model.TeleportLocation;
+import l2.gameserver.tables.SkillTable;
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
-import l2.commons.dbutils.DbUtils;
-import l2.gameserver.database.DatabaseFactory;
-import l2.gameserver.model.TeleportLocation;
-import l2.gameserver.tables.SkillTable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class ResidenceFunction {
-  private static final Logger _log = LoggerFactory.getLogger(ResidenceFunction.class);
   public static final int TELEPORT = 1;
   public static final int ITEM_CREATE = 2;
   public static final int RESTORE_HP = 3;
@@ -34,10 +34,10 @@ public class ResidenceFunction {
   private Calendar _endDate;
   private boolean _inDebt;
   private boolean _active;
-  private Map<Integer, Integer> _leases = new ConcurrentSkipListMap();
-  private Map<Integer, TeleportLocation[]> _teleports = new ConcurrentSkipListMap();
-  private Map<Integer, int[]> _buylists = new ConcurrentSkipListMap();
-  private Map<Integer, Object[][]> _buffs = new ConcurrentSkipListMap();
+  private Map<Integer, Integer> _leases = new ConcurrentSkipListMap<>();
+  private Map<Integer, TeleportLocation[]> _teleports = new ConcurrentSkipListMap<>();
+  private Map<Integer, int[]> _buylists = new ConcurrentSkipListMap<>();
+  private Map<Integer, Object[][]> _buffs = new ConcurrentSkipListMap<>();
   public static final String A = "";
   public static final String W = "W";
   public static final String M = "M";
@@ -97,13 +97,13 @@ public class ResidenceFunction {
     try {
       con = DatabaseFactory.getInstance().getConnection();
       statement = con.prepareStatement("UPDATE residence_functions SET endTime=?, inDebt=? WHERE type=? AND id=?");
-      statement.setInt(1, (int)(this.getEndTimeInMillis() / 1000L));
+      statement.setInt(1, (int) (this.getEndTimeInMillis() / 1000L));
       statement.setInt(2, inDebt ? 1 : 0);
       statement.setInt(3, this.getType());
       statement.setInt(4, this.getResidenceId());
       statement.executeUpdate();
-    } catch (Exception var8) {
-      _log.error("", var8);
+    } catch (Exception e) {
+      log.error("updateRentTime: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -115,7 +115,7 @@ public class ResidenceFunction {
   }
 
   public TeleportLocation[] getTeleports(int level) {
-    return (TeleportLocation[])this._teleports.get(level);
+    return this._teleports.get(level);
   }
 
   public void addTeleports(int level, TeleportLocation[] teleports) {
@@ -127,7 +127,7 @@ public class ResidenceFunction {
   }
 
   public int getLease(int level) {
-    return (Integer)this._leases.get(level);
+    return this._leases.get(level);
   }
 
   public void addLease(int level, int lease) {
@@ -139,7 +139,7 @@ public class ResidenceFunction {
   }
 
   public int[] getBuylist(int level) {
-    return (int[])this._buylists.get(level);
+    return this._buylists.get(level);
   }
 
   public void addBuylist(int level, int[] buylist) {
@@ -151,7 +151,7 @@ public class ResidenceFunction {
   }
 
   public Object[][] getBuffs(int level) {
-    return (Object[][])this._buffs.get(level);
+    return this._buffs.get(level);
   }
 
   public void addBuffs(int level) {

@@ -5,14 +5,14 @@
 
 package l2.gameserver.taskmanager.actionrunner;
 
-import java.util.concurrent.Future;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.ThreadPoolManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.Future;
+
+@Slf4j
 public abstract class ActionWrapper extends RunnableImpl {
-  private static final Logger _log = LoggerFactory.getLogger(ActionWrapper.class);
   private final String _name;
   private Future<?> _scheduledFuture;
 
@@ -38,7 +38,7 @@ public abstract class ActionWrapper extends RunnableImpl {
     try {
       this.runImpl0();
     } catch (Exception var5) {
-      _log.info("ActionWrapper: Exception: " + var5 + "; name: " + this._name, var5);
+      log.info("ActionWrapper: Exception: " + var5 + "; name: " + this._name, var5);
     } finally {
       ActionRunner.getInstance().remove(this._name, this);
       this._scheduledFuture = null;

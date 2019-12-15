@@ -5,11 +5,6 @@
 
 package l2.gameserver.network.l2.s2c;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import l2.gameserver.data.htm.HtmCache;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.entity.SevenSignsFestival.SevenSignsFestival;
@@ -21,11 +16,15 @@ import l2.gameserver.scripts.Scripts;
 import l2.gameserver.scripts.Scripts.ScriptClassAndMethod;
 import l2.gameserver.utils.HtmlUtils;
 import l2.gameserver.utils.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@Slf4j
 public class NpcHtmlMessage extends L2GameServerPacket {
-  protected static final Logger _log = LoggerFactory.getLogger(NpcHtmlMessage.class);
   protected static final Pattern objectId = Pattern.compile("%objectId%");
   protected static final Pattern playername = Pattern.compile("%playername%");
   protected int _npcObjId;
@@ -38,7 +37,7 @@ public class NpcHtmlMessage extends L2GameServerPacket {
     this._file = null;
     this._replaces = new ArrayList<>();
     this.have_appends = false;
-    List<ScriptClassAndMethod> appends = (List)Scripts.dialogAppends.get(npcId);
+    List<ScriptClassAndMethod> appends = Scripts.dialogAppends.get(npcId);
     if (appends != null && appends.size() > 0) {
       this.have_appends = true;
       if (filename != null && filename.equalsIgnoreCase("npcdefault.htm")) {
@@ -47,20 +46,18 @@ public class NpcHtmlMessage extends L2GameServerPacket {
         this.setFile(filename);
       }
 
-      String replaces = "";
-      Object[] script_args = new Object[]{new Integer(val)};
-      Iterator var8 = appends.iterator();
+      StringBuilder replaces = new StringBuilder();
+      Object[] script_args = new Object[]{val};
 
-      while(var8.hasNext()) {
-        ScriptClassAndMethod append = (ScriptClassAndMethod)var8.next();
+      for (ScriptClassAndMethod append : appends) {
         Object obj = Scripts.getInstance().callScripts(player, append.className, append.methodName, script_args);
         if (obj != null) {
-          replaces = replaces + obj;
+          replaces.append(obj);
         }
       }
 
-      if (!replaces.equals("")) {
-        this.replace("</body>", "\n" + Strings.bbParse(replaces) + "</body>");
+      if (!replaces.toString().equals("")) {
+        this.replace("</body>", "\n" + Strings.bbParse(replaces.toString()) + "</body>");
       }
     } else {
       this.setFile(filename);
@@ -83,7 +80,7 @@ public class NpcHtmlMessage extends L2GameServerPacket {
     this.have_appends = false;
     if (npc == null) {
       this._npcObjId = 5;
-      player.setLastNpc((NpcInstance)null);
+      player.setLastNpc(null);
     } else {
       this._npcObjId = npc.getObjectId();
       player.setLastNpc(npc);
@@ -110,7 +107,7 @@ public class NpcHtmlMessage extends L2GameServerPacket {
   public final NpcHtmlMessage setFile(String file) {
     this._file = file;
     if (this._file.startsWith("data/html/")) {
-      _log.info("NpcHtmlMessage: need fix : " + file, new Exception());
+      log.info("NpcHtmlMessage: need fix : " + file, new Exception());
       this._file = this._file.replace("data/html/", "");
     }
 
@@ -156,14 +153,12 @@ public class NpcHtmlMessage extends L2GameServerPacket {
     }
 
     for(int i = 0; i < this._replaces.size(); i += 2) {
-      this._html = this._html.replace((CharSequence)this._replaces.get(i), (CharSequence)this._replaces.get(i + 1));
+      this._html = this._html.replace(this._replaces.get(i), this._replaces.get(i + 1));
     }
 
     if (this._html != null) {
       Matcher m = objectId.matcher(this._html);
-      if (m != null) {
-        this._html = m.replaceAll(String.valueOf(this._npcObjId));
-      }
+      this._html = m.replaceAll(String.valueOf(this._npcObjId));
 
       if (player != null) {
         this._html = playername.matcher(this._html).replaceAll(player.getName());

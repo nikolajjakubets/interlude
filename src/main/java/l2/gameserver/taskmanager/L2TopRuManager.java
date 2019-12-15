@@ -5,25 +5,6 @@
 
 package l2.gameserver.taskmanager;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.Config;
 import l2.gameserver.ThreadPoolManager;
@@ -35,11 +16,28 @@ import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.model.items.ItemInstance.ItemLocation;
 import l2.gameserver.network.l2.components.CustomMessage;
 import l2.gameserver.utils.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@Slf4j
 public class L2TopRuManager {
-  private static final Logger _log = LoggerFactory.getLogger(L2TopRuManager.class);
   private static final String USERAGENT = "Mozilla/5.0 (SunOS; 5.10; amd64; U) Java HotSpot(TM) 64-Bit Server VM/16.2-b04";
 
   private static L2TopRuManager _instance;
@@ -58,7 +56,7 @@ public class L2TopRuManager {
 
   private L2TopRuManager() {
     if (Config.L2TOPRU_DELAY >= 1L) {
-      _log.info("L2TopRuManager: Initializing.");
+      log.info("L2TopRuManager: Initializing.");
       this._webPattern = Pattern.compile("^([\\d-]+\\s[\\d:]+)\\s+(?:" + Config.L2TOPRU_PREFIX + "-)*([^\\s]+)$", 8);
       this._smsPattern = Pattern.compile("^([\\d-]+\\s[\\d:]+)\\s+(?:" + Config.L2TOPRU_PREFIX + "-)*([^\\s]+)\\s+x(\\d{1,2})$", 8);
       ThreadPoolManager.getInstance().scheduleAtFixedRate(new L2TopRuManager.L2TopRuTask(), Config.L2TOPRU_DELAY, Config.L2TOPRU_DELAY);
@@ -77,7 +75,7 @@ public class L2TopRuManager {
       stmt = con.createStatement();
       rset = stmt.executeQuery("SELECT `obj_Id`,`char_name` FROM `characters`");
 
-      while(rset.next()) {
+      while (rset.next()) {
         chars.put(rset.getString("char_name"), rset.getInt("obj_Id"));
       }
     } catch (Exception var12) {
@@ -195,19 +193,17 @@ public class L2TopRuManager {
   }
 
   private void rewardVotes(ArrayList<L2TopRuManager.L2TopRuVote> votes) {
-    Iterator var2 = votes.iterator();
 
-    while(var2.hasNext()) {
-      L2TopRuManager.L2TopRuVote vote = (L2TopRuManager.L2TopRuVote)var2.next();
-      switch(vote.type) {
+    for (L2TopRuVote vote : votes) {
+      switch (vote.type) {
         case WEB:
-          _log.info("L2TopRuManager: Rewarding " + vote.toString());
+          log.info("L2TopRuManager: Rewarding " + vote.toString());
           this.giveItem(vote.char_obj_id, Config.L2TOPRU_WEB_REWARD_ITEMID, Config.L2TOPRU_WEB_REWARD_ITEMCOUNT);
           break;
         case SMS:
-          _log.info("L2TopRuManager: Rewarding " + vote.toString());
+          log.info("L2TopRuManager: Rewarding " + vote.toString());
           if (Config.L2TOPRU_SMS_REWARD_VOTE_MULTI) {
-            this.giveItem(vote.char_obj_id, Config.L2TOPRU_SMS_REWARD_ITEMID, Config.L2TOPRU_SMS_REWARD_VOTE_MULTI ? Config.L2TOPRU_SMS_REWARD_ITEMCOUNT * vote.count : Config.L2TOPRU_SMS_REWARD_ITEMCOUNT);
+            this.giveItem(vote.char_obj_id, Config.L2TOPRU_SMS_REWARD_ITEMID, Config.L2TOPRU_SMS_REWARD_ITEMCOUNT * vote.count);
           }
       }
     }
@@ -215,7 +211,7 @@ public class L2TopRuManager {
   }
 
   private ArrayList<L2TopRuManager.L2TopRuVote> getAllVotes() {
-    ArrayList result = new ArrayList<>();
+    ArrayList<L2TopRuManager.L2TopRuVote> result = new ArrayList<>();
 
     try {
       Matcher m = this._webPattern.matcher(this.getPage(Config.L2TOPRU_WEB_VOTE_URL));
@@ -223,7 +219,7 @@ public class L2TopRuManager {
       L2TopRuManager.L2TopRuVote vote;
       String dateTimeStr;
       String nameStr;
-      while(m.find()) {
+      while (m.find()) {
         dateTimeStr = m.group(1);
         nameStr = m.group(2);
         if (Util.isMatchingRegexp(nameStr, Config.CNAME_TEMPLATE)) {
@@ -234,7 +230,7 @@ public class L2TopRuManager {
 
       m = this._smsPattern.matcher(this.getPage(Config.L2TOPRU_SMS_VOTE_URL));
 
-      while(m.find()) {
+      while (m.find()) {
         dateTimeStr = m.group(1);
         nameStr = m.group(2);
         String mulStr = m.group(3);
@@ -244,7 +240,7 @@ public class L2TopRuManager {
         }
       }
 
-      Collections.sort(result, new L2TopRuManager.L2TopRuVoteComparator());
+      result.sort(new L2TopRuVoteComparator<>());
     } catch (Exception var7) {
       var7.printStackTrace();
     }
@@ -267,9 +263,9 @@ public class L2TopRuManager {
       conn.setConnectTimeout(30000);
       BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "cp1251"));
       StringBuilder builder = new StringBuilder();
-      String line = null;
+      String line;
 
-      while((line = in.readLine()) != null) {
+      while ((line = in.readLine()) != null) {
         builder.append(line).append("\n");
       }
 
@@ -279,7 +275,7 @@ public class L2TopRuManager {
     }
   }
 
-  private final class L2TopRuVoteComparator<T> implements Comparator<L2TopRuManager.L2TopRuVote> {
+  private static class L2TopRuVoteComparator<T> implements Comparator<L2TopRuManager.L2TopRuVote> {
     private L2TopRuVoteComparator() {
     }
 
@@ -289,12 +285,12 @@ public class L2TopRuManager {
       } else if (o.datetime < o1.datetime) {
         return -2147483648;
       } else {
-        return o.datetime > o1.datetime ? 2147483647 : -1;
+        return 2147483647;
       }
     }
   }
 
-  private class L2TopRuVote {
+  private static class L2TopRuVote {
     public long datetime;
     public String charname;
     public int count;
@@ -328,7 +324,7 @@ public class L2TopRuManager {
     }
   }
 
-  private class L2TopRuTask implements Runnable {
+  private static class L2TopRuTask implements Runnable {
     private L2TopRuTask() {
     }
 

@@ -6,16 +6,15 @@
 package l2.gameserver.utils;
 
 import l2.gameserver.Config;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+@Slf4j
 public class Strings {
-  private static final Logger _log = LoggerFactory.getLogger(Strings.class);
   private static String[] tr;
   private static String[] trb;
   private static String[] trcode;
@@ -37,11 +36,11 @@ public class Strings {
     if (x == null) {
       return false;
     } else if (x instanceof Number) {
-      return ((Number)x).intValue() > 0;
+      return ((Number) x).intValue() > 0;
     } else if (x instanceof Boolean) {
-      return (Boolean)x;
+      return (Boolean) x;
     } else {
-      return x instanceof Double ? Math.abs((Double)x) < 1.0E-5D : !String.valueOf(x).isEmpty();
+      return !String.valueOf(x).isEmpty();
     }
   }
 
@@ -52,7 +51,7 @@ public class Strings {
 
       int i;
       String[] ss;
-      for(i = 0; i < pairs.length; ++i) {
+      for (i = 0; i < pairs.length; ++i) {
         ss = pairs[i].split(" +");
         tr[i * 2] = ss[0];
         tr[i * 2 + 1] = ss[1];
@@ -61,7 +60,7 @@ public class Strings {
       pairs = FileUtils.readFileToString(new File(Config.DATAPACK_ROOT, "data/translit_back.txt")).split("\n");
       trb = new String[pairs.length * 2];
 
-      for(i = 0; i < pairs.length; ++i) {
+      for (i = 0; i < pairs.length; ++i) {
         ss = pairs[i].split(" +");
         trb[i * 2] = ss[0];
         trb[i * 2 + 1] = ss[1];
@@ -70,21 +69,21 @@ public class Strings {
       pairs = FileUtils.readFileToString(new File(Config.DATAPACK_ROOT, "data/transcode.txt")).split("\n");
       trcode = new String[pairs.length * 2];
 
-      for(i = 0; i < pairs.length; ++i) {
+      for (i = 0; i < pairs.length; ++i) {
         ss = pairs[i].split(" +");
         trcode[i * 2] = ss[0];
         trcode[i * 2 + 1] = ss[1];
       }
     } catch (IOException e) {
-      _log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), null, e.getCause());
+      log.error("Exception: eMessage={}, eClass={}, eCause={}", e.getMessage(), null, e.getCause());
 
     }
 
-    _log.info("Loaded " + (tr.length + tr.length + trcode.length) + " translit entries.");
+    log.info("Loaded " + (tr.length + tr.length + trcode.length) + " translit entries.");
   }
 
   public static String translit(String s) {
-    for(int i = 0; i < tr.length; i += 2) {
+    for (int i = 0; i < tr.length; i += 2) {
       s = s.replace(tr[i], tr[i + 1]);
     }
 
@@ -94,11 +93,11 @@ public class Strings {
   public static String fromTranslit(String s, int type) {
     int i;
     if (type == 1) {
-      for(i = 0; i < trb.length; i += 2) {
+      for (i = 0; i < trb.length; i += 2) {
         s = s.replace(trb[i], trb[i + 1]);
       }
     } else if (type == 2) {
-      for(i = 0; i < trcode.length; i += 2) {
+      for (i = 0; i < trcode.length; i += 2) {
         s = s.replace(trcode[i], trcode[i + 1]);
       }
     }
@@ -139,7 +138,7 @@ public class Strings {
       }
     }
 
-    while(startIdx < strings.length && maxCount != 0) {
+    while (startIdx < strings.length && maxCount != 0) {
       if (!result.isEmpty() && glueStr != null && !glueStr.isEmpty()) {
         result = result + glueStr;
       }

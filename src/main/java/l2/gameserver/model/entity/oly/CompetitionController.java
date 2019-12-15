@@ -23,33 +23,31 @@ import l2.gameserver.network.l2.s2c.PlaySound;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.utils.Log;
 import l2.gameserver.utils.TimeUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledFuture;
 
+@Slf4j
 public class CompetitionController {
-  private static final Logger _log = LoggerFactory.getLogger(CompetitionController.class);
   public static final int COMPETITION_PAUSE = 30000;
   public static final int COMPETITION_PREPARATION_DELAY = 60;
   public static final int BACKPORT_DELAY = 20;
   private static CompetitionController _instance;
-  private ConcurrentLinkedQueue<Competition> _activeCompetitions = new ConcurrentLinkedQueue();
+  private ConcurrentLinkedQueue<Competition> _activeCompetitions = new ConcurrentLinkedQueue<>();
   private ScheduledFuture<?> _start_task;
   private int _start_fail_trys = 0;
   private static final String GET_COMP_RECORDS = "SELECT `oc`.`char_id` AS `char_obj_id`, `on1`.`char_name` AS `char_name`, `on1`.`class_id` AS `char_class_id`, `on2`.`char_id` AS `rival_obj_id`, `on2`.`char_name` AS `rival_name`, `on2`.`class_id` AS `rival_class_id`, `oc`.`result` AS `result`, `oc`.`rule` AS `rules`, `oc`.`elapsed_time` AS `elapsed_time`, `oc`.`mtime` AS `mtime` FROM `oly_comps` AS `oc` JOIN `oly_nobles` AS `on1` ON `oc`.`char_id` = `on1`.`char_id` JOIN `oly_nobles` AS `on2` ON `oc`.`rival_id` = `on2`.`char_id` WHERE `oc`.`char_id` = ? AND `oc`.`season` = ? ";
   private static final String ADD_COMP_RECORD = "INSERT INTO `oly_comps` (`season`, `char_id`, `rival_id`, `rule`, `result`, `elapsed_time`, `mtime`) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-  public static final CompetitionController getInstance() {
+  public static CompetitionController getInstance() {
     if (_instance == null) {
       _instance = new CompetitionController();
     }
@@ -68,9 +66,9 @@ public class CompetitionController {
     return this._activeCompetitions;
   }
 
-  private final synchronized boolean TryCreateCompetitions(CompetitionType type, int cls_id) {
+  private synchronized boolean TryCreateCompetitions(CompetitionType type, int cls_id) {
     if (!StadiumPool.getInstance().isStadiumAvailable()) {
-      _log.warn("OlyCompetitionController: not enough stadiums.");
+      log.warn("OlyCompetitionController: not enough stadiums.");
       return false;
     } else if (!ParticipantPool.getInstance().isEnough(type, cls_id)) {
       ParticipantPool.getInstance().broadcastToEntrys(type, Msg.THE_MATCH_MAY_BE_DELAYED_DUE_TO_NOT_ENOUGH_COMBATANTS, cls_id);
@@ -79,7 +77,7 @@ public class CompetitionController {
       for (Player[][] participants = ParticipantPool.getInstance().retrieveEntrys(type, cls_id); OlyController.getInstance().isRegAllowed() && StadiumPool.getInstance().isStadiumAvailable() && participants != null && participants[0] != null && participants[1] != null; participants = ParticipantPool.getInstance().retrieveEntrys(type, cls_id)) {
         Stadium stadium = StadiumPool.getInstance().pollStadium();
         if (stadium == null) {
-          _log.error("OlyCompetitionController: stadium == null wtf?");
+          log.error("OlyCompetitionController: stadium == null wtf?");
           return false;
         }
 
@@ -126,8 +124,7 @@ public class CompetitionController {
       ClassId[] var3 = ClassId.values();
       int var4 = var3.length;
 
-      for (int var5 = 0; var5 < var4; ++var5) {
-        ClassId cid = var3[var5];
+      for (ClassId cid : var3) {
         if (cid.level() == 3) {
           this.TryCreateCompetitions(type, cid.getId());
         }
@@ -265,7 +262,7 @@ public class CompetitionController {
         pstmt.setInt(7, (int) (System.currentTimeMillis() / 1000L));
         pstmt.executeUpdate();
       } catch (Exception var17) {
-        _log.warn("Can't save competition result", var17);
+        log.warn("Can't save competition result", var17);
       } finally {
         DbUtils.closeQuietly(conn, pstmt);
       }
@@ -301,7 +298,7 @@ public class CompetitionController {
         ));
       }
     } catch (Exception var11) {
-      _log.warn("Can't load competitions records", var11);
+      log.warn("Can't load competitions records", var11);
     } finally {
       DbUtils.closeQuietly(conn, pstmt, rset);
     }
@@ -315,18 +312,14 @@ public class CompetitionController {
     } else if (!player.isOlyParticipant() && !ParticipantPool.getInstance().isRegistred(player)) {
       StringBuilder sb = new StringBuilder();
       Stadium[] var3 = StadiumPool.getInstance().getAllStadiums();
-      int var4 = var3.length;
 
-      for (int var5 = 0; var5 < var4; ++var5) {
-        Stadium stadium = var3[var5];
+      for (Stadium stadium : var3) {
         sb.append("<a action=\"bypass -h _olympiad?command=move_op_field&field=").append(stadium.getStadiumId() + 1).append("\">");
         sb.append((new CustomMessage("Olympiad.CompetitionState.ARENA", player)).toString()).append(stadium.getStadiumId() + 1);
         sb.append("&nbsp;&nbsp;&nbsp;");
         boolean isEmpty = true;
-        Iterator var8 = this._activeCompetitions.iterator();
 
-        while (var8.hasNext()) {
-          Competition comp = (Competition) var8.next();
+        for (Competition comp : this._activeCompetitions) {
           if (comp.getStadium() == stadium && comp.getState() != CompetitionState.INIT) {
             sb.append(comp._participants[0].getName()).append(" : ").append(comp._participants[1].getName());
             sb.append("&nbsp;");
@@ -387,7 +380,7 @@ public class CompetitionController {
     }
   }
 
-  public class CompetitionResults {
+  public static class CompetitionResults {
     int char_id;
     int rival_id;
     String char_name;
@@ -418,7 +411,7 @@ public class CompetitionController {
         main = StringHolder.getInstance().getNotNull(player, "hero.history.tie");
       } else if (this.result > 0) {
         main = StringHolder.getInstance().getNotNull(player, "hero.history.win");
-      } else if (this.result < 2) {
+      } else {
         main = StringHolder.getInstance().getNotNull(player, "hero.history.loss");
       }
 
@@ -426,7 +419,7 @@ public class CompetitionController {
         wins.increment();
       } else if (this.result == 0) {
         ties.increment();
-      } else if (this.result < 0) {
+      } else {
         looses.increment();
       }
 
@@ -604,16 +597,15 @@ public class CompetitionController {
         CompetitionType[] var1 = CompetitionType.values();
         int var2 = var1.length;
 
-        for (int var3 = 0; var3 < var2; ++var3) {
-          CompetitionType type = var1[var3];
+        for (CompetitionType type : var1) {
           if (CompetitionController.this.RunComps(type)) {
             CompetitionController.getInstance()._start_fail_trys = 0;
           } else if (CompetitionController.getInstance()._start_fail_trys < 5) {
             CompetitionController.getInstance()._start_fail_trys++;
           }
         }
-      } catch (Exception var8) {
-        var8.printStackTrace();
+      } catch (Exception e) {
+        log.error("run: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
       } finally {
         CompetitionController.getInstance().scheduleStartTask();
       }

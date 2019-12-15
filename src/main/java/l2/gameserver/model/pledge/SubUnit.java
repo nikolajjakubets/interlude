@@ -5,27 +5,27 @@
 
 package l2.gameserver.model.pledge;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Collection;
-import java.util.Iterator;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.database.DatabaseFactory;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.Skill;
 import l2.gameserver.network.l2.s2c.ExSubPledgeSkillAdd;
 import l2.gameserver.tables.SkillTable;
+import lombok.extern.slf4j.Slf4j;
 import org.napile.primitive.maps.IntObjectMap;
 import org.napile.primitive.maps.impl.CHashIntObjectMap;
 import org.napile.primitive.maps.impl.CTreeIntObjectMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Collection;
+import java.util.Iterator;
+
+@Slf4j
 public class SubUnit {
-  private static final Logger _log = LoggerFactory.getLogger(SubUnit.class);
-  private IntObjectMap<Skill> _skills = new CTreeIntObjectMap();
-  private IntObjectMap<UnitMember> _members = new CHashIntObjectMap();
+  private IntObjectMap<Skill> _skills = new CTreeIntObjectMap<>();
+  private IntObjectMap<UnitMember> _members = new CHashIntObjectMap<>();
   private int _type;
   private int _leaderObjectId;
   private UnitMember _leader;
@@ -68,7 +68,7 @@ public class SubUnit {
   }
 
   public UnitMember getUnitMember(int obj) {
-    return obj == 0 ? null : (UnitMember)this._members.get(obj);
+    return obj == 0 ? null : this._members.get(obj);
   }
 
   public UnitMember getUnitMember(String obj) {
@@ -87,10 +87,10 @@ public class SubUnit {
   }
 
   public void removeUnitMember(int objectId) {
-    UnitMember m = (UnitMember)this._members.remove(objectId);
+    UnitMember m = this._members.remove(objectId);
     if (m != null) {
       if (objectId == this.getLeaderObjectId()) {
-        this.setLeader((UnitMember)null, true);
+        this.setLeader(null, true);
       }
 
       if (m.hasSponsor()) {
@@ -98,14 +98,14 @@ public class SubUnit {
       }
 
       removeMemberInDatabase(m);
-      m.setPlayerInstance((Player)null, true);
+      m.setPlayerInstance(null, true);
     }
   }
 
   public void replace(int objectId, int newUnitId) {
     SubUnit newUnit = this._clan.getSubUnit(newUnitId);
     if (newUnit != null) {
-      UnitMember m = (UnitMember)this._members.remove(objectId);
+      UnitMember m = this._members.remove(objectId);
       if (m != null) {
         m.setPledgeType(newUnitId);
         newUnit.addUnitMember(m);
@@ -148,8 +148,8 @@ public class SubUnit {
       statement.setInt(2, this._clan.getClanId());
       statement.setInt(3, this._type);
       statement.execute();
-    } catch (Exception var8) {
-      _log.error("Exception: " + var8, var8);
+    } catch (Exception e) {
+      log.error("updateDbLeader: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -187,8 +187,8 @@ public class SubUnit {
         statement.setInt(2, this._clan.getClanId());
         statement.setInt(3, this._type);
         statement.execute();
-      } catch (Exception var9) {
-        _log.error("Exception: " + var9, var9);
+      } catch (Exception e) {
+        log.error("setName: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
       } finally {
         DbUtils.closeQuietly(con, statement);
       }
@@ -203,7 +203,7 @@ public class SubUnit {
   public Skill addSkill(Skill newSkill, boolean store) {
     Skill oldSkill = null;
     if (newSkill != null) {
-      oldSkill = (Skill)this._skills.put(newSkill.getId(), newSkill);
+      oldSkill = this._skills.put(newSkill.getId(), newSkill);
       if (store) {
         Connection con = null;
         PreparedStatement statement = null;
@@ -225,18 +225,16 @@ public class SubUnit {
             statement.setInt(4, newSkill.getLevel());
             statement.execute();
           }
-        } catch (Exception var10) {
-          _log.warn("Exception: " + var10, var10);
+        } catch (Exception e) {
+          log.error("addSkill: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
         } finally {
           DbUtils.closeQuietly(con, statement);
         }
       }
 
       ExSubPledgeSkillAdd packet = new ExSubPledgeSkillAdd(this._type, newSkill.getId(), newSkill.getLevel());
-      Iterator var13 = this._clan.iterator();
 
-      while(var13.hasNext()) {
-        UnitMember temp = (UnitMember)var13.next();
+      for (UnitMember temp : this._clan) {
         if (temp.isOnline()) {
           Player player = temp.getPlayer();
           if (player != null) {
@@ -257,20 +255,16 @@ public class SubUnit {
   }
 
   public void addSkillsQuietly(Player player) {
-    Iterator var2 = this._skills.values().iterator();
 
-    while(var2.hasNext()) {
-      Skill skill = (Skill)var2.next();
+    for (Skill skill : this._skills.values()) {
       this.addSkill(player, skill);
     }
 
   }
 
   public void enableSkills(Player player) {
-    Iterator var2 = this._skills.values().iterator();
 
-    while(var2.hasNext()) {
-      Skill skill = (Skill)var2.next();
+    for (Skill skill : this._skills.values()) {
       if (skill.getMinRank() <= player.getPledgeClass()) {
         player.removeUnActiveSkill(skill);
       }
@@ -279,10 +273,8 @@ public class SubUnit {
   }
 
   public void disableSkills(Player player) {
-    Iterator var2 = this._skills.values().iterator();
 
-    while(var2.hasNext()) {
-      Skill skill = (Skill)var2.next();
+    for (Skill skill : this._skills.values()) {
       player.addUnActiveSkill(skill);
     }
 
@@ -313,8 +305,8 @@ public class SubUnit {
       statement.setLong(2, System.currentTimeMillis() / 1000L);
       statement.setInt(3, member.getObjectId());
       statement.execute();
-    } catch (Exception var7) {
-      _log.warn("Exception: " + var7, var7);
+    } catch (Exception e) {
+      log.error("removeMemberInDatabase: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -344,11 +336,11 @@ public class SubUnit {
         if (leader != null) {
           this.setLeader(leader, false);
         } else if (this._type == 0) {
-          _log.error("Clan " + this._name + " have no leader!");
+          log.error("Clan " + this._name + " have no leader!");
         }
       }
     } catch (Exception var9) {
-      _log.warn("Error while restoring clan members for clan: " + this._clan.getClanId() + " " + var9, var9);
+      log.warn("Error while restoring clan members for clan: " + this._clan.getClanId() + " " + var9, var9);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -373,8 +365,8 @@ public class SubUnit {
         Skill skill = SkillTable.getInstance().getInfo(id, level);
         this._skills.put(skill.getId(), skill);
       }
-    } catch (Exception var10) {
-      _log.warn("Exception: " + var10, var10);
+    } catch (Exception e) {
+      log.error("restoreSkills: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -382,7 +374,7 @@ public class SubUnit {
   }
 
   public int getSkillLevel(int id, int def) {
-    Skill skill = (Skill)this._skills.get(id);
+    Skill skill = this._skills.get(id);
     return skill == null ? def : skill.getLevel();
   }
 

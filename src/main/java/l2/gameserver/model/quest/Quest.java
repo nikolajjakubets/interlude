@@ -31,9 +31,8 @@ import l2.gameserver.scripts.Functions;
 import l2.gameserver.templates.item.ItemTemplate;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.utils.Location;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -41,8 +40,8 @@ import java.sql.ResultSet;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public class Quest {
-  private static final Logger _log = LoggerFactory.getLogger(Quest.class);
   public static final String SOUND_ITEMGET = "ItemSound.quest_itemget";
   public static final String SOUND_ACCEPT = "ItemSound.quest_accept";
   public static final String SOUND_MIDDLE = "ItemSound.quest_middle";
@@ -103,14 +102,13 @@ public class Quest {
   public static final int DELAYED = 4;
 
   public void addQuestItem(int... ids) {
-    int var3 = ids.length;
 
     for (int id : ids) {
       if (id != 0) {
-        ItemTemplate i = null;
+        ItemTemplate i;
         i = ItemHolder.getInstance().getTemplate(id);
         if (this._questItems.contains(id)) {
-          _log.warn("Item " + i + " multiple times in quest drop in " + this.getName());
+          log.warn("Item " + i + " multiple times in quest drop in " + this.getName());
         }
 
         this._questItems.add(id);
@@ -146,7 +144,7 @@ public class Quest {
         statement.setString(4, value);
         statement.executeUpdate();
       } catch (Exception var10) {
-        _log.error("could not insert char quest:", var10);
+        log.error("could not insert char quest:", var10);
       } finally {
         DbUtils.closeQuietly(con, statement);
       }
@@ -165,7 +163,7 @@ public class Quest {
       statement.setString(2, qs.getQuest().getName());
       statement.executeUpdate();
     } catch (Exception var7) {
-      _log.error("could not delete char quest:", var7);
+      log.error("could not delete char quest:", var7);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -184,7 +182,7 @@ public class Quest {
       statement.setString(3, var);
       statement.executeUpdate();
     } catch (Exception var8) {
-      _log.error("could not delete char quest:", var8);
+      log.error("could not delete char quest:", var8);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -207,7 +205,7 @@ public class Quest {
 
       String questId;
       String var;
-      while(rset.next()) {
+      while (rset.next()) {
         questId = rset.getString("name");
         var = rset.getString("value");
         if (var.equalsIgnoreCase("Start")) {
@@ -218,7 +216,7 @@ public class Quest {
           Quest q = QuestManager.getQuest(questId);
           if (q == null) {
             if (!Config.DONTLOADQUEST) {
-              _log.warn("Unknown quest " + questId + " for player " + player.getName());
+              log.warn("Unknown quest " + questId + " for player " + player.getName());
             }
           } else {
             new QuestState(q, player, getStateId(var));
@@ -231,7 +229,7 @@ public class Quest {
       statement.setInt(1, player.getObjectId());
       rset = statement.executeQuery();
 
-      while(rset.next()) {
+      while (rset.next()) {
         questId = rset.getString("name");
         var = rset.getString("var");
         String value = rset.getString("value");
@@ -245,7 +243,7 @@ public class Quest {
         }
       }
     } catch (Exception var12) {
-      _log.error("could not insert char quest:", var12);
+      log.error("could not insert char quest:", var12);
     } finally {
       DbUtils.closeQuietly(invalidQuestData);
       DbUtils.closeQuietly(con, statement, rset);
@@ -254,7 +252,7 @@ public class Quest {
   }
 
   public static String getStateName(int state) {
-    switch(state) {
+    switch (state) {
       case 1:
         return "Start";
       case 2:
@@ -285,7 +283,7 @@ public class Quest {
   }
 
   public Quest(int party) {
-    this._pausedQuestTimers = new ConcurrentHashMap();
+    this._pausedQuestTimers = new ConcurrentHashMap<>();
     this._questItems = new TIntHashSet();
     this._npcLogList = TroveUtils.emptyIntObjectMap();
     this._name = this.getClass().getSimpleName();
@@ -295,15 +293,11 @@ public class Quest {
   }
 
   public List<QuestNpcLogInfo> getNpcLogList(int cond) {
-    return (List)this._npcLogList.get(cond);
+    return this._npcLogList.get(cond);
   }
 
   public void addAttackId(int... attackIds) {
-    int[] var2 = attackIds;
-    int var3 = attackIds.length;
-
-    for(int var4 = 0; var4 < var3; ++var4) {
-      int attackId = var2[var4];
+    for (int attackId : attackIds) {
       this.addEventId(attackId, QuestEventType.ATTACKED_WITH_QUEST);
     }
 
@@ -318,17 +312,14 @@ public class Quest {
 
       return t;
     } catch (Exception var4) {
-      _log.error("", var4);
+      log.error("", var4);
       return null;
     }
   }
 
   public void addKillId(int... killIds) {
-    int[] var2 = killIds;
-    int var3 = killIds.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
-      int killid = var2[var4];
+    for (int killid : killIds) {
       this.addEventId(killid, QuestEventType.MOB_KILLED_WITH_QUEST);
     }
 
@@ -340,15 +331,15 @@ public class Quest {
     } else {
       this.addKillId(killIds);
       if (this._npcLogList.isEmpty()) {
-        this._npcLogList = new TIntObjectHashMap(5);
+        this._npcLogList = new TIntObjectHashMap<>(5);
       }
 
-      List<QuestNpcLogInfo> vars = (List)this._npcLogList.get(cond);
+      List<QuestNpcLogInfo> vars = this._npcLogList.get(cond);
       if (vars == null) {
-        this._npcLogList.put(cond, vars = new ArrayList(5));
+        this._npcLogList.put(cond, vars = new ArrayList<>(5));
       }
 
-      ((List)vars).add(new QuestNpcLogInfo(killIds, varName, max));
+      vars.add(new QuestNpcLogInfo(killIds, varName, max));
     }
   }
 
@@ -363,10 +354,8 @@ public class Quest {
       } else {
         boolean done = true;
         boolean find = false;
-        Iterator var7 = vars.iterator();
 
-        while(var7.hasNext()) {
-          QuestNpcLogInfo info = (QuestNpcLogInfo)var7.next();
+        for (QuestNpcLogInfo info : vars) {
           int count = st.getInt(info.getVarName());
           if (!find && ArrayUtils.contains(info.getNpcIds(), npc.getNpcId())) {
             find = true;
@@ -389,10 +378,8 @@ public class Quest {
   }
 
   public void addKillId(Collection<Integer> killIds) {
-    Iterator var2 = killIds.iterator();
 
-    while(var2.hasNext()) {
-      int killid = (Integer)var2.next();
+    for (int killid : killIds) {
       this.addKillId(killid);
     }
 
@@ -403,11 +390,8 @@ public class Quest {
   }
 
   public void addStartNpc(int... npcIds) {
-    int[] var2 = npcIds;
-    int var3 = npcIds.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
-      int talkId = var2[var4];
+    for (int talkId : npcIds) {
       this.addStartNpc(talkId);
     }
 
@@ -419,32 +403,23 @@ public class Quest {
   }
 
   public void addFirstTalkId(int... npcIds) {
-    int[] var2 = npcIds;
-    int var3 = npcIds.length;
-
-    for(int var4 = 0; var4 < var3; ++var4) {
-      int npcId = var2[var4];
+    for (int npcId : npcIds) {
       this.addEventId(npcId, QuestEventType.NPC_FIRST_TALK);
     }
 
   }
 
   public void addTalkId(int... talkIds) {
-    int[] var2 = talkIds;
-    int var3 = talkIds.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
-      int talkId = var2[var4];
+    for (int talkId : talkIds) {
       this.addEventId(talkId, QuestEventType.QUEST_TALK);
     }
 
   }
 
   public void addTalkId(Collection<Integer> talkIds) {
-    Iterator var2 = talkIds.iterator();
 
-    while(var2.hasNext()) {
-      int talkId = (Integer)var2.next();
+    for (int talkId : talkIds) {
       this.addTalkId(talkId);
     }
 
@@ -452,11 +427,11 @@ public class Quest {
 
   public String getDescr(Player player) {
     QuestState qs = player.getQuestState(this);
-    String desc = this._descr != null ? this._descr : (new CustomMessage("q." + this._questId, player, new Object[0])).toString();
+    String desc = this._descr != null ? this._descr : (new CustomMessage("q." + this._questId, player)).toString();
     if (qs == null || qs.isCreated() && qs.isNowAvailable()) {
       return desc;
     } else {
-      return !qs.isCompleted() && qs.isNowAvailable() ? (new CustomMessage("quest.InProgress", player, new Object[]{desc})).toString() : (new CustomMessage("quest.Done", player, new Object[]{desc})).toString();
+      return !qs.isCompleted() && qs.isNowAvailable() ? (new CustomMessage("quest.InProgress", player, desc)).toString() : (new CustomMessage("quest.Done", player, desc)).toString();
     }
   }
 
@@ -483,7 +458,7 @@ public class Quest {
   }
 
   public void notifyAttack(NpcInstance npc, QuestState qs) {
-    String res = null;
+    String res;
 
     try {
       res = this.onAttack(npc, qs);
@@ -496,7 +471,7 @@ public class Quest {
   }
 
   public void notifyDeath(Creature killer, Creature victim, QuestState qs) {
-    String res = null;
+    String res;
 
     try {
       res = this.onDeath(killer, victim, qs);
@@ -505,7 +480,7 @@ public class Quest {
       return;
     }
 
-    this.showResult((NpcInstance)null, qs.getPlayer(), res);
+    this.showResult(null, qs.getPlayer(), res);
   }
 
   public void notifyEvent(String event, QuestState qs, NpcInstance npc) {
@@ -535,7 +510,7 @@ public class Quest {
   }
 
   public void notifyKill(Player target, QuestState qs) {
-    String res = null;
+    String res;
 
     try {
       res = this.onKill(target, qs);
@@ -544,7 +519,7 @@ public class Quest {
       return;
     }
 
-    this.showResult((NpcInstance)null, qs.getPlayer(), res);
+    this.showResult(null, qs.getPlayer(), res);
   }
 
   public final boolean notifyFirstTalk(NpcInstance npc, Player player) {
@@ -561,7 +536,7 @@ public class Quest {
   }
 
   public boolean notifyTalk(NpcInstance npc, QuestState qs) {
-    String res = null;
+    String res;
 
     try {
       res = this.onTalk(npc, qs);
@@ -574,7 +549,7 @@ public class Quest {
   }
 
   public boolean notifySkillUse(NpcInstance npc, Skill skill, QuestState qs) {
-    String res = null;
+    String res;
 
     try {
       res = this.onSkillUse(npc, skill, qs);
@@ -650,10 +625,10 @@ public class Quest {
   }
 
   private void showError(Player player, Throwable t) {
-    _log.error("", t);
+    log.error("", t);
     if (player != null && player.isGM()) {
       String res = "<html><body><title>Script error</title>" + LogUtils.dumpStack(t).replace("\n", "<br>") + "</body></html>";
-      this.showResult((NpcInstance)null, player, res);
+      this.showResult(null, player, res);
     }
 
   }
@@ -668,7 +643,7 @@ public class Quest {
       NpcHtmlMessage npcReply = new NpcHtmlMessage(target == null ? 5 : target.getObjectId());
       npcReply.setFile("quests/" + this.getClass().getSimpleName() + "/" + fileName);
       if (arg.length % 2 == 0) {
-        for(int i = 0; i < arg.length; i += 2) {
+        for (int i = 0; i < arg.length; i += 2) {
           npcReply.replace(String.valueOf(arg[i]), String.valueOf(arg[i + 1]));
         }
       }
@@ -729,11 +704,9 @@ public class Quest {
 
   void pauseQuestTimers(QuestState qs) {
     if (!qs.getTimers().isEmpty()) {
-      Iterator var2 = qs.getTimers().values().iterator();
 
-      while(var2.hasNext()) {
-        QuestTimer timer = (QuestTimer)var2.next();
-        timer.setQuestState((QuestState)null);
+      for (QuestTimer timer : qs.getTimers().values()) {
+        timer.setQuestState(null);
         timer.pause();
       }
 
@@ -742,13 +715,13 @@ public class Quest {
   }
 
   void resumeQuestTimers(QuestState qs) {
-    Map<String, QuestTimer> timers = (Map)this._pausedQuestTimers.remove(qs.getPlayer().getObjectId());
+    Map<String, QuestTimer> timers = this._pausedQuestTimers.remove(qs.getPlayer().getObjectId());
     if (timers != null) {
       qs.getTimers().putAll(timers);
       Iterator var3 = qs.getTimers().values().iterator();
 
-      while(var3.hasNext()) {
-        QuestTimer timer = (QuestTimer)var3.next();
+      while (var3.hasNext()) {
+        QuestTimer timer = (QuestTimer) var3.next();
         timer.setQuestState(qs);
         timer.start();
       }
@@ -766,8 +739,8 @@ public class Quest {
 
   public NpcInstance addSpawn(int npcId, Location loc, int randomOffset, int despawnDelay) {
     NpcInstance result = Functions.spawn(randomOffset > 50 ? Location.findPointToStay(loc, 0, randomOffset, ReflectionManager.DEFAULT.getGeoIndex()) : loc, npcId);
-    if (despawnDelay > 0 && result != null) {
-      ThreadPoolManager.getInstance().schedule(new Quest.DeSpawnScheduleTimerTask(result), (long)despawnDelay);
+    if (despawnDelay > 0) {
+      ThreadPoolManager.getInstance().schedule(new Quest.DeSpawnScheduleTimerTask(result), despawnDelay);
     }
 
     return result;
@@ -788,7 +761,7 @@ public class Quest {
         return npc;
       }
     } catch (Exception var6) {
-      _log.warn("Could not spawn Npc " + npcId);
+      log.warn("Could not spawn Npc " + npcId);
     }
 
     return null;
@@ -799,7 +772,7 @@ public class Quest {
   }
 
   public QuestRates getRates() {
-    QuestRates questRates = (QuestRates)Config.QUEST_RATES.get(this.getQuestIntId());
+    QuestRates questRates = Config.QUEST_RATES.get(this.getQuestIntId());
     if (questRates == null) {
       Config.QUEST_RATES.put(this.getQuestIntId(), questRates = new QuestRates(this.getQuestIntId()));
     }
@@ -808,7 +781,7 @@ public class Quest {
   }
 
   public class DeSpawnScheduleTimerTask extends RunnableImpl {
-    NpcInstance _npc = null;
+    NpcInstance _npc;
 
     public DeSpawnScheduleTimerTask(NpcInstance npc) {
       this._npc = npc;

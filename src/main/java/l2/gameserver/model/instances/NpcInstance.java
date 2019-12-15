@@ -61,13 +61,13 @@ import l2.gameserver.templates.npc.Faction;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.templates.spawn.SpawnRange;
 import l2.gameserver.utils.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 
+@Slf4j
 public class NpcInstance extends Creature {
   public static final String NO_CHAT_WINDOW = "noChatWindow";
   public static final String NO_RANDOM_WALK = "noRandomWalk";
@@ -75,7 +75,6 @@ public class NpcInstance extends Creature {
   public static final String NO_RANDOM_ANIMATION = "noRandomAnimation";
   public static final String TARGETABLE = "TargetEnabled";
   public static final String SHOW_NAME = "showName";
-  private static final Logger _log = LoggerFactory.getLogger(NpcInstance.class);
   private int _personalAggroRange = -1;
   private int _level = 0;
   private long _dieTime = 0L;
@@ -128,9 +127,9 @@ public class NpcInstance extends Creature {
       if (template.getSkills().size() > 0) {
         TIntObjectIterator iterator = template.getSkills().iterator();
 
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
           iterator.advance();
-          this.addSkill((Skill)iterator.value());
+          this.addSkill((Skill) iterator.value());
         }
       }
 
@@ -151,7 +150,7 @@ public class NpcInstance extends Creature {
 
   public CharacterAI getAI() {
     if (this._ai == null) {
-      synchronized(this) {
+      synchronized (this) {
         if (this._ai == null) {
           this._ai = this.getTemplate().getNewAI(this);
         }
@@ -203,7 +202,7 @@ public class NpcInstance extends Creature {
 
   protected void onReduceCurrentHp(double damage, Creature attacker, Skill skill, boolean awake, boolean standUp, boolean directHp) {
     if (attacker.isPlayable()) {
-      this.getAggroList().addDamageHate(attacker, (int)damage, 0);
+      this.getAggroList().addDamageHate(attacker, (int) damage, 0);
     }
 
     super.onReduceCurrentHp(damage, attacker, skill, awake, standUp, directHp);
@@ -211,7 +210,7 @@ public class NpcInstance extends Creature {
 
   protected void onDeath(Creature killer) {
     this._dieTime = System.currentTimeMillis();
-    if (!this.isMonster() || !((MonsterInstance)this).isSeeded() && !((MonsterInstance)this).isSpoiled()) {
+    if (!this.isMonster() || !((MonsterInstance) this).isSeeded() && !((MonsterInstance) this).isSpoiled()) {
       if (this.isBoss()) {
         this.startDecay(20000L);
       } else if (this.isFlying()) {
@@ -245,7 +244,7 @@ public class NpcInstance extends Creature {
   }
 
   public Location getRndMinionPosition() {
-    return Location.findPointToStay(this, (int)this.getColRadius() + 30, (int)this.getColRadius() + 50);
+    return Location.findPointToStay(this, (int) this.getColRadius() + 30, (int) this.getColRadius() + 50);
   }
 
   public boolean hasMinions() {
@@ -254,7 +253,7 @@ public class NpcInstance extends Creature {
 
   public void dropItem(Player lastAttacker, int itemId, long itemCount) {
     if (itemCount != 0L && lastAttacker != null) {
-      for(long i = 0L; i < itemCount; ++i) {
+      for (long i = 0L; i < itemCount; ++i) {
         ItemInstance item = ItemFunctions.createItem(itemId);
 
         for (GlobalEvent e : this.getEvents()) {
@@ -341,7 +340,7 @@ public class NpcInstance extends Creature {
   }
 
   public NpcTemplate getTemplate() {
-    return (NpcTemplate)this._template;
+    return (NpcTemplate) this._template;
   }
 
   public int getNpcId() {
@@ -377,27 +376,27 @@ public class NpcInstance extends Creature {
   }
 
   public int getMAtk(Creature target, Skill skill) {
-    return (int)((double)super.getMAtk(target, skill) * Config.ALT_NPC_MATK_MODIFIER);
+    return (int) ((double) super.getMAtk(target, skill) * Config.ALT_NPC_MATK_MODIFIER);
   }
 
   public int getPAtk(Creature target) {
-    return (int)((double)super.getPAtk(target) * Config.ALT_NPC_PATK_MODIFIER);
+    return (int) ((double) super.getPAtk(target) * Config.ALT_NPC_PATK_MODIFIER);
   }
 
   public int getMaxHp() {
-    return (int)((double)super.getMaxHp() * Config.ALT_NPC_MAXHP_MODIFIER);
+    return (int) ((double) super.getMaxHp() * Config.ALT_NPC_MAXHP_MODIFIER);
   }
 
   public int getMaxMp() {
-    return (int)((double)super.getMaxMp() * Config.ALT_NPC_MAXMP_MODIFIER);
+    return (int) ((double) super.getMaxMp() * Config.ALT_NPC_MAXMP_MODIFIER);
   }
 
   public long getExpReward() {
-    return (long)this.calcStat(Stats.EXP, (double)this.getTemplate().rewardExp, (Creature)null, (Skill)null);
+    return (long) this.calcStat(Stats.EXP, (double) this.getTemplate().rewardExp, (Creature) null, (Skill) null);
   }
 
   public long getSpReward() {
-    return (long)this.calcStat(Stats.SP, (double)this.getTemplate().rewardSp, (Creature)null, (Skill)null);
+    return (long) this.calcStat(Stats.SP, (double) this.getTemplate().rewardSp, (Creature) null, (Skill) null);
   }
 
   protected void onDelete() {
@@ -406,7 +405,7 @@ public class NpcInstance extends Creature {
       this._spawn.stopRespawn();
     }
 
-    this.setSpawn((Spawner)null);
+    this.setSpawn((Spawner) null);
     super.onDelete();
   }
 
@@ -480,7 +479,7 @@ public class NpcInstance extends Creature {
   }
 
   public int getPhysicalAttackRange() {
-    return (int)this.calcStat(Stats.POWER_ATTACK_RANGE, (double)this.getTemplate().baseAtkRange, (Creature)null, (Skill)null);
+    return (int) this.calcStat(Stats.POWER_ATTACK_RANGE, (double) this.getTemplate().baseAtkRange, (Creature) null, (Skill) null);
   }
 
   public WeaponTemplate getActiveWeaponItem() {
@@ -489,7 +488,7 @@ public class NpcInstance extends Creature {
       return null;
     } else {
       ItemTemplate item = ItemHolder.getInstance().getTemplate(this.getTemplate().rhand);
-      return !(item instanceof WeaponTemplate) ? null : (WeaponTemplate)item;
+      return !(item instanceof WeaponTemplate) ? null : (WeaponTemplate) item;
     }
   }
 
@@ -503,7 +502,7 @@ public class NpcInstance extends Creature {
       return null;
     } else {
       ItemTemplate item = ItemHolder.getInstance().getTemplate(this.getTemplate().lhand);
-      return !(item instanceof WeaponTemplate) ? null : (WeaponTemplate)item;
+      return !(item instanceof WeaponTemplate) ? null : (WeaponTemplate) item;
     }
   }
 
@@ -524,8 +523,8 @@ public class NpcInstance extends Creature {
   public void broadcastCharInfoImpl() {
     Iterator var1 = World.getAroundPlayers(this).iterator();
 
-    while(var1.hasNext()) {
-      Player player = (Player)var1.next();
+    while (var1.hasNext()) {
+      Player player = (Player) var1.next();
       player.sendPacket((new NpcInfo(this, player)).update());
     }
 
@@ -570,7 +569,7 @@ public class NpcInstance extends Creature {
       return null;
     } else {
       if (this._nearestCastle == null) {
-        this._nearestCastle = (Castle)ResidenceHolder.getInstance().getResidence(this.getTemplate().getCastleId());
+        this._nearestCastle = (Castle) ResidenceHolder.getInstance().getResidence(this.getTemplate().getCastleId());
       }
 
       return this._nearestCastle;
@@ -583,7 +582,7 @@ public class NpcInstance extends Creature {
 
   public ClanHall getClanHall() {
     if (this._nearestClanHall == null) {
-      this._nearestClanHall = (ClanHall)ResidenceHolder.getInstance().findNearestResidence(ClanHall.class, this.getX(), this.getY(), this.getZ(), this.getReflection(), 32768);
+      this._nearestClanHall = (ClanHall) ResidenceHolder.getInstance().findNearestResidence(ClanHall.class, this.getX(), this.getY(), this.getZ(), this.getReflection(), 32768);
     }
 
     return this._nearestClanHall;
@@ -632,7 +631,7 @@ public class NpcInstance extends Creature {
           Quest[] var5 = qlst;
           int var6 = qlst.length;
 
-          for(int var7 = 0; var7 < var6; ++var7) {
+          for (int var7 = 0; var7 < var6; ++var7) {
             Quest element = var5[var7];
             QuestState qs = player.getQuestState(element.getName());
             if ((qs == null || !qs.isCompleted()) && element.notifyFirstTalk(this, player)) {
@@ -663,7 +662,7 @@ public class NpcInstance extends Creature {
       QuestState[] var4 = player.getAllQuestsStates();
       int var5 = var4.length;
 
-      for(int var6 = 0; var6 < var5; ++var6) {
+      for (int var6 = 0; var6 < var5; ++var6) {
         QuestState quest = var4[var6];
         if (quest != null && quest.getQuest().isVisible() && quest.isStarted() && quest.getCond() > 0) {
           ++count;
@@ -692,7 +691,7 @@ public class NpcInstance extends Creature {
                 Quest[] var15 = qlst;
                 int var8 = qlst.length;
 
-                for(int var9 = 0; var9 < var8; ++var9) {
+                for (int var9 = 0; var9 < var8; ++var9) {
                   Quest element = var15[var9];
                   if (element == q) {
                     qs = q.newQuestState(player, 1);
@@ -708,8 +707,8 @@ public class NpcInstance extends Creature {
 
           this.showChatWindow(player, "no-quest.htm");
         } catch (Exception var11) {
-          _log.warn("problem with npc text(questId: " + questId + ") " + var11);
-          _log.error("", var11);
+          log.warn("problem with npc text(questId: " + questId + ") " + var11);
+          log.error("", var11);
         }
 
         player.sendActionFailed();
@@ -799,13 +798,13 @@ public class NpcInstance extends Creature {
                 DimensionalRiftManager.getInstance().start(player, b1, this);
               } else if (command.startsWith("ChangeRiftRoom")) {
                 if (player.isInParty() && player.getParty().isInReflection() && player.getParty().getReflection() instanceof DimensionalRift) {
-                  ((DimensionalRift)player.getParty().getReflection()).manualTeleport(player, this);
+                  ((DimensionalRift) player.getParty().getReflection()).manualTeleport(player, this);
                 } else {
                   DimensionalRiftManager.getInstance().teleportToWaitingRoom(player);
                 }
               } else if (command.startsWith("ExitRift")) {
                 if (player.isInParty() && player.getParty().isInReflection() && player.getParty().getReflection() instanceof DimensionalRift) {
-                  ((DimensionalRift)player.getParty().getReflection()).manualExitRift(player, this);
+                  ((DimensionalRift) player.getParty().getReflection()).manualExitRift(player, this);
                 } else {
                   DimensionalRiftManager.getInstance().teleportToWaitingRoom(player);
                 }
@@ -878,9 +877,9 @@ public class NpcInstance extends Creature {
           }
         }
       } catch (StringIndexOutOfBoundsException var8) {
-        _log.info("Incorrect htm bypass! npcId=" + this.getTemplate().npcId + " command=[" + command + "]");
+        log.info("Incorrect htm bypass! npcId=" + this.getTemplate().npcId + " command=[" + command + "]");
       } catch (NumberFormatException var9) {
-        _log.info("Invalid bypass to Server command parameter! npcId=" + this.getTemplate().npcId + " command=[" + command + "]");
+        log.info("Invalid bypass to Server command parameter! npcId=" + this.getTemplate().npcId + " command=[" + command + "]");
       }
 
     }
@@ -893,7 +892,7 @@ public class NpcInstance extends Creature {
       TeleportLocation[] var4 = list;
       int var5 = list.length;
 
-      for(int var6 = 0; var6 < var5; ++var6) {
+      for (int var6 = 0; var6 < var5; ++var6) {
         TeleportLocation tl = var4[var6];
         if (tl.getItem().getItemId() == 57) {
           double pricemod = player.getLevel() <= Config.GATEKEEPER_FREE ? 0.0D : Config.GATEKEEPER_MODIFIER;
@@ -912,9 +911,9 @@ public class NpcInstance extends Creature {
           }
 
           String name = (new CustomMessage(tl.getName(), player, new Object[0])).toString();
-          sb.append(" ").append((long)((double)tl.getPrice() * pricemod)).append(" @811;F;").append(name).append("|").append(name);
-          if ((double)tl.getPrice() * pricemod > 0.0D) {
-            sb.append(" - ").append((long)((double)tl.getPrice() * pricemod)).append(" ").append(HtmlUtils.htmlItemName(57));
+          sb.append(" ").append((long) ((double) tl.getPrice() * pricemod)).append(" @811;F;").append(name).append("|").append(name);
+          if ((double) tl.getPrice() * pricemod > 0.0D) {
+            sb.append(" - ").append((long) ((double) tl.getPrice() * pricemod)).append(" ").append(HtmlUtils.htmlItemName(57));
           }
 
           if (tl.getMinLevel() > 0) {
@@ -956,8 +955,8 @@ public class NpcInstance extends Creature {
     if (awaits != null) {
       Iterator var5 = awaits.iterator();
 
-      while(var5.hasNext()) {
-        QuestState x = (QuestState)var5.next();
+      while (var5.hasNext()) {
+        QuestState x = (QuestState) var5.next();
         if (!options.contains(x.getQuest()) && x.getQuest().getQuestIntId() > 0) {
           options.add(x.getQuest());
         }
@@ -968,7 +967,7 @@ public class NpcInstance extends Creature {
       Quest[] var9 = starts;
       int var10 = starts.length;
 
-      for(int var7 = 0; var7 < var10; ++var7) {
+      for (int var7 = 0; var7 < var10; ++var7) {
         Quest x = var9[var7];
         if (!options.contains(x) && x.getQuestIntId() > 0) {
           options.add(x);
@@ -977,9 +976,9 @@ public class NpcInstance extends Creature {
     }
 
     if (options.size() > 1) {
-      this.showQuestChooseWindow(player, (Quest[])options.toArray(new Quest[options.size()]));
+      this.showQuestChooseWindow(player, (Quest[]) options.toArray(new Quest[options.size()]));
     } else if (options.size() == 1) {
-      this.showQuestWindow(player, ((Quest)options.get(0)).getName());
+      this.showQuestWindow(player, ((Quest) options.get(0)).getName());
     } else {
       this.showQuestWindow(player, "");
     }
@@ -992,7 +991,7 @@ public class NpcInstance extends Creature {
     Quest[] var4 = quests;
     int var5 = quests.length;
 
-    for(int var6 = 0; var6 < var5; ++var6) {
+    for (int var6 = 0; var6 < var5; ++var6) {
       Quest q = var4[var6];
       if (q.isVisible()) {
         sb.append("<a action=\"bypass -h npc_").append(this.getObjectId()).append("_Quest ").append(q.getName()).append("\">[").append(q.getDescr(player)).append("]</a><br>");
@@ -1011,7 +1010,7 @@ public class NpcInstance extends Creature {
     filename = "seven_signs/";
     int npcId = this.getNpcId();
     label55:
-    switch(npcId) {
+    switch (npcId) {
       case 30298:
         if (player.getPledgeType() == -1) {
           filename = this.getHtmlPath(npcId, 1, player);
@@ -1024,7 +1023,7 @@ public class NpcInstance extends Creature {
         i = SevenSigns.getInstance().getPlayerCabal(player);
         int compWinner = SevenSigns.getInstance().getCabalHighestScore();
         if (i == sealAvariceOwner && i == compWinner) {
-          switch(sealAvariceOwner) {
+          switch (sealAvariceOwner) {
             case 0:
               filename = filename + "spirit_null.htm";
               break label55;
@@ -1051,7 +1050,7 @@ public class NpcInstance extends Creature {
 
     NpcHtmlMessage packet = new NpcHtmlMessage(player, this, filename, val);
     if (replace.length % 2 == 0) {
-      for(i = 0; i < replace.length; i += 2) {
+      for (i = 0; i < replace.length; i += 2) {
         packet.replace(String.valueOf(replace[i]), String.valueOf(replace[i + 1]));
       }
     }
@@ -1062,7 +1061,7 @@ public class NpcInstance extends Creature {
   public void showChatWindow(Player player, String filename, Object... replace) {
     NpcHtmlMessage packet = new NpcHtmlMessage(player, this, filename, 0);
     if (replace.length % 2 == 0) {
-      for(int i = 0; i < replace.length; i += 2) {
+      for (int i = 0; i < replace.length; i += 2) {
         packet.replace(String.valueOf(replace[i]), String.valueOf(replace[i + 1]));
       }
     }
@@ -1194,12 +1193,12 @@ public class NpcInstance extends Creature {
         }
 
       } else {
-        Collection<SkillLearn> skills = SkillAcquireHolder.getInstance().getAvailableSkills(player, classId, AcquireType.NORMAL, (SubUnit)null);
+        Collection<SkillLearn> skills = SkillAcquireHolder.getInstance().getAvailableSkills(player, classId, AcquireType.NORMAL, (SubUnit) null);
         AcquireSkillList asl = new AcquireSkillList(AcquireType.NORMAL, skills.size());
         int counts = 0;
         Iterator var7 = skills.iterator();
 
-        while(true) {
+        while (true) {
           SkillLearn s;
           Skill sk;
           do {
@@ -1210,7 +1209,7 @@ public class NpcInstance extends Creature {
                     int minlevel = SkillAcquireHolder.getInstance().getMinLevelForNewSkill(classId, player.getLevel(), AcquireType.NORMAL);
                     if (minlevel > 0) {
                       SystemMessage2 sm = new SystemMessage2(SystemMsg.YOU_DO_NOT_HAVE_ANY_FURTHER_SKILLS_TO_LEARN__COME_BACK_WHEN_YOU_HAVE_REACHED_LEVEL_S1);
-                      sm.addInteger((double)minlevel);
+                      sm.addInteger((double) minlevel);
                       player.sendPacket(sm);
                     } else {
                       player.sendPacket(SystemMsg.THERE_ARE_NO_OTHER_SKILLS_TO_LEARN);
@@ -1226,12 +1225,12 @@ public class NpcInstance extends Creature {
                   return;
                 }
 
-                s = (SkillLearn)var7.next();
-              } while(s.isClicked());
+                s = (SkillLearn) var7.next();
+              } while (s.isClicked());
 
               sk = SkillTable.getInstance().getInfo(s.getId(), s.getLevel());
-            } while(sk == null);
-          } while(!Config.ALT_WEAK_SKILL_LEARN && (!sk.getCanLearn(player.getClassId()) || !sk.canTeachBy(npcId)));
+            } while (sk == null);
+          } while (!Config.ALT_WEAK_SKILL_LEARN && (!sk.getCanLearn(player.getClassId()) || !sk.canTeachBy(npcId)));
 
           ++counts;
           asl.addSkill(s.getId(), s.getLevel(), s.getLevel(), s.getCost(), 0);
@@ -1258,8 +1257,8 @@ public class NpcInstance extends Creature {
     AcquireSkillList asl = new AcquireSkillList(t, skills.size());
     Iterator var4 = skills.iterator();
 
-    while(var4.hasNext()) {
-      SkillLearn s = (SkillLearn)var4.next();
+    while (var4.hasNext()) {
+      SkillLearn s = (SkillLearn) var4.next();
       asl.addSkill(s.getId(), s.getLevel(), s.getLevel(), s.getCost(), 0);
     }
 
@@ -1335,14 +1334,14 @@ public class NpcInstance extends Creature {
 
   public NpcListenerList getListeners() {
     if (this.listeners == null) {
-      synchronized(this) {
+      synchronized (this) {
         if (this.listeners == null) {
           this.listeners = new NpcListenerList(this);
         }
       }
     }
 
-    return (NpcListenerList)this.listeners;
+    return (NpcListenerList) this.listeners;
   }
 
   public <T extends NpcListener> boolean addListener(T listener) {
@@ -1355,14 +1354,14 @@ public class NpcInstance extends Creature {
 
   public NpcStatsChangeRecorder getStatsRecorder() {
     if (this._statsRecorder == null) {
-      synchronized(this) {
+      synchronized (this) {
         if (this._statsRecorder == null) {
           this._statsRecorder = new NpcStatsChangeRecorder(this);
         }
       }
     }
 
-    return (NpcStatsChangeRecorder)this._statsRecorder;
+    return (NpcStatsChangeRecorder) this._statsRecorder;
   }
 
   public void setNpcState(int stateId) {

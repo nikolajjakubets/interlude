@@ -9,14 +9,13 @@ import l2.commons.net.nio.impl.*;
 import l2.gameserver.Config;
 import l2.gameserver.ThreadPoolManager;
 import l2.gameserver.network.l2.c2s.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+@Slf4j
 public final class GamePacketHandler implements IPacketHandler<GameClient>, IClientFactory<GameClient>, IMMOExecutor<GameClient> {
-  private static final Logger _log = LoggerFactory.getLogger(GamePacketHandler.class);
 
   public GamePacketHandler() {
   }
@@ -32,9 +31,9 @@ public final class GamePacketHandler implements IPacketHandler<GameClient>, ICli
     }
 
     try {
-      switch(client.getState()) {
+      switch (client.getState()) {
         case CONNECTED:
-          switch(id) {
+          switch (id) {
             case 0:
               msg = new ProtocolVersion();
               return msg;
@@ -52,7 +51,7 @@ public final class GamePacketHandler implements IPacketHandler<GameClient>, ICli
               return msg;
           }
         case AUTHED:
-          switch(id) {
+          switch (id) {
             case 9:
               msg = new Logout();
               return msg;
@@ -82,7 +81,7 @@ public final class GamePacketHandler implements IPacketHandler<GameClient>, ICli
               return msg;
             case 208:
               int id3 = buf.getShort() & '\uffff';
-              switch(id3) {
+              switch (id3) {
                 case 54:
                   msg = new GotoLobby();
                   return msg;
@@ -104,7 +103,7 @@ public final class GamePacketHandler implements IPacketHandler<GameClient>, ICli
               return msg;
           }
         case IN_GAME:
-          switch(id) {
+          switch (id) {
             case 1:
               msg = new MoveBackwardToLocation();
               break;
@@ -616,7 +615,7 @@ public final class GamePacketHandler implements IPacketHandler<GameClient>, ICli
             case 208:
               if (buf.remaining() >= 2) {
                 int id2 = buf.getShort() & '\uffff';
-                switch(id2) {
+                switch (id2) {
                   case 1:
                     msg = new RequestOustFromPartyRoom();
                     break;
@@ -761,7 +760,7 @@ public final class GamePacketHandler implements IPacketHandler<GameClient>, ICli
                     msg = new RequestDuelSurrender();
                 }
               } else {
-                _log.warn("Client: " + client.toString() + " sent a 0xd0 without the second opcode.");
+                log.warn("Client: " + client.toString() + " sent a 0xd0 without the second opcode.");
               }
           }
       }

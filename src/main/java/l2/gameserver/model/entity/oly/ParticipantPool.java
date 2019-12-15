@@ -10,18 +10,17 @@ import l2.gameserver.model.GameObjectsStorage;
 import l2.gameserver.model.Player;
 import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.utils.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.Map.Entry;
 
+@Slf4j
 public class ParticipantPool {
-  private static final Logger _log = LoggerFactory.getLogger(ParticipantPool.class);
   private static ParticipantPool _instance;
   private Map<CompetitionType, ArrayList<ParticipantPool.EntryRec>> _pools;
 
-  public static final ParticipantPool getInstance() {
+  public static ParticipantPool getInstance() {
     if (_instance == null) {
       _instance = new ParticipantPool();
     }
@@ -35,14 +34,12 @@ public class ParticipantPool {
   public void AllocatePools() {
     this._pools = new HashMap<>();
     CompetitionType[] var1 = CompetitionType.values();
-    int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      CompetitionType type = var1[var3];
+    for (CompetitionType type : var1) {
       this._pools.put(type, new ArrayList<>());
     }
 
-    _log.info("OlyParticipantPool: Allocated " + this._pools.size() + " particiant pools.");
+    log.info("OlyParticipantPool: Allocated " + this._pools.size() + " particiant pools.");
   }
 
   public void FreePools() {
@@ -50,21 +47,20 @@ public class ParticipantPool {
       this._pools.clear();
     }
 
-    _log.info("OlyParticipantPool: pools cleared.");
+    log.info("OlyParticipantPool: pools cleared.");
   }
 
   public boolean isEnough(CompetitionType type, int cls_id) {
-    switch(type) {
+    switch (type) {
       case CLASS_FREE:
         return this._pools.get(type).size() >= Config.OLY_MIN_CF_START;
       case TEAM_CLASS_FREE:
         return this._pools.get(type).size() >= Config.OLY_MIN_TB_START;
       case CLASS_INDIVIDUAL:
         int cnt = 0;
-        Iterator var4 = ((ArrayList)this._pools.get(type)).iterator();
 
-        while(var4.hasNext()) {
-          ParticipantPool.EntryRec er = (ParticipantPool.EntryRec)var4.next();
+        for (Object o : this._pools.get(type)) {
+          EntryRec er = (EntryRec) o;
           if (er.cls_id == cls_id) {
             ++cnt;
           }
@@ -88,7 +84,7 @@ public class ParticipantPool {
       int i;
       ParticipantPool.EntryRec pr;
       int delta;
-      for(i = 0; i < idx; ++i) {
+      for (i = 0; i < idx; ++i) {
         pr = pool.get(i);
         if (pr != null && (type != CompetitionType.CLASS_INDIVIDUAL || cls_id <= 0 || cls_id == pr.cls_id)) {
           delta = Math.abs(base_rec.average - pr.average);
@@ -99,7 +95,7 @@ public class ParticipantPool {
         }
       }
 
-      for(i = idx + 1; i < pool.size(); ++i) {
+      for (i = idx + 1; i < pool.size(); ++i) {
         pr = pool.get(i);
         if (pr != null && (type != CompetitionType.CLASS_INDIVIDUAL || cls_id <= 0 || cls_id == pr.cls_id)) {
           delta = Math.abs(base_rec.average - pr.average);
@@ -117,7 +113,7 @@ public class ParticipantPool {
   public void createEntry(CompetitionType type, Player[] players) {
     if (players != null && players.length != 0) {
       ArrayList<ParticipantPool.EntryRec> pool = this._pools.get(type);
-      synchronized(pool) {
+      synchronized (pool) {
         this._pools.get(type).add(new ParticipantPool.EntryRec(players));
       }
     }
@@ -128,9 +124,9 @@ public class ParticipantPool {
     ArrayList<ParticipantPool.EntryRec> pool = this._pools.get(type);
     int oldest_idx = -1;
     long oldest_time = -9223372036854775808L;
-    Player[][] ret = null;
-    synchronized(pool) {
-      for(int i = 0; i < pool.size(); ++i) {
+    Player[][] ret;
+    synchronized (pool) {
+      for (int i = 0; i < pool.size(); ++i) {
         ParticipantPool.EntryRec pr = pool.get(i);
         if (pr != null && (type != CompetitionType.CLASS_INDIVIDUAL || cls_id <= 0 || cls_id == pr.cls_id) && pr.reg_time > oldest_time) {
           oldest_idx = i;
@@ -156,15 +152,14 @@ public class ParticipantPool {
   public boolean removeEntryByPlayer(CompetitionType type, Player player) {
     long psid = player.getStoredId();
     ArrayList<ParticipantPool.EntryRec> pool = this._pools.get(type);
-    synchronized(pool) {
-      for(int i = 0; i < pool.size(); ++i) {
+    synchronized (pool) {
+      for (int i = 0; i < pool.size(); ++i) {
         ParticipantPool.EntryRec pr = pool.get(i);
         if (pr != null) {
           long[] var9 = pr.sids;
           int var10 = var9.length;
 
-          for(int var11 = 0; var11 < var10; ++var11) {
-            long sid = var9[var11];
+          for (long sid : var9) {
             if (sid == psid) {
               pool.remove(i);
               return true;
@@ -179,22 +174,18 @@ public class ParticipantPool {
 
   public CompetitionType getCompTypeOf(Player player) {
     long psid = player.getStoredId();
-    Iterator var4 = this._pools.entrySet().iterator();
 
-    while(var4.hasNext()) {
-      Entry<CompetitionType, ArrayList<ParticipantPool.EntryRec>> e = (Entry)var4.next();
-      ArrayList<ParticipantPool.EntryRec> pool = e.getValue();
+    for (Entry<CompetitionType, ArrayList<EntryRec>> competitionTypeArrayListEntry : this._pools.entrySet()) {
+      ArrayList<EntryRec> pool = competitionTypeArrayListEntry.getValue();
 
-      for(int i = 0; i < pool.size(); ++i) {
-        ParticipantPool.EntryRec pr = pool.get(i);
+      for (EntryRec pr : pool) {
         if (pr != null) {
           long[] var9 = pr.sids;
           int var10 = var9.length;
 
-          for(int var11 = 0; var11 < var10; ++var11) {
-            long sid = var9[var11];
+          for (long sid : var9) {
             if (sid == psid) {
-              return e.getKey();
+              return competitionTypeArrayListEntry.getKey();
             }
           }
         }
@@ -216,8 +207,8 @@ public class ParticipantPool {
           return false;
         }
 
-        type = (CompetitionType)var2.next();
-      } while(!this.isRegistred(type, player));
+        type = (CompetitionType) var2.next();
+      } while (!this.isRegistred(type, player));
 
       return true;
     }
@@ -227,23 +218,23 @@ public class ParticipantPool {
     if (!OlyController.getInstance().isRegAllowed()) {
       return false;
     } else {
-      List<ParticipantPool.EntryRec> recs = new LinkedList();
+      List<ParticipantPool.EntryRec> recs = new LinkedList<>();
       Iterator var3 = this._pools.entrySet().iterator();
 
-      while(var3.hasNext()) {
-        Entry<CompetitionType, ArrayList<ParticipantPool.EntryRec>> e = (Entry)var3.next();
+      while (var3.hasNext()) {
+        Entry<CompetitionType, ArrayList<ParticipantPool.EntryRec>> e = (Entry) var3.next();
         ArrayList<ParticipantPool.EntryRec> entryRecs = e.getValue();
-        synchronized(entryRecs) {
+        synchronized (entryRecs) {
           recs.addAll(entryRecs);
         }
       }
 
       var3 = recs.iterator();
 
-      while(var3.hasNext()) {
-        ParticipantPool.EntryRec er = (ParticipantPool.EntryRec)var3.next();
+      while (var3.hasNext()) {
+        ParticipantPool.EntryRec er = (ParticipantPool.EntryRec) var3.next();
 
-        for(int sidx = 0; sidx < er.sids.length; ++sidx) {
+        for (int sidx = 0; sidx < er.sids.length; ++sidx) {
           Player player = GameObjectsStorage.getAsPlayer(er.sids[sidx]);
           if (player != null && player.getNetConnection() != null && player.getNetConnection().getHwid() != null && hwid.equalsIgnoreCase(player.getNetConnection().getHwid())) {
             return true;
@@ -259,23 +250,23 @@ public class ParticipantPool {
     if (!OlyController.getInstance().isRegAllowed()) {
       return false;
     } else {
-      List<ParticipantPool.EntryRec> recs = new LinkedList();
+      List<ParticipantPool.EntryRec> recs = new LinkedList<>();
       Iterator var3 = this._pools.entrySet().iterator();
 
-      while(var3.hasNext()) {
-        Entry<CompetitionType, ArrayList<ParticipantPool.EntryRec>> e = (Entry)var3.next();
+      while (var3.hasNext()) {
+        Entry<CompetitionType, ArrayList<ParticipantPool.EntryRec>> e = (Entry) var3.next();
         ArrayList<ParticipantPool.EntryRec> entryRecs = e.getValue();
-        synchronized(entryRecs) {
+        synchronized (entryRecs) {
           recs.addAll(entryRecs);
         }
       }
 
       var3 = recs.iterator();
 
-      while(var3.hasNext()) {
-        ParticipantPool.EntryRec er = (ParticipantPool.EntryRec)var3.next();
+      while (var3.hasNext()) {
+        ParticipantPool.EntryRec er = (ParticipantPool.EntryRec) var3.next();
 
-        for(int sidx = 0; sidx < er.sids.length; ++sidx) {
+        for (int sidx = 0; sidx < er.sids.length; ++sidx) {
           Player player = GameObjectsStorage.getAsPlayer(er.sids[sidx]);
           if (player != null && player.getNetConnection() != null && player.getNetConnection().getIpAddr() != null && player.getNetConnection().getIpAddr() != "?.?.?.?" && ip.equalsIgnoreCase(player.getNetConnection().getIpAddr())) {
             return true;
@@ -295,21 +286,20 @@ public class ParticipantPool {
       ArrayList<ParticipantPool.EntryRec> pool = this._pools.get(type);
       Iterator var6 = pool.iterator();
 
-      while(true) {
+      while (true) {
         ParticipantPool.EntryRec pr;
         do {
           if (!var6.hasNext()) {
             return false;
           }
 
-          pr = (ParticipantPool.EntryRec)var6.next();
-        } while(pr == null);
+          pr = (ParticipantPool.EntryRec) var6.next();
+        } while (pr == null);
 
         long[] var8 = pr.sids;
         int var9 = var8.length;
 
-        for(int var10 = 0; var10 < var9; ++var10) {
-          long sid = var8[var10];
+        for (long sid : var8) {
           if (sid == psid) {
             return true;
           }
@@ -322,21 +312,20 @@ public class ParticipantPool {
     ArrayList<ParticipantPool.EntryRec> pool = this._pools.get(type);
     Iterator var5 = pool.iterator();
 
-    while(true) {
+    while (true) {
       ParticipantPool.EntryRec pr;
       do {
         if (!var5.hasNext()) {
           return;
         }
 
-        pr = (ParticipantPool.EntryRec)var5.next();
-      } while(pr == null);
+        pr = (ParticipantPool.EntryRec) var5.next();
+      } while (pr == null);
 
       long[] var7 = pr.sids;
       int var8 = var7.length;
 
-      for(int var9 = 0; var9 < var8; ++var9) {
-        long sid = var7[var9];
+      for (long sid : var7) {
         Player player = GameObjectsStorage.getAsPlayer(sid);
         if (player != null && (cls_id <= 0 || player.getClassId().getId() == cls_id)) {
           player.sendPacket(gsp);
@@ -347,19 +336,16 @@ public class ParticipantPool {
 
   private void cleadInvalidEntrys(CompetitionType type) {
     ArrayList<ParticipantPool.EntryRec> pool = this._pools.get(type);
-    synchronized(pool) {
+    synchronized (pool) {
       ArrayList<Integer> invalid_entrys = new ArrayList<>();
 
-      for(int i = 0; i < pool.size(); ++i) {
+      for (int i = 0; i < pool.size(); ++i) {
         if (!this.isValidEntry(pool.get(i))) {
           invalid_entrys.add(i);
         }
       }
 
-      Iterator var9 = invalid_entrys.iterator();
-
-      while(var9.hasNext()) {
-        int i = (Integer)var9.next();
+      for (int i : invalid_entrys) {
         pool.remove(i);
       }
 
@@ -382,14 +368,11 @@ public class ParticipantPool {
 
   public int getParticipantCount() {
     int result = 0;
-    Iterator var2 = this._pools.entrySet().iterator();
 
-    while(var2.hasNext()) {
-      Entry<CompetitionType, ArrayList<ParticipantPool.EntryRec>> e = (Entry)var2.next();
-      ArrayList<ParticipantPool.EntryRec> pool = e.getValue();
+    for (Entry<CompetitionType, ArrayList<EntryRec>> competitionTypeArrayListEntry : this._pools.entrySet()) {
+      ArrayList<EntryRec> pool = competitionTypeArrayListEntry.getValue();
 
-      for(int i = 0; i < pool.size(); ++i) {
-        ParticipantPool.EntryRec pr = pool.get(i);
+      for (EntryRec pr : pool) {
         if (pr != null) {
           result += pr.sids.length;
         }
@@ -399,7 +382,7 @@ public class ParticipantPool {
     return result;
   }
 
-  private class EntryRec {
+  private static class EntryRec {
     long[] sids;
     int average;
     long reg_time;
@@ -410,7 +393,7 @@ public class ParticipantPool {
       this.cls_id = players[0].getClassId().getId();
       int sum = 0;
 
-      for(int i = 0; i < players.length; ++i) {
+      for (int i = 0; i < players.length; ++i) {
         this.sids[i] = players[i].getStoredId();
         sum += Math.max(0, NoblesController.getInstance().getPointsOf(players[i].getObjectId()));
         OlyController.getInstance().incPartCount();

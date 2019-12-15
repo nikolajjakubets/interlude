@@ -5,23 +5,19 @@
 
 package l2.gameserver.data.xml.holder;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import javax.xml.parsers.DocumentBuilderFactory;
 import l2.gameserver.Config;
 import l2.gameserver.model.items.TradeItem;
 import l2.gameserver.templates.item.ItemTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.util.*;
+
+@Slf4j
 public class BuyListHolder {
-  private static final Logger _log = LoggerFactory.getLogger(BuyListHolder.class);
   private static BuyListHolder _instance;
   private Map<Integer, BuyListHolder.NpcTradeList> _lists = new HashMap<>();
 
@@ -47,9 +43,9 @@ public class BuyListHolder {
       int counterFiles = 0;
       int counterItems = 0;
 
-      for(Node n1 = doc1.getFirstChild(); n1 != null; n1 = n1.getNextSibling()) {
+      for (Node n1 = doc1.getFirstChild(); n1 != null; n1 = n1.getNextSibling()) {
         if ("list".equalsIgnoreCase(n1.getNodeName())) {
-          for(Node d1 = n1.getFirstChild(); d1 != null; d1 = d1.getNextSibling()) {
+          for (Node d1 = n1.getFirstChild(); d1 != null; d1 = d1.getNextSibling()) {
             if ("file".equalsIgnoreCase(d1.getNodeName())) {
               String filename = d1.getAttributes().getNamedItem("name").getNodeValue();
               File file = new File(Config.DATAPACK_ROOT, "data/" + filename);
@@ -59,9 +55,9 @@ public class BuyListHolder {
               Document doc2 = factory2.newDocumentBuilder().parse(file);
               ++counterFiles;
 
-              for(Node n2 = doc2.getFirstChild(); n2 != null; n2 = n2.getNextSibling()) {
+              for (Node n2 = doc2.getFirstChild(); n2 != null; n2 = n2.getNextSibling()) {
                 if ("list".equalsIgnoreCase(n2.getNodeName())) {
-                  for(Node d2 = n2.getFirstChild(); d2 != null; d2 = d2.getNextSibling()) {
+                  for (Node d2 = n2.getFirstChild(); d2 != null; d2 = d2.getNextSibling()) {
                     if ("tradelist".equalsIgnoreCase(d2.getNodeName())) {
                       String[] npcs = d2.getAttributes().getNamedItem("npc").getNodeValue().split(";");
                       String[] shopIds = d2.getAttributes().getNamedItem("shop").getNodeValue().split(";");
@@ -77,36 +73,36 @@ public class BuyListHolder {
                       if (!haveMarkups) {
                         markups = new String[size];
 
-                        for(n = 0; n < size; ++n) {
+                        for (n = 0; n < size; ++n) {
                           markups[n] = "0";
                         }
                       }
 
                       if (shopIds.length == size && markups.length == size) {
-                        for(n = 0; n < size; ++n) {
+                        for (n = 0; n < size; ++n) {
                           int npc_id = Integer.parseInt(npcs[n]);
                           int shop_id = Integer.parseInt(shopIds[n]);
                           double markup = npc_id > 0 ? 1.0D + Double.parseDouble(markups[n]) / 100.0D : 0.0D;
                           BuyListHolder.NpcTradeList tl = new BuyListHolder.NpcTradeList(shop_id);
                           tl.setNpcId(npc_id);
 
-                          for(Node i = d2.getFirstChild(); i != null; i = i.getNextSibling()) {
+                          for (Node i = d2.getFirstChild(); i != null; i = i.getNextSibling()) {
                             if ("item".equalsIgnoreCase(i.getNodeName())) {
                               int itemId = Integer.parseInt(i.getAttributes().getNamedItem("id").getNodeValue());
                               ItemTemplate template = ItemHolder.getInstance().getTemplate(itemId);
                               if (template == null) {
-                                _log.warn("Template not found for itemId: " + itemId + " for shop " + shop_id);
+                                log.warn("Template not found for itemId: " + itemId + " for shop " + shop_id);
                               } else if (this.checkItem(template)) {
                                 ++counterItems;
-                                long price = i.getAttributes().getNamedItem("price") != null ? Long.parseLong(i.getAttributes().getNamedItem("price").getNodeValue()) : Math.round((double)template.getReferencePrice() * markup);
+                                long price = i.getAttributes().getNamedItem("price") != null ? Long.parseLong(i.getAttributes().getNamedItem("price").getNodeValue()) : Math.round((double) template.getReferencePrice() * markup);
                                 TradeItem item = new TradeItem();
                                 item.setItemId(itemId);
                                 int itemCount = i.getAttributes().getNamedItem("count") != null ? Integer.parseInt(i.getAttributes().getNamedItem("count").getNodeValue()) : 0;
                                 int itemRechargeTime = i.getAttributes().getNamedItem("time") != null ? Integer.parseInt(i.getAttributes().getNamedItem("time").getNodeValue()) : 0;
                                 item.setOwnersPrice(price);
-                                item.setCount((long)itemCount);
-                                item.setCurrentValue((long)itemCount);
-                                item.setLastRechargeTime((int)(System.currentTimeMillis() / 60000L));
+                                item.setCount((long) itemCount);
+                                item.setCurrentValue((long) itemCount);
+                                item.setLastRechargeTime((int) (System.currentTimeMillis() / 60000L));
                                 item.setRechargeTime(itemRechargeTime);
                                 tl.addItem(item);
                               }
@@ -116,7 +112,7 @@ public class BuyListHolder {
                           this._lists.put(shop_id, tl);
                         }
                       } else {
-                        _log.warn("Do not correspond to the size of arrays");
+                        log.warn("Do not correspond to the size of arrays");
                       }
                     }
                   }
@@ -127,19 +123,19 @@ public class BuyListHolder {
         }
       }
 
-      _log.info("TradeController: Loaded " + counterFiles + " file(s).");
-      _log.info("TradeController: Loaded " + counterItems + " Items.");
-      _log.info("TradeController: Loaded " + this._lists.size() + " Buylists.");
+      log.info("TradeController: Loaded " + counterFiles + " file(s).");
+      log.info("TradeController: Loaded " + counterItems + " Items.");
+      log.info("TradeController: Loaded " + this._lists.size() + " Buylists.");
     } catch (Exception var33) {
-      _log.warn("TradeController: Buylists could not be initialized.");
-      _log.error("", var33);
+      log.warn("TradeController: Buylists could not be initialized.");
+      log.error("", var33);
     }
 
   }
 
   public boolean checkItem(ItemTemplate template) {
     if (template.isEquipment() && !template.isForPet() && Config.ALT_SHOP_PRICE_LIMITS.length > 0) {
-      for(int i = 0; i < Config.ALT_SHOP_PRICE_LIMITS.length; i += 2) {
+      for (int i = 0; i < Config.ALT_SHOP_PRICE_LIMITS.length; i += 2) {
         if (template.getBodyPart() == Config.ALT_SHOP_PRICE_LIMITS[i]) {
           if (template.getReferencePrice() > Config.ALT_SHOP_PRICE_LIMITS[i + 1]) {
             return false;
@@ -150,11 +146,7 @@ public class BuyListHolder {
     }
 
     if (Config.ALT_SHOP_UNALLOWED_ITEMS.length > 0) {
-      int[] var6 = Config.ALT_SHOP_UNALLOWED_ITEMS;
-      int var3 = var6.length;
-
-      for(int var4 = 0; var4 < var3; ++var4) {
-        int i = var6[var4];
+      for (int i : Config.ALT_SHOP_UNALLOWED_ITEMS) {
         if (template.getItemId() == i) {
           return false;
         }
@@ -165,7 +157,7 @@ public class BuyListHolder {
   }
 
   public BuyListHolder.NpcTradeList getBuyList(int listId) {
-    return (BuyListHolder.NpcTradeList)this._lists.get(listId);
+    return (BuyListHolder.NpcTradeList) this._lists.get(listId);
   }
 
   public void addToBuyList(int listId, BuyListHolder.NpcTradeList list) {
@@ -202,23 +194,23 @@ public class BuyListHolder {
       long currentTime = System.currentTimeMillis() / 60000L;
       Iterator var4 = this.tradeList.iterator();
 
-      while(true) {
+      while (true) {
         TradeItem ti;
         do {
           if (!var4.hasNext()) {
             return result;
           }
 
-          ti = (TradeItem)var4.next();
+          ti = (TradeItem) var4.next();
           if (!ti.isCountLimited()) {
             break;
           }
 
-          if (ti.getCurrentValue() < ti.getCount() && (long)(ti.getLastRechargeTime() + ti.getRechargeTime()) <= currentTime) {
+          if (ti.getCurrentValue() < ti.getCount() && (long) (ti.getLastRechargeTime() + ti.getRechargeTime()) <= currentTime) {
             ti.setLastRechargeTime(ti.getLastRechargeTime() + ti.getRechargeTime());
             ti.setCurrentValue(ti.getCount());
           }
-        } while(ti.getCurrentValue() == 0L);
+        } while (ti.getCurrentValue() == 0L);
 
         result.add(ti);
       }
@@ -233,17 +225,15 @@ public class BuyListHolder {
           return null;
         }
 
-        ti = (TradeItem)var2.next();
-      } while(ti.getItemId() != itemId);
+        ti = (TradeItem) var2.next();
+      } while (ti.getItemId() != itemId);
 
       return ti;
     }
 
     public synchronized void updateItems(List<TradeItem> buyList) {
-      Iterator var2 = buyList.iterator();
 
-      while(var2.hasNext()) {
-        TradeItem ti = (TradeItem)var2.next();
+      for (TradeItem ti : buyList) {
         TradeItem ic = this.getItemByItemId(ti.getItemId());
         if (ic.isCountLimited()) {
           ic.setCurrentValue(Math.max(ic.getCurrentValue() - ti.getCount(), 0L));

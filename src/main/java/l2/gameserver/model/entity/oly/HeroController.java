@@ -16,11 +16,9 @@ import l2.gameserver.model.base.ClassId;
 import l2.gameserver.model.entity.HeroDiary;
 import l2.gameserver.model.entity.oly.CompetitionController.CompetitionResults;
 import l2.gameserver.model.entity.oly.NoblesController.NobleRecord;
-import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.model.pledge.Alliance;
 import l2.gameserver.model.pledge.Clan;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
 import l2.gameserver.network.l2.s2c.SocialAction;
 import l2.gameserver.network.l2.s2c.SystemMessage;
@@ -28,17 +26,16 @@ import l2.gameserver.tables.ClanTable;
 import l2.gameserver.tables.SkillTable;
 import l2.gameserver.utils.Log;
 import l2.gameserver.utils.Strings;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public class HeroController {
-  private static final Logger _log = LoggerFactory.getLogger(HeroController.class);
   public static final int[] HERO_WEAPONS = new int[]{6611, 6612, 6613, 6614, 6615, 6616, 6617, 6618, 6619, 6620, 6621, 9388, 9389, 9390};
   private static final String SQL_GET_HEROES = "SELECT  `oly_heroes`.`char_id` AS `char_id`, `oly_nobles`.`char_name` AS `name`, `oly_nobles`.`class_id` AS `class_id`, `oly_heroes`.`count` AS `count`, `oly_heroes`.`played` AS `played`, `oly_heroes`.`active` AS `active`, `oly_heroes`.`message` AS `message` FROM    `oly_heroes`,`oly_nobles` WHERE   `oly_heroes`.`char_id` = `oly_nobles`.`char_id`";
   private static final String SQL_SET_HEROES = "REPLACE INTO `oly_heroes` (`char_id`, `count`, `played`, `active`, `message`) VALUES (?, ?, ?, ?, ?)";
@@ -46,7 +43,6 @@ public class HeroController {
   private ArrayList<HeroController.HeroRecord> _currentHeroes = new ArrayList<>();
   private ArrayList<HeroController.HeroRecord> _allHeroes = new ArrayList<>();
   private static Map<Integer, List<HeroDiary>> _herodiary;
-  private static Map<Integer, String> _heroMessage;
 
   public static HeroController getInstance() {
     if (_instance == null) {
@@ -57,13 +53,13 @@ public class HeroController {
   }
 
   private HeroController() {
-    _herodiary = new ConcurrentHashMap();
-    _heroMessage = new ConcurrentHashMap();
+    _herodiary = new ConcurrentHashMap<>();
+    Map<Integer, String> _heroMessage = new ConcurrentHashMap<>();
     this.loadHeroes();
   }
 
   private synchronized Collection<NobleRecord> CalcHeroesContenders() {
-    _log.info("HeroController: Calculating heroes contenders.");
+    log.info("HeroController: Calculating heroes contenders.");
     HashMap<ClassId, NobleRecord> hero_contenders_map = new HashMap<>();
     Iterator var2 = NoblesController.getInstance().getNoblesRecords().iterator();
 
@@ -75,19 +71,17 @@ public class HeroController {
         if (nr.comp_done >= Config.OLY_MIN_HERO_COMPS && nr.comp_win >= Config.OLY_MIN_HERO_WIN) {
           ClassId cid = null;
           ClassId[] var5 = ClassId.values();
-          int var6 = var5.length;
 
-          for(int var7 = 0; var7 < var6; ++var7) {
-            ClassId cid2 = var5[var7];
+          for (ClassId cid2 : var5) {
             if (cid2.getId() == nr.class_id && cid2.level() == 3) {
               cid = cid2;
             }
           }
 
           if (cid == null) {
-            _log.warn("HeroController: Not third or null ClassID for character '" + nr.char_name + "'");
+            log.warn("HeroController: Not third or null ClassID for character '" + nr.char_name + "'");
           } else if (hero_contenders_map.containsKey(cid)) {
-            NobleRecord nr2 = (NobleRecord)hero_contenders_map.get(cid);
+            NobleRecord nr2 = hero_contenders_map.get(cid);
             if (nr.points_current > nr2.points_current || nr.points_current == nr2.points_current && nr.comp_win > nr2.comp_win) {
               hero_contenders_map.put(cid, nr);
             }
@@ -96,7 +90,7 @@ public class HeroController {
           }
         }
       } catch (Exception var9) {
-        _log.warn("HeroController: Exception while claculating new heroes", var9);
+        log.warn("HeroController: Exception while claculating new heroes", var9);
       }
     }
 
@@ -107,9 +101,7 @@ public class HeroController {
       Log.add(String.format("HeroController: %s(%d) pretended to be a hero. points_current = %d", nr.char_name, nr.char_id, nr.points_current), "olympiad");
     }
 
-    ArrayList<NobleRecord> result = new ArrayList<>();
-    result.addAll(hero_contenders_map.values());
-    return result;
+    return new ArrayList<>(hero_contenders_map.values());
   }
 
   private void loadHeroes() {
@@ -138,7 +130,7 @@ public class HeroController {
 
       this.applyClanAndAlly();
     } catch (Exception var15) {
-      _log.warn("Exception while loading heroes", var15);
+      log.warn("Exception while loading heroes", var15);
     } finally {
       DbUtils.closeQuietly(conn, stmt, rset);
     }
@@ -152,10 +144,8 @@ public class HeroController {
     try {
       conn = DatabaseFactory.getInstance().getConnection();
       pstmt = conn.prepareStatement("REPLACE INTO `oly_heroes` (`char_id`, `count`, `played`, `active`, `message`) VALUES (?, ?, ?, ?, ?)");
-      Iterator var3 = this._allHeroes.iterator();
 
-      while(var3.hasNext()) {
-        HeroController.HeroRecord nr = (HeroController.HeroRecord)var3.next();
+      for (HeroRecord nr : this._allHeroes) {
         pstmt.setInt(1, nr.char_id);
         pstmt.setInt(2, nr.count);
         pstmt.setInt(3, nr.played ? 1 : 0);
@@ -164,7 +154,7 @@ public class HeroController {
         pstmt.executeUpdate();
       }
     } catch (Exception var8) {
-      _log.warn("Exception while saving heroes", var8);
+      log.warn("Exception while saving heroes", var8);
     } finally {
       DbUtils.closeQuietly(conn, pstmt);
     }
@@ -172,7 +162,7 @@ public class HeroController {
   }
 
   private void clearHeroes() {
-    _log.info("HeroController: Clearing previus season heroes.");
+    log.info("HeroController: Clearing previus season heroes.");
     mysql.set("UPDATE `oly_heroes` SET `played` = 0, `active` = 0");
     if (!this._currentHeroes.isEmpty()) {
       Iterator var1 = this._currentHeroes.iterator();
@@ -235,29 +225,25 @@ public class HeroController {
   }
 
   public synchronized void ComputeNewHeroNobleses() {
-    _log.info("HeroController: Computing new heroes.");
+    log.info("HeroController: Computing new heroes.");
 
     try {
       NoblesController.getInstance().SaveNobleses();
       this.saveHeroes();
       Collection<NobleRecord> hContenders = this.CalcHeroesContenders();
       this.clearHeroes();
-      Iterator var2 = hContenders.iterator();
 
-      while(var2.hasNext()) {
-        NobleRecord hnr = (NobleRecord)var2.next();
-        HeroController.HeroRecord hr = null;
-        Iterator var5 = this._allHeroes.iterator();
+      for (NobleRecord hnr : hContenders) {
+        HeroRecord hr = null;
 
-        while(var5.hasNext()) {
-          HeroController.HeroRecord hr2 = (HeroController.HeroRecord)var5.next();
+        for (HeroRecord hr2 : this._allHeroes) {
           if (hnr.char_id == hr2.char_id) {
             hr = hr2;
           }
         }
 
         if (hr == null) {
-          hr = new HeroController.HeroRecord(hnr.char_id, hnr.char_name, hnr.class_id, 0, false, true, "");
+          hr = new HeroRecord(hnr.char_id, hnr.char_name, hnr.class_id, 0, false, true, "");
           this._allHeroes.add(hr);
         }
 
@@ -272,29 +258,27 @@ public class HeroController {
       NoblesController.getInstance().SaveNobleses();
       this.applyClanAndAlly();
     } catch (Exception var7) {
-      _log.warn("HeroController: Can't compute heroes.", var7);
+      log.warn("HeroController: Can't compute heroes.", var7);
     }
 
   }
 
   private void applyClanAndAlly() {
-    Iterator var1 = this._currentHeroes.iterator();
 
-    while(var1.hasNext()) {
-      HeroController.HeroRecord hr = (HeroController.HeroRecord)var1.next();
+    for (HeroRecord hr : this._currentHeroes) {
       if (hr != null) {
         Entry<Clan, Alliance> e = ClanTable.getInstance().getClanAndAllianceByCharId(hr.char_id);
         if (e.getKey() != null) {
-          hr.clan_name = ((Clan)e.getKey()).getName();
-          hr.clan_crest = ((Clan)e.getKey()).getCrestId();
+          hr.clan_name = e.getKey().getName();
+          hr.clan_crest = e.getKey().getCrestId();
         } else {
           hr.clan_name = "";
           hr.clan_crest = 0;
         }
 
         if (e.getValue() != null) {
-          hr.ally_name = ((Alliance)e.getValue()).getAllyName();
-          hr.ally_crest = ((Alliance)e.getValue()).getAllyCrestId();
+          hr.ally_name = e.getValue().getAllyName();
+          hr.ally_crest = e.getValue().getAllyCrestId();
         } else {
           hr.ally_name = "";
           hr.ally_crest = 0;
@@ -312,21 +296,19 @@ public class HeroController {
     if (player == null) {
       return false;
     } else {
-      return this._currentHeroes.isEmpty() ? false : this.isCurrentHero(player.getObjectId());
+      return !this._currentHeroes.isEmpty() && this.isCurrentHero(player.getObjectId());
     }
   }
 
   public boolean isInactiveHero(Player player) {
-    return player == null ? false : this.isInactiveHero(player.getObjectId());
+    return player != null && this.isInactiveHero(player.getObjectId());
   }
 
   public void activateHero(Player player) {
     if (player != null) {
       if (!this._currentHeroes.isEmpty()) {
-        Iterator var2 = this._currentHeroes.iterator();
 
-        while(var2.hasNext()) {
-          HeroController.HeroRecord hr = (HeroController.HeroRecord)var2.next();
+        for (HeroRecord hr : this._currentHeroes) {
           if (hr.char_id == player.getObjectId() && hr.played) {
             hr.active = true;
             if (player.getBaseClassId() == player.getActiveClassId()) {
@@ -335,7 +317,7 @@ public class HeroController {
 
             player.setHero(true);
             player.unsetVar("CustomHeroEndTime");
-            player.broadcastPacket(new L2GameServerPacket[]{new SocialAction(player.getObjectId(), 16)});
+            player.broadcastPacket(new SocialAction(player.getObjectId(), 16));
             player.updatePledgeClass();
             player.getPlayer().sendUserInfo(true);
             if (player.getClan() != null && player.getClan().getLevel() >= 5) {
@@ -416,19 +398,18 @@ public class HeroController {
     }
 
     if (hr != null) {
-      NpcHtmlMessage html = new NpcHtmlMessage(player, (NpcInstance)null);
+      NpcHtmlMessage html = new NpcHtmlMessage(player, null);
       html.setFile("oly/monument_hero_info.htm");
       html.replace("%title%", StringHolder.getInstance().getNotNull(player, "hero.history"));
       Collection<CompetitionResults> crs_list = hr.getCompetitions();
-      CompetitionResults[] crs = (CompetitionResults[])crs_list.toArray(new CompetitionResults[crs_list.size()]);
+      CompetitionResults[] crs = crs_list.toArray(new CompetitionResults[0]);
       int allStatWinner = 0;
       int allStatLoss = 0;
       int allStatTie = 0;
-      CompetitionResults[] var12 = crs;
       int max = crs.length;
 
       for(int var14 = 0; var14 < max; ++var14) {
-        CompetitionResults h = var12[var14];
+        CompetitionResults h = crs[var14];
         if (h.result > 0) {
           ++allStatWinner;
         } else if (h.result < 0) {
@@ -454,7 +435,7 @@ public class HeroController {
           currentWinner.increment();
         } else if (h.result < 0) {
           currentLoss.increment();
-        } else if (h.result == 0) {
+        } else {
           currentTie.increment();
         }
 
@@ -510,10 +491,10 @@ public class HeroController {
 
       _herodiary.put(charId, diary);
       if (Config.DEBUG) {
-        _log.info("Hero System: Loaded " + diary.size() + " diary entries for Hero(object id: #" + charId + ")");
+        log.info("Hero System: Loaded " + diary.size() + " diary entries for Hero(object id: #" + charId + ")");
       }
     } catch (SQLException var14) {
-      _log.warn("Hero System: Couldnt load Hero Diary for CharId: " + charId, var14);
+      log.warn("Hero System: Couldnt load Hero Diary for CharId: " + charId, var14);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }
@@ -530,14 +511,14 @@ public class HeroController {
     }
 
     if (hr != null) {
-      List<HeroDiary> mainlist = (List)_herodiary.get(hr.char_id);
+      List<HeroDiary> mainlist = _herodiary.get(hr.char_id);
       if (mainlist != null) {
-        NpcHtmlMessage html = new NpcHtmlMessage(activeChar, (NpcInstance)null);
+        NpcHtmlMessage html = new NpcHtmlMessage(activeChar, null);
         html.setFile("oly/monument_hero_info.htm");
         html.replace("%title%", StringHolder.getInstance().getNotNull(activeChar, "hero.diary"));
         html.replace("%heroname%", hr.name);
         html.replace("%message%", hr.message);
-        List<HeroDiary> list = new ArrayList(mainlist);
+        List<HeroDiary> list = new ArrayList<>(mainlist);
         Collections.reverse(list);
         boolean color = true;
         StringBuilder fList = new StringBuilder(500);
@@ -546,7 +527,7 @@ public class HeroController {
 
         for(int i = (page - 1) * 10; i < list.size(); ++i) {
           breakat = i;
-          HeroDiary diary = (HeroDiary)list.get(i);
+          HeroDiary diary = list.get(i);
           Entry<String, String> entry = diary.toString(activeChar);
           fList.append("<tr><td>");
           if (color) {
@@ -555,8 +536,8 @@ public class HeroController {
             fList.append("<table width=270>");
           }
 
-          fList.append("<tr><td width=270><font color=\"LEVEL\">" + (String)entry.getKey() + "</font></td></tr>");
-          fList.append("<tr><td width=270>" + (String)entry.getValue() + "</td></tr>");
+          fList.append("<tr><td width=270><font color=\"LEVEL\">").append(entry.getKey()).append("</font></td></tr>");
+          fList.append("<tr><td width=270>" + entry.getValue() + "</td></tr>");
           fList.append("<tr><td>&nbsp;</td></tr></table>");
           fList.append("</td></tr>");
           color = !color;
@@ -589,7 +570,7 @@ public class HeroController {
 
   public void addHeroDiary(int playerId, int id, int param) {
     this.insertHeroDiary(playerId, id, param);
-    List<HeroDiary> list = (List)_herodiary.get(playerId);
+    List<HeroDiary> list = _herodiary.get(playerId);
     if (list != null) {
       list.add(new HeroDiary(id, System.currentTimeMillis(), param));
     }
@@ -610,7 +591,7 @@ public class HeroController {
       statement.execute();
       statement.close();
     } catch (SQLException var10) {
-      _log.error("SQL exception while saving DiaryData.", var10);
+      log.error("SQL exception while saving DiaryData.", var10);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -619,10 +600,8 @@ public class HeroController {
 
   public void setHeroMessage(int charId, String message) {
     HeroController.HeroRecord hr = null;
-    Iterator var4 = this.getCurrentHeroes().iterator();
 
-    while(var4.hasNext()) {
-      HeroController.HeroRecord hr2 = (HeroController.HeroRecord)var4.next();
+    for (HeroRecord hr2 : this.getCurrentHeroes()) {
       if (hr2.active && hr2.played && hr2.char_id == charId) {
         hr = hr2;
       }
@@ -635,8 +614,7 @@ public class HeroController {
     int[] var1 = HERO_WEAPONS;
     int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      int iid = var1[var3];
+    for (int iid : var1) {
       if (player.getInventory().getCountOf(iid) > 0L) {
         return true;
       }
@@ -647,12 +625,10 @@ public class HeroController {
 
   private static void removeAllHeroWeapons(Player player) {
     boolean removed = false;
-    int[] var2 = HERO_WEAPONS;
-    int var3 = var2.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
+    for (int i : HERO_WEAPONS) {
       int itemId;
-      for(itemId = var2[var4]; player.getInventory().destroyItemByItemId(itemId, 1L); removed = true) {
+      for (itemId = i; player.getInventory().destroyItemByItemId(itemId, 1L); removed = true) {
       }
 
       if (removed) {

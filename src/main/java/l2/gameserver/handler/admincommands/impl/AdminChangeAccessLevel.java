@@ -5,12 +5,6 @@
 
 package l2.gameserver.handler.admincommands.impl;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import l2.commons.dbutils.DbUtils;
 import l2.gameserver.Announcements;
 import l2.gameserver.Config;
@@ -19,31 +13,36 @@ import l2.gameserver.database.mysql;
 import l2.gameserver.handler.admincommands.IAdminCommandHandler;
 import l2.gameserver.model.GameObjectsStorage;
 import l2.gameserver.model.Player;
-import l2.gameserver.model.base.PlayerAccess;
 import l2.gameserver.network.l2.components.ChatType;
 import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
 import l2.gameserver.utils.Files;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+@Slf4j
 public class AdminChangeAccessLevel implements IAdminCommandHandler {
-  private static final Logger _log = LoggerFactory.getLogger(AdminChangeAccessLevel.class);
 
   public AdminChangeAccessLevel() {
   }
 
   public boolean useAdminCommand(Enum comm, String[] wordList, String fullString, Player activeChar) {
-    AdminChangeAccessLevel.Commands command = (AdminChangeAccessLevel.Commands)comm;
+    AdminChangeAccessLevel.Commands command = (AdminChangeAccessLevel.Commands) comm;
     if (!activeChar.getPlayerAccess().CanGmEdit) {
       return false;
     } else {
-      switch(command) {
+      switch (command) {
         case admin_changelvl:
           int lvl;
           if (wordList.length == 2) {
             lvl = Integer.parseInt(wordList[1]);
             if (activeChar.getTarget().isPlayer()) {
-              ((Player)activeChar.getTarget()).setAccessLevel(lvl);
+              ((Player) activeChar.getTarget()).setAccessLevel(lvl);
             }
           } else if (wordList.length == 3) {
             lvl = Integer.parseInt(wordList[2]);
@@ -77,7 +76,7 @@ public class AdminChangeAccessLevel implements IAdminCommandHandler {
             try {
               BufferedReader in = new BufferedReader(new FileReader("config/GMAccess.d/" + newFName));
 
-              while(true) {
+              while (true) {
                 String str;
                 if ((str = in.readLine()) == null) {
                   in.close();
@@ -182,7 +181,7 @@ public class AdminChangeAccessLevel implements IAdminCommandHandler {
           } else {
             oId = mysql.simple_get_int("obj_Id", "characters", "`char_name`='" + wordList[1] + "'");
             if (oId > 0) {
-              Integer oldCount = (Integer)mysql.get("SELECT `value` FROM character_variables WHERE `obj_id` = " + oId + " AND `name` = 'penaltyChatCount'");
+              Integer oldCount = (Integer) mysql.get("SELECT `value` FROM character_variables WHERE `obj_id` = " + oId + " AND `name` = 'penaltyChatCount'");
               mysql.set("REPLACE INTO character_variables (obj_id, type, name, value, expire_time) VALUES (" + oId + ",'user-var','penaltyChatCount','" + (oldCount + count) + "',-1)");
             }
           }
@@ -257,8 +256,8 @@ public class AdminChangeAccessLevel implements IAdminCommandHandler {
         pName = rset.getString(1);
       }
     } catch (Exception var9) {
-      _log.warn("SQL Error: " + var9);
-      _log.error("", var9);
+      log.warn("SQL Error: " + var9);
+      log.error("", var9);
     } finally {
       DbUtils.closeQuietly(con, statement, rset);
     }

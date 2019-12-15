@@ -5,13 +5,6 @@
 
 package l2.gameserver.model.entity.residence;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import l2.commons.dao.JdbcEntityState;
 import l2.commons.dbutils.DbUtils;
 import l2.commons.math.SafeMath;
@@ -34,20 +27,27 @@ import l2.gameserver.templates.manor.CropProcure;
 import l2.gameserver.templates.manor.SeedProduction;
 import l2.gameserver.utils.GameStats;
 import l2.gameserver.utils.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.napile.primitive.maps.IntObjectMap;
 import org.napile.primitive.maps.impl.HashIntObjectMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+@Slf4j
 public class Castle extends Residence {
-  private static final Logger _log = LoggerFactory.getLogger(Castle.class);
   private static final String CASTLE_MANOR_DELETE_PRODUCTION = "DELETE FROM castle_manor_production WHERE castle_id=?;";
   private static final String CASTLE_MANOR_DELETE_PRODUCTION_PERIOD = "DELETE FROM castle_manor_production WHERE castle_id=? AND period=?;";
   private static final String CASTLE_MANOR_DELETE_PROCURE = "DELETE FROM castle_manor_procure WHERE castle_id=?;";
   private static final String CASTLE_MANOR_DELETE_PROCURE_PERIOD = "DELETE FROM castle_manor_procure WHERE castle_id=? AND period=?;";
   private static final String CASTLE_UPDATE_CROP = "UPDATE castle_manor_procure SET can_buy=? WHERE crop_id=? AND castle_id=? AND period=?";
   private static final String CASTLE_UPDATE_SEED = "UPDATE castle_manor_production SET can_produce=? WHERE seed_id=? AND castle_id=? AND period=?";
-  private final IntObjectMap<MerchantGuard> _merchantGuards = new HashIntObjectMap();
+  private final IntObjectMap<MerchantGuard> _merchantGuards = new HashIntObjectMap<>();
   private List<CropProcure> _procure;
   private List<SeedProduction> _production;
   private List<CropProcure> _procureNext;
@@ -59,7 +59,7 @@ public class Castle extends Residence {
   private long _collectedShops;
   private long _collectedSeed;
   private final NpcString _npcStringName;
-  private Set<ItemInstance> _spawnMerchantTickets = new CopyOnWriteArraySet();
+  private Set<ItemInstance> _spawnMerchantTickets = new CopyOnWriteArraySet<>();
 
   public Castle(StatsSet set) {
     super(set);
@@ -159,8 +159,8 @@ public class Castle extends Residence {
         statement.execute();
         clan.broadcastClanStatus(true, false, false);
       }
-    } catch (Exception var8) {
-      _log.error("", var8);
+    } catch (Exception e) {
+      log.error("updateOwnerInDB: eMessage={}, eClause={} eClass={}", e.getMessage(), e.getCause(), e.getClass());
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -423,7 +423,7 @@ public class Castle extends Residence {
         }
       }
     } catch (Exception var11) {
-      _log.error("Error adding seed production data for castle " + this.getName() + "!", var11);
+      log.error("Error adding seed production data for castle " + this.getName() + "!", var11);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -466,7 +466,7 @@ public class Castle extends Residence {
         }
       }
     } catch (Exception var13) {
-      _log.error("Error adding seed production data for castle " + this.getName() + "!", var13);
+      log.error("Error adding seed production data for castle " + this.getName() + "!", var13);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -535,7 +535,7 @@ public class Castle extends Residence {
         }
       }
     } catch (Exception var11) {
-      _log.error("Error adding crop data for castle " + this.getName() + "!", var11);
+      log.error("Error adding crop data for castle " + this.getName() + "!", var11);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -578,7 +578,7 @@ public class Castle extends Residence {
         }
       }
     } catch (Exception var13) {
-      _log.error("Error adding crop data for castle " + this.getName() + "!", var13);
+      log.error("Error adding crop data for castle " + this.getName() + "!", var13);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -598,7 +598,7 @@ public class Castle extends Residence {
       statement.setInt(4, period);
       statement.execute();
     } catch (Exception var11) {
-      _log.error("Error adding crop data for castle " + this.getName() + "!", var11);
+      log.error("Error adding crop data for castle " + this.getName() + "!", var11);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }
@@ -618,7 +618,7 @@ public class Castle extends Residence {
       statement.setInt(4, period);
       statement.execute();
     } catch (Exception var11) {
-      _log.error("Error adding seed production data for castle " + this.getName() + "!", var11);
+      log.error("Error adding seed production data for castle " + this.getName() + "!", var11);
     } finally {
       DbUtils.closeQuietly(con, statement);
     }

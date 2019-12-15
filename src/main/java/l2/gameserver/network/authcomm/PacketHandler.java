@@ -5,18 +5,13 @@
 
 package l2.gameserver.network.authcomm;
 
-import java.nio.ByteBuffer;
-import l2.gameserver.network.authcomm.as2gs.AuthResponse;
-import l2.gameserver.network.authcomm.as2gs.KickPlayer;
-import l2.gameserver.network.authcomm.as2gs.LoginServerFail;
-import l2.gameserver.network.authcomm.as2gs.NotifyPwdCngResult;
-import l2.gameserver.network.authcomm.as2gs.PingRequest;
-import l2.gameserver.network.authcomm.as2gs.PlayerAuthResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import l2.gameserver.network.authcomm.as2gs.*;
+import lombok.extern.slf4j.Slf4j;
 
+import java.nio.ByteBuffer;
+
+@Slf4j
 public class PacketHandler {
-  private static final Logger _log = LoggerFactory.getLogger(PacketHandler.class);
 
   public PacketHandler() {
   }
@@ -24,7 +19,7 @@ public class PacketHandler {
   public static ReceivablePacket handlePacket(ByteBuffer buf) {
     ReceivablePacket packet = null;
     int id = buf.get() & 255;
-    switch(id) {
+    switch (id) {
       case 0:
         packet = new AuthResponse();
         break;
@@ -44,9 +39,9 @@ public class PacketHandler {
         packet = new PingRequest();
         break;
       default:
-        _log.error("Received unknown packet: " + Integer.toHexString(id));
+        log.error("Received unknown packet: " + Integer.toHexString(id));
     }
 
-    return (ReceivablePacket)packet;
+    return packet;
   }
 }

@@ -14,14 +14,12 @@ import l2.gameserver.model.base.TeamType;
 import l2.gameserver.model.matching.MatchingRoom;
 import l2.gameserver.model.pledge.Alliance;
 import l2.gameserver.model.pledge.Clan;
-import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.skills.effects.EffectCubic;
 import l2.gameserver.utils.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class CharInfo extends L2GameServerPacket {
-  private static final Logger _log = LoggerFactory.getLogger(CharInfo.class);
   private int[][] _inv;
   private int _mAtkSpd;
   private int _pAtkSpd;
@@ -85,7 +83,7 @@ public class CharInfo extends L2GameServerPacket {
   public static final int[] PAPERDOLL_ORDER = new int[]{0, 6, 7, 8, 9, 10, 11, 12, 13, 7, 15, 16};
 
   public CharInfo(Player cha) {
-    this((Creature)cha);
+    this((Creature) cha);
   }
 
   public CharInfo(Creature cha) {
@@ -145,11 +143,8 @@ public class CharInfo extends L2GameServerPacket {
           }
 
           this._inv = new int[17][2];
-          int[] var7 = PAPERDOLL_ORDER;
-          int var8 = var7.length;
 
-          for(int var5 = 0; var5 < var8; ++var5) {
-            int PAPERDOLL_ID = var7[var5];
+          for (int PAPERDOLL_ID : PAPERDOLL_ORDER) {
             this._inv[PAPERDOLL_ID][0] = player.getInventory().getPaperdollItemId(PAPERDOLL_ID);
             this._inv[PAPERDOLL_ID][1] = player.getInventory().getPaperdollAugmentationId(PAPERDOLL_ID);
           }
@@ -157,8 +152,8 @@ public class CharInfo extends L2GameServerPacket {
           this._mAtkSpd = player.getMAtkSpd();
           this._pAtkSpd = player.getPAtkSpd();
           this.moveAnimMod = player.getMovementSpeedMultiplier();
-          this._runSpd = (int)((double)player.getRunSpeed() / this.moveAnimMod);
-          this._walkSpd = (int)((double)player.getWalkSpeed() / this.moveAnimMod);
+          this._runSpd = (int) ((double) player.getRunSpeed() / this.moveAnimMod);
+          this._walkSpd = (int) ((double) player.getWalkSpeed() / this.moveAnimMod);
           this._flRunSpd = 0;
           this._flWalkSpd = 0;
           if (player.isFlying()) {
@@ -192,7 +187,7 @@ public class CharInfo extends L2GameServerPacket {
           this._combat = player.isInCombat() ? 1 : 0;
           this._dead = player.isAlikeDead() ? 1 : 0;
           this.private_store = player.isInObserverMode() ? 7 : player.getPrivateStoreType();
-          this.cubics = (EffectCubic[])player.getCubics().toArray(new EffectCubic[player.getCubics().size()]);
+          this.cubics = player.getCubics().toArray(new EffectCubic[0]);
           this._abnormalEffect = player.getAbnormalEffect();
           this._abnormalEffect2 = player.getAbnormalEffect2();
           this.rec_have = player.getReceivedRec();
@@ -215,11 +210,11 @@ public class CharInfo extends L2GameServerPacket {
   }
 
   protected final void writeImpl() {
-    Player activeChar = ((GameClient)this.getClient()).getActiveChar();
+    Player activeChar = this.getClient().getActiveChar();
     if (activeChar != null) {
       if (this._objId != 0) {
         if (activeChar.getObjectId() == this._objId) {
-          _log.error("You cant send CharInfo about his character to active user!!!");
+          log.error("You cant send CharInfo about his character to active user!!!");
         } else {
           this.writeC(3);
           this.writeD(this._loc.x);
@@ -236,7 +231,7 @@ public class CharInfo extends L2GameServerPacket {
 
           int var4;
           int PAPERDOLL_ID;
-          for(var4 = 0; var4 < var3; ++var4) {
+          for (var4 = 0; var4 < var3; ++var4) {
             PAPERDOLL_ID = var2[var4];
             this.writeD(this._inv[PAPERDOLL_ID][0]);
           }
@@ -244,7 +239,7 @@ public class CharInfo extends L2GameServerPacket {
           var2 = PAPERDOLL_ORDER;
           var3 = var2.length;
 
-          for(var4 = 0; var4 < var3; ++var4) {
+          for (var4 = 0; var4 < var3; ++var4) {
             PAPERDOLL_ID = var2[var4];
             this.writeD(this._inv[PAPERDOLL_ID][1]);
           }
@@ -287,7 +282,7 @@ public class CharInfo extends L2GameServerPacket {
           EffectCubic[] var6 = this.cubics;
           var3 = var6.length;
 
-          for(var4 = 0; var4 < var3; ++var4) {
+          for (var4 = 0; var4 < var3; ++var4) {
             EffectCubic cubic = var6[var4];
             this.writeH(cubic == null ? 0 : cubic.getId());
           }

@@ -5,6 +5,20 @@
 
 package l2.gameserver.model.entity.oly;
 
+import l2.commons.dbutils.DbUtils;
+import l2.gameserver.Announcements;
+import l2.gameserver.Config;
+import l2.gameserver.Config.OlySeasonTimeCalcMode;
+import l2.gameserver.ThreadPoolManager;
+import l2.gameserver.cache.Msg;
+import l2.gameserver.database.DatabaseFactory;
+import l2.gameserver.instancemanager.ServerVariables;
+import l2.gameserver.model.GameObjectsStorage;
+import l2.gameserver.model.instances.NpcInstance;
+import l2.gameserver.network.l2.s2c.SystemMessage;
+import l2.gameserver.scripts.Functions;
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,23 +29,9 @@ import java.util.Iterator;
 import java.util.TimeZone;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import l2.commons.dbutils.DbUtils;
-import l2.gameserver.Announcements;
-import l2.gameserver.Config;
-import l2.gameserver.ThreadPoolManager;
-import l2.gameserver.Config.OlySeasonTimeCalcMode;
-import l2.gameserver.cache.Msg;
-import l2.gameserver.database.DatabaseFactory;
-import l2.gameserver.instancemanager.ServerVariables;
-import l2.gameserver.model.GameObjectsStorage;
-import l2.gameserver.model.instances.NpcInstance;
-import l2.gameserver.network.l2.s2c.SystemMessage;
-import l2.gameserver.scripts.Functions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class OlyController {
-  private static final Logger _log = LoggerFactory.getLogger(OlyController.class);
   private static final SimpleDateFormat _dtformat = new SimpleDateFormat("HH:mm:ss dd.MM.yyyy");
   private static OlyController _instance;
   private int _season_id;
@@ -58,7 +58,7 @@ public class OlyController {
   private static final String OLY_HERO_SEASON_VAR = "oly_chero_season";
   private int _active_comp_idx = -1;
 
-  public static final OlyController getInstance() {
+  public static OlyController getInstance() {
     if (_instance == null) {
       _instance = new OlyController();
     }
@@ -96,12 +96,12 @@ public class OlyController {
         this._bonus_time[3] = rset.getLong("b_s3");
         this._comp_idx = rset.getInt("c_idx");
 
-        for(int i = 0; i < this._comps_time.length; ++i) {
+        for (int i = 0; i < this._comps_time.length; ++i) {
           long[] comp_time = new long[]{rset.getLong("c_s" + i), rset.getLong("c_e" + i)};
           this._comps_time[i] = comp_time;
         }
       } else {
-        _log.info("Oly: Generating a new season " + this._season_id);
+        log.info("Oly: Generating a new season " + this._season_id);
         this.calcNewSeason();
         this.save();
       }
@@ -128,13 +128,13 @@ public class OlyController {
       pstmt.setInt(5, this._bonus_idx);
 
       int j;
-      for(j = 0; j < this._bonus_time.length; ++j) {
+      for (j = 0; j < this._bonus_time.length; ++j) {
         pstmt.setLong(6 + j, this._bonus_time[j]);
       }
 
       pstmt.setInt(10, this._comp_idx);
 
-      for(j = 0; j < this._comps_time.length; ++j) {
+      for (j = 0; j < this._comps_time.length; ++j) {
         pstmt.setLong(11 + j * 2, this._comps_time[j][0]);
         pstmt.setLong(12 + j * 2, this._comps_time[j][1]);
       }
@@ -160,7 +160,7 @@ public class OlyController {
       this.SeasonStart(curr_season);
     } else {
       this._season_start_task = ThreadPoolManager.getInstance().schedule(new OlyController.SeasonStartTask(curr_season), seasonStartRemaining * 1000L);
-      _log.info("OlyController: Season " + curr_season + " start schedule at " + ScheduledFutureTime(this._season_start_task));
+      log.info("OlyController: Season " + curr_season + " start schedule at " + ScheduledFutureTime(this._season_start_task));
     }
 
     long seasonEndRemaining = Math.max(0L, this._season_end_time - now);
@@ -169,7 +169,7 @@ public class OlyController {
       this.SeasonEnd(curr_season);
     } else {
       this._season_end_task = ThreadPoolManager.getInstance().schedule(new OlyController.SeasonEndTask(curr_season), seasonEndRemaining * 1000L);
-      _log.info("OlyController: Season " + curr_season + " end schedule at " + ScheduledFutureTime(this._season_end_task));
+      log.info("OlyController: Season " + curr_season + " end schedule at " + ScheduledFutureTime(this._season_end_task));
     }
 
     long seasonNominateRemaining = Math.max(0L, this._nominate_time - now);
@@ -178,13 +178,13 @@ public class OlyController {
       this.Nomination(curr_season);
     } else {
       this._nominate_task = ThreadPoolManager.getInstance().schedule(new OlyController.NominationTask(curr_season), seasonNominateRemaining * 1000L);
-      _log.info("OlyController: Season " + curr_season + " nomination schedule at " + ScheduledFutureTime(this._nominate_task));
+      log.info("OlyController: Season " + curr_season + " nomination schedule at " + ScheduledFutureTime(this._nominate_task));
     }
 
     StringBuilder sb = new StringBuilder();
 
     int j;
-    for(j = this._comp_idx; j < this._comps_time.length; ++j) {
+    for (j = this._comp_idx; j < this._comps_time.length; ++j) {
       if (this._comps_time[j] != null && (this._comps_time[j][0] >= now || this._comps_time[j][1] >= now)) {
         if (j != this._comp_idx) {
           sb.append(';');
@@ -195,21 +195,21 @@ public class OlyController {
       }
     }
 
-    _log.info("OlyController: Season " + curr_season + " competitions schedule at [" + sb.toString() + "]");
+    log.info("OlyController: Season " + curr_season + " competitions schedule at [" + sb.toString() + "]");
     sb.delete(0, sb.length());
 
-    for(j = this._bonus_idx; j < this._bonus_time.length; ++j) {
+    for (j = this._bonus_idx; j < this._bonus_time.length; ++j) {
       if (this._bonus_time[j] > now) {
         if (j != this._bonus_idx) {
           sb.append(';');
         }
 
-        this._bonus_tasks[j] = ThreadPoolManager.getInstance().schedule(new OlyController.BonusTask(curr_season, j), Math.max((long)((3 + j - this._bonus_idx) * 60), this._bonus_time[j] - now) * 1000L);
+        this._bonus_tasks[j] = ThreadPoolManager.getInstance().schedule(new OlyController.BonusTask(curr_season, j), Math.max((long) ((3 + j - this._bonus_idx) * 60), this._bonus_time[j] - now) * 1000L);
         sb.append(ScheduledFutureTime(this._bonus_tasks[j]));
       }
     }
 
-    _log.info("OlyController: Season " + curr_season + " bonuses schedule at [" + sb.toString() + "]");
+    log.info("OlyController: Season " + curr_season + " bonuses schedule at [" + sb.toString() + "]");
     sb = null;
   }
 
@@ -217,9 +217,9 @@ public class OlyController {
     try {
       this._season_calculation = false;
       Announcements.getInstance().announceToAll((new SystemMessage(1639)).addNumber(season_id));
-      _log.info("OlyController: Season " + season_id + " started.");
+      log.info("OlyController: Season " + season_id + " started.");
     } catch (Exception var3) {
-      _log.warn("Exception while starting of " + season_id + " season", var3);
+      log.warn("Exception while starting of " + season_id + " season", var3);
     }
 
   }
@@ -229,7 +229,7 @@ public class OlyController {
       if (!this._season_calculation) {
         this._season_calculation = true;
         if (ServerVariables.getInt("oly_chero_season", -1) != season_id) {
-          _log.info("OlyController: calculation heroes for " + season_id + " season");
+          log.info("OlyController: calculation heroes for " + season_id + " season");
           HeroController.getInstance().ComputeNewHeroNobleses();
           ServerVariables.set("oly_chero_season", season_id);
         }
@@ -237,12 +237,12 @@ public class OlyController {
         this.save();
         Announcements.getInstance().announceToAll((new SystemMessage(1640)).addNumber(season_id));
       } else {
-        _log.warn("OlyController: Unexpected season calculated. Canceling computation.");
+        log.warn("OlyController: Unexpected season calculated. Canceling computation.");
       }
 
-      _log.info("OlyController: Season " + season_id + " ended.");
+      log.info("OlyController: Season " + season_id + " ended.");
     } catch (Exception var3) {
-      _log.warn("Exception while ending of " + season_id + " season", var3);
+      log.warn("Exception while ending of " + season_id + " season", var3);
     }
 
   }
@@ -253,13 +253,13 @@ public class OlyController {
         this._season_calculation = false;
         this.save();
       } else {
-        _log.warn("OlyController: Season not calculated. Run calculation manualy.");
+        log.warn("OlyController: Season not calculated. Run calculation manualy.");
       }
 
-      _log.info("OlyController: Season " + season_id + " nomination started.");
+      log.info("OlyController: Season " + season_id + " nomination started.");
       ThreadPoolManager.getInstance().execute(new OlyController.NewSeasonCalcTask(season_id + 1));
     } catch (Exception var3) {
-      _log.warn("Exception while nominating in " + season_id + " season", var3);
+      log.warn("Exception while nominating in " + season_id + " season", var3);
     }
 
   }
@@ -273,13 +273,13 @@ public class OlyController {
         CompetitionController.getInstance();
         CompetitionController.getInstance().scheduleStartTask();
         Announcements.getInstance().announceToAll(Msg.THE_OLYMPIAD_GAME_HAS_STARTED);
-        _log.info("OlyController: Season " + season_id + " comp " + comp_id + " started.");
+        log.info("OlyController: Season " + season_id + " comp " + comp_id + " started.");
         this._active_comp_idx = comp_id;
       } else {
-        _log.warn("OlyController: Can't start new competitions. Old comps in progress.");
+        log.warn("OlyController: Can't start new competitions. Old comps in progress.");
       }
     } catch (Exception var4) {
-      _log.warn("Exception while start comp " + comp_id + " in " + season_id + " season", var4);
+      log.warn("Exception while start comp " + comp_id + " in " + season_id + " season", var4);
     }
 
   }
@@ -295,13 +295,13 @@ public class OlyController {
         ++this._comp_idx;
         Announcements.getInstance().announceToAll(new SystemMessage(1919));
         Announcements.getInstance().announceToAll(Msg.THE_OLYMPIAD_GAME_HAS_ENDED);
-        _log.info("OlyController: Season " + season_id + " comp " + comp_id + " ended.");
+        log.info("OlyController: Season " + season_id + " comp " + comp_id + " ended.");
         this.save();
       } else {
-        _log.warn("OlyController: Can't stop competitions. Competitions not in progress.");
+        log.warn("OlyController: Can't stop competitions. Competitions not in progress.");
       }
     } catch (Exception var4) {
-      _log.warn("Exception while end comp " + comp_id + " in " + season_id + " season", var4);
+      log.warn("Exception while end comp " + comp_id + " in " + season_id + " season", var4);
     }
 
   }
@@ -310,10 +310,10 @@ public class OlyController {
     try {
       NoblesController.getInstance().AddWeaklyBonus();
       ++this._bonus_idx;
-      _log.info("OlyController: Season " + season_id + " bonus " + bonus_id + " applied.");
+      log.info("OlyController: Season " + season_id + " bonus " + bonus_id + " applied.");
       this.save();
     } catch (Exception var4) {
-      _log.warn("Exception while bonus " + bonus_id + " in " + season_id + " season", var4);
+      log.warn("Exception while bonus " + bonus_id + " in " + season_id + " season", var4);
     }
 
   }
@@ -332,7 +332,7 @@ public class OlyController {
 
       this.schedule();
     } catch (Exception var3) {
-      _log.warn("Exception while calculating new " + season_id + " season", var3);
+      log.warn("Exception while calculating new " + season_id + " season", var3);
     }
 
   }
@@ -373,10 +373,10 @@ public class OlyController {
   public void announceCompetition(CompetitionType type, int stad_id) {
     Iterator var3 = GameObjectsStorage.getAllByNpcId(31688, false).iterator();
 
-    while(var3.hasNext()) {
-      NpcInstance npc = (NpcInstance)var3.next();
+    while (var3.hasNext()) {
+      NpcInstance npc = (NpcInstance) var3.next();
       if (Config.NPC_OLYMPIAD_GAME_ANNOUNCE) {
-        switch(type) {
+        switch (type) {
           case CLASS_FREE:
             Functions.npcShoutCustomMessage(npc, "l2p.gameserver.model.entity.OlympiadGame.OlympiadNonClassed", new Object[]{String.valueOf(stad_id + 1)});
             break;
@@ -423,7 +423,7 @@ public class OlyController {
     Calendar c_bonus = Calendar.getInstance();
     c_bonus.setTimeInMillis(base_mills);
 
-    for(int i = 0; i < this._bonus_time.length; ++i) {
+    for (int i = 0; i < this._bonus_time.length; ++i) {
       this._bonus_time[i] = this.getDateSeconds(c_bonus, Config.OLY_BONUS_TIME);
     }
 
@@ -431,7 +431,7 @@ public class OlyController {
     Calendar c_comp_start = Calendar.getInstance();
     c_comp_start.setTimeInMillis(base_mills);
 
-    for(int j = 0; j < this._comps_time.length; ++j) {
+    for (int j = 0; j < this._comps_time.length; ++j) {
       this._comps_time[j] = new long[2];
       this._comps_time[j][0] = this.getDateSeconds(c_comp_start, Config.OLY_COMPETITION_START_TIME);
       this._comps_time[j][1] = this.getDateSeconds(c_comp_start, Config.OLY_COMPETITION_END_TIME);

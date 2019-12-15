@@ -5,13 +5,6 @@
 
 package l2.gameserver.instancemanager;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import l2.gameserver.Config;
 import l2.gameserver.GameTimeController;
 import l2.gameserver.data.xml.holder.NpcHolder;
@@ -25,11 +18,17 @@ import l2.gameserver.model.instances.MonsterInstance;
 import l2.gameserver.templates.npc.NpcTemplate;
 import l2.gameserver.templates.spawn.PeriodOfDay;
 import l2.gameserver.templates.spawn.SpawnTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Slf4j
 public class SpawnManager {
-  private static final Logger _log = LoggerFactory.getLogger(SpawnManager.class);
   private static SpawnManager _instance = new SpawnManager();
   private static final String SPAWN_EVENT_NAME_SSQ_EVENT = "[ssq_event]";
   private static final String SPAWN_EVENT_NAME_AVARICE_NONE = "[ssq_seal1_none]";
@@ -40,7 +39,7 @@ public class SpawnManager {
   private static final String SPAWN_EVENT_NAME_GNOSIS_DAWN = "[ssq_seal2_dawn]";
   private static final String DAWN_GROUP = "dawn_spawn";
   private static final String DUSK_GROUP = "dusk_spawn";
-  private Map<String, List<Spawner>> _spawns = new ConcurrentHashMap();
+  private Map<String, List<Spawner>> _spawns = new ConcurrentHashMap<>();
   private SpawnManager.Listeners _listeners = new SpawnManager.Listeners();
 
   public static SpawnManager getInstance() {
@@ -48,11 +47,9 @@ public class SpawnManager {
   }
 
   private SpawnManager() {
-    Iterator var1 = SpawnHolder.getInstance().getSpawns().entrySet().iterator();
 
-    while(var1.hasNext()) {
-      Entry<String, List<SpawnTemplate>> entry = (Entry)var1.next();
-      this.fillSpawn((String)entry.getKey(), (List)entry.getValue());
+    for (Entry<String, List<SpawnTemplate>> stringListEntry : SpawnHolder.getInstance().getSpawns().entrySet()) {
+      this.fillSpawn(stringListEntry.getKey(), stringListEntry.getValue());
     }
 
     GameTimeController.getInstance().addListener(this._listeners);
@@ -63,19 +60,12 @@ public class SpawnManager {
     if (Config.DONTLOADSPAWN) {
       return Collections.emptyList();
     } else {
-      List<Spawner> spawnerList = (List)this._spawns.get(group);
-      if (spawnerList == null) {
-        this._spawns.put(group, spawnerList = new ArrayList(templateList.size()));
-      }
+      List<Spawner> spawnerList = this._spawns.computeIfAbsent(group, k -> new ArrayList(templateList.size()));
 
-      Iterator var4 = templateList.iterator();
-
-      while(var4.hasNext()) {
-        SpawnTemplate template = (SpawnTemplate)var4.next();
-
+      for (SpawnTemplate template : templateList) {
         try {
           HardSpawner spawner = new HardSpawner(template);
-          ((List)spawnerList).add(spawner);
+          spawnerList.add(spawner);
           NpcTemplate npcTemplate = NpcHolder.getInstance().getTemplate(spawner.getCurrentNpcId());
           if (Config.RATE_MOB_SPAWN > 1 && npcTemplate.getInstanceClass() == MonsterInstance.class && npcTemplate.level >= Config.RATE_MOB_SPAWN_MIN_LEVEL && npcTemplate.level <= Config.RATE_MOB_SPAWN_MAX_LEVEL) {
             spawner.setAmount(template.getCount() * Config.RATE_MOB_SPAWN);
@@ -95,7 +85,7 @@ public class SpawnManager {
         }
       }
 
-      return (List)spawnerList;
+      return spawnerList;
     }
   }
 
@@ -147,27 +137,23 @@ public class SpawnManager {
     List<Spawner> spawnerList = this.getSpawners(group);
     if (spawnerList != null) {
       int npcSpawnCount = 0;
-      Iterator var4 = spawnerList.iterator();
 
-      while(var4.hasNext()) {
-        Spawner spawner = (Spawner)var4.next();
+      for (Spawner spawner : spawnerList) {
         npcSpawnCount += spawner.init();
         if (npcSpawnCount % 1000 == 0 && npcSpawnCount != 0) {
-          _log.info("SpawnManager: spawned " + npcSpawnCount + " npc for group: " + group);
+          log.info("SpawnManager: spawned " + npcSpawnCount + " npc for group: " + group);
         }
       }
 
-      _log.info("SpawnManager: spawned " + npcSpawnCount + " npc; spawns: " + spawnerList.size() + "; group: " + group);
+      log.info("SpawnManager: spawned " + npcSpawnCount + " npc; spawns: " + spawnerList.size() + "; group: " + group);
     }
   }
 
   public void despawn(String group) {
-    List<Spawner> spawnerList = (List)this._spawns.get(group);
+    List<Spawner> spawnerList = this._spawns.get(group);
     if (spawnerList != null) {
-      Iterator var3 = spawnerList.iterator();
 
-      while(var3.hasNext()) {
-        Spawner spawner = (Spawner)var3.next();
+      for (Spawner spawner : spawnerList) {
         spawner.deleteAll();
       }
 
@@ -175,20 +161,16 @@ public class SpawnManager {
   }
 
   public List<Spawner> getSpawners(String group) {
-    List<Spawner> list = (List)this._spawns.get(group);
+    List<Spawner> list = this._spawns.get(group);
     return list == null ? Collections.emptyList() : list;
   }
 
   public void reloadAll() {
     RaidBossSpawnManager.getInstance().cleanUp();
-    Iterator var1 = this._spawns.values().iterator();
 
-    while(var1.hasNext()) {
-      List<Spawner> spawnerList = (List)var1.next();
-      Iterator var3 = spawnerList.iterator();
+    for (List<Spawner> spawners : this._spawns.values()) {
 
-      while(var3.hasNext()) {
-        Spawner spawner = (Spawner)var3.next();
+      for (Spawner spawner : spawners) {
         spawner.deleteAll();
       }
     }
@@ -230,7 +212,7 @@ public class SpawnManager {
       SpawnManager.this.despawn("[ssq_seal2_none]");
       SpawnManager.this.despawn("[ssq_seal2_twilight]");
       SpawnManager.this.despawn("[ssq_seal2_dawn]");
-      switch(SevenSigns.getInstance().getCurrentPeriod()) {
+      switch (SevenSigns.getInstance().getCurrentPeriod()) {
         case 0:
         case 2:
         default:
@@ -239,7 +221,7 @@ public class SpawnManager {
           SpawnManager.this.spawn("[ssq_event]");
           break;
         case 3:
-          switch(SevenSigns.getInstance().getSealOwner(1)) {
+          switch (SevenSigns.getInstance().getSealOwner(1)) {
             case 0:
               SpawnManager.this.spawn("[ssq_seal1_none]");
               break;
@@ -250,7 +232,7 @@ public class SpawnManager {
               SpawnManager.this.spawn("[ssq_seal1_dawn]");
           }
 
-          switch(SevenSigns.getInstance().getSealOwner(2)) {
+          switch (SevenSigns.getInstance().getSealOwner(2)) {
             case 0:
               SpawnManager.this.spawn("[ssq_seal2_none]");
               break;
