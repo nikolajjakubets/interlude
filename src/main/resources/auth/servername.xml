@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<!DOCTYPE list SYSTEM "C:\Users\User\IdeaProjects\interlude\src\main\resources\auth\servername.dtd">
+<!DOCTYPE list SYSTEM "servername.dtd">
 <list>
   <server id="1" name="Bartz"/>
   <server id="2" name="Sieghardt"/>

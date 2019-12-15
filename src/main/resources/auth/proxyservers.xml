@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<!DOCTYPE list SYSTEM "C:\Users\User\IdeaProjects\interlude\src\main\resources\auth\proxyservers.dtd">
+<!DOCTYPE list SYSTEM "proxyservers.dtd">
 <list>
   <!--
   Использование : <proxyServer origId="<original_server_id>" proxyId="<proxy_server_id>" proxyHost="<proxy_host>" proxyPort="<proxy_port>" />
