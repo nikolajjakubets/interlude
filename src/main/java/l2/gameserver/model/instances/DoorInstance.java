@@ -178,10 +178,8 @@ public final class DoorInstance extends Creature implements GeoCollision {
   }
 
   public void broadcastStatusUpdate() {
-    Iterator var1 = World.getAroundPlayers(this).iterator();
 
-    while(var1.hasNext()) {
-      Player player = (Player)var1.next();
+    for (Player player : World.getAroundPlayers(this)) {
       if (player != null) {
         player.sendPacket(new DoorStatusUpdate(this, player));
       }

@@ -107,13 +107,13 @@ public class GameServerCommunication extends Thread {
         } else if (count != 0) {
             buf.flip();
 
-            while(this.tryReadPacket(key, gs, buf)) {
+          while (this.tryReadPacket(gs, buf)) {
             }
 
         }
     }
 
-    protected boolean tryReadPacket(SelectionKey key, GameServer gs, ByteBuffer buf) throws IOException {
+  protected boolean tryReadPacket(GameServer gs, ByteBuffer buf) throws IOException {
         int pos = buf.position();
         if (buf.remaining() > 2) {
             int size = buf.getShort() & '\uffff';

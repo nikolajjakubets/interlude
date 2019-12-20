@@ -155,7 +155,7 @@ public abstract class Spawner extends EventOwner implements Cloneable {
 
   public NpcInstance getFirstSpawned() {
     List<NpcInstance> npcs = this.getAllSpawned();
-    return npcs.size() > 0 ? (NpcInstance) npcs.get(0) : null;
+    return npcs.size() > 0 ? npcs.get(0) : null;
   }
 
   public void setRespawnDelay(long respawnDelay, long respawnDelayRandom) {
@@ -168,7 +168,7 @@ public abstract class Spawner extends EventOwner implements Cloneable {
   }
 
   public void setRespawnDelay(int respawnDelay) {
-    this.setRespawnDelay((long) respawnDelay, 0L);
+    this.setRespawnDelay(respawnDelay, 0L);
   }
 
   public void setRespawnTime(int respawnTime) {
@@ -203,7 +203,7 @@ public abstract class Spawner extends EventOwner implements Cloneable {
 
   protected NpcInstance initNpc0(NpcInstance mob, Location newLoc, boolean spawn, MultiValueSet<String> set) {
     mob.setParameters(set);
-    mob.setCurrentHpMp((double) mob.getMaxHp(), (double) mob.getMaxMp(), true);
+    mob.setCurrentHpMp(mob.getMaxHp(), mob.getMaxMp(), true);
     mob.setSpawn(this);
     mob.setSpawnedLoc(newLoc);
     mob.setUnderground(GeoEngine.getHeight(newLoc, this.getReflection().getGeoIndex()) < GeoEngine.getHeight(newLoc.clone().changeZ(5000), this.getReflection().getGeoIndex()));

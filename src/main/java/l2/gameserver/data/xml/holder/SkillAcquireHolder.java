@@ -7,14 +7,6 @@ package l2.gameserver.data.xml.holder;
 
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntObjectIterator;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.Map.Entry;
 import l2.commons.data.xml.AbstractHolder;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.Skill;
@@ -26,10 +18,13 @@ import l2.gameserver.model.base.ClassType2;
 import l2.gameserver.model.pledge.Clan;
 import l2.gameserver.model.pledge.SubUnit;
 
+import java.util.*;
+import java.util.Map.Entry;
+
 public final class SkillAcquireHolder extends AbstractHolder {
   private static final SkillAcquireHolder _instance = new SkillAcquireHolder();
-  private TIntObjectHashMap<List<SkillLearn>> _normalSkillTree = new TIntObjectHashMap();
-  private TIntObjectHashMap<List<SkillLearn>> _fishingSkillTree = new TIntObjectHashMap();
+  private TIntObjectHashMap<List<SkillLearn>> _normalSkillTree = new TIntObjectHashMap<>();
+  private TIntObjectHashMap<List<SkillLearn>> _fishingSkillTree = new TIntObjectHashMap<>();
   private List<SkillLearn> _pledgeSkillTree = new ArrayList<>();
 
   public SkillAcquireHolder() {
@@ -40,34 +35,32 @@ public final class SkillAcquireHolder extends AbstractHolder {
   }
 
   public int getMinLevelForNewSkill(ClassId classId, int currLevel, AcquireType type) {
-    switch(type) {
-      case NORMAL:
-        List<SkillLearn> skills = this._normalSkillTree.get(classId.getId());
-        if (skills == null) {
-          this.info("skill tree for class " + classId.getId() + " is not defined !");
-          return 0;
-        } else {
-          int minlevel = 0;
-          Iterator var6 = skills.iterator();
-
-          while(true) {
-            SkillLearn temp;
-            do {
-              do {
-                if (!var6.hasNext()) {
-                  return minlevel;
-                }
-
-                temp = (SkillLearn)var6.next();
-              } while(temp.getMinLevel() <= currLevel);
-            } while(minlevel != 0 && temp.getMinLevel() >= minlevel);
-
-            minlevel = temp.getMinLevel();
-          }
-        }
-      default:
+    if (type == AcquireType.NORMAL) {
+      List<SkillLearn> skills = this._normalSkillTree.get(classId.getId());
+      if (skills == null) {
+        this.info("skill tree for class " + classId.getId() + " is not defined !");
         return 0;
+      } else {
+        int minlevel = 0;
+        Iterator var6 = skills.iterator();
+
+        while (true) {
+          SkillLearn temp;
+          do {
+            do {
+              if (!var6.hasNext()) {
+                return minlevel;
+              }
+
+              temp = (SkillLearn) var6.next();
+            } while (temp.getMinLevel() <= currLevel);
+          } while (minlevel != 0 && temp.getMinLevel() >= minlevel);
+
+          minlevel = temp.getMinLevel();
+        }
+      }
     }
+    return 0;
   }
 
   public Collection<SkillLearn> getAvailableSkills(Player player, AcquireType type) {
@@ -96,7 +89,7 @@ public final class SkillAcquireHolder extends AbstractHolder {
       case CLAN:
         Collection<SkillLearn> pledgeSkillTree = this._pledgeSkillTree;
         Collection<Skill> skls = player.getClan().getSkills();
-        return this.getAvaliableList(pledgeSkillTree, skls.toArray(new Skill[skls.size()]), player.getClan().getLevel());
+        return this.getAvaliableList(pledgeSkillTree, skls.toArray(Skill.EMPTY_ARRAY), player.getClan().getLevel());
       default:
         return Collections.emptyList();
     }
@@ -144,12 +137,11 @@ public final class SkillAcquireHolder extends AbstractHolder {
           } while(((SubClass)e.getValue()).isBase());
 
           ClassId[] var11 = ClassId.values();
-          int var12 = var11.length;
 
-          for(int var13 = 0; var13 < var12; ++var13) {
-            ClassId ci = var11[var13];
-            if (ci.getId() == (Integer)e.getKey() && ci.getType2() == temp.getClassType2()) {
+          for (ClassId ci : var11) {
+            if (ci.getId() == (Integer) e.getKey() && ci.getType2() == temp.getClassType2()) {
               knownSkill = true;
+              break;
             }
           }
         }
@@ -207,7 +199,7 @@ public final class SkillAcquireHolder extends AbstractHolder {
   }
 
   public boolean isSkillPossible(Player player, Skill skill, AcquireType type) {
-    Clan clan = null;
+    Clan clan;
     List skills;
     switch(type) {
       case NORMAL:
@@ -232,7 +224,7 @@ public final class SkillAcquireHolder extends AbstractHolder {
   }
 
   public boolean isSkillPossible(Player player, ClassId classId, Skill skill, AcquireType type) {
-    Clan clan = null;
+    Clan clan;
     List skills;
     switch(type) {
       case NORMAL:
@@ -273,10 +265,8 @@ public final class SkillAcquireHolder extends AbstractHolder {
 
   public boolean isSkillPossible(Player player, Skill skill) {
     AcquireType[] var3 = AcquireType.VALUES;
-    int var4 = var3.length;
 
-    for(int var5 = 0; var5 < var4; ++var5) {
-      AcquireType aq = var3[var5];
+    for (AcquireType aq : var3) {
       if (this.isSkillPossible(player, skill, aq)) {
         return true;
       }
@@ -287,10 +277,8 @@ public final class SkillAcquireHolder extends AbstractHolder {
 
   public boolean isSkillPossible(Player player, ClassId classId, Skill skill) {
     AcquireType[] var4 = AcquireType.VALUES;
-    int var5 = var4.length;
 
-    for(int var6 = 0; var6 < var5; ++var6) {
-      AcquireType aq = var4[var6];
+    for (AcquireType aq : var4) {
       if (this.isSkillPossible(player, classId, skill, aq)) {
         return true;
       }
@@ -304,11 +292,9 @@ public final class SkillAcquireHolder extends AbstractHolder {
     if (learns == null) {
       return Collections.emptyList();
     } else {
-      List<SkillLearn> l = new ArrayList(1);
-      Iterator var5 = learns.iterator();
+      List<SkillLearn> l = new ArrayList<>(1);
 
-      while(var5.hasNext()) {
-        SkillLearn $i = (SkillLearn)var5.next();
+      for (SkillLearn $i : learns) {
         if ($i.getItemId() == itemId) {
           l.add($i);
         }
@@ -324,10 +310,9 @@ public final class SkillAcquireHolder extends AbstractHolder {
 
     while(i.hasNext()) {
       i.advance();
-      Iterator var3 = ((List)i.value()).iterator();
 
-      while(var3.hasNext()) {
-        SkillLearn learn = (SkillLearn)var3.next();
+      for (Object o : (List) i.value()) {
+        SkillLearn learn = (SkillLearn) o;
         if (learn.getItemId() > 0 && learn.isClicked()) {
           a.add(learn);
         }
@@ -339,10 +324,9 @@ public final class SkillAcquireHolder extends AbstractHolder {
 
   public void addAllNormalSkillLearns(TIntObjectHashMap<List<SkillLearn>> map) {
     ClassId[] var3 = ClassId.VALUES;
-    int var4 = var3.length;
 
-    for(int var5 = 0; var5 < var4; ++var5) {
-      ClassId classId = var3[var5];
+    for (ClassId id : var3) {
+      ClassId classId = id;
       if (classId.getRace() != null) {
         int classID = classId.getId();
         List<SkillLearn> temp = map.get(classID);
@@ -357,7 +341,7 @@ public final class SkillAcquireHolder extends AbstractHolder {
 
           classId = classId.getParent(0);
 
-          while(classId != null) {
+          while (classId != null) {
             List<SkillLearn> parentList = this._normalSkillTree.get(classId.getId());
             temp.addAll(parentList);
             classId = classId.getParent(0);

@@ -1,13 +1,6 @@
 package l2.commons.lang;
 
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.LockInfo;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryUsage;
-import java.lang.management.MonitorInfo;
-import java.lang.management.ThreadInfo;
-import java.lang.management.ThreadMXBean;
+import java.lang.management.*;
 import java.util.Iterator;
 
 public final class StatsUtils {
