@@ -61,7 +61,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Reflection {
-  private static final Logger _log = LoggerFactory.getLogger(Reflection.class);
   private static final AtomicInteger _nextId = new AtomicInteger();
   private final int _id;
   private String _name;
@@ -185,11 +184,11 @@ public class Reflection {
   }
 
   public DoorInstance getDoor(int id) {
-    return (DoorInstance)this._doors.get(id);
+    return this._doors.get(id);
   }
 
   public Zone getZone(String name) {
-    return (Zone)this._zones.get(name);
+    return this._zones.get(name);
   }
 
   public void startCollapseTimer(long timeInMillis) {
@@ -252,13 +251,11 @@ public class Reflection {
       this.lock.lock();
 
       try {
-        Iterator var1 = this._objects.iterator();
 
-        while(var1.hasNext()) {
-          GameObject o = (GameObject)var1.next();
+        for (GameObject o : this._objects) {
           if (o.isPlayer()) {
             Player player = o.getPlayer();
-            player.sendMessage((new CustomMessage("THIS_INSTANCE_ZONE_WILL_BE_TERMINATED_IN_S1_MINUTES_YOU_WILL_BE_FORCED_OUT_OF_THE_DANGEON_THEN_TIME_EXPIRES", player, new Object[0])).addNumber(1L));
+            player.sendMessage((new CustomMessage("THIS_INSTANCE_ZONE_WILL_BE_TERMINATED_IN_S1_MINUTES_YOU_WILL_BE_FORCED_OUT_OF_THE_DANGEON_THEN_TIME_EXPIRES", player)).addNumber(1L));
           }
         }
       } finally {
@@ -350,11 +347,11 @@ public class Reflection {
           Player player = (Player)var3.next();
           if (player.getParty() != null) {
             if (this.equals(player.getParty().getReflection())) {
-              player.getParty().setReflection((Reflection)null);
+              player.getParty().setReflection(null);
             }
 
             if (player.getParty().getCommandChannel() != null && this.equals(player.getParty().getCommandChannel().getReflection())) {
-              player.getParty().getCommandChannel().setReflection((Reflection)null);
+              player.getParty().getCommandChannel().setReflection(null);
             }
           }
 
@@ -368,12 +365,12 @@ public class Reflection {
         }
 
         if (this._commandChannel != null) {
-          this._commandChannel.setReflection((Reflection)null);
+          this._commandChannel.setReflection(null);
           this._commandChannel = null;
         }
 
         if (this._party != null) {
-          this._party.setReflection((Reflection)null);
+          this._party.setReflection(null);
           this._party = null;
         }
 
@@ -468,12 +465,10 @@ public class Reflection {
     this.lock.lock();
 
     try {
-      Iterator var2 = this._objects.iterator();
 
-      while(var2.hasNext()) {
-        GameObject o = (GameObject)var2.next();
+      for (GameObject o : this._objects) {
         if (o.isPlayer()) {
-          result.add((Player)o);
+          result.add((Player) o);
         }
       }
     } finally {
@@ -488,12 +483,10 @@ public class Reflection {
     this.lock.lock();
 
     try {
-      Iterator var2 = this._objects.iterator();
 
-      while(var2.hasNext()) {
-        GameObject o = (GameObject)var2.next();
+      for (GameObject o : this._objects) {
         if (o.isNpc()) {
-          result.add((NpcInstance)o);
+          result.add((NpcInstance) o);
         }
       }
     } finally {
@@ -574,7 +567,7 @@ public class Reflection {
                 Location loc = (Location)var7.next();
                 c = new SimpleSpawner(s.getNpcId());
                 c.setReflection(this);
-                c.setRespawnDelay((long)s.getRespawnDelay(), (long)s.getRespawnRnd());
+                c.setRespawnDelay(s.getRespawnDelay(), s.getRespawnRnd());
                 c.setAmount(s.getCount());
                 c.setLoc(loc);
                 c.doSpawn(true);
@@ -589,9 +582,9 @@ public class Reflection {
             case 1:
               c = new SimpleSpawner(s.getNpcId());
               c.setReflection(this);
-              c.setRespawnDelay((long)s.getRespawnDelay(), (long)s.getRespawnRnd());
+              c.setRespawnDelay(s.getRespawnDelay(), s.getRespawnRnd());
               c.setAmount(1);
-              c.setLoc((Location)s.getCoords().get(Rnd.get(s.getCoords().size())));
+              c.setLoc(s.getCoords().get(Rnd.get(s.getCoords().size())));
               c.doSpawn(true);
               if (s.getRespawnDelay() == 0) {
                 c.stopRespawn();
@@ -604,7 +597,7 @@ public class Reflection {
             case 2:
               c = new SimpleSpawner(s.getNpcId());
               c.setReflection(this);
-              c.setRespawnDelay((long)s.getRespawnDelay(), (long)s.getRespawnRnd());
+              c.setRespawnDelay(s.getRespawnDelay(), s.getRespawnRnd());
               c.setAmount(s.getCount());
               c.setTerritory(s.getLoc());
 
@@ -629,7 +622,7 @@ public class Reflection {
 
   public void init(IntObjectMap<DoorTemplate> doors, Map<String, ZoneTemplate> zones) {
     if (!doors.isEmpty()) {
-      this._doors = new HashIntObjectMap(doors.size());
+      this._doors = new HashIntObjectMap<>(doors.size());
     }
 
     Iterator var3;
@@ -648,7 +641,7 @@ public class Reflection {
 
     this.initDoors();
     if (!zones.isEmpty()) {
-      this._zones = new HashMap(zones.size());
+      this._zones = new HashMap<>(zones.size());
     }
 
     var3 = zones.values().iterator();
@@ -684,7 +677,7 @@ public class Reflection {
 
   private void init0(IntObjectMap<DoorInfo> doors, Map<String, ZoneInfo> zones) {
     if (!doors.isEmpty()) {
-      this._doors = new HashIntObjectMap(doors.size());
+      this._doors = new HashIntObjectMap<>(doors.size());
     }
 
     Iterator var3;
@@ -703,7 +696,7 @@ public class Reflection {
 
     this.initDoors();
     if (!zones.isEmpty()) {
-      this._zones = new HashMap(zones.size());
+      this._zones = new HashMap<>(zones.size());
     }
 
     ZoneInfo t;
@@ -729,10 +722,8 @@ public class Reflection {
   }
 
   private void initDoors() {
-    Iterator var1 = this._doors.values().iterator();
 
-    while(var1.hasNext()) {
-      DoorInstance door = (DoorInstance)var1.next();
+    for (DoorInstance door : this._doors.values()) {
       if (door.getTemplate().getMasterDoor() > 0) {
         DoorInstance masterDoor = this.getDoor(door.getTemplate().getMasterDoor());
         masterDoor.addListener(new MasterOnOpenCloseListenerImpl(door));
@@ -742,7 +733,7 @@ public class Reflection {
   }
 
   public void openDoor(int doorId) {
-    DoorInstance door = (DoorInstance)this._doors.get(doorId);
+    DoorInstance door = this._doors.get(doorId);
     if (door != null) {
       door.openMe();
     }
@@ -750,7 +741,7 @@ public class Reflection {
   }
 
   public void closeDoor(int doorId) {
-    DoorInstance door = (DoorInstance)this._doors.get(doorId);
+    DoorInstance door = this._doors.get(doorId);
     if (door != null) {
       door.closeMe();
     }
@@ -759,16 +750,14 @@ public class Reflection {
 
   public void clearReflection(int timeInMinutes, boolean message) {
     if (!this.isDefault() && !this.isStatic()) {
-      Iterator var3 = this.getNpcs().iterator();
 
-      while(var3.hasNext()) {
-        NpcInstance n = (NpcInstance)var3.next();
+      for (NpcInstance n : this.getNpcs()) {
         n.deleteMe();
       }
 
       this.startCollapseTimer((long)(timeInMinutes * 60) * 1000L);
       if (message) {
-        var3 = this.getPlayers().iterator();
+        Iterator var3 = this.getPlayers().iterator();
 
         while(true) {
           Player pl;
@@ -780,11 +769,8 @@ public class Reflection {
             pl = (Player)var3.next();
           } while(pl == null);
 
-          Iterator var5 = pl.iterator();
-
-          while(var5.hasNext()) {
-            Player partyPlayer = (Player)var5.next();
-            partyPlayer.sendMessage((new CustomMessage("THIS_DUNGEON_WILL_EXPIRE_IN_S1_MINUTES", partyPlayer, new Object[0])).addNumber((long)timeInMinutes));
+          for (Player partyPlayer : pl) {
+            partyPlayer.sendMessage((new CustomMessage("THIS_DUNGEON_WILL_EXPIRE_IN_S1_MINUTES", partyPlayer)).addNumber(timeInMinutes));
           }
         }
       }
@@ -836,7 +822,6 @@ public class Reflection {
     }
 
     if (players != null) {
-      int var6 = players.length;
 
       for (int objectId : players) {
         try {
@@ -886,9 +871,9 @@ public class Reflection {
 
       while(var8.hasNext()) {
         Entry<String, SpawnInfo2> entry = (Entry)var8.next();
-        List<Spawner> spawnList = new ArrayList(((SpawnInfo2)entry.getValue()).getTemplates().size());
+        List<Spawner> spawnList = new ArrayList(entry.getValue().getTemplates().size());
         this._spawners.put(entry.getKey(), spawnList);
-        Iterator var5 = ((SpawnInfo2)entry.getValue()).getTemplates().iterator();
+        Iterator var5 = entry.getValue().getTemplates().iterator();
 
         while(var5.hasNext()) {
           SpawnTemplate template = (SpawnTemplate)var5.next();
@@ -900,8 +885,8 @@ public class Reflection {
           spawner.setRespawnTime(0);
         }
 
-        if (((SpawnInfo2)entry.getValue()).isSpawned()) {
-          this.spawnByGroup((String)entry.getKey());
+        if (entry.getValue().isSpawned()) {
+          this.spawnByGroup(entry.getKey());
         }
       }
     }
@@ -916,14 +901,12 @@ public class Reflection {
   }
 
   public void spawnByGroup(String name) {
-    List<Spawner> list = (List)this._spawners.get(name);
+    List<Spawner> list = this._spawners.get(name);
     if (list == null) {
       throw new IllegalArgumentException();
     } else {
-      Iterator var3 = list.iterator();
 
-      while(var3.hasNext()) {
-        Spawner s = (Spawner)var3.next();
+      for (Spawner s : list) {
         s.init();
       }
 
@@ -931,7 +914,7 @@ public class Reflection {
   }
 
   public void despawnByGroup(String name) {
-    List<Spawner> list = (List)this._spawners.get(name);
+    List<Spawner> list = this._spawners.get(name);
     if (list == null) {
       throw new IllegalArgumentException();
     } else {

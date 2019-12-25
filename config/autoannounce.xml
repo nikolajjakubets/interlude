@@ -5,7 +5,7 @@
 -->
 <list>
   <announce delay="600" repeat="6000" is_screen_message="false">
-    <message text="Приветствуем на самом лучшем сервере"/>
-    <message text="Желаем приятной игры"/>
+    <message text="Welcome to lineage 2 Interlude Rollback "/>
+    <message text="We wish you a pleasant game"/>
   </announce>
 </list>
