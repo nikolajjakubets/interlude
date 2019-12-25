@@ -4,12 +4,12 @@
 -- ВЫ ОБЯЗАНЫ СДЕЛАТЬ ПЕРЕД ВЫПОЛНЕНИЕМ ДАННОГО SQL файла РЕЗЕРВНОЕ КОПИРОВАНИЕ ОБЕИХ БАЗ.
 -- ЕСЛИ ВЫ ЭТОГО НЕ СДЕЛАЕТЕ И ВОЗНИКНУТ ЛЮБАЫЕ ОШИБКИ В ПРОЦЕССЕ ВЫПОЛНЕНИЯ. ВЫ ЛИШИТЕСЬ ОБЕИХ БАЗ
 
--- и так поехали, теперь мы должны указать имена баз из которой объединяем данные:
--- в примере это src_db и куда, в перемер это dst_db т.е. данные src_db > dst_db.
+-- и так поехали, теперь мы должны указать имена баз из которой объединяем данные: 
+-- в примере это src_db и куда, в перемер это dst_db т.е. данные src_db > dst_db. 
 
 -- Если у вас база логина называется по другому - временно перенесите в одну базу. Таблица accounts.
--- Логины так же нужно делать CONCAT из за того что на аккаунте может быть к примеру 7 персонажей.
--- Перенесенный аккаунт будет иметь все те же данные, но уже с приставкой XL. Саму приставку вы можете менять как вам угодно.
+-- Логины так же нужно делать CONCAT из за того что на аккаунте может быть к примеру 7 персонажей. 
+-- Перенесенный аккаунт будет иметь все те же данные, но уже с приставкой XL. Саму приставку вы можете менять как вам угодно. 
 -- У меня в примере CONCAT(login,'XL')
 
 -- EN
@@ -30,99 +30,73 @@
 -- make table with current objectId's situation from main database
 
 DROP TABLE IF EXISTS dst_db.objectIdx;
-CREATE TABLE dst_db.objectIdx
-(
+CREATE TABLE dst_db.objectIdx (
     object_id int NOT NULL,
     PRIMARY KEY (object_id)
 );
 
 drop table if exists src_db.`acc_conv`;
-create table src_db.` acc_conv `
-(
-    `src_login` VARCHAR
-(
-    32
-) NOT NULL,
-    ` dst_login ` VARCHAR
-(
-    32
-) NOT NULL,
-    primary key
-(
-    `src_login`
-),
-    unique key
-(
-    `dst_login`
-)
-    ) engine=InnoDB default charset=utf8;
+create table src_db.`acc_conv` (
+  `src_login` VARCHAR(32) NOT NULL,
+  `dst_login` VARCHAR(32) NOT NULL,
+  primary key(`src_login`),
+  unique key(`dst_login`)
+) engine=InnoDB default charset=utf8;
 
 
 
 INSERT INTO dst_db.objectIdx (object_id)
-SELECT obj_id
-from dst_db.characters;
+SELECT obj_id from dst_db.characters;
 
 INSERT INTO dst_db.objectIdx (object_id)
-SELECT item_id
-from dst_db.items;
+SELECT item_id from dst_db.items;
 
 INSERT INTO dst_db.objectIdx (object_id)
-SELECT clan_id
-from dst_db.clan_data;
+SELECT clan_id from dst_db.clan_data;
 
 INSERT INTO dst_db.objectIdx (object_id)
-SELECT ally_id
-from dst_db.ally_data;
+SELECT ally_id from dst_db.ally_data;
 
 INSERT INTO dst_db.objectIdx (object_id)
-SELECT objId
-from dst_db.pets;
+SELECT objId from dst_db.pets;
 
 -- make table with current objectId's situation from imported database
 DROP TABLE IF EXISTS src_db.objectIdx;
-CREATE TABLE src_db.objectIdx
-(
-    shortIdx  int NOT NULL auto_increment,
-    object_id int NOT NULL,
-    PRIMARY KEY (shortIdx),
-    KEY ` object_id ` (` object_id `)
+CREATE TABLE src_db.objectIdx (
+shortIdx int NOT NULL auto_increment,
+object_id int NOT NULL,
+PRIMARY KEY  (shortIdx),
+KEY `object_id` (`object_id`)
 );
 
 
 INSERT INTO src_db.objectIdx (object_id)
-SELECT obj_id
-FROM src_db.characters;
+SELECT obj_id FROM src_db.characters;
 INSERT INTO src_db.objectIdx (object_id)
-SELECT item_id
-FROM src_db.items;
+SELECT item_id FROM src_db.items;
 INSERT INTO src_db.objectIdx (object_id)
-SELECT clan_id
-FROM src_db.clan_data;
+SELECT clan_id FROM src_db.clan_data;
 INSERT INTO src_db.objectIdx (object_id)
-SELECT ally_id
-FROM src_db.ally_data;
+SELECT ally_id FROM src_db.ally_data;
 INSERT INTO src_db.objectIdx (object_id)
-SELECT objId
-FROM src_db.pets;
+SELECT objId FROM src_db.pets;
 
 -- make table with oldId/newId for imported database
 DROP TABLE IF EXISTS src_db.exportIdx;
-CREATE TABLE src_db.exportIdx
-(
-    old_id int NOT NULL,
-    new_id int NOT NULL,
-    PRIMARY KEY (old_id),
-    KEY ` new_id ` (` new_id `)
+CREATE TABLE src_db.exportIdx (
+old_id int NOT NULL,
+new_id int NOT NULL,
+PRIMARY KEY  (old_id),
+KEY `new_id` (`new_id`)
 );
 INSERT INTO src_db.exportIdx
-SELECT object_id, shortIdx + (SELECT max(object_id) FROM dst_db.objectIdx)
+SELECT object_id,shortIdx+(SELECT max(object_id) FROM dst_db.objectIdx)
 from src_db.objectIdx;
 
 -- okeys, lets do change old_id on new_id
 -- main ids change
-UPDATE src_db.characters a,src_db.exportIdx b
-SET a.obj_id = b.new_id where a.obj_id = b.old_id;
+UPDATE src_db.characters a,src_db.exportIdx b 
+SET a.obj_id = b.new_id where a.obj_id = b.old_id; 
 
 UPDATE src_db.items a,src_db.exportIdx b
 SET a.item_id = b.new_id where a.item_id = b.old_id;
@@ -228,44 +202,32 @@ UPDATE src_db.pets a,src_db.exportIdx b
 SET a.item_obj_id = b.new_id
 WHERE a.item_obj_id = b.old_id;
 
-insert into src_db.acc_conv (src_login, dst_login)
-select src_db.characters.account_name, src_db.characters.account_name
-from src_db.characters
+insert into src_db.acc_conv (src_login, dst_login) select src_db.characters.account_name, src_db.characters.account_name from src_db.characters
 group by src_db.characters.account_name
 ;
 
 delimiter $$
 drop FUNCTION if exists `lip_ex_TrunLoginWithPfx` $$
-CREATE
-DEFINER = CURRENT_USER FUNCTION `lip_ex_TrunLoginWithPfx` (`sSrcLogin` varchar(32)) RETURNS varchar(32)
+CREATE DEFINER = CURRENT_USER FUNCTION `lip_ex_TrunLoginWithPfx` (`sSrcLogin` varchar(32)) RETURNS varchar(32)
   NOT DETERMINISTIC
-  SQL
-SECURITY DEFINER
-    entry:
-BEGIN
-declare iIdx int default 0;
-declare iCnt int default 0;
-declare sLogin varchar (32) default 0;
-set sLogin = sSrcLogin;
+  SQL SECURITY DEFINER
+entry: BEGIN
+  declare iIdx int default 0;
+  declare iCnt int default 0;
+	declare sLogin varchar(32) default 0;
+  set sLogin = sSrcLogin;
 
-REPEAT
-set iIdx = iIdx + 1;
-if CHAR_LENGTH(sSrcLogin) < 11 THEN
-select trim(concat(sSrcLogin, '_', iIdx))
-into sLogin;
-else
-select trim(concat(LEFT(sSrcLogin, char_length(sSrcLogin) - 3), '_', iIdx))
-into sLogin;
-end if;
-select count(dst_login)
-into iCnt
-from acc_conv
-where acc_conv.dst_login = sLogin;
-UNTIL
-    (iCnt < 1)
-    END REPEAT;
+  REPEAT
+    set iIdx = iIdx + 1;
+    if CHAR_LENGTH(sSrcLogin) < 11 THEN
+      select trim(concat(sSrcLogin, '_', iIdx)) into sLogin;
+    else
+      select trim(concat(LEFT(sSrcLogin, char_length(sSrcLogin) - 3), '_', iIdx)) into sLogin;
+    end if;
+    select count(dst_login) into iCnt from acc_conv where acc_conv.dst_login = sLogin;
+  UNTIL (iCnt < 1) END REPEAT;
 
-RETURN sLogin;
+	RETURN sLogin;
 END $$
 delimiter ;
 
@@ -297,20 +259,20 @@ WHERE ally_name in (SELECT ally_name FROM dst_db.ally_data);
 SELECT 'Start merge process.';
 -- INSERT INTO dst_db.accounts SELECT * FROM src_db.accounts;
 
-insert into dst_db.accounts(login, `password`, email)
+insert into dst_db.accounts(login, `password`, email) 
 select src_db.acc_conv.dst_login, x.password, x.email
 from src_db.acc_conv, src_db.accounts x where x.login = src_db.acc_conv.src_login;
 
 SELECT 'accounts ok.';
-INSERT INTO dst_db.characters SELECT * FROM src_db.characters;
+INSERT INTO dst_db.characters SELECT * FROM src_db.characters; 
 SELECT 'characters ok.';
-INSERT INTO dst_db.items SELECT * FROM src_db.items;
+INSERT INTO dst_db.items SELECT * FROM src_db.items; 
 SELECT 'items ok.';
-INSERT INTO dst_db.clan_data SELECT * FROM src_db.clan_data;
+INSERT INTO dst_db.clan_data SELECT * FROM src_db.clan_data; 
 SELECT 'clan_data ok.';
-INSERT INTO dst_db.ally_data SELECT * FROM src_db.ally_data;
+INSERT INTO dst_db.ally_data SELECT * FROM src_db.ally_data; 
 SELECT 'ally_data ok.';
-INSERT INTO dst_db.pets SELECT * FROM src_db.pets;
+INSERT INTO dst_db.pets SELECT * FROM src_db.pets; 
 SELECT 'pets ok.';
 -- secondary tables
 INSERT INTO dst_db.character_quests SELECT * FROM src_db.character_quests;
@@ -343,11 +305,11 @@ INSERT INTO dst_db.items_variation SELECT * FROM src_db.items_variation;
 SELECT 'items_variation ok.';
 INSERT INTO dst_db.siege_clans SELECT * FROM src_db.siege_clans;
 SELECT 'siege_clans ok.';
-INSERT INTO dst_db.clan_subpledges SELECT * FROM src_db.clan_subpledges;
+INSERT INTO dst_db.clan_subpledges SELECT * FROM src_db.clan_subpledges; 
 SELECT 'clan_subpledges ok.';
-INSERT INTO dst_db.clan_privs SELECT * FROM src_db.clan_privs;
+INSERT INTO dst_db.clan_privs SELECT * FROM src_db.clan_privs; 
 SELECT 'clan_privs ok.';
-INSERT INTO dst_db.clan_skills SELECT * FROM src_db.clan_skills;
+INSERT INTO dst_db.clan_skills SELECT * FROM src_db.clan_skills; 
 SELECT 'clan_skills ok.';
 drop FUNCTION if exists `lip_ex_TrunLoginWithPfx`;
 

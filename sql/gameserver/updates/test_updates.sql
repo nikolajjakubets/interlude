@@ -1,3 +1,1 @@
-SELECT *
-FROM characters
-limit 1;
+SELECT * FROM characters limit 1;
