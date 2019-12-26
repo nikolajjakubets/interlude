@@ -25,15 +25,11 @@ import java.util.Map.Entry;
 @Deprecated
 public final class DocumentSkill extends DocumentBase {
   private static final String SKILL_ENCHANT_NODE_NAME = "enchant";
-  private static final Comparator<Integer> INTEGER_KEY_ASC_COMPARATOR = new Comparator<Integer>() {
-    public int compare(Integer o1, Integer o2) {
-      return o1 - o2;
-    }
-  };
-  protected Map<String, Map<Integer, Object>> tables = new LinkedHashMap();
+  private static final Comparator<Integer> INTEGER_KEY_ASC_COMPARATOR = Comparator.comparingInt(o -> o);
+  protected Map<String, Map<Integer, Object>> tables = new LinkedHashMap<>();
   private DocumentSkill.SkillLoad currentSkill = null;
   private Set<String> usedTables = new HashSet<>();
-  private List<Skill> skillsInFile = new LinkedList();
+  private List<Skill> skillsInFile = new LinkedList<>();
 
   DocumentSkill(File file) {
     super(file);
@@ -62,7 +58,7 @@ public final class DocumentSkill extends DocumentBase {
   }
 
   protected Object getTableValue(String name) {
-    Map<Integer, Object> values = (Map) this.tables.get(name);
+    Map<Integer, Object> values = this.tables.get(name);
     if (values == null) {
       log.error("No table " + name + " for skill " + this.currentSkill.id);
       return 0;
@@ -76,7 +72,7 @@ public final class DocumentSkill extends DocumentBase {
   }
 
   protected Object getTableValue(String name, int level) {
-    Map<Integer, Object> values = (Map) this.tables.get(name);
+    Map<Integer, Object> values = this.tables.get(name);
     if (values == null) {
       log.error("No table " + name + " for skill " + this.currentSkill.id);
       return 0;
@@ -111,20 +107,16 @@ public final class DocumentSkill extends DocumentBase {
     NamedNodeMap tableNodeAttrs = tableNode.getAttributes();
     String tableName = tableNodeAttrs.getNamedItem("name").getNodeValue();
     Object[] tableContent = this.fillTableToSize(this.parseTable(tableNode), levels);
-    Map<Integer, Object> globalTableLevels = (Map) this.tables.get(tableName);
-    if (globalTableLevels == null) {
-      globalTableLevels = new TreeMap(INTEGER_KEY_ASC_COMPARATOR);
-      this.tables.put(tableName, globalTableLevels);
-    }
+    Map<Integer, Object> globalTableLevels = this.tables.computeIfAbsent(tableName, k -> new TreeMap<>(INTEGER_KEY_ASC_COMPARATOR));
 
     for (int tblContIdx = 0; tblContIdx < tableContent.length; ++tblContIdx) {
       int skillLvl = skillLevelOffset + tblContIdx;
-      if (((Map) globalTableLevels).containsKey(skillLvl)) {
+      if (globalTableLevels.containsKey(skillLvl)) {
         log.error("Duplicate skill level " + skillLvl + " in table " + tableName + " in skill " + this.currentSkill.id);
         return;
       }
 
-      ((Map) globalTableLevels).put(skillLvl, tableContent[tblContIdx]);
+      globalTableLevels.put(skillLvl, tableContent[tblContIdx]);
     }
 
   }
@@ -204,12 +196,11 @@ public final class DocumentSkill extends DocumentBase {
 
       while (var23.hasNext()) {
         Entry<String, Map<Integer, Object>> tableEntry = (Entry) var23.next();
-        Map<Integer, Object> table = (Map) tableEntry.getValue();
+        Map<Integer, Object> table = tableEntry.getValue();
         Object baseEnchantValue = table.get(skillBaseLevels);
-        Iterator var33 = skillLevelsList.iterator();
 
-        while (var33.hasNext()) {
-          Integer skillLevel = (Integer) var33.next();
+        for (Object o : skillLevelsList) {
+          Integer skillLevel = (Integer) o;
           if (skillLevel > skillBaseLevels && !table.containsKey(skillLevel)) {
             table.put(skillLevel, baseEnchantValue);
           }
@@ -236,7 +227,7 @@ public final class DocumentSkill extends DocumentBase {
 
         for (Node skillSetNode = n.getFirstChild(); skillSetNode != null; skillSetNode = skillSetNode.getNextSibling()) {
           if ("set".equalsIgnoreCase(skillSetNode.getNodeName())) {
-            StatsSet skillCurrLevelSet = (StatsSet) this.currentSkill.sets.get(skillLevel);
+            StatsSet skillCurrLevelSet = this.currentSkill.sets.get(skillLevel);
             this.currentSkill.currentLevel = skillLevel;
             this.parseBeanSet(skillSetNode, skillCurrLevelSet, skillLevel);
           }
@@ -248,7 +239,7 @@ public final class DocumentSkill extends DocumentBase {
       Skill currSkill;
       while (var23.hasNext()) {
         StatsSet currStatsSet = (StatsSet) var23.next();
-        currSkill = ((SkillType) currStatsSet.getEnum("skillType", SkillType.class)).makeSkill(currStatsSet);
+        currSkill = currStatsSet.getEnum("skillType", SkillType.class).makeSkill(currStatsSet);
         this.currentSkill.currentSkills.put(currSkill.getLevel(), currSkill);
       }
 
@@ -257,7 +248,7 @@ public final class DocumentSkill extends DocumentBase {
       while (var23.hasNext()) {
         skillLevel = (Integer) var23.next();
         this.currentSkill.currentLevel = skillLevel;
-        currSkill = (Skill) this.currentSkill.currentSkills.get(skillLevel);
+        currSkill = this.currentSkill.currentSkills.get(skillLevel);
         if (currSkill == null) {
           log.error("Undefined skill id " + skillId + " level " + skillLevel);
           return;
@@ -306,8 +297,7 @@ public final class DocumentSkill extends DocumentBase {
         array.add(data.nextToken());
       }
 
-      Object[] res = array.toArray(new Object[array.size()]);
-      return res;
+      return array.toArray(new Object[0]);
     }
   }
 

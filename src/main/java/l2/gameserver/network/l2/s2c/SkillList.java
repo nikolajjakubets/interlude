@@ -5,24 +5,22 @@
 
 package l2.gameserver.network.l2.s2c;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.Skill;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class SkillList extends L2GameServerPacket {
   private List<SkillList.SkillListRecord> _skillRecords;
 
   public SkillList(Player player) {
     Collection<Skill> playerSkills = player.getAllSkills();
-    this._skillRecords = new ArrayList(playerSkills.size());
-    Iterator var3 = playerSkills.iterator();
+    this._skillRecords = new ArrayList<>(playerSkills.size());
 
-    while(var3.hasNext()) {
-      Skill skill = (Skill)var3.next();
-      this._skillRecords.add(new SkillList.SkillListRecord(player, skill));
+    for (Skill skill : playerSkills) {
+      this._skillRecords.add(new SkillListRecord(player, skill));
     }
 
   }
@@ -30,10 +28,8 @@ public class SkillList extends L2GameServerPacket {
   protected final void writeImpl() {
     this.writeC(88);
     this.writeD(this._skillRecords.size());
-    Iterator var1 = this._skillRecords.iterator();
 
-    while(var1.hasNext()) {
-      SkillList.SkillListRecord skr = (SkillList.SkillListRecord)var1.next();
+    for (SkillListRecord skr : this._skillRecords) {
       skr.writeRecord();
     }
 

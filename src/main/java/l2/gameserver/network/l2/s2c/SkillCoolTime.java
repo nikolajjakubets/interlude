@@ -5,13 +5,10 @@
 
 package l2.gameserver.network.l2.s2c;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 import l2.gameserver.model.Player;
 import l2.gameserver.skills.TimeStamp;
+
+import java.util.*;
 
 public class SkillCoolTime extends L2GameServerPacket {
   private List<SkillCoolTime.Skill> _list = Collections.emptyList();
@@ -42,12 +39,11 @@ public class SkillCoolTime extends L2GameServerPacket {
     this.writeC(193);
     this.writeD(this._list.size());
 
-    for(int i = 0; i < this._list.size(); ++i) {
-      SkillCoolTime.Skill sk = (SkillCoolTime.Skill)this._list.get(i);
-      this.writeD(sk.skillId);
-      this.writeD(sk.level);
-      this.writeD(sk.reuseBase);
-      this.writeD(sk.reuseCurrent);
+    for (Skill skill : this._list) {
+      this.writeD(skill.skillId);
+      this.writeD(skill.level);
+      this.writeD(skill.reuseBase);
+      this.writeD(skill.reuseCurrent);
     }
 
   }

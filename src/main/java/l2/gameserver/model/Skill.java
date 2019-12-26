@@ -795,7 +795,6 @@ public abstract class Skill extends StatTemplate implements Cloneable {
 
   public final Creature getAimingTarget(Creature activeChar, GameObject obj) {
     Creature target = obj != null && obj.isCreature() ? (Creature) obj : null;
-    Creature activeCharPlayer = null;
     switch (this._targetType) {
       case TARGET_ALLY:
       case TARGET_CLAN:
@@ -819,57 +818,57 @@ public abstract class Skill extends StatTemplate implements Cloneable {
         return target instanceof FeedableBeastInstance ? target : null;
       case TARGET_PET:
       case TARGET_PET_AURA:
-        Creature activeCharPet = activeChar.getPet();
-        return activeCharPet != null && activeCharPet.isDead() == this._isCorpse ? activeCharPet : null;
+        target = activeChar.getPet();
+        return target != null && target.isDead() == this._isCorpse ? target : null;
       case TARGET_OWNER:
         if (!activeChar.isSummon() && !activeChar.isPet()) {
           return null;
         }
 
-        activeCharPlayer = activeChar.getPlayer();
-        return activeCharPlayer != null && activeCharPlayer.isDead() == this._isCorpse ? activeCharPlayer : null;
+        target = activeChar.getPlayer();
+        return target != null && target.isDead() == this._isCorpse ? target : null;
       case TARGET_ENEMY_PET:
-        if (activeCharPlayer != null && activeCharPlayer != activeChar.getPet() && activeCharPlayer.isPet()) {
-          return activeCharPlayer;
+        if (target != null && target != activeChar.getPet() && target.isPet()) {
+          return target;
         }
 
         return null;
       case TARGET_ENEMY_SUMMON:
-        if (activeCharPlayer != null && activeCharPlayer != activeChar.getPet() && activeCharPlayer.isSummon()) {
-          return activeCharPlayer;
+        if (target != null && target != activeChar.getPet() && target.isSummon()) {
+          return target;
         }
 
         return null;
       case TARGET_ENEMY_SERVITOR:
-        if (activeCharPlayer != null && activeCharPlayer != activeChar.getPet() && activeCharPlayer instanceof Summon) {
-          return activeCharPlayer;
+        if (target != null && target != activeChar.getPet() && target instanceof Summon) {
+          return target;
         }
 
         return null;
       case TARGET_ONE:
-        return activeCharPlayer == null || activeCharPlayer.isDead() != this._isCorpse || activeCharPlayer == activeChar && this.isOffensive() || this._isUndeadOnly && !activeCharPlayer.isUndead() ? null : activeCharPlayer;
+        return target == null || target.isDead() != this._isCorpse || target == activeChar && this.isOffensive() || this._isUndeadOnly && !target.isUndead() ? null : target;
       case TARGET_OTHER:
-        return activeCharPlayer == null || activeCharPlayer == activeChar || activeCharPlayer.isDead() != this._isCorpse || this._isUndeadOnly && !activeCharPlayer.isUndead() ? null : activeCharPlayer;
+        return target == null || target == activeChar || target.isDead() != this._isCorpse || this._isUndeadOnly && !target.isUndead() ? null : target;
       case TARGET_AREA:
       case TARGET_MULTIFACE:
       case TARGET_TUNNEL:
-        return activeCharPlayer == null || activeCharPlayer.isDead() != this._isCorpse || activeCharPlayer == activeChar && this.isOffensive() || this._isUndeadOnly && !activeCharPlayer.isUndead() ? null : activeCharPlayer;
+        return target == null || target.isDead() != this._isCorpse || target == activeChar && this.isOffensive() || this._isUndeadOnly && !target.isUndead() ? null : target;
       case TARGET_AREA_AIM_CORPSE:
-        return activeCharPlayer != null && activeCharPlayer.isDead() ? activeCharPlayer : null;
+        return target != null && target.isDead() ? target : null;
       case TARGET_CORPSE:
-        if (activeCharPlayer != null && activeCharPlayer.isDead()) {
-          if (activeCharPlayer.isSummon() && activeCharPlayer != activeChar.getPet()) {
-            return activeCharPlayer;
+        if (target != null && target.isDead()) {
+          if (target.isSummon() && target != activeChar.getPet()) {
+            return target;
           }
 
-          return activeCharPlayer.isNpc() ? activeCharPlayer : null;
+          return target.isNpc() ? target : null;
         }
 
         return null;
       case TARGET_CORPSE_PLAYER:
-        return activeCharPlayer != null && activeCharPlayer.isPlayable() && activeCharPlayer.isDead() ? activeCharPlayer : null;
+        return target != null && target.isPlayable() && target.isDead() ? target : null;
       case TARGET_SIEGE:
-        return activeCharPlayer != null && !activeCharPlayer.isDead() && activeCharPlayer.isDoor() ? activeCharPlayer : null;
+        return target != null && !target.isDead() && target.isDoor() ? target : null;
       default:
         activeChar.sendMessage("Target type of skill is not currently handled");
         return null;

@@ -5,15 +5,12 @@
 
 package l2.gameserver.network.l2.s2c;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import l2.gameserver.data.xml.holder.EnchantSkillHolder;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.Skill;
 import l2.gameserver.templates.SkillEnchant;
+
+import java.util.*;
 
 public class ExEnchantSkillList extends L2GameServerPacket {
   private final List<ExEnchantSkillList.SkillEnchantEntry> _skills = new ArrayList<>();
@@ -48,14 +45,11 @@ public class ExEnchantSkillList extends L2GameServerPacket {
 
         SkillEnchant currSkillEnch = EnchantSkillHolder.getInstance().getSkillEnchant(skillId, currSkillLevel);
         if (currSkillLevel == baseSkillLevel) {
-          Iterator var14 = skillEnchRoutes.values().iterator();
 
-          while(var14.hasNext()) {
-            Map<Integer, SkillEnchant> skillEnchLevels = (Map)var14.next();
-            Iterator var16 = skillEnchLevels.values().iterator();
+          for (var o : skillEnchRoutes.values()) {
+            Map<Integer, SkillEnchant> skillEnchLevels = (Map) o;
 
-            while(var16.hasNext()) {
-              SkillEnchant newSkillEnch = (SkillEnchant)var16.next();
+            for (SkillEnchant newSkillEnch : skillEnchLevels.values()) {
               if (newSkillEnch.getEnchantLevel() == 1) {
                 esl.addSkill(newSkillEnch.getSkillId(), newSkillEnch.getSkillLevel(), newSkillEnch.getSp(), newSkillEnch.getExp());
               }
@@ -64,7 +58,7 @@ public class ExEnchantSkillList extends L2GameServerPacket {
         } else if (currSkillEnch != null) {
           Map<Integer, SkillEnchant> skillEnchLevels = (Map)skillEnchRoutes.get(currSkillEnch.getRouteId());
           int newSkillLevel = currSkillLevel + 1;
-          SkillEnchant newSkillEnch = (SkillEnchant)skillEnchLevels.get(newSkillLevel);
+          SkillEnchant newSkillEnch = skillEnchLevels.get(newSkillLevel);
           if (newSkillEnch != null) {
             esl.addSkill(newSkillEnch.getSkillId(), newSkillEnch.getSkillLevel(), newSkillEnch.getSp(), newSkillEnch.getExp());
           }
@@ -83,10 +77,8 @@ public class ExEnchantSkillList extends L2GameServerPacket {
   protected final void writeImpl() {
     this.writeEx(23);
     this.writeD(this._skills.size());
-    Iterator var1 = this._skills.iterator();
 
-    while(var1.hasNext()) {
-      ExEnchantSkillList.SkillEnchantEntry see = (ExEnchantSkillList.SkillEnchantEntry)var1.next();
+    for (SkillEnchantEntry see : this._skills) {
       see.write();
     }
 

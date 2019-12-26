@@ -5,22 +5,22 @@
 
 package l2.gameserver.network.l2.s2c;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 import l2.gameserver.model.Skill;
 import l2.gameserver.model.pledge.Clan;
 import l2.gameserver.model.pledge.SubUnit;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
 public class PledgeSkillList extends L2GameServerPacket {
-  private List<PledgeSkillList.SkillInfo> _allSkills = Collections.emptyList();
+  private List<PledgeSkillList.SkillInfo> _allSkills;
   private List<PledgeSkillList.UnitSkillInfo> _unitSkills = new ArrayList<>();
 
   public PledgeSkillList(Clan clan) {
     Collection<Skill> skills = clan.getSkills();
-    this._allSkills = new ArrayList(skills.size());
+    this._allSkills = new ArrayList<>(skills.size());
     Iterator var3 = skills.iterator();
 
     while(var3.hasNext()) {
@@ -32,11 +32,9 @@ public class PledgeSkillList extends L2GameServerPacket {
 
     while(var3.hasNext()) {
       SubUnit subUnit = (SubUnit)var3.next();
-      Iterator var5 = subUnit.getSkills().iterator();
 
-      while(var5.hasNext()) {
-        Skill sk = (Skill)var5.next();
-        this._unitSkills.add(new PledgeSkillList.UnitSkillInfo(subUnit.getType(), sk.getId(), sk.getLevel()));
+      for (Skill sk : subUnit.getSkills()) {
+        this._unitSkills.add(new UnitSkillInfo(subUnit.getType(), sk.getId(), sk.getLevel()));
       }
     }
 

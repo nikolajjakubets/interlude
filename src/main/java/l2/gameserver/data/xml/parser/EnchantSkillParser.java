@@ -5,12 +5,13 @@
 
 package l2.gameserver.data.xml.parser;
 
-import java.io.File;
-import java.util.Iterator;
 import l2.commons.data.xml.AbstractFileParser;
 import l2.gameserver.Config;
 import l2.gameserver.data.xml.holder.EnchantSkillHolder;
 import org.dom4j.Element;
+
+import java.io.File;
+import java.util.Iterator;
 
 public class EnchantSkillParser extends AbstractFileParser<EnchantSkillHolder> {
   private static final EnchantSkillParser INSTANCE = new EnchantSkillParser();
@@ -40,12 +41,12 @@ public class EnchantSkillParser extends AbstractFileParser<EnchantSkillHolder> {
       int skillId = Integer.parseInt(skillElement.attributeValue("id"));
 
       while(skillRouteElementIt.hasNext()) {
-        Element skillRouteElement = (Element)skillRouteElementIt.next();
+        Element skillRouteElement = skillRouteElementIt.next();
         Iterator<Element> skillEnchantElementIt = skillRouteElement.elementIterator("enchant");
         int routeId = Integer.parseInt(skillRouteElement.attributeValue("id"));
 
         while(skillEnchantElementIt.hasNext()) {
-          Element skillEnchantElement = (Element)skillEnchantElementIt.next();
+          Element skillEnchantElement = skillEnchantElementIt.next();
           int enchantLevel = Integer.parseInt(skillEnchantElement.attributeValue("level"));
           int skillLevel = Integer.parseInt(skillEnchantElement.attributeValue("skillLvl"));
           long exp = Long.parseLong(skillEnchantElement.attributeValue("exp"));
@@ -62,7 +63,7 @@ public class EnchantSkillParser extends AbstractFileParser<EnchantSkillHolder> {
           int neededItemId = neededItemIdVal != null ? Integer.parseInt(neededItemIdVal) : 0;
           String neededItemCntVal = skillEnchantElement.attributeValue("neededItemCount");
           int neededItemCnt = neededItemCntVal != null ? Integer.parseInt(neededItemCntVal) : 0;
-          ((EnchantSkillHolder)this.getHolder()).addEnchantSkill(skillId, skillLevel, enchantLevel, routeId, exp, sp, chances, neededItemId, (long)neededItemCnt);
+          this.getHolder().addEnchantSkill(skillId, skillLevel, enchantLevel, routeId, exp, sp, chances, neededItemId, neededItemCnt);
         }
       }
     }

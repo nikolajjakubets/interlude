@@ -31,8 +31,6 @@ public abstract class L2GameServerPacket extends SendablePacket<GameClient> impl
     } catch (Exception var5) {
       log.error("Client: " + this.getClient() + " - Failed writing: " + this.getType() + " - Server Version: " + GameServer.getInstance().getVersion().getRevisionNumber(), var5);
       return false;
-    } finally {
-      ;
     }
   }
 

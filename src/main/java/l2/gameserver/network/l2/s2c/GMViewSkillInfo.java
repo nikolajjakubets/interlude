@@ -5,10 +5,10 @@
 
 package l2.gameserver.network.l2.s2c;
 
-import java.util.Collection;
-import java.util.Iterator;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.Skill;
+
+import java.util.Collection;
 
 public class GMViewSkillInfo extends L2GameServerPacket {
   private String _charName;
@@ -25,10 +25,8 @@ public class GMViewSkillInfo extends L2GameServerPacket {
     this.writeC(145);
     this.writeS(this._charName);
     this.writeD(this._skills.size());
-    Iterator var1 = this._skills.iterator();
 
-    while(var1.hasNext()) {
-      Skill skill = (Skill)var1.next();
+    for (Skill skill : this._skills) {
       this.writeD(skill.isPassive() ? 1 : 0);
       this.writeD(skill.getDisplayLevel());
       this.writeD(skill.getId());

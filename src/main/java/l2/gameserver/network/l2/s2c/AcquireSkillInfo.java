@@ -5,12 +5,12 @@
 
 package l2.gameserver.network.l2.s2c;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 import l2.gameserver.model.SkillLearn;
 import l2.gameserver.model.base.AcquireType;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class AcquireSkillInfo extends L2GameServerPacket {
   private SkillLearn _learn;
@@ -39,13 +39,11 @@ public class AcquireSkillInfo extends L2GameServerPacket {
     this.writeD(this._learn.getCost());
     this.writeD(this._type.ordinal());
     this.writeD(this._reqs.size());
-    Iterator var1 = this._reqs.iterator();
 
-    while(var1.hasNext()) {
-      AcquireSkillInfo.Require temp = (AcquireSkillInfo.Require)var1.next();
+    for (Require temp : this._reqs) {
       this.writeD(temp.type);
       this.writeD(temp.itemId);
-      this.writeD((int)temp.count);
+      this.writeD((int) temp.count);
       this.writeD(temp.unk);
     }
 

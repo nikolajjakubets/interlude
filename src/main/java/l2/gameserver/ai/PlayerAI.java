@@ -13,7 +13,6 @@ import l2.gameserver.model.Player;
 import l2.gameserver.model.Skill;
 import l2.gameserver.model.Skill.SkillType;
 import l2.gameserver.model.items.attachment.FlagItemAttachment;
-import l2.gameserver.network.l2.components.IStaticPacket;
 import l2.gameserver.network.l2.components.SystemMsg;
 import l2.gameserver.network.l2.s2c.ActionFail;
 
@@ -23,20 +22,20 @@ public class PlayerAI extends PlayableAI {
   }
 
   protected void onIntentionRest() {
-    this.changeIntention(CtrlIntention.AI_INTENTION_REST, (Object)null, (Object)null);
-    this.setAttackTarget((Creature)null);
+    this.changeIntention(CtrlIntention.AI_INTENTION_REST, null, null);
+    this.setAttackTarget(null);
     this.clientStopMoving();
   }
 
   protected void onIntentionActive() {
     this.clearNextAction();
-    this.changeIntention(CtrlIntention.AI_INTENTION_ACTIVE, (Object)null, (Object)null);
+    this.changeIntention(CtrlIntention.AI_INTENTION_ACTIVE, null, null);
   }
 
   public void onIntentionInteract(GameObject object) {
     Player actor = this.getActor();
     if (actor.getSittingTask()) {
-      this.setNextAction(NextAction.INTERACT, object, (Object)null, false, false);
+      this.setNextAction(NextAction.INTERACT, object, null, false, false);
     } else if (actor.isSitting()) {
       actor.sendPacket(Msg.YOU_CANNOT_MOVE_WHILE_SITTING);
       this.clientActionFailed();
@@ -48,7 +47,7 @@ public class PlayerAI extends PlayableAI {
   public void onIntentionPickUp(GameObject object) {
     Player actor = this.getActor();
     if (actor.getSittingTask()) {
-      this.setNextAction(NextAction.PICKUP, object, (Object)null, false, false);
+      this.setNextAction(NextAction.PICKUP, object, null, false, false);
     } else if (actor.isSitting()) {
       actor.sendPacket(Msg.YOU_CANNOT_MOVE_WHILE_SITTING);
       this.clientActionFailed();
@@ -68,7 +67,7 @@ public class PlayerAI extends PlayableAI {
         actor.sendActionFailed();
       } else if (actor.isFrozen()) {
         this.setIntention(CtrlIntention.AI_INTENTION_ACTIVE);
-        actor.sendPacket(new IStaticPacket[]{SystemMsg.YOU_CANNOT_MOVE_WHILE_FROZEN, ActionFail.STATIC});
+        actor.sendPacket(SystemMsg.YOU_CANNOT_MOVE_WHILE_FROZEN, ActionFail.STATIC);
       } else {
         super.thinkAttack(checkRange);
       }
@@ -83,7 +82,7 @@ public class PlayerAI extends PlayableAI {
       actor.sendActionFailed();
     } else if (actor.isFrozen()) {
       this.setIntention(CtrlIntention.AI_INTENTION_ACTIVE);
-      actor.sendPacket(new IStaticPacket[]{SystemMsg.YOU_CANNOT_MOVE_WHILE_FROZEN, ActionFail.STATIC});
+      actor.sendPacket(SystemMsg.YOU_CANNOT_MOVE_WHILE_FROZEN, ActionFail.STATIC);
     } else {
       super.thinkCast(checkRange);
     }
@@ -98,7 +97,7 @@ public class PlayerAI extends PlayableAI {
     } else {
       actor.setLastAttackPacket();
       if (actor.getSittingTask()) {
-        this.setNextAction(NextAction.ATTACK, target, (Object)null, forceUse, false);
+        this.setNextAction(NextAction.ATTACK, target, null, forceUse, false);
       } else if (actor.isSitting()) {
         actor.sendPacket(Msg.YOU_CANNOT_MOVE_WHILE_SITTING);
         this.clientActionFailed();

@@ -5,10 +5,10 @@
 
 package l2.gameserver.network.l2.s2c;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import l2.gameserver.model.base.AcquireType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AcquireSkillList extends L2GameServerPacket {
   private AcquireType _type;
@@ -31,10 +31,8 @@ public class AcquireSkillList extends L2GameServerPacket {
     this.writeC(138);
     this.writeD(this._type.ordinal());
     this.writeD(this._skills.size());
-    Iterator var1 = this._skills.iterator();
 
-    while(var1.hasNext()) {
-      AcquireSkillList.Skill temp = (AcquireSkillList.Skill)var1.next();
+    for (Skill temp : this._skills) {
       this.writeD(temp.id);
       this.writeD(temp.nextLevel);
       this.writeD(temp.maxLevel);

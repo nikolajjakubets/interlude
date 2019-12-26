@@ -618,7 +618,7 @@ abstract class DocumentBase {
         int level = this.parseNumber(st.nextToken().trim()).shortValue();
         cond = this.joinAnd(cond, new ConditionHasSkill(id, level));
       } else if ("success".equalsIgnoreCase(nodeName)) {
-        cond = this.joinAnd(cond, new ConditionFirstEffectSuccess(Boolean.valueOf(nodeValue)));
+        cond = this.joinAnd(cond, new ConditionFirstEffectSuccess(Boolean.parseBoolean(nodeValue)));
       }
     }
 
@@ -675,7 +675,6 @@ abstract class DocumentBase {
       char ch = value.length() == 0 ? 32 : value.charAt(0);
       if (value.contains("#") && ch != '#') {
         String[] var7 = value.split("[;: ]+");
-        int var8 = var7.length;
 
         for (String str : var7) {
           if (str.charAt(0) == '#') {
@@ -721,7 +720,8 @@ abstract class DocumentBase {
       } else {
         return Double.valueOf(value);
       }
-    } catch (NumberFormatException var3) {
+    } catch (NumberFormatException e) {
+      log.error("parseNumber: eMessage={}, eCause={}", e.getMessage(), e.getCause());
       return null;
     }
   }

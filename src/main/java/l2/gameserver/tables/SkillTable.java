@@ -6,15 +6,12 @@
 package l2.gameserver.tables;
 
 import gnu.trove.TIntIntHashMap;
-import java.util.Iterator;
-import java.util.Map;
 import l2.gameserver.model.Skill;
 import l2.gameserver.skills.SkillsEngine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 public class SkillTable {
-  private static final Logger _log = LoggerFactory.getLogger(SkillTable.class);
   private static final SkillTable _instance = new SkillTable();
   private Map<Integer, Map<Integer, Skill>> _skills;
   private TIntIntHashMap _maxLevelsTable;
@@ -23,7 +20,7 @@ public class SkillTable {
   public SkillTable() {
   }
 
-  public static final SkillTable getInstance() {
+  public static SkillTable getInstance() {
     return _instance;
   }
 
@@ -37,8 +34,8 @@ public class SkillTable {
   }
 
   public Skill getInfo(int skillId, int skillLevel) {
-    Map<Integer, Skill> skillLevels = (Map)this._skills.get(skillId);
-    return skillLevels == null ? null : (Skill)skillLevels.get(skillLevel);
+    Map<Integer, Skill> skillLevels = this._skills.get(skillId);
+    return skillLevels == null ? null : skillLevels.get(skillLevel);
   }
 
   public int getMaxLevel(int skillId) {
@@ -52,14 +49,10 @@ public class SkillTable {
   private void makeLevelsTable() {
     this._maxLevelsTable = new TIntIntHashMap();
     this._baseLevelsTable = new TIntIntHashMap();
-    Iterator var1 = this._skills.values().iterator();
 
-    while(var1.hasNext()) {
-      Map<Integer, Skill> ss = (Map)var1.next();
-      Iterator var3 = ss.values().iterator();
+    for (Map<Integer, Skill> integerSkillMap : this._skills.values()) {
 
-      while(var3.hasNext()) {
-        Skill s = (Skill)var3.next();
+      for (Skill s : integerSkillMap.values()) {
         int skillId = s.getId();
         int level = s.getLevel();
         int maxLevel = this._maxLevelsTable.get(skillId);

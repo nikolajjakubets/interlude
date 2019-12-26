@@ -5,11 +5,11 @@
 
 package l2.gameserver.network.l2.s2c;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class ExEnchantSkillInfo extends L2GameServerPacket {
   private final int _skillId;
@@ -47,13 +47,11 @@ public class ExEnchantSkillInfo extends L2GameServerPacket {
       this.writeD(0);
     } else {
       this.writeD(this._itemsNeeded.size());
-      Iterator var1 = this._itemsNeeded.iterator();
 
-      while(var1.hasNext()) {
-        Pair<Integer, Long> itemNeeded = (Pair)var1.next();
+      for (Pair<Integer, Long> integerLongPair : this._itemsNeeded) {
         this.writeD(4);
-        this.writeD((Integer)itemNeeded.getKey());
-        this.writeD(((Long)itemNeeded.getValue()).intValue());
+        this.writeD(integerLongPair.getKey());
+        this.writeD(integerLongPair.getValue().intValue());
         this.writeD(0);
       }
     }

@@ -5,12 +5,12 @@
 
 package l2.gameserver.network.l2.s2c;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
 import l2.gameserver.model.Creature;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.Skill;
+
+import java.util.Collection;
+import java.util.Collections;
 
 public class MagicSkillLaunched extends L2GameServerPacket {
   private final int _casterId;
@@ -62,10 +62,8 @@ public class MagicSkillLaunched extends L2GameServerPacket {
     this.writeD(this._skillId);
     this.writeD(this._skillLevel);
     this.writeD(this._targets.size());
-    Iterator var1 = this._targets.iterator();
 
-    while(var1.hasNext()) {
-      Creature target = (Creature)var1.next();
+    for (Creature target : this._targets) {
       if (target != null) {
         this.writeD(target.getObjectId());
       }
