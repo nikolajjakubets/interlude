@@ -85,11 +85,11 @@ public class RequestActionUse extends L2GameClientPacket {
 
           if (action.type == 2) {
             if (action.id == 1000 && target != null && !target.isDoor()) {
-              activeChar.sendPacket(new IStaticPacket[]{SystemMsg.THAT_IS_AN_INCORRECT_TARGET, ActionFail.STATIC});
+              activeChar.sendPacket(new IStaticPacket[]{SystemMsg.THAT_IS_AN_INCORRECT_TARGET, ActionFail.getStatic()});
             } else if (action.id != 1039 && action.id != 1040 || (target == null || !target.isDoor() || ((DoorInstance)target).getDoorType() == DoorType.WALL) && !(target instanceof SiegeFlagInstance)) {
               this.UseSkill(action.value);
             } else {
-              activeChar.sendPacket(new IStaticPacket[]{SystemMsg.THAT_IS_AN_INCORRECT_TARGET, ActionFail.STATIC});
+              activeChar.sendPacket(new IStaticPacket[]{SystemMsg.THAT_IS_AN_INCORRECT_TARGET, ActionFail.getStatic()});
             }
           } else {
             switch(action.id) {
@@ -188,14 +188,14 @@ public class RequestActionUse extends L2GameClientPacket {
                 break;
               case 19:
                 if (pet.isDead()) {
-                  activeChar.sendPacket(new IStaticPacket[]{SystemMsg.DEAD_PETS_CANNOT_BE_RETURNED_TO_THEIR_SUMMONING_ITEM, ActionFail.STATIC});
+                  activeChar.sendPacket(new IStaticPacket[]{SystemMsg.DEAD_PETS_CANNOT_BE_RETURNED_TO_THEIR_SUMMONING_ITEM, ActionFail.getStatic()});
                   return;
                 }
 
                 if (pet.isInCombat()) {
-                  activeChar.sendPacket(new IStaticPacket[]{SystemMsg.A_PET_CANNOT_BE_UNSUMMONED_DURING_BATTLE, ActionFail.STATIC});
+                  activeChar.sendPacket(new IStaticPacket[]{SystemMsg.A_PET_CANNOT_BE_UNSUMMONED_DURING_BATTLE, ActionFail.getStatic()});
                 } else if (pet.isPet() && (double)pet.getCurrentFed() < 0.55D * (double)pet.getMaxFed()) {
-                  activeChar.sendPacket(new IStaticPacket[]{SystemMsg.YOU_MAY_NOT_RESTORE_A_HUNGRY_PET, ActionFail.STATIC});
+                  activeChar.sendPacket(new IStaticPacket[]{SystemMsg.YOU_MAY_NOT_RESTORE_A_HUNGRY_PET, ActionFail.getStatic()});
                 } else {
                   pet.unSummon();
                 }
@@ -265,7 +265,7 @@ public class RequestActionUse extends L2GameClientPacket {
                     }
                   } else if (activeChar.isMounted()) {
                     if (activeChar.isFlying() && !activeChar.checkLandingState()) {
-                      activeChar.sendPacket(new IStaticPacket[]{Msg.YOU_ARE_NOT_ALLOWED_TO_DISMOUNT_AT_THIS_LOCATION, ActionFail.STATIC});
+                      activeChar.sendPacket(new IStaticPacket[]{Msg.YOU_ARE_NOT_ALLOWED_TO_DISMOUNT_AT_THIS_LOCATION, ActionFail.getStatic()});
                       return;
                     }
 

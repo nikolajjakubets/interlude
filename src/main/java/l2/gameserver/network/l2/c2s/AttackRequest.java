@@ -50,12 +50,12 @@ public class AttackRequest extends L2GameClientPacket {
         } else if (!target.isPlayer() || !activeChar.isInBoat() && !target.isInBoat()) {
           if (target.isPlayable()) {
             if (activeChar.isInZonePeace()) {
-              activeChar.sendPacket(new IStaticPacket[]{Msg.YOU_MAY_NOT_ATTACK_IN_A_PEACEFUL_ZONE, ActionFail.STATIC});
+              activeChar.sendPacket(new IStaticPacket[]{Msg.YOU_MAY_NOT_ATTACK_IN_A_PEACEFUL_ZONE, ActionFail.getStatic()});
               return;
             }
 
             if (((Playable)target).isInZonePeace()) {
-              activeChar.sendPacket(new IStaticPacket[]{Msg.YOU_MAY_NOT_ATTACK_THIS_TARGET_IN_A_PEACEFUL_ZONE, ActionFail.STATIC});
+              activeChar.sendPacket(new IStaticPacket[]{Msg.YOU_MAY_NOT_ATTACK_THIS_TARGET_IN_A_PEACEFUL_ZONE, ActionFail.getStatic()});
               return;
             }
           }
@@ -75,7 +75,7 @@ public class AttackRequest extends L2GameClientPacket {
             }
           }
         } else {
-          activeChar.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_ALLOWED_WHILE_USING_A_FERRY, ActionFail.STATIC});
+          activeChar.sendPacket(new IStaticPacket[]{Msg.THIS_IS_NOT_ALLOWED_WHILE_USING_A_FERRY, ActionFail.getStatic()});
         }
       }
     }

@@ -39,7 +39,7 @@ public class Shutdown extends Thread {
   private int shutdownMode;
   private int shutdownCounter;
 
-  public static final Shutdown getInstance() {
+  public static Shutdown getInstance() {
     return _instance;
   }
 

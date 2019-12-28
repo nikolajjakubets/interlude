@@ -7,19 +7,14 @@ package l2.gameserver.model;
 
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntObjectIterator;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import l2.commons.collections.LazyArrayList;
 import l2.commons.util.Rnd;
 import l2.gameserver.model.instances.NpcInstance;
+
+import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class AggroList {
   private final NpcInstance npc;
@@ -41,7 +36,7 @@ public class AggroList {
 
       try {
         AggroList.AggroInfo ai;
-        if ((ai = (AggroList.AggroInfo)this.hateList.get(attacker.getObjectId())) == null) {
+        if ((ai = this.hateList.get(attacker.getObjectId())) == null) {
           this.hateList.put(attacker.getObjectId(), ai = new AggroList.AggroInfo(attacker));
         }
 
@@ -61,7 +56,7 @@ public class AggroList {
 
     AggroList.AggroInfo var2;
     try {
-      var2 = (AggroList.AggroInfo)this.hateList.get(attacker.getObjectId());
+      var2 = this.hateList.get(attacker.getObjectId());
     } finally {
       this.readLock.unlock();
     }
@@ -78,7 +73,7 @@ public class AggroList {
         return;
       }
 
-      AggroList.AggroInfo ai = (AggroList.AggroInfo)this.hateList.get(attacker.getObjectId());
+      AggroList.AggroInfo ai = this.hateList.get(attacker.getObjectId());
       if (ai != null) {
         ai.hate = 0;
       }
@@ -144,7 +139,7 @@ public class AggroList {
         return var3;
       }
 
-      hated = (AggroList.AggroInfo[])this.hateList.getValues(new AggroList.AggroInfo[this.hateList.size()]);
+      hated = this.hateList.getValues(new AggroInfo[this.hateList.size()]);
     } finally {
       this.readLock.unlock();
     }
@@ -186,7 +181,7 @@ public class AggroList {
         return null;
       }
 
-      hated = (AggroList.AggroInfo[])this.hateList.getValues(new AggroList.AggroInfo[this.hateList.size()]);
+      hated = this.hateList.getValues(new AggroInfo[this.hateList.size()]);
     } finally {
       this.readLock.unlock();
     }
@@ -264,7 +259,7 @@ public class AggroList {
       if (randomHated.isEmpty()) {
         mostHated = null;
       } else {
-        mostHated = (Creature)randomHated.get(Rnd.get(randomHated.size()));
+        mostHated = randomHated.get(Rnd.get(randomHated.size()));
       }
 
       LazyArrayList.recycle(randomHated);
@@ -283,7 +278,7 @@ public class AggroList {
         return (Creature)var2;
       }
 
-      hated = (AggroList.AggroInfo[])this.hateList.getValues(new AggroList.AggroInfo[this.hateList.size()]);
+      hated = this.hateList.getValues(new AggroInfo[this.hateList.size()]);
     } finally {
       this.readLock.unlock();
     }

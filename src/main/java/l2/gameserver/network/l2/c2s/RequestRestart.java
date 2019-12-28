@@ -28,17 +28,17 @@ public class RequestRestart extends L2GameClientPacket {
     Player activeChar = ((GameClient)this.getClient()).getActiveChar();
     if (activeChar != null) {
       if (activeChar.isInObserverMode()) {
-        activeChar.sendPacket(new IStaticPacket[]{Msg.OBSERVERS_CANNOT_PARTICIPATE, RestartResponse.FAIL, ActionFail.STATIC});
+        activeChar.sendPacket(new IStaticPacket[]{Msg.OBSERVERS_CANNOT_PARTICIPATE, RestartResponse.FAIL, ActionFail.getStatic()});
       } else if (activeChar.isInCombat()) {
-        activeChar.sendPacket(new IStaticPacket[]{Msg.YOU_CANNOT_RESTART_WHILE_IN_COMBAT, RestartResponse.FAIL, ActionFail.STATIC});
+        activeChar.sendPacket(new IStaticPacket[]{Msg.YOU_CANNOT_RESTART_WHILE_IN_COMBAT, RestartResponse.FAIL, ActionFail.getStatic()});
       } else if (activeChar.isFishing()) {
-        activeChar.sendPacket(new IStaticPacket[]{Msg.YOU_CANNOT_DO_ANYTHING_ELSE_WHILE_FISHING, RestartResponse.FAIL, ActionFail.STATIC});
+        activeChar.sendPacket(new IStaticPacket[]{Msg.YOU_CANNOT_DO_ANYTHING_ELSE_WHILE_FISHING, RestartResponse.FAIL, ActionFail.getStatic()});
       } else if (activeChar.isBlocked() && !activeChar.isFlying()) {
         activeChar.sendMessage(new CustomMessage("l2p.gameserver.clientpackets.RequestRestart.OutOfControl", activeChar, new Object[0]));
-        activeChar.sendPacket(new IStaticPacket[]{RestartResponse.FAIL, ActionFail.STATIC});
+        activeChar.sendPacket(new IStaticPacket[]{RestartResponse.FAIL, ActionFail.getStatic()});
       } else if (activeChar.isFestivalParticipant() && SevenSignsFestival.getInstance().isFestivalInitialized()) {
         activeChar.sendMessage(new CustomMessage("l2p.gameserver.clientpackets.RequestRestart.Festival", activeChar, new Object[0]));
-        activeChar.sendPacket(new IStaticPacket[]{RestartResponse.FAIL, ActionFail.STATIC});
+        activeChar.sendPacket(new IStaticPacket[]{RestartResponse.FAIL, ActionFail.getStatic()});
       } else {
         if (this.getClient() != null) {
           ((GameClient)this.getClient()).setState(GameClientState.AUTHED);

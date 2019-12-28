@@ -35,23 +35,23 @@ public class CharacterSelected extends L2GameClientPacket {
     if (client.getActiveChar() == null) {
       int objId = client.getObjectIdForSlot(this._charSlot);
       if (AutoBan.isBanned(objId)) {
-        this.sendPacket(ActionFail.STATIC);
+        this.sendPacket(ActionFail.getStatic());
       } else {
         String hwidLock = CharacterVariablesDAO.getInstance().getVar(objId, "hwidlock@");
         if (hwidLock != null && !hwidLock.isEmpty() && client.getHwid() != null && !client.getHwid().isEmpty() && !hwidLock.equalsIgnoreCase(client.getHwid())) {
           this.sendPacket(new ExShowScreenMessage("HWID is locked.", 10000, ScreenMessageAlign.TOP_CENTER, true));
-          this.sendPacket(ActionFail.STATIC);
+          this.sendPacket(ActionFail.getStatic());
         } else {
           String ipLock = CharacterVariablesDAO.getInstance().getVar(objId, "iplock@");
           if (ipLock != null && !ipLock.isEmpty() && client.getIpAddr() != null && !client.getIpAddr().isEmpty() && !ipLock.equalsIgnoreCase(client.getIpAddr())) {
             this.sendPacket(new ExShowScreenMessage("IP address is locked.", 10000, ScreenMessageAlign.TOP_CENTER, true));
-            this.sendPacket(ActionFail.STATIC);
+            this.sendPacket(ActionFail.getStatic());
           } else {
             Runnable doSelect = new RunnableImpl() {
               public void runImpl() throws Exception {
                 Player activeChar = client.loadCharFromDisk(CharacterSelected.this._charSlot);
                 if (activeChar == null) {
-                  CharacterSelected.this.sendPacket(ActionFail.STATIC);
+                  CharacterSelected.this.sendPacket(ActionFail.getStatic());
                 } else {
                   if (activeChar.getAccessLevel() < 0) {
                     activeChar.setAccessLevel(0);

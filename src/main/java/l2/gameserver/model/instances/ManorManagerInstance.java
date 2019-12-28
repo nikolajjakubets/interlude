@@ -5,31 +5,23 @@
 
 package l2.gameserver.model.instances;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.StringTokenizer;
 import l2.gameserver.ai.CtrlIntention;
 import l2.gameserver.cache.Msg;
-import l2.gameserver.data.xml.holder.ResidenceHolder;
 import l2.gameserver.data.xml.holder.BuyListHolder.NpcTradeList;
+import l2.gameserver.data.xml.holder.ResidenceHolder;
 import l2.gameserver.instancemanager.CastleManorManager;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.entity.residence.Castle;
 import l2.gameserver.model.items.TradeItem;
 import l2.gameserver.network.l2.components.IStaticPacket;
-import l2.gameserver.network.l2.s2c.ActionFail;
-import l2.gameserver.network.l2.s2c.BuyListSeed;
-import l2.gameserver.network.l2.s2c.ExShowCropInfo;
-import l2.gameserver.network.l2.s2c.ExShowManorDefaultInfo;
-import l2.gameserver.network.l2.s2c.ExShowProcureCropDetail;
-import l2.gameserver.network.l2.s2c.ExShowSeedInfo;
-import l2.gameserver.network.l2.s2c.ExShowSellCropList;
-import l2.gameserver.network.l2.s2c.MyTargetSelected;
-import l2.gameserver.network.l2.s2c.NpcHtmlMessage;
-import l2.gameserver.network.l2.s2c.ValidateLocation;
+import l2.gameserver.network.l2.s2c.*;
 import l2.gameserver.templates.manor.SeedProduction;
 import l2.gameserver.templates.npc.NpcTemplate;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class ManorManagerInstance extends MerchantInstance {
   public ManorManagerInstance(int objectId, NpcTemplate template) {
@@ -72,7 +64,7 @@ public class ManorManagerInstance extends MerchantInstance {
     if (canBypassCheck(player, this)) {
       if (command.startsWith("manor_menu_select")) {
         if (CastleManorManager.getInstance().isUnderMaintenance()) {
-          player.sendPacket(new IStaticPacket[]{ActionFail.STATIC, Msg.THE_MANOR_SYSTEM_IS_CURRENTLY_UNDER_MAINTENANCE});
+          player.sendPacket(new IStaticPacket[]{ActionFail.getStatic(), Msg.THE_MANOR_SYSTEM_IS_CURRENTLY_UNDER_MAINTENANCE});
           return;
         }
 

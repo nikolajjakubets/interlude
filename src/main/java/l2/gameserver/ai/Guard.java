@@ -5,8 +5,8 @@
 
 package l2.gameserver.ai;
 
-import l2.gameserver.model.Creature;
 import l2.gameserver.model.AggroList.AggroInfo;
+import l2.gameserver.model.Creature;
 import l2.gameserver.model.instances.NpcInstance;
 
 public class Guard extends Fighter {
@@ -30,7 +30,7 @@ public class Guard extends Fighter {
       if (target.isPlayable() && (target.getKarma() == 0 || actor.getParameter("evilGuard", false) && target.getPvpFlag() > 0)) {
         return false;
       } else {
-        return target.isMonster() ? false : super.checkAggression(target);
+        return !target.isMonster() && super.checkAggression(target);
       }
     } else {
       return false;

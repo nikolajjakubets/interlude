@@ -519,7 +519,7 @@ public abstract class Playable extends Creature {
     Player player = this.getPlayer();
     if (item != null && player != null && !player.isInvisible()) {
       if (item.isEquipable() && !(item.getTemplate() instanceof EtcItemTemplate)) {
-        SystemMessage msg = null;
+        SystemMessage msg;
         String player_name = player.getName();
         int msg_id;
         if (item.getEnchantLevel() > 0) {
@@ -566,10 +566,8 @@ public abstract class Playable extends Creature {
           this.setCurrentCp((double)this.getMaxCp() * Config.RESPAWN_RESTORE_CP, true);
         }
       } else {
-        Iterator var1 = this.getEffectList().getAllEffects().iterator();
 
-        while(var1.hasNext()) {
-          Effect e = (Effect)var1.next();
+        for (Effect e : this.getEffectList().getAllEffects()) {
           if (e.getEffectType() == EffectType.Salvation) {
             e.exit();
             break;

@@ -5,7 +5,6 @@
 
 package l2.gameserver.network.l2.c2s;
 
-import java.util.Iterator;
 import l2.commons.lang.ArrayUtils;
 import l2.gameserver.instancemanager.ReflectionManager;
 import l2.gameserver.listener.actor.player.OnAnswerListener;
@@ -26,6 +25,8 @@ import l2.gameserver.utils.ItemFunctions;
 import l2.gameserver.utils.Location;
 import l2.gameserver.utils.TeleportUtils;
 import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.Iterator;
 
 public class RequestRestartPoint extends L2GameClientPacket {
   private RestartType _restartType;
@@ -57,7 +58,7 @@ public class RequestRestartPoint extends L2GameClientPacket {
               activeChar.sendMessage(new CustomMessage("YOU_HAVE_USED_THE_FEATHER_OF_BLESSING_TO_RESURRECT", activeChar, new Object[0]));
               activeChar.doRevive(100.0D);
             } else {
-              activeChar.sendPacket(new IStaticPacket[]{ActionFail.STATIC, new Die(activeChar)});
+              activeChar.sendPacket(new IStaticPacket[]{ActionFail.getStatic(), new Die(activeChar)});
             }
             break;
           default:
@@ -83,7 +84,7 @@ public class RequestRestartPoint extends L2GameClientPacket {
               activeChar.setPendingRevive(true);
               activeChar.teleToLocation(loc, ReflectionManager.DEFAULT);
             } else {
-              activeChar.sendPacket(new IStaticPacket[]{ActionFail.STATIC, new Die(activeChar)});
+              activeChar.sendPacket(new IStaticPacket[]{ActionFail.getStatic(), new Die(activeChar)});
             }
         }
 

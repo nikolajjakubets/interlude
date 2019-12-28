@@ -67,7 +67,7 @@ public class PlayerAI extends PlayableAI {
         actor.sendActionFailed();
       } else if (actor.isFrozen()) {
         this.setIntention(CtrlIntention.AI_INTENTION_ACTIVE);
-        actor.sendPacket(SystemMsg.YOU_CANNOT_MOVE_WHILE_FROZEN, ActionFail.STATIC);
+        actor.sendPacket(SystemMsg.YOU_CANNOT_MOVE_WHILE_FROZEN, ActionFail.getStatic());
       } else {
         super.thinkAttack(checkRange);
       }
@@ -82,7 +82,7 @@ public class PlayerAI extends PlayableAI {
       actor.sendActionFailed();
     } else if (actor.isFrozen()) {
       this.setIntention(CtrlIntention.AI_INTENTION_ACTIVE);
-      actor.sendPacket(SystemMsg.YOU_CANNOT_MOVE_WHILE_FROZEN, ActionFail.STATIC);
+      actor.sendPacket(SystemMsg.YOU_CANNOT_MOVE_WHILE_FROZEN, ActionFail.getStatic());
     } else {
       super.thinkCast(checkRange);
     }

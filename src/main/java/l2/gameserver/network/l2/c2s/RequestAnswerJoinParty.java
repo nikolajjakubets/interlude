@@ -72,7 +72,7 @@ public class RequestAnswerJoinParty extends L2GameClientPacket {
               IStaticPacket problem = activeChar.canJoinParty(requestor);
               if (problem != null) {
                 request.cancel();
-                activeChar.sendPacket(new IStaticPacket[]{problem, ActionFail.STATIC});
+                activeChar.sendPacket(new IStaticPacket[]{problem, ActionFail.getStatic()});
                 requestor.sendPacket(JoinParty.FAIL);
               } else {
                 if (party == null) {

@@ -16,11 +16,7 @@ import l2.gameserver.network.l2.GameClient;
 import l2.gameserver.network.l2.GameClient.GameClientState;
 import l2.gameserver.network.l2.components.CustomMessage;
 import l2.gameserver.network.l2.components.IStaticPacket;
-import l2.gameserver.network.l2.s2c.ActionFail;
-import l2.gameserver.network.l2.s2c.CharSelected;
-import l2.gameserver.network.l2.s2c.CharacterSelectionInfo;
-import l2.gameserver.network.l2.s2c.L2GameServerPacket;
-import l2.gameserver.network.l2.s2c.RestartResponse;
+import l2.gameserver.network.l2.s2c.*;
 import l2.gameserver.scripts.Functions;
 
 public class Relog extends Functions implements IVoicedCommandHandler {
@@ -41,21 +37,21 @@ public class Relog extends Functions implements IVoicedCommandHandler {
     } else if (activeChar == null) {
       return false;
     } else if (activeChar.isInObserverMode()) {
-      activeChar.sendPacket(new IStaticPacket[]{Msg.OBSERVERS_CANNOT_PARTICIPATE, RestartResponse.FAIL, ActionFail.STATIC});
+      activeChar.sendPacket(new IStaticPacket[]{Msg.OBSERVERS_CANNOT_PARTICIPATE, RestartResponse.FAIL, ActionFail.getStatic()});
       return false;
     } else if (activeChar.isInCombat()) {
-      activeChar.sendPacket(new IStaticPacket[]{Msg.YOU_CANNOT_RESTART_WHILE_IN_COMBAT, RestartResponse.FAIL, ActionFail.STATIC});
+      activeChar.sendPacket(new IStaticPacket[]{Msg.YOU_CANNOT_RESTART_WHILE_IN_COMBAT, RestartResponse.FAIL, ActionFail.getStatic()});
       return false;
     } else if (activeChar.isFishing()) {
-      activeChar.sendPacket(new IStaticPacket[]{Msg.YOU_CANNOT_DO_ANYTHING_ELSE_WHILE_FISHING, RestartResponse.FAIL, ActionFail.STATIC});
+      activeChar.sendPacket(new IStaticPacket[]{Msg.YOU_CANNOT_DO_ANYTHING_ELSE_WHILE_FISHING, RestartResponse.FAIL, ActionFail.getStatic()});
       return false;
     } else if (activeChar.isBlocked() && !activeChar.isFlying()) {
       activeChar.sendMessage(new CustomMessage("l2p.gameserver.clientpackets.RequestRestart.OutOfControl", activeChar, new Object[0]));
-      activeChar.sendPacket(new IStaticPacket[]{RestartResponse.FAIL, ActionFail.STATIC});
+      activeChar.sendPacket(new IStaticPacket[]{RestartResponse.FAIL, ActionFail.getStatic()});
       return false;
     } else if (activeChar.isFestivalParticipant() && SevenSignsFestival.getInstance().isFestivalInitialized()) {
       activeChar.sendMessage(new CustomMessage("l2p.gameserver.clientpackets.RequestRestart.Festival", activeChar, new Object[0]));
-      activeChar.sendPacket(new IStaticPacket[]{RestartResponse.FAIL, ActionFail.STATIC});
+      activeChar.sendPacket(new IStaticPacket[]{RestartResponse.FAIL, ActionFail.getStatic()});
       return false;
     } else {
       final GameClient client = activeChar.getNetConnection();

@@ -2465,7 +2465,7 @@ public class Player extends Playable implements PlayerGroup {
           NpcInstance npc = (NpcInstance) target;
           this.sendPacket(new MyTargetSelected(npc.getObjectId(), this.getLevel() - npc.getLevel()));
           this.sendPacket(npc.makeStatusUpdate(new int[]{9, 10}));
-          this.sendPacket(new ValidateLocation(npc), ActionFail.STATIC);
+          this.sendPacket(new ValidateLocation(npc), ActionFail.getStatic());
         } else {
           this.sendPacket(new MyTargetSelected(target.getObjectId(), 0));
         }

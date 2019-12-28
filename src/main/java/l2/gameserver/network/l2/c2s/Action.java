@@ -43,7 +43,7 @@ public class Action extends L2GameClientPacket {
           if (activeChar.getAggressionTarget() != null && activeChar.getAggressionTarget() != obj) {
             activeChar.sendActionFailed();
           } else if (activeChar.isFrozen()) {
-            activeChar.sendPacket(new IStaticPacket[]{SystemMsg.YOU_CANNOT_MOVE_WHILE_FROZEN, ActionFail.STATIC});
+            activeChar.sendPacket(new IStaticPacket[]{SystemMsg.YOU_CANNOT_MOVE_WHILE_FROZEN, ActionFail.getStatic()});
           } else {
             obj.onAction(activeChar, this._actionId == 1);
           }

@@ -5,10 +5,18 @@
 
 package l2.gameserver.network.l2.s2c;
 
-public class ActionFail extends L2GameServerPacket {
-  public static final L2GameServerPacket STATIC = new ActionFail();
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-  public ActionFail() {
+@Slf4j
+@NoArgsConstructor
+public class ActionFail extends L2GameServerPacket {
+
+  private static final L2GameServerPacket STATIC = new ActionFail();
+
+  public static L2GameServerPacket getStatic() {
+//    new Exception().printStackTrace();
+    return STATIC;
   }
 
   protected final void writeImpl() {

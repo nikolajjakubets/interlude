@@ -40,12 +40,10 @@ import l2.gameserver.model.entity.residence.Castle;
 import l2.gameserver.model.entity.residence.ClanHall;
 import l2.gameserver.model.items.ItemInstance;
 import l2.gameserver.model.pledge.Clan;
-import l2.gameserver.model.pledge.SubUnit;
 import l2.gameserver.model.quest.Quest;
 import l2.gameserver.model.quest.QuestEventType;
 import l2.gameserver.model.quest.QuestState;
 import l2.gameserver.network.l2.components.CustomMessage;
-import l2.gameserver.network.l2.components.IStaticPacket;
 import l2.gameserver.network.l2.components.SystemMsg;
 import l2.gameserver.network.l2.s2c.*;
 import l2.gameserver.scripts.Events;
@@ -278,7 +276,7 @@ public class NpcInstance extends Creature {
             sm.addLong(item.getCount());
           }
 
-          this.broadcastPacket(new L2GameServerPacket[]{sm});
+          this.broadcastPacket(sm);
         }
 
         lastAttacker.doAutoLootOrDrop(item, this);
@@ -302,7 +300,7 @@ public class NpcInstance extends Creature {
           sm.addLong(item.getCount());
         }
 
-        this.broadcastPacket(new L2GameServerPacket[]{sm});
+        this.broadcastPacket(sm);
       }
 
       lastAttacker.doAutoLootOrDrop(item, this);
@@ -392,11 +390,11 @@ public class NpcInstance extends Creature {
   }
 
   public long getExpReward() {
-    return (long) this.calcStat(Stats.EXP, (double) this.getTemplate().rewardExp, (Creature) null, (Skill) null);
+    return (long) this.calcStat(Stats.EXP, (double) this.getTemplate().rewardExp, null, null);
   }
 
   public long getSpReward() {
-    return (long) this.calcStat(Stats.SP, (double) this.getTemplate().rewardSp, (Creature) null, (Skill) null);
+    return (long) this.calcStat(Stats.SP, this.getTemplate().rewardSp, null, null);
   }
 
   protected void onDelete() {
@@ -405,7 +403,7 @@ public class NpcInstance extends Creature {
       this._spawn.stopRespawn();
     }
 
-    this.setSpawn((Spawner) null);
+    this.setSpawn(null);
     super.onDelete();
   }
 
@@ -479,7 +477,7 @@ public class NpcInstance extends Creature {
   }
 
   public int getPhysicalAttackRange() {
-    return (int) this.calcStat(Stats.POWER_ATTACK_RANGE, (double) this.getTemplate().baseAtkRange, (Creature) null, (Skill) null);
+    return (int) this.calcStat(Stats.POWER_ATTACK_RANGE, this.getTemplate().baseAtkRange, null, null);
   }
 
   public WeaponTemplate getActiveWeaponItem() {
@@ -532,7 +530,7 @@ public class NpcInstance extends Creature {
 
   public void onRandomAnimation() {
     if (System.currentTimeMillis() - this._lastSocialAction > 10000L) {
-      this.broadcastPacket(new L2GameServerPacket[]{new SocialAction(this.getObjectId(), 2)});
+      this.broadcastPacket(new SocialAction(this.getObjectId(), 2));
       this._lastSocialAction = System.currentTimeMillis();
     }
 
@@ -594,10 +592,10 @@ public class NpcInstance extends Creature {
     } else if (player.getTarget() != this) {
       player.setTarget(this);
       if (player.getTarget() == this) {
-        player.sendPacket(new IStaticPacket[]{new MyTargetSelected(this.getObjectId(), player.getLevel() - this.getLevel()), this.makeStatusUpdate(new int[]{9, 10})});
+        player.sendPacket(new MyTargetSelected(this.getObjectId(), player.getLevel() - this.getLevel()), this.makeStatusUpdate(9, 10));
       }
 
-      player.sendPacket(new IStaticPacket[]{new ValidateLocation(this), ActionFail.STATIC});
+      player.sendPacket(new ValidateLocation(this), ActionFail.getStatic());
     } else if (Events.onAction(player, this, shift)) {
       player.sendActionFailed();
     } else if (this.isAutoAttackable(player)) {
@@ -836,7 +834,7 @@ public class NpcInstance extends Creature {
                   if (list != null) {
                     this.showTeleportList(player, list);
                   } else {
-                    player.sendMessage(new CustomMessage("Common.BrokenLink", player, new Object[0]));
+                    player.sendMessage(new CustomMessage("Common.BrokenLink", player));
                   }
                 } else if (command.startsWith("Tele20Lvl")) {
                   val = Integer.parseInt(command.substring(10, 11).trim());
@@ -846,7 +844,7 @@ public class NpcInstance extends Creature {
                   } else if (list != null) {
                     this.showTeleportList(player, list);
                   } else {
-                    player.sendMessage(new CustomMessage("Common.BrokenLink", player, new Object[0]));
+                    player.sendMessage(new CustomMessage("Common.BrokenLink", player));
                   }
                 } else if (command.startsWith("open_gate")) {
                   val = Integer.parseInt(command.substring(10));
@@ -910,30 +908,30 @@ public class NpcInstance extends Creature {
             sb.append(" ").append(tl.getCastleId());
           }
 
-          String name = (new CustomMessage(tl.getName(), player, new Object[0])).toString();
+          String name = (new CustomMessage(tl.getName(), player)).toString();
           sb.append(" ").append((long) ((double) tl.getPrice() * pricemod)).append(" @811;F;").append(name).append("|").append(name);
           if ((double) tl.getPrice() * pricemod > 0.0D) {
             sb.append(" - ").append((long) ((double) tl.getPrice() * pricemod)).append(" ").append(HtmlUtils.htmlItemName(57));
           }
 
           if (tl.getMinLevel() > 0) {
-            sb.append(" - ").append((new CustomMessage("l2.gameserver.model.instances.NpcInstance.TeleportListMinLevel", player, new Object[]{tl.getMinLevel()})).toString());
+            sb.append(" - ").append((new CustomMessage("l2.gameserver.model.instances.NpcInstance.TeleportListMinLevel", player, tl.getMinLevel())).toString());
           }
 
           if (tl.getMaxLevel() > 0) {
-            sb.append(" - ").append((new CustomMessage("l2.gameserver.model.instances.NpcInstance.TeleportListMaxLevel", player, new Object[]{tl.getMaxLevel()})).toString());
+            sb.append(" - ").append((new CustomMessage("l2.gameserver.model.instances.NpcInstance.TeleportListMaxLevel", player, tl.getMaxLevel())).toString());
           }
 
           sb.append("]<br1>\n");
         } else {
-          String name = (new CustomMessage(tl.getName(), player, new Object[0])).toString();
+          String name = (new CustomMessage(tl.getName(), player)).toString();
           sb.append("[scripts_Util:QuestGatekeeper ").append(tl.getX()).append(" ").append(tl.getY()).append(" ").append(tl.getZ()).append(" ").append(tl.getPrice()).append(" ").append(tl.getItem().getItemId()).append(" @811;F;").append(name).append("|").append(name).append(" - ").append(tl.getPrice()).append(" ").append(HtmlUtils.htmlItemName(tl.getItem().getItemId()));
           if (tl.getMinLevel() > 0) {
-            sb.append(" - ").append((new CustomMessage("l2.gameserver.model.instances.NpcInstance.TeleportListMinLevel", player, new Object[]{tl.getMinLevel()})).toString());
+            sb.append(" - ").append((new CustomMessage("l2.gameserver.model.instances.NpcInstance.TeleportListMinLevel", player, tl.getMinLevel())).toString());
           }
 
           if (tl.getMaxLevel() > 0) {
-            sb.append(" - ").append((new CustomMessage("l2.gameserver.model.instances.NpcInstance.TeleportListMaxLevel", player, new Object[]{tl.getMaxLevel()})).toString());
+            sb.append(" - ").append((new CustomMessage("l2.gameserver.model.instances.NpcInstance.TeleportListMaxLevel", player, tl.getMaxLevel())).toString());
           }
 
           sb.append("]<br1>\n");
@@ -976,9 +974,9 @@ public class NpcInstance extends Creature {
     }
 
     if (options.size() > 1) {
-      this.showQuestChooseWindow(player, (Quest[]) options.toArray(new Quest[options.size()]));
+      this.showQuestChooseWindow(player, options.toArray(new Quest[options.size()]));
     } else if (options.size() == 1) {
-      this.showQuestWindow(player, ((Quest) options.get(0)).getName());
+      this.showQuestWindow(player, options.get(0).getName());
     } else {
       this.showQuestWindow(player, "");
     }
@@ -1143,7 +1141,7 @@ public class NpcInstance extends Creature {
         html = new NpcHtmlMessage(player, this);
         sb = new StringBuilder();
         sb.append("<html><head><body>");
-        sb.append(new CustomMessage("l2p.gameserver.model.instances.L2NpcInstance.WrongTeacherClass", player, new Object[0]));
+        sb.append(new CustomMessage("l2p.gameserver.model.instances.L2NpcInstance.WrongTeacherClass", player));
         sb.append("</body></html>");
         html.setHtml(sb.toString());
         player.sendPacket(html);
@@ -1186,14 +1184,14 @@ public class NpcInstance extends Creature {
           html = new NpcHtmlMessage(player, this);
           sb = new StringBuilder();
           sb.append("<html><head><body>");
-          sb.append(new CustomMessage("l2p.gameserver.model.instances.L2NpcInstance.WrongTeacherClass", player, new Object[0]));
+          sb.append(new CustomMessage("l2p.gameserver.model.instances.L2NpcInstance.WrongTeacherClass", player));
           sb.append("</body></html>");
           html.setHtml(sb.toString());
           player.sendPacket(html);
         }
 
       } else {
-        Collection<SkillLearn> skills = SkillAcquireHolder.getInstance().getAvailableSkills(player, classId, AcquireType.NORMAL, (SubUnit) null);
+        Collection<SkillLearn> skills = SkillAcquireHolder.getInstance().getAvailableSkills(player, classId, AcquireType.NORMAL, null);
         AcquireSkillList asl = new AcquireSkillList(AcquireType.NORMAL, skills.size());
         int counts = 0;
         Iterator var7 = skills.iterator();
@@ -1209,7 +1207,7 @@ public class NpcInstance extends Creature {
                     int minlevel = SkillAcquireHolder.getInstance().getMinLevelForNewSkill(classId, player.getLevel(), AcquireType.NORMAL);
                     if (minlevel > 0) {
                       SystemMessage2 sm = new SystemMessage2(SystemMsg.YOU_DO_NOT_HAVE_ANY_FURTHER_SKILLS_TO_LEARN__COME_BACK_WHEN_YOU_HAVE_REACHED_LEVEL_S1);
-                      sm.addInteger((double) minlevel);
+                      sm.addInteger(minlevel);
                       player.sendPacket(sm);
                     } else {
                       player.sendPacket(SystemMsg.THERE_ARE_NO_OTHER_SKILLS_TO_LEARN);
@@ -1365,7 +1363,7 @@ public class NpcInstance extends Creature {
   }
 
   public void setNpcState(int stateId) {
-    this.broadcastPacket(new L2GameServerPacket[]{new ExChangeNpcState(this.getObjectId(), stateId)});
+    this.broadcastPacket(new ExChangeNpcState(this.getObjectId(), stateId));
     this.npcState = stateId;
   }
 

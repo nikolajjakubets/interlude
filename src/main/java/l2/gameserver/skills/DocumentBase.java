@@ -721,7 +721,7 @@ abstract class DocumentBase {
         return Double.valueOf(value);
       }
     } catch (NumberFormatException e) {
-      log.error("parseNumber: eMessage={}, eCause={}", e.getMessage(), e.getCause());
+//      log.error("parseNumber: eMessage={}, eCause={}", e.getMessage(), e.getCause());
       return null;
     }
   }

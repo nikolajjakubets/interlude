@@ -5,12 +5,6 @@
 
 package l2.gameserver.model.entity.boat;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import l2.gameserver.ai.BoatAI;
 import l2.gameserver.ai.CharacterAI;
 import l2.gameserver.model.Creature;
@@ -26,6 +20,9 @@ import l2.gameserver.templates.CharTemplate;
 import l2.gameserver.templates.item.WeaponTemplate;
 import l2.gameserver.utils.Location;
 import l2.gameserver.utils.PositionUtils;
+
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public abstract class Boat extends Creature {
   private int _moveSpeed;
@@ -78,9 +75,9 @@ public abstract class Boat extends Creature {
 
   public void moveInBoat(Player player, Location ori, Location loc) {
     if (player.getPet() != null) {
-      player.sendPacket(new IStaticPacket[]{SystemMsg.YOU_SHOULD_RELEASE_YOUR_PET_OR_SERVITOR_SO_THAT_IT_DOES_NOT_FALL_OFF_OF_THE_BOAT_AND_DROWN, ActionFail.STATIC});
+      player.sendPacket(new IStaticPacket[]{SystemMsg.YOU_SHOULD_RELEASE_YOUR_PET_OR_SERVITOR_SO_THAT_IT_DOES_NOT_FALL_OFF_OF_THE_BOAT_AND_DROWN, ActionFail.getStatic()});
     } else if (player.getTransformation() != 0) {
-      player.sendPacket(new IStaticPacket[]{SystemMsg.YOU_CANNOT_BOARD_A_SHIP_WHILE_YOU_ARE_POLYMORPHED, ActionFail.STATIC});
+      player.sendPacket(new IStaticPacket[]{SystemMsg.YOU_CANNOT_BOARD_A_SHIP_WHILE_YOU_ARE_POLYMORPHED, ActionFail.getStatic()});
     } else if (!player.isMovementDisabled() && !player.isSitting()) {
       if (!player.isInBoat()) {
         player.setBoat(this);

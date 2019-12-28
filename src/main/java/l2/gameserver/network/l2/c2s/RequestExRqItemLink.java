@@ -23,7 +23,7 @@ public class RequestExRqItemLink extends L2GameClientPacket {
   protected void runImpl() {
     ItemInfo item;
     if ((item = ItemInfoCache.getInstance().get(this._objectId)) == null) {
-      this.sendPacket(ActionFail.STATIC);
+      this.sendPacket(ActionFail.getStatic());
     } else {
       this.sendPacket(new ExRpItemLink(item));
     }

@@ -45,7 +45,7 @@ public class MoveBackwardToLocation extends L2GameClientPacket {
         if (activeChar.isTeleporting()) {
           activeChar.sendActionFailed();
         } else if (activeChar.isFrozen()) {
-          activeChar.sendPacket(new IStaticPacket[]{SystemMsg.YOU_CANNOT_MOVE_WHILE_FROZEN, ActionFail.STATIC});
+          activeChar.sendPacket(new IStaticPacket[]{SystemMsg.YOU_CANNOT_MOVE_WHILE_FROZEN, ActionFail.getStatic()});
         } else if (activeChar.isOlyObserver()) {
           if (activeChar.getOlyObservingStadium().getObservingLoc().distance(this._targetLoc) < 8192.0D) {
             activeChar.sendPacket(new CharMoveToLocation(activeChar.getObjectId(), this._originLoc, this._targetLoc));

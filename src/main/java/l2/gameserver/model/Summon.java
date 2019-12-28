@@ -109,9 +109,9 @@ public abstract class Summon extends Playable {
 
   public void onAction(Player player, boolean shift) {
     if (this.isFrozen()) {
-      player.sendPacket(ActionFail.STATIC);
+      player.sendPacket(ActionFail.getStatic());
     } else if (Events.onAction(player, this, shift)) {
-      player.sendPacket(ActionFail.STATIC);
+      player.sendPacket(ActionFail.getStatic());
     } else {
       Player owner = this.getPlayer();
       if (player.getTarget() != this) {
@@ -119,7 +119,7 @@ public abstract class Summon extends Playable {
         if (player.getTarget() == this) {
           player.sendPacket(new IStaticPacket[]{new MyTargetSelected(this.getObjectId(), 0), this.makeStatusUpdate(new int[]{9, 10, 11, 12})});
         } else {
-          player.sendPacket(ActionFail.STATIC);
+          player.sendPacket(ActionFail.getStatic());
         }
       } else if (player == owner) {
         player.sendPacket((new PetInfo(this)).update());
@@ -127,7 +127,7 @@ public abstract class Summon extends Playable {
           player.sendPacket(new PetStatusShow(this));
         }
 
-        player.sendPacket(ActionFail.STATIC);
+        player.sendPacket(ActionFail.getStatic());
       } else if (this.isAutoAttackable(player)) {
         player.getAI().Attack(this, false, shift);
       } else if (player.getAI().getIntention() != CtrlIntention.AI_INTENTION_FOLLOW) {

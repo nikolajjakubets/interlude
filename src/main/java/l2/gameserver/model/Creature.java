@@ -1790,17 +1790,15 @@ public abstract class Creature extends GameObject {
   public boolean moveToLocation(int toX, int toY, int toZ, int indent, boolean pathfinding) {
     this.moveLock.lock();
 
-    boolean var8;
     try {
       indent = Math.max(indent, 0);
       Location worldTo = new Location(toX, toY, toZ);
       Creature.MoveActionBase prevMoveAction = this.moveAction;
-      if (prevMoveAction == null || !(prevMoveAction instanceof Creature.MoveToLocationAction) || !((Creature.MoveToLocationAction)prevMoveAction).isSameDest(worldTo)) {
+      if (!(prevMoveAction instanceof MoveToLocationAction) || !((MoveToLocationAction) prevMoveAction).isSameDest(worldTo)) {
         if (this.isMovementDisabled()) {
           this.getAI().setNextAction(NextAction.MOVE, new Location(toX, toY, toZ), indent, pathfinding, false);
           this.sendActionFailed();
-          var8 = false;
-          return var8;
+          return false;
         }
 
         this.getAI().clearNextAction();
@@ -1816,26 +1814,22 @@ public abstract class Creature extends GameObject {
         this.stopMove(false, false);
         Creature.MoveActionBase mtla = this.createMoveToLocation(worldTo, indent, pathfinding);
         this.moveAction = mtla;
-        boolean var9;
         if (!mtla.start()) {
           this.moveAction = null;
           this.sendActionFailed();
-          var9 = false;
-          return var9;
+          return false;
         }
 
         mtla.scheduleNextTick();
-        var9 = true;
-        return var9;
+        return true;
       }
 
       this.sendActionFailed();
-      var8 = false;
+      return false;
     } finally {
       this.moveLock.unlock();
     }
 
-    return var8;
   }
 
   public boolean moveToRelative(GameObject pawn, int indent, int range) {
@@ -2538,7 +2532,7 @@ public abstract class Creature extends GameObject {
   }
 
   public void sendActionFailed() {
-    this.sendPacket(ActionFail.STATIC);
+    this.sendPacket(ActionFail.getStatic());
   }
 
   public boolean hasAI() {

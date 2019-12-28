@@ -43,7 +43,7 @@ public class RequestExRemoveItemAttribute extends L2GameClientPacket {
           Element element = Element.getElementById(this._attributeId);
           if (element != Element.NONE && set.getValue(element) > 0) {
             if (!activeChar.reduceAdena(ExShowBaseAttributeCancelWindow.getAttributeRemovePrice(itemToUnnchant), true)) {
-              activeChar.sendPacket(new IStaticPacket[]{new ExBaseAttributeCancelResult(false, itemToUnnchant, element), SystemMsg.YOU_DO_NOT_HAVE_ENOUGH_ADENA, ActionFail.STATIC});
+              activeChar.sendPacket(new IStaticPacket[]{new ExBaseAttributeCancelResult(false, itemToUnnchant, element), SystemMsg.YOU_DO_NOT_HAVE_ENOUGH_ADENA, ActionFail.getStatic()});
             } else {
               boolean equipped = false;
               if (equipped = itemToUnnchant.isEquipped()) {
@@ -60,7 +60,7 @@ public class RequestExRemoveItemAttribute extends L2GameClientPacket {
               activeChar.updateStats();
             }
           } else {
-            activeChar.sendPacket(new IStaticPacket[]{new ExBaseAttributeCancelResult(false, itemToUnnchant, element), ActionFail.STATIC});
+            activeChar.sendPacket(new IStaticPacket[]{new ExBaseAttributeCancelResult(false, itemToUnnchant, element), ActionFail.getStatic()});
           }
         }
       } else {

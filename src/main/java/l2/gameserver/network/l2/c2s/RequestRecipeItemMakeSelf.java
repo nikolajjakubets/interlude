@@ -5,26 +5,24 @@
 
 package l2.gameserver.network.l2.c2s;
 
-import java.util.Iterator;
-import java.util.List;
 import l2.commons.util.Rnd;
 import l2.gameserver.Config;
 import l2.gameserver.cache.Msg;
 import l2.gameserver.data.xml.holder.RecipeHolder;
-import l2.gameserver.model.Creature;
 import l2.gameserver.model.Player;
 import l2.gameserver.model.Recipe;
 import l2.gameserver.model.items.ItemInstance;
-import l2.gameserver.network.l2.GameClient;
-import l2.gameserver.network.l2.components.IStaticPacket;
 import l2.gameserver.network.l2.s2c.ActionFail;
 import l2.gameserver.network.l2.s2c.RecipeItemMakeInfo;
 import l2.gameserver.network.l2.s2c.SystemMessage;
 import l2.gameserver.network.l2.s2c.SystemMessage2;
-import l2.gameserver.templates.item.ItemTemplate;
 import l2.gameserver.templates.item.EtcItemTemplate.EtcItemType;
+import l2.gameserver.templates.item.ItemTemplate;
 import l2.gameserver.utils.ItemFunctions;
 import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.Iterator;
+import java.util.List;
 
 public class RequestRecipeItemMakeSelf extends L2GameClientPacket {
   private int _recipeId;
@@ -53,7 +51,7 @@ public class RequestRecipeItemMakeSelf extends L2GameClientPacket {
           if (activeChar.getCurrentMp() < (double)recipe.getMpConsume()) {
             activeChar.sendPacket(Msg.NOT_ENOUGH_MP, new RecipeItemMakeInfo(activeChar, recipe, 0));
           } else if (!activeChar.findRecipe(this._recipeId)) {
-            activeChar.sendPacket(Msg.PLEASE_REGISTER_A_RECIPE, ActionFail.STATIC);
+            activeChar.sendPacket(Msg.PLEASE_REGISTER_A_RECIPE, ActionFail.getStatic());
           } else {
             boolean succeed = false;
             List<Pair<ItemTemplate, Long>> materials = recipe.getMaterials();
