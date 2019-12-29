@@ -7,8 +7,6 @@ package l2.gameserver.network.l2.c2s;
 
 import l2.gameserver.model.GameObject;
 import l2.gameserver.model.Player;
-import l2.gameserver.network.l2.GameClient;
-import l2.gameserver.network.l2.components.IStaticPacket;
 import l2.gameserver.network.l2.components.SystemMsg;
 import l2.gameserver.network.l2.s2c.ActionFail;
 
@@ -28,7 +26,7 @@ public class Action extends L2GameClientPacket {
   }
 
   protected void runImpl() {
-    Player activeChar = ((GameClient)this.getClient()).getActiveChar();
+    Player activeChar = this.getClient().getActiveChar();
     if (activeChar != null) {
       if (activeChar.isOutOfControl()) {
         activeChar.sendActionFailed();
@@ -43,7 +41,7 @@ public class Action extends L2GameClientPacket {
           if (activeChar.getAggressionTarget() != null && activeChar.getAggressionTarget() != obj) {
             activeChar.sendActionFailed();
           } else if (activeChar.isFrozen()) {
-            activeChar.sendPacket(new IStaticPacket[]{SystemMsg.YOU_CANNOT_MOVE_WHILE_FROZEN, ActionFail.getStatic()});
+            activeChar.sendPacket(SystemMsg.YOU_CANNOT_MOVE_WHILE_FROZEN, ActionFail.getStatic());
           } else {
             obj.onAction(activeChar, this._actionId == 1);
           }

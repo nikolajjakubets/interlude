@@ -11,7 +11,6 @@ import l2.gameserver.model.Skill;
 import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.templates.StatsSet;
 
-import java.util.Iterator;
 import java.util.List;
 
 public class Aggression extends Skill {
@@ -30,15 +29,12 @@ public class Aggression extends Skill {
       effect *= 2;
     }
 
-    Iterator var4 = targets.iterator();
-
-    while(var4.hasNext()) {
-      Creature target = (Creature)var4.next();
+    for (Creature target : targets) {
       if (target != null && target.isAutoAttackable(activeChar)) {
         if (target.isNpc()) {
           if (this._unaggring) {
             if (target.isNpc() && activeChar.isPlayable()) {
-              ((NpcInstance)target).getAggroList().addDamageHate(activeChar, 0, -effect);
+              ((NpcInstance) target).getAggroList().addDamageHate(activeChar, 0, -effect);
             }
           } else {
             target.getAI().notifyEvent(CtrlEvent.EVT_AGGRESSION, activeChar, effect);

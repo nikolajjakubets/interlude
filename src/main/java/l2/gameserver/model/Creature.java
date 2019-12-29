@@ -101,9 +101,9 @@ public abstract class Creature extends GameObject {
   protected long _attackReuseEndTime;
   private int _poleAttackCount = 0;
   private static final double[] POLE_VAMPIRIC_MOD = new double[]{1.0D, 0.9D, 0.0D, 7.0D, 0.2D, 0.01D};
-  protected final Map<Integer, Skill> _skills = new ConcurrentSkipListMap();
+  protected final Map<Integer, Skill> _skills = new ConcurrentSkipListMap<>();
   protected Map<TriggerType, Set<TriggerInfo>> _triggers;
-  protected IntObjectMap<TimeStamp> _skillReuses = new CHashIntObjectMap();
+  protected IntObjectMap<TimeStamp> _skillReuses = new CHashIntObjectMap<>();
   protected volatile EffectList _effectList;
   protected volatile CharStatsChangeRecorder<? extends Creature> _statsRecorder;
   private List<Stats> _blockedStats;
@@ -178,14 +178,14 @@ public abstract class Creature extends GameObject {
     super(objectId);
     this._team = TeamType.NONE;
     this.regenLock = new ReentrantLock();
-    this._zonesRef = new AtomicReference(Zone.EMPTY_L2ZONE_ARRAY);
+    this._zonesRef = new AtomicReference<>(Zone.EMPTY_L2ZONE_ARRAY);
     this.statusListenersLock = new ReentrantLock();
     this._unActiveSkills = new TIntHashSet();
     this._template = template;
     this._baseTemplate = template;
     this._calculators = new Calculator[Stats.NUM_STATS];
     StatFunctions.addPredefinedFuncs(this);
-    this.reference = new L2Reference(this);
+    this.reference = new L2Reference<>(this);
     this._storedId = GameObjectsStorage.put(this);
   }
 
@@ -407,11 +407,9 @@ public abstract class Creature extends GameObject {
   }
 
   public final void addStatFuncs(Func[] funcs) {
-    Func[] var2 = funcs;
     int var3 = funcs.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
-      Func f = var2[var4];
+    for (Func f : funcs) {
       this.addStatFunc(f);
     }
 
@@ -430,11 +428,9 @@ public abstract class Creature extends GameObject {
   }
 
   public final void removeStatFuncs(Func[] funcs) {
-    Func[] var2 = funcs;
     int var3 = funcs.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
-      Func f = var2[var4];
+    for (Func f : funcs) {
       this.removeStatFunc(f);
     }
 
@@ -442,9 +438,9 @@ public abstract class Creature extends GameObject {
 
   public final void removeStatsOwner(Object owner) {
     synchronized(this._calculators) {
-      for(int i = 0; i < this._calculators.length; ++i) {
-        if (this._calculators[i] != null) {
-          this._calculators[i].removeOwner(owner);
+      for (Calculator calculator : this._calculators) {
+        if (calculator != null) {
+          calculator.removeOwner(owner);
         }
       }
 
@@ -569,8 +565,7 @@ public abstract class Creature extends GameObject {
     if (this.isVisible() && packets.length != 0) {
       List<Player> players = World.getAroundPlayers(this);
 
-      for(int i = 0; i < players.size(); ++i) {
-        Player target = players.get(i);
+      for (Player target : players) {
         target.sendPacket(packets);
       }
 
@@ -581,8 +576,7 @@ public abstract class Creature extends GameObject {
     if (this.isVisible() && !packets.isEmpty()) {
       List<Player> players = World.getAroundPlayers(this);
 
-      for(int i = 0; i < players.size(); ++i) {
-        Player target = players.get(i);
+      for (Player target : players) {
         target.sendPacket(packets);
       }
 
@@ -595,12 +589,9 @@ public abstract class Creature extends GameObject {
 
       try {
         if (this._statusListeners != null && !this._statusListeners.isEmpty()) {
-          for(int i = 0; i < this._statusListeners.size(); ++i) {
-            Player player = this._statusListeners.get(i);
+          for (Player player : this._statusListeners) {
             player.sendPacket(packets);
           }
-
-          return;
         }
       } finally {
         this.statusListenersLock.unlock();
@@ -615,7 +606,7 @@ public abstract class Creature extends GameObject {
 
       try {
         if (this._statusListeners == null) {
-          this._statusListeners = new LazyArrayList();
+          this._statusListeners = new LazyArrayList<>();
         }
 
         if (!this._statusListeners.contains(cha)) {
@@ -634,7 +625,6 @@ public abstract class Creature extends GameObject {
     try {
       if (this._statusListeners != null) {
         this._statusListeners.remove(cha);
-        return;
       }
     } finally {
       this.statusListenersLock.unlock();
@@ -659,11 +649,10 @@ public abstract class Creature extends GameObject {
 
   public StatusUpdate makeStatusUpdate(int... fields) {
     StatusUpdate su = new StatusUpdate(this.getObjectId());
-    int[] var3 = fields;
     int var4 = fields.length;
 
     for(int var5 = 0; var5 < var4; ++var5) {
-      int field = var3[var5];
+      int field = fields[var5];
       switch(field) {
         case 9:
           su.addAttribute(field, (int)this.getCurrentHp());
@@ -895,10 +884,8 @@ public abstract class Creature extends GameObject {
         }
 
         if (trigger.getType() != TriggerType.SUPPORT_MAGICAL_SKILL_USE) {
-          Iterator var12 = targets.iterator();
 
-          while(var12.hasNext()) {
-            Creature cha = (Creature)var12.next();
+          for (Creature cha : targets) {
             this.broadcastPacket(new MagicSkillUse(this, cha, displayId, displayLevel, 0, 0L));
           }
         }
@@ -1102,10 +1089,8 @@ public abstract class Creature extends GameObject {
     double mult = 1.0D;
     this._poleAttackCount = 1;
     if (!this.isInZonePeace()) {
-      Iterator var10 = this.getAroundCharacters(range, 200).iterator();
 
-      while(var10.hasNext()) {
-        Creature t = (Creature)var10.next();
+      for (Creature t : this.getAroundCharacters(range, 200)) {
         if (this._poleAttackCount > attackcountmax) {
           break;
         }
@@ -1383,7 +1368,7 @@ public abstract class Creature extends GameObject {
 
   public final Skill[] getAllSkillsArray() {
     Collection<Skill> vals = this._skills.values();
-    return vals.toArray(new Skill[vals.size()]);
+    return vals.toArray(new Skill[0]);
   }
 
   public final double getAttackSpeedMultiplier() {
@@ -1754,8 +1739,7 @@ public abstract class Creature extends GameObject {
       Location moveFrom = theMoveActionBase.moveFrom();
       Location moveTo = theMoveActionBase.moveTo();
       if (moveFrom.getZ() > moveTo.getZ()) {
-        int maxZDiff = moveFrom.getZ() - moveTo.getZ();
-        return maxZDiff;
+        return moveFrom.getZ() - moveTo.getZ();
       }
     }
 
@@ -1764,10 +1748,10 @@ public abstract class Creature extends GameObject {
 
   public Creature getFollowTarget() {
     Creature.MoveActionBase moveAction = this.moveAction;
-    if (moveAction != null && moveAction instanceof Creature.MoveToRelativeAction && !moveAction.isFinished()) {
+    if (moveAction instanceof MoveToRelativeAction && !moveAction.isFinished()) {
       Creature.MoveToRelativeAction mtra = (Creature.MoveToRelativeAction)moveAction;
       GameObject target = mtra.getTarget();
-      if (target != null && target instanceof Creature) {
+      if (target instanceof Creature) {
         return (Creature)target;
       }
     }
@@ -1842,15 +1826,13 @@ public abstract class Creature extends GameObject {
     boolean var7;
     try {
       if (this.isMovementDisabled() || pawn == null || this.isInBoat()) {
-        boolean var11 = false;
-        return var11;
+        return false;
       }
 
       Creature.MoveActionBase prevMoveAction = this.moveAction;
-      if (prevMoveAction != null && prevMoveAction instanceof Creature.MoveToRelativeAction && !prevMoveAction.isFinished() && ((Creature.MoveToRelativeAction)prevMoveAction).isSameTarget(pawn)) {
+      if (prevMoveAction instanceof MoveToRelativeAction && !prevMoveAction.isFinished() && ((MoveToRelativeAction) prevMoveAction).isSameTarget(pawn)) {
         this.sendActionFailed();
-        boolean var13 = false;
-        return var13;
+        return false;
       }
 
       range = Math.max(range, 10);
@@ -1924,7 +1906,6 @@ public abstract class Creature extends GameObject {
             this.broadcastPacket(this.stopMovePacket());
           }
 
-          return;
         }
       } finally {
         this.moveLock.unlock();
@@ -1939,11 +1920,9 @@ public abstract class Creature extends GameObject {
     } else {
       int waterZ = -2147483648;
       Zone[] zones = this._zonesRef.get();
-      Zone[] var3 = zones;
       int var4 = zones.length;
 
-      for(int var5 = 0; var5 < var4; ++var5) {
-        Zone zone = var3[var5];
+      for (Zone zone : zones) {
         if (zone.getType() == ZoneType.water && (waterZ == -2147483648 || waterZ < zone.getTerritory().getZmax())) {
           waterZ = zone.getTerritory().getZmax();
         }
@@ -2025,11 +2004,9 @@ public abstract class Creature extends GameObject {
 
   public boolean isInZone(ZoneType type) {
     Zone[] zones = this._zonesRef.get();
-    Zone[] var3 = zones;
     int var4 = zones.length;
 
-    for(int var5 = 0; var5 < var4; ++var5) {
-      Zone zone = var3[var5];
+    for (Zone zone : zones) {
       if (zone.getType() == type) {
         return true;
       }
@@ -2040,11 +2017,9 @@ public abstract class Creature extends GameObject {
 
   public boolean isInZone(String name) {
     Zone[] zones = this._zonesRef.get();
-    Zone[] var3 = zones;
     int var4 = zones.length;
 
-    for(int var5 = 0; var5 < var4; ++var5) {
-      Zone zone = var3[var5];
+    for (Zone zone : zones) {
       if (zone.getName().equals(name)) {
         return true;
       }
@@ -2060,11 +2035,9 @@ public abstract class Creature extends GameObject {
 
   public Zone getZone(ZoneType type) {
     Zone[] zones = this._zonesRef.get();
-    Zone[] var3 = zones;
     int var4 = zones.length;
 
-    for(int var5 = 0; var5 < var4; ++var5) {
-      Zone zone = var3[var5];
+    for (Zone zone : zones) {
       if (zone.getType() == type) {
         return zone;
       }
@@ -2075,11 +2048,9 @@ public abstract class Creature extends GameObject {
 
   public Location getRestartPoint() {
     Zone[] zones = this._zonesRef.get();
-    Zone[] var2 = zones;
     int var3 = zones.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
-      Zone zone = var2[var4];
+    for (Zone zone : zones) {
       if (zone.getRestartPoints() != null) {
         ZoneType type = zone.getType();
         if (type == ZoneType.battle_zone || type == ZoneType.peace_zone || type == ZoneType.offshore || type == ZoneType.dummy) {
@@ -2093,11 +2064,9 @@ public abstract class Creature extends GameObject {
 
   public Location getPKRestartPoint() {
     Zone[] zones = this._zonesRef.get();
-    Zone[] var2 = zones;
     int var3 = zones.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
-      Zone zone = var2[var4];
+    for (Zone zone : zones) {
       if (zone.getRestartPoints() != null) {
         ZoneType type = zone.getType();
         if (type == ZoneType.battle_zone || type == ZoneType.peace_zone || type == ZoneType.offshore || type == ZoneType.dummy) {
@@ -2265,10 +2234,8 @@ public abstract class Creature extends GameObject {
         switch(skill.getFlyType()) {
           case THROW_UP:
           case THROW_HORIZONTAL:
-            Iterator var9 = targets.iterator();
 
-            while(var9.hasNext()) {
-              Creature target = (Creature)var9.next();
+            for (Creature target : targets) {
               Location flyLoc = this.getFlyLocation(null, skill);
               target.setLoc(flyLoc);
               this.broadcastPacket(new FlyToLocation(target, flyLoc, skill.getFlyType()));
@@ -2425,8 +2392,7 @@ public abstract class Creature extends GameObject {
     Skill[] var1 = this.getAllSkillsArray();
     int var2 = var1.length;
 
-    for(int var3 = 0; var3 < var2; ++var3) {
-      Skill s = var1[var3];
+    for (Skill s : var1) {
       this.removeSkill(s);
     }
 
@@ -2454,10 +2420,8 @@ public abstract class Creature extends GameObject {
       if (Config.ALT_DELETE_SA_BUFFS && (oldSkill.isItemSkill() || oldSkill.isHandler())) {
         List<Effect> effects = this.getEffectList().getEffectsBySkill(oldSkill);
         if (effects != null) {
-          Iterator var4 = effects.iterator();
 
-          while(var4.hasNext()) {
-            Effect effect = (Effect)var4.next();
+          for (Effect effect : effects) {
             effect.exit();
           }
         }
@@ -2466,10 +2430,8 @@ public abstract class Creature extends GameObject {
         if (pet != null) {
           effects = pet.getEffectList().getEffectsBySkill(oldSkill);
           if (effects != null) {
-            Iterator var8 = effects.iterator();
 
-            while(var8.hasNext()) {
-              Effect effect = (Effect)var8.next();
+            for (Effect effect : effects) {
               effect.exit();
             }
           }
@@ -2482,10 +2444,8 @@ public abstract class Creature extends GameObject {
 
   public void addTriggers(StatTemplate f) {
     if (!f.getTriggerList().isEmpty()) {
-      Iterator var2 = f.getTriggerList().iterator();
 
-      while(var2.hasNext()) {
-        TriggerInfo t = (TriggerInfo)var2.next();
+      for (TriggerInfo t : f.getTriggerList()) {
         this.addTrigger(t);
       }
 
@@ -2494,12 +2454,12 @@ public abstract class Creature extends GameObject {
 
   public void addTrigger(TriggerInfo t) {
     if (this._triggers == null) {
-      this._triggers = new ConcurrentHashMap();
+      this._triggers = new ConcurrentHashMap<>();
     }
 
     Set<TriggerInfo> hs = this._triggers.get(t.getType());
     if (hs == null) {
-      hs = new CopyOnWriteArraySet();
+      hs = new CopyOnWriteArraySet<>();
       this._triggers.put(t.getType(), hs);
     }
 
@@ -2512,10 +2472,8 @@ public abstract class Creature extends GameObject {
 
   public void removeTriggers(StatTemplate f) {
     if (this._triggers != null && !f.getTriggerList().isEmpty()) {
-      Iterator var2 = f.getTriggerList().iterator();
 
-      while(var2.hasNext()) {
-        TriggerInfo t = (TriggerInfo)var2.next();
+      for (TriggerInfo t : f.getTriggerList()) {
         this.removeTrigger(t);
       }
 
@@ -3586,7 +3544,7 @@ public abstract class Creature extends GameObject {
     if (this._statsRecorder == null) {
       synchronized(this) {
         if (this._statsRecorder == null) {
-          this._statsRecorder = new CharStatsChangeRecorder(this);
+          this._statsRecorder = new CharStatsChangeRecorder<>(this);
         }
       }
     }
@@ -4000,7 +3958,7 @@ public abstract class Creature extends GameObject {
       this.indent = indent;
       this.pathFind = pathFind;
       this.ignoreGeo = ignoreGeo;
-      this.geoPathLines = new LinkedList();
+      this.geoPathLines = new LinkedList<>();
       this.currentGeoPathLine = Collections.emptyList();
       this.moveFrom = actor.getLoc();
       this.moveTo = actor.getLoc();
@@ -4013,7 +3971,7 @@ public abstract class Creature extends GameObject {
       if (actor == null) {
         return false;
       } else {
-        LinkedList<List<Location>> geoPathLines = new LinkedList();
+        LinkedList<List<Location>> geoPathLines = new LinkedList<>();
         if (!GeoMove.buildGeoPath(geoPathLines, pathFrom.clone().world2geo(), pathTo.clone().world2geo(), actor.getGeoIndex(), (int)actor.getColRadius(), (int)actor.getColHeight(), this.indent, this.pathFind && !this.ignoreGeo && !this.isRelativeMove(), this.isForPlayable(), actor.isFlying(), actor.isInWater(), actor.getWaterZ(), this.ignoreGeo)) {
           return false;
         } else {

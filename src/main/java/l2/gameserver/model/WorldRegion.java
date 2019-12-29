@@ -5,12 +5,6 @@
 
 package l2.gameserver.model;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import l2.commons.lang.ArrayUtils;
 import l2.commons.threading.RunnableImpl;
 import l2.gameserver.ThreadPoolManager;
@@ -20,6 +14,13 @@ import l2.gameserver.model.instances.NpcInstance;
 import l2.gameserver.network.l2.s2c.L2GameServerPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class WorldRegion implements Iterable<GameObject> {
   public static final WorldRegion[] EMPTY_L2WORLDREGION_ARRAY = new WorldRegion[0];
@@ -122,17 +123,15 @@ public final class WorldRegion implements Iterable<GameObject> {
       int oid = object.getObjectId();
       Reflection rid = object.getReflection();
       List<L2GameServerPacket> d = null;
-      Iterator var7 = this.iterator();
 
-      while(var7.hasNext()) {
-        GameObject obj = (GameObject)var7.next();
+      for (GameObject obj : this) {
         if (obj.getObjectId() != oid && obj.getReflection() == rid) {
           if (player != null) {
-            player.sendPacket(player.removeVisibleObject(obj, (List)null));
+            player.sendPacket(player.removeVisibleObject(obj, (List) null));
           }
 
           if (obj.isPlayer()) {
-            Player p = (Player)obj;
+            Player p = (Player) obj;
             p.sendPacket(p.removeVisibleObject(object, d == null ? (d = object.deletePacketList()) : d));
           }
         }

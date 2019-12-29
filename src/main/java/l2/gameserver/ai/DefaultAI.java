@@ -200,58 +200,74 @@ public class DefaultAI extends CharacterAI {
   }
 
   protected boolean checkAggression(Creature target) {
-    NpcInstance actor = this.getActor();
-    if (this.getIntention() == CtrlIntention.AI_INTENTION_ACTIVE && this.isGlobalAggro()) {
-      if (target.isAlikeDead()) {
-        return false;
-      } else if (target.isNpc() && target.isInvul()) {
-        return false;
-      } else {
-        if (target.isPlayable()) {
-          if (!this.canSeeInSilentMove((Playable) target)) {
-            return false;
-          }
-
-          if (!this.canSeeInHide((Playable) target)) {
-            return false;
-          }
-
-          if (actor.getFaction().getName().equalsIgnoreCase("varka_silenos_clan") && target.getPlayer().getVarka() > 0) {
-            return false;
-          }
-
-          if (actor.getFaction().getName().equalsIgnoreCase("ketra_orc_clan") && target.getPlayer().getKetra() > 0) {
-            return false;
-          }
-
-          if (target.isPlayer() && ((Player) target).isGM() && target.isInvisible()) {
-            return false;
-          }
-
-          if (((Playable) target).getNonAggroTime() > System.currentTimeMillis()) {
-            return false;
-          }
-
-          if (target.isPlayer() && !target.getPlayer().isActive()) {
-            return false;
-          }
-
-          if (actor.isMonster() && target.isInZonePeace()) {
-            return false;
-          }
-        }
-
-        if (!this.isInAggroRange(target)) {
-          return false;
-        } else if (!this.canAttackCharacter(target)) {
-          return false;
-        } else {
-          return GeoEngine.canSeeTarget(actor, target, false);
-        }
-      }
-    } else {
+    NpcInstance actor = getActor();
+    if (getIntention() != CtrlIntention.AI_INTENTION_ACTIVE || !isGlobalAggro()) {
       return false;
     }
+    if (target.isAlikeDead()) {
+      return false;
+    }
+
+    if (target.isNpc() && target.isInvul()) {
+      return false;
+    }
+
+    if (target.isPlayable()) {
+      if (!canSeeInSilentMove((Playable) target)) {
+        return false;
+      }
+      if (!canSeeInHide((Playable) target)) {
+        return false;
+      }
+      if (actor.getFaction().getName().equalsIgnoreCase("varka_silenos_clan") && target.getPlayer().getVarka() > 0) {
+        return false;
+      }
+      if (actor.getFaction().getName().equalsIgnoreCase("ketra_orc_clan") && target.getPlayer().getKetra() > 0) {
+        return false;
+      }
+      /*
+       * if(target.isFollow && !target.isPlayer() && target.getFollowTarget() != null && target.getFollowTarget().isPlayer()) return;
+       */
+      if (target.isPlayer() && ((Player) target).isGM() && target.isInvisible()) {
+        return true;
+      }
+      if (((Playable) target).getNonAggroTime() > System.currentTimeMillis()) {
+        return false;
+      }
+      if (target.isPlayer() && !target.getPlayer().isActive()) {
+        return false;
+      }
+      if (actor.isMonster() && target.isInZonePeace()) {
+        return false;
+      }
+    }
+
+    AggroInfo ai = actor.getAggroList().get(target);
+    if (ai != null && ai.hate > 0) {
+      if (!target.isInRangeZ(actor.getSpawnedLoc(), MAX_PURSUE_RANGE)) {
+        return false;
+      }
+    } else if (!actor.isAggressive() || !target.isInRangeZ(actor.getSpawnedLoc(), actor.getAggroRange())) {
+      return false;
+    }
+
+    if (!canAttackCharacter(target)) {
+      return false;
+    }
+    if (!GeoEngine.canSeeTarget(actor, target, false)) {
+      return false;
+    }
+
+    actor.getAggroList().addDamageHate(target, 0, 2);
+
+    if ((target.isSummon() || target.isPet())) {
+      actor.getAggroList().addDamageHate(target.getPlayer(), 0, 1);
+    }
+
+    startRunningTask(AI_TASK_ATTACK_DELAY);
+    setIntention(CtrlIntention.AI_INTENTION_ATTACK, target);
+
+    return true;
   }
 
   protected Location getPursueBaseLoc() {
@@ -1196,7 +1212,7 @@ public class DefaultAI extends CharacterAI {
 
   protected boolean chooseTaskAndTargets(Skill skill, Creature target, double distance) {
     NpcInstance actor = this.getActor();
-    LazyArrayList targets;
+    LazyArrayList<Creature> targets;
     Iterator var7;
     Creature cha;
     if (skill != null) {
@@ -1214,7 +1230,7 @@ public class DefaultAI extends CharacterAI {
           }
 
           if (!targets.isEmpty()) {
-            target = (Creature) targets.get(Rnd.get(targets.size()));
+            target = targets.get(Rnd.get(targets.size()));
           }
 
           LazyArrayList.recycle(targets);
@@ -1246,7 +1262,7 @@ public class DefaultAI extends CharacterAI {
         }
 
         if (!targets.isEmpty()) {
-          target = (Creature) targets.get(Rnd.get(targets.size()));
+          target = targets.get(Rnd.get(targets.size()));
         }
 
         LazyArrayList.recycle(targets);
@@ -1314,10 +1330,8 @@ public class DefaultAI extends CharacterAI {
 
           MinionList minionList = master.getMinionList();
           if (minionList != null) {
-            Iterator var6 = minionList.getAliveMinions().iterator();
 
-            while (var6.hasNext()) {
-              MinionInstance minion = (MinionInstance) var6.next();
+            for (MinionInstance minion : minionList.getAliveMinions()) {
               if (minion != actor) {
                 minion.getAI().notifyEvent(CtrlEvent.EVT_AGGRESSION, attacker, damage);
               }
@@ -1351,10 +1365,8 @@ public class DefaultAI extends CharacterAI {
     NpcInstance actor = this.getActor();
     MinionList minionList = actor.getMinionList();
     if (minionList != null && minionList.hasAliveMinions()) {
-      Iterator var5 = minionList.getAliveMinions().iterator();
 
-      while (var5.hasNext()) {
-        MinionInstance minion = (MinionInstance) var5.next();
+      for (MinionInstance minion : minionList.getAliveMinions()) {
         minion.getAI().notifyEvent(CtrlEvent.EVT_AGGRESSION, attacker, damage);
       }
     }
@@ -1366,11 +1378,9 @@ public class DefaultAI extends CharacterAI {
     if (actor.getFaction().isNone()) {
       return Collections.emptyList();
     } else {
-      List<NpcInstance> npcFriends = new LazyArrayList();
-      Iterator var3 = World.getAroundNpc(actor).iterator();
+      List<NpcInstance> npcFriends = new LazyArrayList<>();
 
-      while (var3.hasNext()) {
-        NpcInstance npc = (NpcInstance) var3.next();
+      for (NpcInstance npc : World.getAroundNpc(actor)) {
         if (!npc.isDead() && npc.isInFaction(actor) && npc.isInRangeZ(actor, npc.getFaction().getRange()) && GeoEngine.canSeeTarget(npc, actor, false)) {
           npcFriends.add(npc);
         }
@@ -1431,7 +1441,7 @@ public class DefaultAI extends CharacterAI {
         Skill[] stun = Rnd.chance(this.getRateSTUN()) ? this.selectUsableSkills(target, distance, this._stunSkills) : null;
         Skill[] heal = actorHp < 50.0D ? (Rnd.chance(this.getRateHEAL()) ? this.selectUsableSkills(actor, 0.0D, this._healSkills) : null) : null;
         Skill[] buff = Rnd.chance(this.getRateBUFF()) ? this.selectUsableSkills(actor, 0.0D, this._buffSkills) : null;
-        RndSelector<Skill[]> rnd = new RndSelector();
+        RndSelector<Skill[]> rnd = new RndSelector<>();
         if (!actor.isAMuted()) {
           rnd.add(null, this.getRatePHYS());
         }

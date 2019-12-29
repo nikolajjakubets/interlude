@@ -1,15 +1,12 @@
 package l2.commons.collections;
 
-import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.RandomAccess;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
+
+import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class LazyArrayList<E> implements List<E>, RandomAccess, Cloneable, Serializable {
     private static final long serialVersionUID = 8683452581122892189L;
@@ -26,7 +23,7 @@ public class LazyArrayList<E> implements List<E>, RandomAccess, Cloneable, Seria
             return (LazyArrayList)POOL.borrowObject();
         } catch (Exception var1) {
             var1.printStackTrace();
-            return new LazyArrayList();
+          return new LazyArrayList<>();
         }
     }
 
